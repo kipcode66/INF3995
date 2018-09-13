@@ -1,4 +1,7 @@
 package ca.polymtl.inf3995.team1.tp4;
+/**
+ * Taken from https://stackoverflow.com/questions/13477820/android-vertical-viewpager#22797619
+ */
 
 import android.content.Context;
 import android.net.Uri;
