@@ -9,5 +9,3 @@ public:
 
     void onRequest(const Http::Request& request, Http::ResponseWriter response);
 };
-
-
