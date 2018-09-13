@@ -3,4 +3,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="test1_button_name">Request test1</string>
+    <string name="test2_button_name">Request test2</string>
+    <string name="test3_button_name">Request test3</string>
 </resources>

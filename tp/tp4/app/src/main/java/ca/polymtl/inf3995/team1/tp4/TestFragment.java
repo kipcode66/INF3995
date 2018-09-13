@@ -25,6 +25,7 @@ public class TestFragment extends Fragment {
 
     // TODO: Rename and change types of parameters
     private String mParam1;
+    private FragmentType type;
 
     private OnFragmentInteractionListener mListener;
 
@@ -43,8 +44,9 @@ public class TestFragment extends Fragment {
     public static TestFragment newInstance(FragmentType type) {
         TestFragment fragment = new TestFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, type.name);
+        args.putInt(ARG_PARAM1, type.id);
         fragment.setArguments(args);
+        fragment.type = type;
         return fragment;
     }
 
@@ -66,17 +68,31 @@ public class TestFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TestFragment.this.onButtonPressed();
+                TestFragment.this.onButtonPressed(v);
             }
         });
+        switch (type.id) {
+            case 1:
+                button.setText(R.string.test1_button_name);
+                break;
+            case 2:
+                button.setText(R.string.test2_button_name);
+                break;
+            case 3:
+                button.setText(R.string.test3_button_name);
+                break;
+            default:
+                button.setText("Error, invalid fragment id");
+                break;
+        }
 
         return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed(View view) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onFragmentInteraction(view);
         }
     }
 
@@ -109,6 +125,6 @@ public class TestFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteraction(View view);
     }
 }

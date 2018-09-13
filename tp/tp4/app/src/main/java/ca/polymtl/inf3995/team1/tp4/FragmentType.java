@@ -3,12 +3,13 @@ package ca.polymtl.inf3995.team1.tp4;
 public class FragmentType {
     private static final FragmentType FRAGMENT_TYPES[] = new FragmentType[3];
 
+    public final int id;
     public final String name;
 
     static {
-        FragmentType.FRAGMENT_TYPES[0] = new FragmentType("test1");
-        FragmentType.FRAGMENT_TYPES[1] = new FragmentType("test2");
-        FragmentType.FRAGMENT_TYPES[2] = new FragmentType("test3");
+        FragmentType.FRAGMENT_TYPES[0] = new FragmentType(1, "test1");
+        FragmentType.FRAGMENT_TYPES[1] = new FragmentType(2, "test2");
+        FragmentType.FRAGMENT_TYPES[2] = new FragmentType(3, "test3");
     }
 
     public static final FragmentType getInstance(int instanceId) {
@@ -18,7 +19,8 @@ public class FragmentType {
         return FragmentType.FRAGMENT_TYPES[instanceId];
     }
 
-    public FragmentType(String name) {
+    public FragmentType(int id, String name) {
+        this.id = id;
         this.name = name;
     }
 }

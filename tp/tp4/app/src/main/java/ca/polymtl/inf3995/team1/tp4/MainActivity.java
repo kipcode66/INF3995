@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.View;
 
 public class MainActivity extends FragmentActivity implements TestFragment.OnFragmentInteractionListener {
     public static final int NUM_PAGES = 3;
@@ -27,7 +28,7 @@ public class MainActivity extends FragmentActivity implements TestFragment.OnFra
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onFragmentInteraction(View view) {
         // TODO
     }
 
