@@ -3,7 +3,7 @@ project(tp3)
 
 # GENERAL CONFIG
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++14")
 
 
 # SOURCES
