@@ -1,11 +1,21 @@
 #include "HelloHandler.hpp"
+#include "Logger.hpp"
 
 #include <regex>
 
 #include "pistache/endpoint.h"
 
+HelloHandler::HelloHandler()
+    : m_logFile("server.log", std::ofstream::out | std::ofstream::app)
+    , m_logger(m_logFile)
+{
+    m_logFile << "--- SERVER STARTED ---" << std::endl;
+}
+
 void HelloHandler::onRequest(const Pistache::Http::Request& request, Pistache::Http::ResponseWriter response) {
     std::cout << "ressource \"" << request.resource() << '"' << std::endl;
+
+    m_logger.logRequest(request.method(), request.resource());
 
     if (request.method() == Pistache::Http::Method::Get) {
         if (std::regex_match(request.resource(), std::regex("/test1/?"))) {
@@ -29,15 +39,16 @@ void HelloHandler::onRequest(const Pistache::Http::Request& request, Pistache::H
             );
         }
         else {
-            send404(response);
+            send404(request, response);
         }
     }
     else {
-        send404(response);
+        send404(request, response);
     }
 }
 
-void HelloHandler::send404(Pistache::Http::ResponseWriter& response) const {
+void HelloHandler::send404(const Pistache::Http::Request& request, Pistache::Http::ResponseWriter& response) {
+    m_logger.logError(request.method(), Pistache::Http::Code::Not_Found, request.resource());
     response.send(
         Pistache::Http::Code::Not_Found,
         "<!DOCTYPE html>\n"
