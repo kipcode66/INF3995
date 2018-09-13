@@ -6,4 +6,6 @@
     <string name="test1_button_name">Request test1</string>
     <string name="test2_button_name">Request test2</string>
     <string name="test3_button_name">Request test3</string>
+    <string name="title_activity_request">RequestActivity</string>
+    <string name="action_settings">Settings</string>
 </resources>

@@ -19,6 +19,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".RequestActivity"
+            android:label="@string/title_activity_request">
+        </activity>
     </application>
 
 </manifest>

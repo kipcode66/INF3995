@@ -4,6 +4,7 @@ package ca.polymtl.inf3995.team1.tp4;
  */
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -74,28 +75,18 @@ public class TestFragment extends Fragment {
                 TestFragment.this.onButtonPressed(v);
             }
         });
-        switch (type.id) {
-            case 1:
-                button.setText(R.string.test1_button_name);
-                break;
-            case 2:
-                button.setText(R.string.test2_button_name);
-                break;
-            case 3:
-                button.setText(R.string.test3_button_name);
-                break;
-            default:
-                button.setText("Error, invalid fragment id");
-                break;
-        }
+
+        button.setText(type.buttonText);
 
         return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(View view) {
+        Intent intent = new Intent();
+
         if (mListener != null) {
-            mListener.onFragmentInteraction(view);
+            mListener.onFragmentInteraction(view, type);
         }
     }
 
@@ -128,6 +119,6 @@ public class TestFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(View view);
+        void onFragmentInteraction(View view, FragmentType type);
     }
 }
