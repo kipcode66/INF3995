@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -22,6 +25,13 @@ public class RequestActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request);
 
+        Button button = (Button) findViewById(R.id.retour);
+        button.setOnClickListener(new OnClickListener() {
+            public void onClick(View v){
+                Intent i = new Intent(RequestActivity.this, MainActivity.class);
+                startActivity(i);
+            }
+        });
         Intent intent = getIntent();
         requestUrl = intent.getExtras().getString("requestUrl");
         startRequest(requestUrl);
