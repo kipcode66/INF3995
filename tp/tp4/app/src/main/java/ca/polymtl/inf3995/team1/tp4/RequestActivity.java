@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -38,8 +40,15 @@ public class RequestActivity extends Activity {
     }
 
     protected void startRequest(String url) {
-            WebView output = findViewById(R.id.responseOut);
-            output.loadUrl(url);
+        WebView output = findViewById(R.id.responseOut);
+        output.loadUrl(url);
+        output.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                view.loadUrl(request.getUrl().toString());
+                return false;
+            }
+        });
     }
 
 }
