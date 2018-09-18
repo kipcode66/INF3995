@@ -33,6 +33,7 @@ public class RequestActivity extends Activity {
     protected void startRequest(String url) {
         WebView output = findViewById(R.id.responseOut);
         output.loadUrl(url);
+        output.getSettings().setJavaScriptEnabled(true);
         output.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
