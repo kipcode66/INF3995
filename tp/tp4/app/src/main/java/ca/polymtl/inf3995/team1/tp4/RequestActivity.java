@@ -25,11 +25,10 @@ public class RequestActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request);
 
-        Button button = (Button) findViewById(R.id.retour);
+        Button button = (Button) findViewById(R.id.Back);
         button.setOnClickListener(new OnClickListener() {
             public void onClick(View v){
-                Intent i = new Intent(RequestActivity.this, MainActivity.class);
-                startActivity(i);
+                finish();
             }
         });
         Intent intent = getIntent();
