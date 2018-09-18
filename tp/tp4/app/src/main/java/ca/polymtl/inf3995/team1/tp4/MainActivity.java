@@ -10,7 +10,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 
-public class MainActivity extends FragmentActivity implements TestFragment.OnFragmentInteractionListener {
+public class MainActivity extends FragmentActivity implements RequestButtonPageFragment.OnFragmentInteractionListener {
     public static final int NUM_PAGES = 3;
 
     private ViewPager mPager;
@@ -23,13 +23,17 @@ public class MainActivity extends FragmentActivity implements TestFragment.OnFra
 
         // Instantiate a ViewPager and a PagerAdapter.
         mPager = (ViewPager) findViewById(R.id.pager);
-        mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
+        mPagerAdapter = new RequestButtonPagerAdapter(getSupportFragmentManager());
         mPager.setAdapter(mPagerAdapter);
     }
 
+    /**
+     * Handler of a click of the button.
+     * @param view
+     * @param type An instance of {@link RequestData} containing data about the request.
+     */
     @Override
-    public void onFragmentInteraction(View view, FragmentType type) {
-        // TODO
+    public void onFragmentInteraction(View view, RequestData type) {
         Intent intent = new Intent(MainActivity.this, RequestActivity.class);
         Bundle b = new Bundle();
         b.putString("requestUrl", type.requestUrl);
@@ -38,17 +42,17 @@ public class MainActivity extends FragmentActivity implements TestFragment.OnFra
     }
 
     /**
-     * A simple pager adapter that represents 5 ScreenSlidePageFragment objects, in
+     * A simple pager adapter that represents 3 RequestButtonPageFragment objects, in
      * sequence.
      */
-    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
-        public ScreenSlidePagerAdapter(FragmentManager fm) {
+    private class RequestButtonPagerAdapter extends FragmentStatePagerAdapter {
+        public RequestButtonPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
-            return (Fragment) TestFragment.newInstance(FragmentType.getInstance(position));
+            return (Fragment) RequestButtonPageFragment.newInstance(RequestData.getInstance(position));
         }
 
         @Override

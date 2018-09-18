@@ -12,8 +12,6 @@ import android.widget.Button;
 
 public class RequestActivity extends Activity {
 
-    public String requestUrl;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,7 +24,7 @@ public class RequestActivity extends Activity {
             }
         });
         Intent intent = getIntent();
-        requestUrl = intent.getExtras().getString("requestUrl");
+        String requestUrl = intent.getExtras().getString("requestUrl");
         startRequest(requestUrl);
     }
 
