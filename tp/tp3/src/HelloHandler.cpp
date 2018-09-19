@@ -1,22 +1,19 @@
 #include "HelloHandler.hpp"
-#include "Logger.hpp"
 
 #include <regex>
 
-#include "pistache/endpoint.h"
-
 HelloHandler::HelloHandler()
-    : m_logFile("server.log", std::ofstream::out | std::ofstream::app)
-    , m_logger(m_logFile)
+    : m_logFile("server.log", std::ofstream::out | std::ofstream::app), m_printQueue(m_printQueue)
 {
     m_logFile << "--- SERVER STARTED ---" << std::endl;
+    m_printQueue = new PrintQueue();
 }
 
 void HelloHandler::onRequest(const Pistache::Http::Request& request, Pistache::Http::ResponseWriter response) {
     std::cout << "ressource \"" << request.resource() << '"' << std::endl;
 
-    m_logger.logRequest(request.method(), request.resource());
-
+    RequestEvent* requestEventLog = new RequestEvent(m_logFile, request.method(), request.resource());
+    m_printQueue->push(requestEventLog);
     if (request.method() == Pistache::Http::Method::Get) {
         if (std::regex_match(request.resource(), std::regex("/test1/?"))) {
             response.send(Pistache::Http::Code::Ok, "test 1 est bon...\n");
@@ -48,7 +45,8 @@ void HelloHandler::onRequest(const Pistache::Http::Request& request, Pistache::H
 }
 
 void HelloHandler::send404(const Pistache::Http::Request& request, Pistache::Http::ResponseWriter& response) {
-    m_logger.logError(request.method(), Pistache::Http::Code::Not_Found, request.resource());
+    ErrorEvent* errorEventLog = new ErrorEvent(m_logFile, Pistache::Http::Code::Not_Found, request.resource());
+    m_printQueue->push(errorEventLog);
     response.send(
         Pistache::Http::Code::Not_Found,
         "<!DOCTYPE html>\n"
@@ -60,3 +58,8 @@ void HelloHandler::send404(const Pistache::Http::Request& request, Pistache::Htt
         "</html>\n"
     );
 }
+
+PrintQueue* HelloHandler::getQueue() {
+    return m_printQueue;
+}
+

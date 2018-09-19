@@ -3,17 +3,25 @@ project(tp3)
 
 # GENERAL CONFIG
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++14")
+set(CMAKE_CXX_FLAGS " -pthread ${CMAKE_CXX_FLAGS} -std=c++14")
 
 
 # SOURCES
 
 set(MY_CXX_SOURCES
 	"main.cpp"
+	"PrintHandler.hpp"
+	"PrintHandler.cpp"
+	"PrintQueue.hpp"
+	"PrintQueue.cpp"
 	"HelloHandler.cpp"
 	"HelloHandler.hpp"
-	"Logger.cpp"
-	"Logger.hpp"
+	"LogEvent.hpp"
+	"LogEvent.cpp"
+	"RequestEvent.hpp"
+	"RequestEvent.cpp"
+	"ErrorEvent.hpp"
+	"ErrorEvent.cpp"
 )
 
 # FIND LIBRARIES

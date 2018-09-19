@@ -4,7 +4,11 @@
 #include <fstream>
 
 #include "pistache/endpoint.h"
-#include "Logger.hpp"
+#include "RequestEvent.hpp"
+#include "ErrorEvent.hpp"
+#include "PrintHandler.hpp"
+#include "PrintQueue.hpp"
+#include "thread"
 
 using namespace Pistache;
 
@@ -16,13 +20,14 @@ public:
     explicit HelloHandler();
 
     void onRequest(const Http::Request& request, Http::ResponseWriter response);
+    PrintQueue* getQueue() ; 
 
 protected:
     void send404(const Pistache::Http::Request& request, Http::ResponseWriter& response);
 
 protected:
     std::ofstream m_logFile;
-    Logger m_logger;
+    PrintQueue* m_printQueue;
 };
 
 #endif // !SRC_HELLO_HANDLER_HPP
