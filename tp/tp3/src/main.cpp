@@ -33,9 +33,8 @@ int main(int argc, char** argv) {
         std::cerr << "Server is running" << std::endl;
         PrintHandler printHandler = PrintHandler(helloHanldlerPointer->getQueue());
         std::thread printThread(&PrintHandler::print, std::ref(printHandler));
-        //std::thread printThread = std::thread(&PrintHandler::print, std::ref(printHandler)); 
+        printThread.detach();
         server.serve();
-        printThread.join();
 
         return 0;
     }
