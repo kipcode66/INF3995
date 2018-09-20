@@ -8,5 +8,6 @@ ErrorEvent::~ErrorEvent()
 { }
 
 void ErrorEvent::print() {
+    std::cerr << "Got error \"" << m_errorCode << "\" during request for resource \"" << m_resource << '"' << std::endl;
     m_out << "Got error \"" << m_errorCode << "\" during request for resource \"" << m_resource << '"' << std::endl;
 }

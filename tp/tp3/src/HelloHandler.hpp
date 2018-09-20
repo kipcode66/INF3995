@@ -20,14 +20,16 @@ public:
     explicit HelloHandler();
 
     void onRequest(const Http::Request& request, Http::ResponseWriter response);
-    PrintQueue* getQueue() ; 
+    PrintQueue* getQueue(); 
 
 protected:
     void send404(const Pistache::Http::Request& request, Http::ResponseWriter& response);
 
 protected:
     std::ofstream m_logFile;
-    PrintQueue* m_printQueue;
+
+protected:
+    static PrintQueue* c_printQueue;
 };
 
 #endif // !SRC_HELLO_HANDLER_HPP

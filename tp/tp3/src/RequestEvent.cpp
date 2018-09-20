@@ -8,5 +8,6 @@ RequestEvent::~RequestEvent()
 { }
 
 void RequestEvent::print() {
+    std::cerr << "Got \"" << m_method << "\" request for resource \"" << m_resource << '"' << std::endl;
     m_out << "Got \"" << m_method << "\" request for resource \"" << m_resource << '"' << std::endl;
 }
