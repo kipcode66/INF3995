@@ -12,6 +12,7 @@ import android.view.View;
 
 public class MainActivity extends FragmentActivity implements RequestButtonPageFragment.OnFragmentInteractionListener {
     public static final int NUM_PAGES = 3;
+    public static final int NUM_LOOPS = 10000;
 
     private ViewPager mPager;
     private PagerAdapter mPagerAdapter;
@@ -25,6 +26,7 @@ public class MainActivity extends FragmentActivity implements RequestButtonPageF
         mPager = (ViewPager) findViewById(R.id.pager);
         mPagerAdapter = new RequestButtonPagerAdapter(getSupportFragmentManager());
         mPager.setAdapter(mPagerAdapter);
+        mPager.setCurrentItem(NUM_PAGES * NUM_LOOPS / 2);
     }
 
     /**
@@ -52,12 +54,12 @@ public class MainActivity extends FragmentActivity implements RequestButtonPageF
 
         @Override
         public Fragment getItem(int position) {
-            return (Fragment) RequestButtonPageFragment.newInstance(RequestData.getInstance(position));
+            return (Fragment) RequestButtonPageFragment.newInstance(RequestData.getInstance(position % NUM_PAGES));
         }
 
         @Override
         public int getCount() {
-            return NUM_PAGES;
+            return NUM_PAGES * NUM_LOOPS;
         }
     }
 }
