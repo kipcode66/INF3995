@@ -23,7 +23,6 @@ public class RequestButtonPageFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_REQUEST_ID = "requestId";
 
-    // TODO: Rename and change types of parameters
     private int requestId;
     private RequestData data;
 
@@ -40,7 +39,6 @@ public class RequestButtonPageFragment extends Fragment {
      * @param data Parameter 1.
      * @return A new instance of fragment RequestButtonPageFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static RequestButtonPageFragment newInstance(RequestData data) {
         RequestButtonPageFragment fragment = new RequestButtonPageFragment();
         Bundle args = new Bundle();
@@ -77,7 +75,6 @@ public class RequestButtonPageFragment extends Fragment {
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(View view) {
         Intent intent = new Intent();
 
@@ -114,7 +111,6 @@ public class RequestButtonPageFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument data and name
         void onFragmentInteraction(View view, RequestData type);
     }
 }
