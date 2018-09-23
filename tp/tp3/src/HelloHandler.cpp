@@ -4,8 +4,8 @@
 
 PrintQueue* HelloHandler::c_printQueue = nullptr;
 
-HelloHandler::HelloHandler()
-    : m_logFile("server.log", std::ofstream::out | std::ofstream::app)
+HelloHandler::HelloHandler(std::ofstream& logFile)
+    : m_logFile(logFile)
 {
     if (c_printQueue == nullptr) {
         c_printQueue = new PrintQueue();
