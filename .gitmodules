@@ -1,3 +1,6 @@
 [submodule "tp/tp3/lib/pistache"]
 	path = tp/tp3/lib/pistache
 	url = https://github.com/oktal/pistache
+[submodule "project/server/lib/pistache"]
+	path = project/server/lib/pistache
+	url = https://github.com/oktal/pistache
