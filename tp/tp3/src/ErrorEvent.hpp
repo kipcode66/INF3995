@@ -10,10 +10,9 @@ public:
     ~ErrorEvent();
     virtual void print();
 
-private: 
+private:
     std::string m_resource;
     Pistache::Http::Code m_errorCode;
 };
 
 #endif // !SRC_ERROREVENT_HPP
- 

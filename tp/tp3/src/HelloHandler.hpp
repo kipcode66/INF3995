@@ -20,7 +20,7 @@ public:
     explicit HelloHandler(std::ofstream& logFile);
 
     void onRequest(const Http::Request& request, Http::ResponseWriter response);
-    PrintQueue* getQueue(); 
+    PrintQueue* getQueue();
 
 protected:
     void send404(const Pistache::Http::Request& request, Http::ResponseWriter& response);

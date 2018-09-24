@@ -38,13 +38,13 @@ int main(int argc, char** argv) {
 
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
-        
+
         auto opts = Http::Endpoint::options().threads(1);
         Http::Endpoint server(addr);
         server.init(opts);
 
         std::ofstream logFile("server.log", std::ofstream::out | std::ofstream::app);
-        auto helloHanldlerPointer = std::make_shared<HelloHandler>(logFile); 
+        auto helloHanldlerPointer = std::make_shared<HelloHandler>(logFile);
         server.setHandler(helloHanldlerPointer);
         std::cerr << "Server is running" << std::endl;
         PrintHandler printHandler = PrintHandler(helloHanldlerPointer->getQueue());

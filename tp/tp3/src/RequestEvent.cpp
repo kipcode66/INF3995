@@ -1,7 +1,7 @@
 #include "RequestEvent.hpp"
 
 RequestEvent::RequestEvent(std::ostream& out, const Pistache::Http::Method& method, const std::string& resource)
-    : LogEvent(out), m_method(method), m_resource(resource) 
+    : LogEvent(out), m_method(method), m_resource(resource)
 { }
 
 RequestEvent::~RequestEvent()

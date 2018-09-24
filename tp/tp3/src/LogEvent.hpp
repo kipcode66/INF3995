@@ -19,4 +19,3 @@ protected:
 };
 
 #endif // !SRC_LOGEVENT_HPP
- 

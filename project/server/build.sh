@@ -11,7 +11,7 @@ buildDependencies() {
     if [ ! -e "${PISTACHE_BUILT_FLAG}" ] || [ ! -d "${PISTACHE_BINARY_DIR}" ]; then
         git submodule update --init --recursive
         mkdir -p "${PISTACHE_BINARY_DIR}"
-        cd "${PISTACHE_BINARY_DIR}"    
+        cd "${PISTACHE_BINARY_DIR}"
         cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX="${DEPS_INSTALL_DIR}" ..
     fi
 

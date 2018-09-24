@@ -3,7 +3,7 @@
 PrintQueue::PrintQueue()
 { }
 
-std::unique_ptr<LogEvent> PrintQueue::pop() 
+std::unique_ptr<LogEvent> PrintQueue::pop()
 {
     std::unique_lock<std::mutex> mlock(m_mutex);
     while (m_queue.empty())
