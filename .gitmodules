@@ -4,3 +4,6 @@
 [submodule "project/server/lib/pistache"]
 	path = project/server/lib/pistache
 	url = https://github.com/oktal/pistache
+[submodule "project/server/lib/openssl"]
+	path = project/server/lib/openssl
+	url = https://github.com/openssl/openssl
