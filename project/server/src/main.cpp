@@ -36,11 +36,12 @@ uint16_t parseArgs(int argc, char** argv) {
 int main(int argc, char** argv) {
 
     uint16_t portId = parseArgs(argc, argv);
+    constexpr std::size_t MAX_PAYLOAD_SIZE = (100 << 20);
 
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
 
-        auto opts = Pistache::Http::Endpoint::options().threads(1);
+        auto opts = Pistache::Http::Endpoint::options().threads(1).maxPayload(MAX_PAYLOAD_SIZE);
         Pistache::Http::Endpoint server(addr);
         server.init(opts);
 
