@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Client</string>
+    <string name="title_activity_splash_screen">Application Client</string>
+    <string name="dummy_button">Bouton Factice</string>
+    <string name="dummy_content">CONTENU FACTICE</string>
+    <string name="title_activity_queue">ActivitéFile</string>
+    <string name="navigation_drawer_open">Ouvrir le tiroire de navigation</string>
+    <string name="navigation_drawer_close">Fermer le tiroire de navigation</string>
+    <string name="nav_header_desc">Entête de navigation</string>
+    <string name="action_settings">Paramètres</string>
+    <string name="communicate_queue_drawer">Communication</string>
+</resources>
