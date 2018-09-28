@@ -10,9 +10,12 @@ fi
 
 while [ "$PORT" != "$MAX_PORT" ]; do
     echo $'\n'"Trying port number $PORT"
-    sudo ./build/server "$PORT"
+    ./build/server "$PORT"
     RETURN_CODE=$?
     if [ "$RETURN_CODE" == 255 ]; then
         PORT=$(($PORT + 1))
+    fi
+    if [ "$RETURN_CODE" == 0 ]; then
+        break
     fi
 done
