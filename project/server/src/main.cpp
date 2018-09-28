@@ -31,6 +31,7 @@ uint16_t parseArgs(int argc, char** argv) {
         usage();
         exit(254);
     }
+    return portId;
 }
 
 int main(int argc, char** argv) {
