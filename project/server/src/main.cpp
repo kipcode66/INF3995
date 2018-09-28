@@ -12,7 +12,7 @@ void usage() {
 }
 
 uint16_t parseArgs(int argc, char** argv) {
-    uint16_t portId;
+    uint32_t portId;
     if (argc == 1) {
         portId = 80;
     }
