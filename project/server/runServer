@@ -10,7 +10,7 @@ fi
 
 while [ "$PORT" != "$MAX_PORT" ]; do
     echo $'\n'"Trying port number $PORT"
-    ./build/server "$PORT"
+    ./build/http-server/http-server "$PORT"
     RETURN_CODE=$?
     if [ "$RETURN_CODE" == 255 ]; then
         PORT=$(($PORT + 1))
