@@ -3,10 +3,10 @@
 #define BOOST_TEST_MODULE EXAMPLE
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE( passing_test_case ) {
+BOOST_AUTO_TEST_CASE(passing_test_case) {
     BOOST_TEST(1 == 1);
 }
 
-BOOST_AUTO_TEST_CASE( failing_test_case ) {
+BOOST_AUTO_TEST_CASE(failing_test_case) {
     BOOST_TEST(1 == 2);
 }
