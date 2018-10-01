@@ -7,12 +7,27 @@
 # when we pull from Git and somebody added a file.
 
 ###############################################################################
+#                            FUNCTION DEFINITIONS                             #
+###############################################################################
+
+# Function to transform relative paths into absolute paths so that
+# the variables can be used in other directories
+# Note that fileList is a VARIABLE NAME (e.g. myVar), not a value (i.e., not ${myVar})
+function(makeAbsolute fileList)
+    foreach(file IN LISTS "${fileList}")
+        get_filename_component(fileAbsolute "${file}" ABSOLUTE)
+        list(APPEND outputFileList "${fileAbsolute}")
+    endforeach()
+    set(${fileList} "${outputFileList}" PARENT_SCOPE)
+endfunction()
+
+###############################################################################
 #                            C++ TRANSLATION UNITS                            #
 ###############################################################################
 
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although not recommended)
-set(SERVER_CPP_SOURCES
+set(HTTP_SERVER_CPP_SOURCES
     http/RequestHandler.cpp
     
 )
@@ -23,6 +38,9 @@ set(SERVER_CPP_SOURCES
 
 # All .h, .hpp, .hh files
 # Use quotes "" if a file contains a space (although not recommended)
-set(SERVER_HEADER_SOURCES
+set(HTTP_SERVER_HEADER_SOURCES
     http/RequestHandler.hpp
 )
+
+makeAbsolute(HTTP_SERVER_CPP_SOURCES)
+makeAbsolute(HTTP_SERVER_HEADER_SOURCES)
