@@ -18,3 +18,6 @@ link_libraries(pistache)                   # Equivalent to the -l flag in g++
 add_executable(http-server     main.cpp "${HTTP_SERVER_CPP_SOURCES}" "${HTTP_SERVER_HEADER_SOURCES}")
 add_library   (http-server-lib          "${HTTP_SERVER_CPP_SOURCES}" "${HTTP_SERVER_HEADER_SOURCES}") # Static library used for unit tests
 set_target_properties(http-server-lib PROPERTIES OUTPUT_NAME http-server)
+
+# Testing
+add_subdirectory(test)
