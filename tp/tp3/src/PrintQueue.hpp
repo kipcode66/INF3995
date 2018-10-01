@@ -5,17 +5,19 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <memory>
+
 #include "LogEvent.hpp"
 
 class PrintQueue {
 public:
     PrintQueue();
 
-    LogEvent* pop();
-    void push(LogEvent* item);
+    std::unique_ptr<LogEvent> pop();
+    void push(std::unique_ptr<LogEvent> item);
 
 private:
-    std::queue<LogEvent*> m_queue;
+    std::queue<std::unique_ptr<LogEvent>> m_queue;
     std::mutex m_mutex;
     std::condition_variable m_condition;
 };
