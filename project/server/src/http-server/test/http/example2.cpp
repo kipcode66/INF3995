@@ -1,6 +1,6 @@
 // From : https://www.boost.org/doc/libs/1_68_0/libs/test/doc/html/boost_test/testing_tools/boost_test_universal_macro.html
 
-#define BOOST_TEST_MODULE boost_test_macro3
+#define BOOST_TEST_MODULE EXAMPLE2
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE( example_test_case ) {
