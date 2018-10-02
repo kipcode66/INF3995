@@ -28,8 +28,7 @@ endfunction()
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although not recommended)
 set(SSL_DAEMON_CPP_SOURCES
-    main.cpp
-
+    ArgsParser.cpp
 )
 
 ###############################################################################
@@ -39,7 +38,7 @@ set(SSL_DAEMON_CPP_SOURCES
 # All .h, .hpp, .hh files
 # Use quotes "" if a file contains a space (although not recommended)
 set(SSL_DAEMON_HEADER_SOURCES
-
+    ArgsParser.hpp
 )
 
 makeAbsolute(SSL_DAEMON_CPP_SOURCES)
