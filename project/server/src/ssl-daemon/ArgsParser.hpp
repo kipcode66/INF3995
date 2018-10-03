@@ -33,7 +33,8 @@ public:
 
 public:
     explicit ArgsParser();
-    Config parseArgs(const std::vector<std::string>& argv);
+    Config parseArgs(const std::vector<std::string>& argv) const;
+    void usage() const;
 };
 
 } // namespace daemon

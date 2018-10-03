@@ -7,7 +7,7 @@ namespace daemon {
 
 ArgsParser::ArgsParser() { }
 
-ArgsParser::Config ArgsParser::parseArgs(const std::vector<std::string>& argv) {
+ArgsParser::Config ArgsParser::parseArgs(const std::vector<std::string>& argv) const {
     uint16_t listenPort = DEFAULT_LISTEN_PORT;
     uint16_t outputPort = DEFAULT_OUTPUT_PORT;
 
@@ -29,12 +29,26 @@ ArgsParser::Config ArgsParser::parseArgs(const std::vector<std::string>& argv) {
                 throw std::invalid_argument("Missing argument after -o");
             }
         }
+        else if (arg == "-h" || arg == "--help") {
+            usage();
+            exit(0);
+        }
         else {
             throw std::invalid_argument("Unknown argument " + argv.at(i));
         }
     }
 
     return Config(listenPort, outputPort);
+}
+
+void ArgsParser::usage() const {
+    std::cout <<
+        "Usage : " << std::endl <<
+        "    ssl-daemon [-l <portNum>] [-o <portNum>]" << std::endl <<
+        std::endl <<
+        "OPTIONS" << std::endl <<
+        "    --help | -h\t\tPrint this help menu and exit." << std::endl;
+
 }
 
 } // namespace daemon
