@@ -1,4 +1,6 @@
 #include <inttypes.h>
+#include <vector>
+#include <string>
 
 namespace elevation {
 namespace daemon {
@@ -22,7 +24,7 @@ public:
 
 public:
     explicit ArgsParser();
-    Config parseArgs(int argc, char** argv);
+    Config parseArgs(const std::vector<std::string>& argv);
 };
 
 } // namespace daemon
