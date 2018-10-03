@@ -14,6 +14,7 @@ link_directories("${DEPS_DIR}/lib")        # Equivalent to the -L flag in g++
 link_libraries(ssl)                        # Equivalent to the -l flag in g++
 
 # Create targets
-add_executable(ssl-daemon     main.cpp "${SSL_DAEMON_CPP_SOURCES}" "${SSL_DAEMON_HEADER_SOURCES}")
+add_executable(ssl-daemon     main.cpp "${SSL_DAEMON_HEADER_SOURCES}")
 add_library   (ssl-daemon-lib          "${SSL_DAEMON_CPP_SOURCES}" "${SSL_DAEMON_HEADER_SOURCES}") # Static library used for unit tests
 set_target_properties(ssl-daemon-lib PROPERTIES OUTPUT_NAME ssl-daemon)
+target_link_libraries(ssl-daemon ssl-daemon-lib)
