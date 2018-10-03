@@ -7,6 +7,10 @@ namespace daemon {
 
 class ArgsParser {
 public:
+        static constexpr uint16_t DEFAULT_LISTEN_PORT = 443;
+        static constexpr uint16_t DEFAULT_OUTPUT_PORT = 7777;
+
+public:
     class Config {
     public:
         constexpr explicit Config(uint16_t listenPort, uint16_t outputPort)
