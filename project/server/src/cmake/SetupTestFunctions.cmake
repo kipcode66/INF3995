@@ -6,13 +6,13 @@ function(addUnitTest unitTest testName testFile)
     add_test(NAME "${testName}.${unitTest}" COMMAND "${testName}" "--run_test=${unit_test}" "--catch_system_error=true")
 endfunction()
 
-function(addAllTestsIn testFile)
+function(addAllTestsIn testFile includeDirList libraryList)
     get_filename_component(testName "${testFile}" NAME_WE)
 
     # Create executable
-    add_executable("${testName}" "${testFile}" "${HTTP_SERVER_CPP_SOURCES}" "${HTTP_SERVER_HEADER_SOURCES}")
-    target_include_directories("${testName}" PRIVATE "${BOOST_INCLUDE_DIRS}")
-    target_link_libraries("${testName}" "${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}")
+    add_executable("${testName}" "${testFile}" "${includeDirList}")
+    target_include_directories("${testName}" PRIVATE "${BOOST_INCLUDE_DIRS}" "${includeDirList}")
+    target_link_libraries("${testName}" "${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}" "${libraryList}")
 
     # Find the subtests (the "test cases") inside the test file.
     file(READ "${testFile}" contents)
@@ -23,16 +23,15 @@ function(addAllTestsIn testFile)
     endforeach()
 endfunction()
 
-macro(setupTests testSources)
+macro(setupTests testSourceList includeDirList libraryList)
     set(Boost_USE_STATIC_LIBS ON) # FindBoost.cmake uses this variable. If it's at ON, that CMake script will output the
                                   # static libraries, rather than the shared libraries.
     find_package(Boost REQUIRED COMPONENTS unit_test_framework) # This finds where the Boost unit test libraries and
                                                                 # header files are, and sets some variables accoridngly.
     set(BOOST_INCLUDE_DIRS "${boost_installation_prefix}/include")
-
     
     enable_testing()
-    foreach(testFile IN LISTS "${testSources}")
-        addAllTestsIn("${testFile}")
+    foreach(testFile IN LISTS "${testSourceList}")
+        addAllTestsIn("${testFile}" "${includeDirList}" "${libraryList}")
     endforeach()
 endmacro()
