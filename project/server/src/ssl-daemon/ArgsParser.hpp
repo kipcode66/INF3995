@@ -17,6 +17,11 @@ public:
         uint16_t getListenPort() const { return m_listenPort; }
         uint16_t getOutputPort() const { return m_outputPort; }
 
+        bool operator==(const Config& other) const { // For unit tests
+            return m_listenPort == other.m_listenPort &&
+                   m_outputPort == other.m_outputPort;
+        }
+
     private:
         uint16_t m_listenPort;
         uint16_t m_outputPort;
