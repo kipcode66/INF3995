@@ -12,9 +12,11 @@ public:
     static constexpr int NO_FD = -1;
 
 public:
-    Socket(uint16_t portNum);
+    Socket(uint16_t portNum, bool isLocalhostSocket);
     Socket(const Socket& other) = delete;
     Socket(Socket&& other) = delete;
+
+    virtual ~Socket();
 
     Socket& operator=(const Socket& other) = delete;
     Socket& operator=(Socket&& other) = delete;
@@ -22,7 +24,11 @@ public:
     Socket& operator<<(const std::string& str);
     Socket& operator>>(std::string& str);
 
-private:
+protected:
+    void createLocalSocket_(uint16_t portNum);
+    void createIpSocket_(uint16_t portNum);
+
+protected:
     int m_fd;
 };
 
