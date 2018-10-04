@@ -10,6 +10,7 @@ namespace daemon {
 class Socket {
 public:
     static constexpr int NO_FD = -1;
+    static constexpr int SOCKET_MAX_BACKLOG = 100;
 
 public:
     Socket(uint16_t portNum, bool isLocalhostSocket);
@@ -25,8 +26,8 @@ public:
     Socket& operator>>(std::string& str);
 
 protected:
-    void createLocalSocket_(uint16_t portNum);
-    void createIpSocket_(uint16_t portNum);
+    void makeLocalSocket_();
+    void makeIpSocket_(uint16_t portNum);
 
 protected:
     int m_fd;
