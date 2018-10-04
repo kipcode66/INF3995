@@ -16,6 +16,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # Use quotes "" if a file contains a space (although not recommended)
 set(SSL_DAEMON_CPP_SOURCES
     ArgsParser.cpp
+    communication/Socket.cpp
 )
 
 ###############################################################################
@@ -26,6 +27,7 @@ set(SSL_DAEMON_CPP_SOURCES
 # Use quotes "" if a file contains a space (although not recommended)
 set(SSL_DAEMON_HEADER_SOURCES
     ArgsParser.hpp
+    communication/Socket.hpp
 )
 
 makeAbsolute(SSL_DAEMON_CPP_SOURCES)
