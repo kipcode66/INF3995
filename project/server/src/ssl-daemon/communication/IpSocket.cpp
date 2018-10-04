@@ -12,7 +12,7 @@ namespace elevation {
 namespace daemon {
 
 IpSocket::IpSocket(uint16_t portNum)
-    : Socket(0, false), m_portNum(portNum)
+    : m_portNum(portNum)
 {
     // Create socket
     int socket_fd = ::socket(AF_INET, SOCK_STREAM, 0);

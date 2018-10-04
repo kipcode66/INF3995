@@ -5,7 +5,7 @@
 namespace elevation {
 namespace daemon {
     
-Socket::Socket(uint16_t portNum, bool isLocalhostSocket)
+Socket::Socket()
     : m_fd(NO_FD)
 { }
 

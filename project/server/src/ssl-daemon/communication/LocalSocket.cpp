@@ -12,7 +12,6 @@ namespace elevation {
 namespace daemon {
     
 LocalSocket::LocalSocket(const std::string& socketFilename)
-    : Socket(0, true)
 {
     // Create socket
     int socket_fd = ::socket(AF_UNIX, SOCK_STREAM, 0);

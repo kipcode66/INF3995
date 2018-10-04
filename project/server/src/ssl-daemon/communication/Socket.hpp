@@ -13,11 +13,11 @@ public:
     static constexpr int SOCKET_MAX_BACKLOG = 100;
 
 public:
-    Socket(uint16_t portNum, bool isLocalhostSocket);
+    Socket();
     Socket(const Socket& other) = delete;
     Socket(Socket&& other) = delete;
 
-    virtual ~Socket();
+    virtual ~Socket() = 0;
 
     Socket& operator=(const Socket& other) = delete;
     Socket& operator=(Socket&& other) = delete;
