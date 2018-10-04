@@ -26,9 +26,6 @@ public:
     Socket& operator>>(std::string& str);
 
 protected:
-    void makeIpSocket_(uint16_t portNum);
-
-protected:
     int m_fd;
 };
 

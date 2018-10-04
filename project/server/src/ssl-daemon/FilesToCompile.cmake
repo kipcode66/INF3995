@@ -18,6 +18,7 @@ set(SSL_DAEMON_CPP_SOURCES
     ArgsParser.cpp
     communication/Socket.cpp
     communication/LocalSocket.cpp
+    communication/IpSocket.cpp
 )
 
 ###############################################################################
@@ -30,6 +31,7 @@ set(SSL_DAEMON_HEADER_SOURCES
     ArgsParser.hpp
     communication/Socket.hpp
     communication/LocalSocket.hpp
+    communication/IpSocket.hpp
 )
 
 makeAbsolute(SSL_DAEMON_CPP_SOURCES)
