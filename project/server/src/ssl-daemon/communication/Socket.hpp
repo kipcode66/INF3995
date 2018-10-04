@@ -26,7 +26,6 @@ public:
     Socket& operator>>(std::string& str);
 
 protected:
-    void makeLocalSocket_();
     void makeIpSocket_(uint16_t portNum);
 
 protected:

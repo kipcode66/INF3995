@@ -17,6 +17,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 set(SSL_DAEMON_CPP_SOURCES
     ArgsParser.cpp
     communication/Socket.cpp
+    communication/LocalSocket.cpp
 )
 
 ###############################################################################
@@ -28,6 +29,7 @@ set(SSL_DAEMON_CPP_SOURCES
 set(SSL_DAEMON_HEADER_SOURCES
     ArgsParser.hpp
     communication/Socket.hpp
+    communication/LocalSocket.hpp
 )
 
 makeAbsolute(SSL_DAEMON_CPP_SOURCES)
