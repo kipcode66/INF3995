@@ -1,4 +1,9 @@
 #!/bin/bash
+
+SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
+PRIVATE_SOCKETS_DIR="${SERVER_DIR}/build/common/private-sockets"
+mkdir -p "${PRIVATE_SOCKETS_DIR}"
+
 # Check if root
 if [ "$(whoami)" == root ]; then
     PORT=80
