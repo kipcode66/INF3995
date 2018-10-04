@@ -10,7 +10,6 @@ int main(int argc, char** argv) {
     }
     catch (const std::invalid_argument& e) {
         std::cerr << e.what() << std::endl;
-        argsParser.usage();
         return 255;
     }
 
