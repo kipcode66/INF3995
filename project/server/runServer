@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
-PRIVATE_SOCKETS_DIR="${SERVER_DIR}/build/common/private-sockets"
+PRIVATE_SOCKETS_DIR="${SERVER_DIR}/build/common/sock"
 mkdir -p "${PRIVATE_SOCKETS_DIR}"
 
 # Check if root
