@@ -17,9 +17,25 @@ SslSession::SslSession(SSL* ssl)
     : m_ssl(ssl)
 { }
 
+SslSession::SslSession(SslSession&& that) {
+    *this = std::move(that);
+}
+
 SslSession::~SslSession()
 {
-    SSL_free(m_ssl);
+    if (m_ssl != nullptr) {
+        SSL_free(m_ssl);
+    }
+    if (m_clientFd != NO_FD) {
+        ::close(m_clientFd);
+    }
+}
+
+SslSession& SslSession::operator=(SslSession&& that) {
+    m_ssl = that.m_ssl;
+    m_clientFd = that.m_clientFd;
+    that.m_ssl = nullptr;
+    that.m_clientFd = NO_FD;
 }
 
 void SslSession::acceptNext(Socket& socket) {
@@ -35,6 +51,7 @@ void SslSession::acceptNext(Socket& socket) {
     if (SSL_accept(m_ssl) <= 0) {
         throwSslError_();
     }
+    std::cout << "Done accepting" << std::endl;
 }
 
 void SslSession::throwSslError_() const {

@@ -10,8 +10,17 @@ namespace daemon {
 
 class SslSession {
 public:
+    static constexpr int NO_FD = -1;
+
+public:
     explicit SslSession(SSL* ssl);
+    SslSession(SslSession&& that);
+    SslSession(const SslSession&) = delete;
+
     virtual ~SslSession();
+
+    SslSession& operator=(SslSession&&);
+    SslSession& operator=(const SslSession&) = delete;
 
     void acceptNext(Socket& socket);
 
@@ -19,7 +28,7 @@ protected:
     void throwSslError_() const;
 
 protected:
-    SSL* const m_ssl;
+    SSL* m_ssl;
     int m_clientFd;
 };
 
