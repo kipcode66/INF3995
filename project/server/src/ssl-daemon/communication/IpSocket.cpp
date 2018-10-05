@@ -38,7 +38,19 @@ IpSocket::IpSocket(uint16_t portNum, int fd)
     m_fd = fd;
 }
 
+IpSocket::IpSocket(IpSocket&& that)
+    : m_portNum(that.m_portNum)
+{
+    *this = std::move(that);
+}
+
 IpSocket::~IpSocket() { }
+
+IpSocket& IpSocket::operator=(IpSocket&& that) {
+    (Socket&)*this = (Socket&&)std::move(that);
+    m_portNum = that.m_portNum;
+    return *this;
+}
 
 } // namespace daemon
 } // namespace elevation
