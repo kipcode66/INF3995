@@ -27,6 +27,7 @@ SslContext::~SslContext()
     if (m_ctx != nullptr) {
         SSL_CTX_free(m_ctx);
     }
+    EVP_cleanup();
 }
 
 void initOpenSsl_() {
