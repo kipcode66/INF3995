@@ -29,13 +29,7 @@ IpSocket::IpSocket(uint16_t portNum)
     if (::bind(socket_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
         throw std::runtime_error(::strerror(errno));
     }
-
-    if (::listen(socket_fd, SOCKET_MAX_BACKLOG) < 0) {
-        throw std::runtime_error(::strerror(errno));
-    }
     m_fd = socket_fd;
-
-    std::cout << "Socket created at fd " << m_fd << std::endl;
 }
 
 IpSocket::~IpSocket() { }
