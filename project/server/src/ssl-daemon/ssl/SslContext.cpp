@@ -30,7 +30,7 @@ SslContext::~SslContext()
     EVP_cleanup();
 }
 
-void initOpenSsl_() {
+void SslContext::initOpenSsl_() {
     SSL_load_error_strings();	
     OpenSSL_add_ssl_algorithms();
 }
@@ -66,6 +66,10 @@ void SslContext::throwSslError_() {
     char buf[ERROR_BUFFER_SIZE];
     ERR_error_string_n(ERR_get_error(), buf, ERROR_BUFFER_SIZE);
     throw std::runtime_error(buf);
+}
+
+SslContext& SslContext::getInstance() {
+    return c_instance;
 }
 
 SslSession SslContext::makeSession() const {
