@@ -46,19 +46,16 @@ void SslSession::acceptNext(Socket& socket) {
         throw std::runtime_error(::strerror(errno));
     }
 
-    SSL_set_fd(m_ssl, socket.getFd());
+    SSL_set_fd(m_ssl, m_clientFd);
 
-    if (SSL_accept(m_ssl) <= 0) {
-        throwSslError_();
+    int acceptStatus = SSL_accept(m_ssl);
+    if (acceptStatus <= 0) {
+        throw std::runtime_error("Failed SSL_accept");
     }
-    std::cout << "Done accepting" << std::endl;
-}
-
-void SslSession::throwSslError_() const {
-    constexpr int ERROR_BUFFER_SIZE = 300;
-    char buf[ERROR_BUFFER_SIZE];
-    ERR_error_string_n(ERR_get_error(), buf, ERROR_BUFFER_SIZE);
-    throw std::runtime_error(buf);
+    else {
+        const char reply[] = "test\n";
+        SSL_write(m_ssl, reply, strlen(reply));
+    }
 }
 
 } // namespace daemon

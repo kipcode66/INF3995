@@ -25,9 +25,6 @@ public:
     void acceptNext(Socket& socket);
 
 protected:
-    void throwSslError_() const;
-
-protected:
     SSL* m_ssl;
     int m_clientFd;
 };
