@@ -25,6 +25,10 @@ public:
     Socket& operator<<(const std::string& str);
     Socket& operator>>(std::string& str);
 
+    inline int getFd() const {
+        return m_fd;
+    }
+
 protected:
     int m_fd;
 };
