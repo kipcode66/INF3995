@@ -38,7 +38,7 @@ SslSession& SslSession::operator=(SslSession&& that) {
     that.m_clientFd = NO_FD;
 }
 
-void SslSession::acceptNext(Socket& socket) {
+void SslSession::bindTo(Socket& socket) {
     SSL_set_fd(m_ssl, socket.m_fd);
 
     int acceptStatus = SSL_accept(m_ssl);

@@ -22,7 +22,7 @@ public:
     SslSession& operator=(SslSession&&);
     SslSession& operator=(const SslSession&) = delete;
 
-    void acceptNext(Socket& socket);
+    void bindTo(Socket& socket);
 
 protected:
     SSL* m_ssl;
