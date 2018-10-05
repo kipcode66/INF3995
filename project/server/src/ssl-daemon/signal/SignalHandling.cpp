@@ -2,6 +2,21 @@
 
 #include <signal.h>
 #include <unistd.h>
+#include <atomic>
+#include <stdexcept>
+
+static std::atomic<struct sigaction> oldSigaction;
+
+extern "C" void signalHandler_(int signal) {
+    elevation::daemon::SignalHandling::cleanupRequested.store(true);
+
+    static char message[] = "Caught signal. The SSL Daemon will stop on the next HTTPS connection, or if "
+                            "sending the same signal another time.\n";
+    ::write(STDERR_FILENO, message, sizeof(message));
+
+    struct sigaction newSigaction = oldSigaction.load();
+    ::sigaction(signal, &newSigaction, NULL); // Install old sigaction instead
+}
 
 namespace elevation {
 namespace daemon {
@@ -16,15 +31,10 @@ void SignalHandling::installSignalHandlers() {
 void SignalHandling::installSignalHandlerFor_(int signal) {
     // From https://www.gnu.org/software/libc/manual/html_node/Sigaction-Function-Example.html
     struct sigaction newAction, oldAction;
-    newAction.sa_handler = &SignalHandling::signalHandler_;
-    ::sigaction(signal, &newAction, &oldAction);
-}
-
-void SignalHandling::signalHandler_(int signal) {
-    cleanupRequested.store(true);
-
-    // Don't reinstall the signal handler : if the code doesn't check the flag
-    // for a while, we want to be able to terminate it by sending the same signal.
+    newAction.sa_handler = &signalHandler_;
+    ::sigaction(signal, NULL, &oldAction); // Get sigaction that will be replaced
+    ::oldSigaction.store(oldAction);
+    ::sigaction(signal, &newAction, NULL); // Set new sigaction
 }
 
 } // namespace daemon
