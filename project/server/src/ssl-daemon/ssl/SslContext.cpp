@@ -2,8 +2,12 @@
 
 #include <openssl/err.h>
 
+#include <elevation/daemon/Config.hpp>
+
 namespace elevation {
 namespace daemon {
+
+SslContext SslContext::c_instance = SslContext(SSL_DAEMON_CERTIFICATE, SSL_DAEMON_PRIVATE_KEYFILE);
 
 SslContext::SslContext(const std::string& certificatePath, const std::string& privateKeyPath)
     : m_ctx(nullptr)
