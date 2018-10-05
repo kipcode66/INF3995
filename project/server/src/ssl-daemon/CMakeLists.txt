@@ -14,6 +14,7 @@ include_directories(                       # Equivalent to the -I flag in g++
     "${DEPS_DIR}/include"
     "${COMMON_INCLUDE_DIR}"
     "${SSL_DAEMON_GENERATED_INCLUDE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 link_directories("${DEPS_DIR}/lib")        # Equivalent to the -L flag in g++
 link_libraries(ssl)                        # Equivalent to the -l flag in g++
