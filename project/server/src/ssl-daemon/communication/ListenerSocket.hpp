@@ -12,9 +12,14 @@ public:
 
 public:
     ListenerSocket(uint16_t portNum);
+    ListenerSocket(const ListenerSocket&) = delete;
+    ListenerSocket(ListenerSocket&&);
     virtual ~ListenerSocket();
 
-    IpSocket&& accept();
+    ListenerSocket& operator=(const ListenerSocket&) = delete;
+    ListenerSocket& operator=(ListenerSocket&&);
+
+    IpSocket accept();
 };
 
 } // namespace daemon
