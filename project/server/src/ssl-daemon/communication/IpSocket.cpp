@@ -32,6 +32,12 @@ IpSocket::IpSocket(uint16_t portNum)
     m_fd = socket_fd;
 }
 
+IpSocket::IpSocket(uint16_t portNum, int fd)
+    : m_portNum(portNum)
+{
+    m_fd = fd;
+}
+
 IpSocket::~IpSocket() { }
 
 } // namespace daemon
