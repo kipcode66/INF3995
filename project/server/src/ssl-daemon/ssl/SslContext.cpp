@@ -1,4 +1,9 @@
+// Modified from OpenSSL Wiki : https://wiki.openssl.org/index.php/Simple_TLS_Server
+
 #include "SslContext.hpp"
+
+#include <cstring>
+#include <stdexcept>
 
 #include <openssl/err.h>
 
@@ -12,6 +17,7 @@ SslContext SslContext::c_instance = SslContext(SSL_DAEMON_CERTIFICATE, SSL_DAEMO
 SslContext::SslContext(const std::string& certificatePath, const std::string& privateKeyPath)
     : m_ctx(nullptr)
 {
+    initOpenSsl_();
     m_ctx = createContext_();
     configureContext_(certificatePath, privateKeyPath);
 }
@@ -23,6 +29,11 @@ SslContext::~SslContext()
     }
 }
 
+void initOpenSsl_() {
+    SSL_load_error_strings();	
+    OpenSSL_add_ssl_algorithms();
+}
+
 SSL_CTX* SslContext::createContext_() {
     const SSL_METHOD* method;
     SSL_CTX *ctx;
@@ -31,8 +42,7 @@ SSL_CTX* SslContext::createContext_() {
 
     ctx = SSL_CTX_new(method);
     if (!ctx) {
-        perror("Unable to create SSL context");
-        ERR_print_errors_fp(stderr);
+        throwSslError_();
     }
 
     return ctx;
@@ -42,12 +52,19 @@ void SslContext::configureContext_(const std::string& certificatePath, const std
     SSL_CTX_set_ecdh_auto(ctx, 1);
 
     if (SSL_CTX_use_certificate_file(m_ctx, certificatePath.c_str(), SSL_FILETYPE_PEM) <= 0) {
-        ERR_print_errors_fp(stderr);
+        throwSslError_();
     }
 
     if (SSL_CTX_use_PrivateKey_file(m_ctx, privateKeyPath.c_str(), SSL_FILETYPE_PEM) <= 0) {
-        ERR_print_errors_fp(stderr);
+        throwSslError_();
     }
+}
+
+void SslContext::throwSslError_() {
+    constexpr int ERROR_BUFFER_SIZE = 300;
+    char buf[ERROR_BUFFER_SIZE];
+    ERR_error_string_n(ERR_get_error(), buf, ERROR_BUFFER_SIZE);
+    throw std::runtime_error(buf);
 }
 
 SslSession SslContext::makeSession() const {

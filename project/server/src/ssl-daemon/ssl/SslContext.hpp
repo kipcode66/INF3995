@@ -20,8 +20,11 @@ protected:
     explicit SslContext(const std::string& certificatePath, const std::string& privateKeyPath);
     virtual ~SslContext();
 
+    void initOpenSsl_();
     SSL_CTX* createContext_();
     void configureContext_(const std::string& certificatePath, const std::string& privateKeyPath);
+
+    void throwSslError_();
 
 protected:
     SSL_CTX* m_ctx;
