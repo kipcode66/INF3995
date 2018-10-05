@@ -9,6 +9,11 @@ namespace daemon {
 class SignalHandling {
 public:
     static std::atomic<bool> cleanupRequested; ///< Whether A signal such as SIGINT requested a cleanup.
+    static void installSignalHandlers();
+
+private:
+    static void installSignalHandlerFor_(int signal);
+    static void signalHandler_(int signal);
 
 private:
     SignalHandling();
