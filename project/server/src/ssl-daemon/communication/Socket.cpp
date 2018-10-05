@@ -8,16 +8,28 @@
 
 namespace elevation {
 namespace daemon {
-    
+
 Socket::Socket()
     : m_fd(NO_FD)
 { }
+
+Socket::Socket(Socket&& that)
+    : m_fd(NO_FD)
+{
+    *this = std::move(that);
+}
 
 Socket::~Socket()
 {
     if (m_fd != NO_FD) {
         ::close(m_fd);
     }
+}
+
+Socket& Socket::operator=(Socket&& that) {
+    m_fd = that.m_fd;
+    that.m_fd = NO_FD;
+    return *this;
 }
 
 Socket& Socket::operator<<(const std::string& str) {

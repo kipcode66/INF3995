@@ -10,17 +10,16 @@ namespace daemon {
 class Socket {
 public:
     static constexpr int NO_FD = -1;
-    static constexpr int SOCKET_MAX_BACKLOG = 100;
 
 public:
     Socket();
     Socket(const Socket& other) = delete;
-    Socket(Socket&& other) = delete;
+    Socket(Socket&& other);
 
     virtual ~Socket() = 0;
 
     Socket& operator=(const Socket& other) = delete;
-    Socket& operator=(Socket&& other) = delete;
+    Socket& operator=(Socket&& other);
 
     Socket& operator<<(const std::string& str);
     Socket& operator>>(std::string& str);
