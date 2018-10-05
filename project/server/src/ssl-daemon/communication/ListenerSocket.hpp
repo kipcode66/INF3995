@@ -5,7 +5,7 @@
 
 namespace elevation {
 namespace daemon {
-    
+
 class ListenerSocket : public IpSocket {
 public:
     static constexpr int SOCKET_MAX_BACKLOG = 10; ///< @brief Max Number of pending connections before we drop the next ones.
@@ -14,7 +14,7 @@ public:
     ListenerSocket(uint16_t portNum);
     virtual ~ListenerSocket();
 
-    IpSocket accept();
+    IpSocket&& accept();
 };
 
 } // namespace daemon
