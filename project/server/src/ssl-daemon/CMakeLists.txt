@@ -18,6 +18,7 @@ include_directories(                       # Equivalent to the -I flag in g++
 )
 link_directories("${DEPS_DIR}/lib")        # Equivalent to the -L flag in g++
 link_libraries(ssl)                        # Equivalent to the -l flag in g++
+link_libraries(crypto)
 
 # Create targets
 add_executable(ssl-daemon     main.cpp "${SSL_DAEMON_HEADER_SOURCES}")
