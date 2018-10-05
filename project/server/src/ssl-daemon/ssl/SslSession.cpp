@@ -39,14 +39,7 @@ SslSession& SslSession::operator=(SslSession&& that) {
 }
 
 void SslSession::acceptNext(Socket& socket) {
-    struct sockaddr_in addr;
-    socklen_t len = sizeof(addr);
-    m_clientFd = ::accept(socket.getFd(), (struct sockaddr*)&addr, &len);
-    if (m_clientFd < 0) {
-        throw std::runtime_error(::strerror(errno));
-    }
-
-    SSL_set_fd(m_ssl, m_clientFd);
+    SSL_set_fd(m_ssl, socket.m_fd);
 
     int acceptStatus = SSL_accept(m_ssl);
     if (acceptStatus <= 0) {
