@@ -3,6 +3,8 @@
 
 #include <openssl/ssl.h>
 
+#include "communication/Socket.hpp"
+
 namespace elevation {
 namespace daemon {
 
@@ -11,10 +13,14 @@ public:
     explicit SslSession(SSL* ssl);
     virtual ~SslSession();
 
-    void acceptNext();
+    void acceptNext(Socket& socket);
+
+protected:
+    void throwSslError_() const;
 
 protected:
     SSL* const m_ssl;
+    int m_clientFd;
 };
 
 } // namespace daemon
