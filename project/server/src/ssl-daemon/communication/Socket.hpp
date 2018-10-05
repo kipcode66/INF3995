@@ -8,6 +8,8 @@ namespace elevation {
 namespace daemon {
 
 class Socket {
+    friend class SslSession; // Requires the file descriptor.
+
 public:
     static constexpr int NO_FD = -1;
 
