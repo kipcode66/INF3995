@@ -48,7 +48,7 @@ void ArgsParser::usage() const {
         std::endl <<
         "OPTIONS" << std::endl <<
         "    --help | -h     Print this help menu and exit." << std::endl <<
-        "    -l <portNum>    Port number to listen on. [Default: 443]" << std::endl << 
+        "    -l <portNum>    Port number to listen on. [Default: 443]" << std::endl <<
         "    -o <portNum>    Port number to send decyphered output to. [Default: 7777]" << std::endl;
 
 }

@@ -10,7 +10,7 @@
 
 namespace elevation {
 namespace daemon {
-    
+
 LocalSocket::LocalSocket(const std::string& socketFilename)
 {
     // Create socket

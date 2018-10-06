@@ -7,7 +7,7 @@
 
 namespace elevation {
 namespace daemon {
-    
+
 class IpSocket : public Socket {
 public:
     explicit IpSocket(uint16_t portNum); ///< @brief Creates a stream socket at given port.

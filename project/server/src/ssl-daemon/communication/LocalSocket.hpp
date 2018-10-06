@@ -7,7 +7,7 @@
 
 namespace elevation {
 namespace daemon {
-    
+
 class LocalSocket : public Socket {
 public:
     explicit LocalSocket(const std::string& socketFilename);

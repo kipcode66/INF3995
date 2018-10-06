@@ -29,7 +29,7 @@ macro(setupTests testSourceList includeDirList libraryList)
     find_package(Boost REQUIRED COMPONENTS unit_test_framework) # This finds where the Boost unit test libraries and
                                                                 # header files are, and sets some variables accoridngly.
     set(BOOST_INCLUDE_DIRS "${boost_installation_prefix}/include")
-    
+
     enable_testing()
     foreach(testFile IN LISTS "${testSourceList}")
         addAllTestsIn("${testFile}" "${includeDirList}" "${libraryList}")
