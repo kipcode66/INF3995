@@ -1,3 +1,6 @@
+#ifndef ARGS_PARSER_HPP
+#define ARGS_PARSER_HPP
+
 #include <inttypes.h>
 #include <vector>
 #include <string>
@@ -39,3 +42,5 @@ public:
 
 } // namespace daemon
 } // namespace elevation
+
+#endif // !ARGS_PARSER_HPP
