@@ -90,9 +90,12 @@ void SslContext::throwSslError_() {
     throw std::runtime_error(buf);
 }
 
-SslSession SslContext::makeSession() const {
+SslSession SslContext::acceptSession() {
+    IpSocket acceptedClient = m_socket.accept();
     SSL* ssl = SSL_new(m_ctx);
-    return SslSession(ssl);
+    SslSession session(ssl);
+    session.bindTo(acceptedClient);
+    return session;
 }
 
 } // namespace daemon

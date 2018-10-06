@@ -11,13 +11,12 @@ DaemonRunner::DaemonRunner(const ArgsParser::Config& config)
 { }
 
 void DaemonRunner::run() {
-    ListenerSocket listenerSocket(m_config.getListenPort());
+    SslContext::createInstance(m_config.getListenPort());
+    SslContext& ctx = SslContext::getInstance();
 
     while (true) {
-        SslContext& ctx = SslContext::getInstance();
-        IpSocket nextClient = listenerSocket.accept();
-        SslSession session = ctx.makeSession();
-        session.bindTo(nextClient);
+        SslSession session = ctx.acceptSession();
+        std::cout << "Accepted HTTPS connection." << std::endl;
         
         if (SignalHandling::cleanupRequested.load()) {
             throw std::runtime_error("SSL Daemon killed by signal.");

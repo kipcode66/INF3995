@@ -23,7 +23,7 @@ public:
     static SslContext& getInstance();
 
 public:
-    SslSession makeSession() const;
+    SslSession acceptSession();
 
     virtual ~SslContext();
 
