@@ -23,6 +23,7 @@ set(SSL_DAEMON_CPP_SOURCES
     communication/ListenerSocket.cpp
     ssl/SslContext.cpp
     ssl/SslSession.cpp
+    core/DaemonRunner.cpp
 )
 
 ###############################################################################
@@ -40,6 +41,7 @@ set(SSL_DAEMON_HEADER_SOURCES
     communication/ListenerSocket.hpp
     ssl/SslContext.hpp
     ssl/SslSession.hpp
+    core/DaemonRunner.hpp
 )
 
 makeAbsolute(SSL_DAEMON_CPP_SOURCES)
