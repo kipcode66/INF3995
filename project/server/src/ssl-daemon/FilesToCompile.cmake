@@ -21,6 +21,7 @@ set(SSL_DAEMON_CPP_SOURCES
     communication/LocalSocket.cpp
     communication/IpSocket.cpp
     communication/ListenerSocket.cpp
+    communication/ClientSocket.cpp
     ssl/SslContext.cpp
     ssl/SslSession.cpp
     core/DaemonRunner.cpp
@@ -39,6 +40,7 @@ set(SSL_DAEMON_HEADER_SOURCES
     communication/LocalSocket.hpp
     communication/IpSocket.hpp
     communication/ListenerSocket.hpp
+    communication/ClientSocket.hpp
     ssl/SslContext.hpp
     ssl/SslSession.hpp
     core/DaemonRunner.hpp
