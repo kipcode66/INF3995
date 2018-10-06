@@ -25,6 +25,8 @@ ClientSocket::ClientSocket(ClientSocket&& that)
     m_portNum = that.m_portNum;
 }
 
+ClientSocket::~ClientSocket() { }
+
 ClientSocket& ClientSocket::operator=(ClientSocket&& that) {
     IpSocket::operator=(std::move(that));
     m_portNum = that.m_portNum;
