@@ -10,6 +10,17 @@ namespace daemon {
 ListenerSocket::ListenerSocket(uint16_t portNum)
     : IpSocket(portNum)
 {
+    // Bind socket to address and port
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = htons(portNum);
+
+    if (::bind(m_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+        throw std::runtime_error(::strerror(errno));
+    }
+
+    // Make this socket wait for connections.
     if (::listen(m_fd, SOCKET_MAX_BACKLOG) < 0) {
         throw std::runtime_error(::strerror(errno));
     }

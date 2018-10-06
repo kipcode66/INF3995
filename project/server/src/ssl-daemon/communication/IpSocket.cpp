@@ -19,16 +19,6 @@ IpSocket::IpSocket(uint16_t portNum)
     if (socket_fd < 0) {
         throw std::runtime_error(::strerror(errno));
     }
-
-    // Bind to address and port
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(portNum);
-
-    if (::bind(socket_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        throw std::runtime_error(::strerror(errno));
-    }
     m_fd = socket_fd;
 }
 
