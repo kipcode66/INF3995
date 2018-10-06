@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 
 #include <cstring>
+#include <string>
 
 namespace elevation {
 namespace daemon {
@@ -46,6 +47,16 @@ void SslSession::bindTo(std::unique_ptr<IpSocket> socket) {
     if (acceptStatus <= 0) {
         throw std::runtime_error("Failed SSL_accept");
     }
+}
+
+void SslSession::write(const std::string& data) {
+    SSL_write(m_ssl, data.c_str(), data.size());
+}
+
+std::string SslSession::read() {
+    char buffer[BUFFER_READ_SIZE];
+    SSL_read(m_ssl, buffer, BUFFER_READ_SIZE);
+    return std::string(buffer);
 }
 
 } // namespace daemon
