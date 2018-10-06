@@ -8,23 +8,27 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import kotlinx.android.synthetic.main.activity_queue.*
 import kotlinx.android.synthetic.main.app_bar_queue.*
 import kotlinx.android.synthetic.main.content_queue.*
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 
 class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     val restService: RestRequestService by inject()
-    lateinit var snack: Snackbar;
+    lateinit var snack: Snackbar
+    lateinit var toast: Toast
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_queue)
         setSupportActionBar(toolbar)
         snack = Snackbar.make(nav_view, "Hello, World!", Snackbar.LENGTH_LONG)
+        toast = Toast.makeText(get(), "Slide show!", Toast.LENGTH_SHORT)
 
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -73,7 +77,7 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 restService.doRequest("Something xD")
             }
             R.id.nav_slideshow -> {
-
+                toast.show()
             }
             R.id.nav_manage -> {
 

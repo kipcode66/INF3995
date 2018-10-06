@@ -6,4 +6,7 @@ class TokenManagerService {
         // TODO Ensure that the token is still valid.
         return ""
     }
+
+    private fun fetchToken(): String {
+    }
 }
