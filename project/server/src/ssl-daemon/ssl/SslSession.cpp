@@ -46,10 +46,6 @@ void SslSession::bindTo(std::unique_ptr<IpSocket> socket) {
     if (acceptStatus <= 0) {
         throw std::runtime_error("Failed SSL_accept");
     }
-    else {
-        const char reply[] = "test\n";
-        SSL_write(m_ssl, reply, strlen(reply));
-    }
 }
 
 } // namespace daemon
