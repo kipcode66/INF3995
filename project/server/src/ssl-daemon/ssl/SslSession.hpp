@@ -2,16 +2,14 @@
 #define SSL_SSL_SESSION_HPP
 
 #include <openssl/ssl.h>
+#include <memory>
 
-#include "communication/Socket.hpp"
+#include "communication/IpSocket.hpp"
 
 namespace elevation {
 namespace daemon {
 
 class SslSession {
-public:
-    static constexpr int NO_FD = -1;
-
 public:
     explicit SslSession(SSL* ssl);
     SslSession(SslSession&& that);
@@ -22,11 +20,11 @@ public:
     SslSession& operator=(SslSession&&);
     SslSession& operator=(const SslSession&) = delete;
 
-    void bindTo(Socket& socket);
+    void bindTo(std::unique_ptr<IpSocket> socket);
 
 protected:
     SSL* m_ssl;
-    int m_clientFd;
+    std::unique_ptr<IpSocket> m_clientSocket;
 };
 
 } // namespace daemon

@@ -15,10 +15,14 @@ namespace daemon {
 
 SslSession::SslSession(SSL* ssl)
     : m_ssl(ssl)
+    , m_clientSocket(nullptr)
 { }
 
-SslSession::SslSession(SslSession&& that) {
-    *this = std::move(that);
+SslSession::SslSession(SslSession&& that)
+    : m_clientSocket(std::move(that.m_clientSocket))
+{
+    m_ssl = that.m_ssl;
+    that.m_ssl = nullptr;
 }
 
 SslSession::~SslSession()
@@ -26,20 +30,17 @@ SslSession::~SslSession()
     if (m_ssl != nullptr) {
         SSL_free(m_ssl);
     }
-    if (m_clientFd != NO_FD) {
-        ::close(m_clientFd);
-    }
 }
 
 SslSession& SslSession::operator=(SslSession&& that) {
     m_ssl = that.m_ssl;
-    m_clientFd = that.m_clientFd;
+    m_clientSocket = std::move(that.m_clientSocket);
     that.m_ssl = nullptr;
-    that.m_clientFd = NO_FD;
 }
 
-void SslSession::bindTo(Socket& socket) {
-    SSL_set_fd(m_ssl, socket.m_fd);
+void SslSession::bindTo(std::unique_ptr<IpSocket> socket) {
+    m_clientSocket = std::move(socket);
+    SSL_set_fd(m_ssl, m_clientSocket->m_fd);
 
     int acceptStatus = SSL_accept(m_ssl);
     if (acceptStatus <= 0) {
