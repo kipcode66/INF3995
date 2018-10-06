@@ -12,10 +12,32 @@
 namespace elevation {
 namespace daemon {
 
-SslContext SslContext::c_instance = SslContext(SSL_DAEMON_CERTIFICATE, SSL_DAEMON_PRIVATE_KEYFILE);
+std::unique_ptr<SslContext> SslContext::c_instance = nullptr;
 
-SslContext::SslContext(const std::string& certificatePath, const std::string& privateKeyPath)
-    : m_ctx(nullptr)
+void SslContext::createInstance(uint16_t portNum) {
+    if (&c_instance != nullptr) {
+        ListenerSocket socket(portNum);
+        c_instance = std::unique_ptr<SslContext>(
+            new SslContext(std::move(socket), SSL_DAEMON_CERTIFICATE, SSL_DAEMON_PRIVATE_KEYFILE)
+        );
+    }
+    else {
+        throw std::logic_error("Cannot create SslContext instance : already exists.");
+    }
+}
+
+SslContext& SslContext::getInstance() {
+    if (&c_instance != nullptr) {
+        return *c_instance;
+    }
+    else {
+        throw std::logic_error("Cannot get SslContext instance : not yet created.");
+    }
+}
+
+SslContext::SslContext(ListenerSocket socket, const std::string& certificatePath, const std::string& privateKeyPath)
+    : m_socket(std::move(socket))
+    , m_ctx(nullptr)
 {
     initOpenSsl_();
     m_ctx = createContext_();
@@ -66,10 +88,6 @@ void SslContext::throwSslError_() {
     char buf[ERROR_BUFFER_SIZE];
     ERR_error_string_n(ERR_get_error(), buf, ERROR_BUFFER_SIZE);
     throw std::runtime_error(buf);
-}
-
-SslContext& SslContext::getInstance() {
-    return c_instance;
 }
 
 SslSession SslContext::makeSession() const {

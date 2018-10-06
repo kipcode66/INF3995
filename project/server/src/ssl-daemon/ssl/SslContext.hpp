@@ -6,19 +6,29 @@
 #include <openssl/ssl.h>
 
 #include <string>
+#include <memory>
+
+#include "communication/ListenerSocket.hpp"
 
 namespace elevation {
 namespace daemon {
 
 class SslContext {
 public:
+    /**
+     * @brief Creates and configures the singleton instance of SslContext.
+     * @param[in] portNum The number of the port that will accept SSL connections.
+     */
+    static void createInstance(uint16_t portNum);
     static SslContext& getInstance();
 
+public:
     SslSession makeSession() const;
 
-protected:
-    explicit SslContext(const std::string& certificatePath, const std::string& privateKeyPath);
     virtual ~SslContext();
+
+protected:
+    explicit SslContext(ListenerSocket socket, const std::string& certificatePath, const std::string& privateKeyPath);
 
     void initOpenSsl_();
     SSL_CTX* createContext_();
@@ -28,8 +38,10 @@ protected:
 
 protected:
     SSL_CTX* m_ctx;
+    ListenerSocket m_socket;
 
-    static SslContext c_instance;
+protected:
+    static std::unique_ptr<SslContext> c_instance;
 };
 
 } // namespace daemon
