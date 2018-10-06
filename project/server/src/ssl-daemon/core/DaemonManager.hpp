@@ -15,7 +15,7 @@ protected:
     const ArgsParser::Config m_config;
 };
 
-}
-}
+} // namespace daemon
+} // namespace elevation
 
 #endif // !CORE_DAEMON_MANAGER

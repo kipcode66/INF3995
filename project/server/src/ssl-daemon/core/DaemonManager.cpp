@@ -35,5 +35,5 @@ void DaemonManager::run() {
     }
 }
 
-}
-}
+} // namespace daemon
+} // namespace elevation
