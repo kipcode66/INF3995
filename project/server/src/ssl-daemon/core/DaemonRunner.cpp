@@ -1,6 +1,7 @@
 #include "DaemonRunner.hpp"
 #include "signal/SignalHandling.hpp"
 #include "communication/ListenerSocket.hpp"
+#include "communication/ClientSocket.hpp"
 #include "ssl/SslContext.hpp"
 
 namespace elevation {
@@ -17,6 +18,7 @@ void DaemonRunner::run() {
     while (true) {
         SslSession session = ctx.acceptSession();
         std::cout << "Accepted HTTPS connection." << std::endl;
+        ClientSocket httpServerConnection(m_config.getOutputPort());
         
         if (SignalHandling::cleanupRequested.load()) {
             throw std::runtime_error("SSL Daemon killed by signal.");
