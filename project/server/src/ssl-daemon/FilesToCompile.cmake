@@ -23,6 +23,7 @@ set(SSL_DAEMON_CPP_SOURCES
     communication/ClientSocket.cpp
     ssl/SslContext.cpp
     ssl/SslSession.cpp
+    core/DaemonRunner.cpp
     core/DaemonManager.cpp
 )
 
@@ -41,6 +42,7 @@ set(SSL_DAEMON_HEADER_SOURCES
     communication/ClientSocket.hpp
     ssl/SslContext.hpp
     ssl/SslSession.hpp
+    core/DaemonRunner.hpp
     core/DaemonManager.hpp
 )
 
