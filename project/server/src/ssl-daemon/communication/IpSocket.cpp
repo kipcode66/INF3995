@@ -29,15 +29,14 @@ IpSocket::IpSocket(uint16_t portNum, int fd)
 }
 
 IpSocket::IpSocket(IpSocket&& that)
-    : m_portNum(that.m_portNum)
-{
-    *this = std::move(that);
-}
+    : Socket(std::move(that))
+    , m_portNum(that.m_portNum)
+{ }
 
 IpSocket::~IpSocket() { }
 
 IpSocket& IpSocket::operator=(IpSocket&& that) {
-    (Socket&)*this = (Socket&&)std::move(that);
+    Socket::operator=(std::move(that));
     m_portNum = that.m_portNum;
     return *this;
 }

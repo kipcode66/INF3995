@@ -16,7 +16,8 @@ Socket::Socket()
 Socket::Socket(Socket&& that)
     : m_fd(NO_FD)
 {
-    *this = std::move(that);
+    m_fd = that.m_fd;
+    that.m_fd = NO_FD;
 }
 
 Socket::~Socket()

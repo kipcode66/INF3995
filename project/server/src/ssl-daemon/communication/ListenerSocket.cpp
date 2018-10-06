@@ -28,15 +28,13 @@ ListenerSocket::ListenerSocket(uint16_t portNum)
 
 ListenerSocket::ListenerSocket(ListenerSocket&& that)
     : IpSocket(std::move(that))
-{
-    *this = std::move(that);
-}
+{ }
 
 ListenerSocket::~ListenerSocket()
 { }
 
 ListenerSocket& ListenerSocket::operator=(ListenerSocket&& that) {
-    m_portNum = that.m_portNum;
+    IpSocket::operator=(std::move(that));
 }
 
 IpSocket ListenerSocket::accept() {
