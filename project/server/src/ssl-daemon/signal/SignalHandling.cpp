@@ -10,8 +10,9 @@ static std::atomic<struct sigaction> oldSigaction;
 extern "C" void signalHandler_(int signal) {
     elevation::daemon::SignalHandling::cleanupRequested.store(true);
 
-    static char message[] = "Caught signal. The SSL Daemon will stop on the next HTTPS connection, or if "
-                            "sending the same signal another time.\n";
+    static char message[] = "Caught signal.\nIf the SSL Daemon does not stop immediately, "
+                            "it will on the next HTTPS connection, or if sending the same "
+                            "signal another time.\n";
     ::write(STDERR_FILENO, message, sizeof(message));
 
     struct sigaction newSigaction = oldSigaction.load();
