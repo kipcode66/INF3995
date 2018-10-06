@@ -14,13 +14,9 @@ public:
     ~DaemonRunner();
 
 protected:
-    void reader_();
-    void writer_();
-
-protected:
-    SslSession m_session;
-    std::thread m_readerThread;
-    std::thread m_writerThread;
+    void runner_(SslSession clientSession);
+    void reader_(SslSession& clientSession);
+    void writer_(SslSession& clientSession);
 };
 
 } // namespace daemon
