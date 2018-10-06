@@ -1,5 +1,5 @@
 ###############################################################################
-#                   CMAKE SCRIPT SPECIFIC TO THE HTTP SERVER                  #
+#                    CMAKE SCRIPT SPECIFIC TO THE SSL DAEMON                  #
 ###############################################################################
 
 # This CMake script contains the files that will be compiled.
@@ -14,9 +14,8 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although not recommended)
-set(HTTP_SERVER_CPP_SOURCES
-    http/RequestHandler.cpp
-    
+set(SSL_DAEMON_CPP_SOURCES
+    ArgsParser.cpp
 )
 
 ###############################################################################
@@ -25,9 +24,9 @@ set(HTTP_SERVER_CPP_SOURCES
 
 # All .h, .hpp, .hh files
 # Use quotes "" if a file contains a space (although not recommended)
-set(HTTP_SERVER_HEADER_SOURCES
-    http/RequestHandler.hpp
+set(SSL_DAEMON_HEADER_SOURCES
+    ArgsParser.hpp
 )
 
-makeAbsolute(HTTP_SERVER_CPP_SOURCES)
-makeAbsolute(HTTP_SERVER_HEADER_SOURCES)
+makeAbsolute(SSL_DAEMON_CPP_SOURCES)
+makeAbsolute(SSL_DAEMON_HEADER_SOURCES)
