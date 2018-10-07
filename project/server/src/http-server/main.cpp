@@ -1,7 +1,8 @@
 #include <iostream>
 #include <inttypes.h>
 
-#include "http/RequestHandler.hpp"
+//#include "http/RequestHandler.hpp"
+#include "http/RestApi.hpp"
 
 void usage() {
     std::cerr << std::endl << "Usage: tp3 [portNum]" << std::endl <<
@@ -42,15 +43,18 @@ int main(int argc, char** argv) {
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
 
-        auto opts = Pistache::Http::Endpoint::options().threads(1).maxPayload(MAX_PAYLOAD_SIZE);
-        Pistache::Http::Endpoint server(addr);
-        server.init(opts);
+//        auto opts = Pistache::Http::Endpoint::options().threads(1).maxPayload(MAX_PAYLOAD_SIZE);
+//        Pistache::Http::Endpoint server(addr);
+//        server.init(opts);
 
-        auto requestHandler = std::make_shared<elevation::http::RequestHandler>();
-        server.setHandler(requestHandler);
+//        auto requestHandler = std::make_shared<elevation::http::RequestHandler>();
+//        server.setHandler(requestHandler);
 
+        RestApi api(addr);
+        api.init();
+        api.start();
         std::cout << "Server is about to start." << std::endl;
-        server.serve();
+//        server.serve();
     }
     catch (std::exception& e) {
         std::cerr << "Server crashed with C++ exception: \"" << e.what() << "\"" << std::endl;
