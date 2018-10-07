@@ -17,6 +17,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 set(SSL_DAEMON_CPP_SOURCES
     ArgsParser.cpp
     signal/SignalHandling.cpp
+    communication/SocketClosedException.cpp
     communication/Socket.cpp
     communication/IpSocket.cpp
     communication/ListenerSocket.cpp
@@ -36,6 +37,7 @@ set(SSL_DAEMON_CPP_SOURCES
 set(SSL_DAEMON_HEADER_SOURCES
     ArgsParser.hpp
     signal/SignalHandling.hpp
+    communication/SocketClosedException.hpp
     communication/Socket.hpp
     communication/IpSocket.hpp
     communication/ListenerSocket.hpp
