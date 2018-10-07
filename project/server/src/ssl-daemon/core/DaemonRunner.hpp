@@ -2,6 +2,7 @@
 #define CORE_DAEMON_RUNNER_HPP
 
 #include "ssl/SslSession.hpp"
+#include "communication/ClientSocket.hpp"
 
 #include <thread>
 
@@ -10,13 +11,13 @@ namespace daemon {
 
 class DaemonRunner {
 public:
-    DaemonRunner(SslSession session);
+    DaemonRunner(SslSession clientSession, ClientSocket httpServerSocket);
     ~DaemonRunner();
 
 protected:
-    void runner_(SslSession clientSession);
-    void reader_(SslSession& clientSession);
-    void writer_(SslSession& clientSession);
+    void runner_(SslSession clientSession, ClientSocket httpServerSocket);
+    void reader_(SslSession& clientSession, ClientSocket& httpServerSocket);
+    void writer_(SslSession& clientSession, ClientSocket& httpServerSocket);
 };
 
 } // namespace daemon

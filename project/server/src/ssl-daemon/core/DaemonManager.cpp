@@ -19,9 +19,9 @@ void DaemonManager::run() {
     while (true) {
         SslSession session = ctx.acceptSession();
         std::cout << "Accepted HTTPS connection." << std::endl;
-        ClientSocket httpServerConnection(m_config.getOutputPort());
+        ClientSocket httpServerSocket(m_config.getOutputPort());
 
-        DaemonRunner runner(std::move(session));
+        DaemonRunner runner(std::move(session), std::move(httpServerSocket));
 
         if (SignalHandling::cleanupRequested.load()) {
             throw std::runtime_error("SSL Daemon killed by signal.");
