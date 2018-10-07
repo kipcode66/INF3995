@@ -7,6 +7,8 @@
 #include <openssl/err.h>
 #include <vector>
 
+#include "SocketClosedException.hpp"
+
 namespace elevation {
 namespace daemon {
 
@@ -83,7 +85,7 @@ std::string Socket::read(std::size_t dataSize) {
         throw std::runtime_error(::strerror(errno));
     }
     else if (readAmount == 0) {
-        throw std::runtime_error("Socket closed");
+        throw SocketClosedException();
     }
     data[readAmount] = '\0';
     return std::string(&data[0]);
@@ -96,7 +98,7 @@ char Socket::readCharacter_() {
         throw std::runtime_error(::strerror(errno));
     }
     else if (readAmount == 0) {
-        throw std::runtime_error("Socket closed");
+        throw SocketClosedException();
     }
     return nextCharacter;
 }
