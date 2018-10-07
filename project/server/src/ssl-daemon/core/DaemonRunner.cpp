@@ -24,7 +24,8 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
 }
 
 void DaemonRunner::reader_(SslSession& clientSession, ClientSocket& httpServerSocket) {
-    std::cout << clientSession.read() << std::endl;
+    std::string gottenData = clientSession.read();
+    httpServerSocket << gottenData;
 }
 
 void DaemonRunner::writer_(SslSession& clientSession, ClientSocket& httpServerSocket) {
