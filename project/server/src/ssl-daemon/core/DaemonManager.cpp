@@ -3,6 +3,7 @@
 #include "communication/ListenerSocket.hpp"
 #include "communication/ClientSocket.hpp"
 #include "ssl/SslContext.hpp"
+#include "core/DaemonRunner.hpp"
 
 namespace elevation {
 namespace daemon {
@@ -20,14 +21,7 @@ void DaemonManager::run() {
         std::cout << "Accepted HTTPS connection." << std::endl;
         ClientSocket httpServerConnection(m_config.getOutputPort());
 
-        session.write(
-            "HTTP/1.1 404 Not Found\n"
-            "Connection: Keep-Alive\n"
-            "Content-Length: 13\n"
-            "\n"
-            "404 not found");
-        
-        std::cout << session.read() << std::endl;
+        DaemonRunner runner(std::move(session));
 
         if (SignalHandling::cleanupRequested.load()) {
             throw std::runtime_error("SSL Daemon killed by signal.");
