@@ -5,6 +5,7 @@
 #include <cstring>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <vector>
 
 namespace elevation {
 namespace daemon {
@@ -58,6 +59,46 @@ Socket& Socket::operator>>(std::string& str) {
         throw std::runtime_error(::strerror(errno));
     }
     return *this;
+}
+
+std::string Socket::readLine() {
+    constexpr const char LINE_DELIMITER = '\n'; // The server normally sends \r\n, but only the \n interests us.
+    std::ostringstream dataStream;
+
+    char nextCharacter = readCharacter_();
+    while (nextCharacter != LINE_DELIMITER) {
+        dataStream << nextCharacter;
+        std::cout << "Got char " << nextCharacter << std::endl;
+        nextCharacter = readCharacter_();
+    }
+    dataStream << nextCharacter;
+
+    return dataStream.str();
+}
+
+std::string Socket::read(std::size_t dataSize) {
+    std::vector<char> data(dataSize + 1);
+    int readAmount = ::read(m_fd, &data[0], dataSize);
+    if (readAmount < 0) {
+        throw std::runtime_error(::strerror(errno));
+    }
+    else if (readAmount == 0) {
+        throw std::runtime_error("Socket closed");
+    }
+    data[readAmount] = '\0';
+    return std::string(&data[0]);
+}
+
+char Socket::readCharacter_() {
+    char nextCharacter;
+    int readAmount = ::read(m_fd, &nextCharacter, sizeof(nextCharacter));
+    if (readAmount < 0) {
+        throw std::runtime_error(::strerror(errno));
+    }
+    else if (readAmount == 0) {
+        throw std::runtime_error("Socket closed");
+    }
+    return nextCharacter;
 }
 
 } // namespace daemon

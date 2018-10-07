@@ -25,10 +25,15 @@ public:
 
     Socket& operator<<(const std::string& str);
     Socket& operator>>(std::string& str);
+    std::string readLine();
+    std::string read(std::size_t dataLength);
 
     inline int getFd() const {
         return m_fd;
     }
+
+protected:
+    char readCharacter_();
 
 protected:
     int m_fd;
