@@ -1,6 +1,9 @@
 #include "DaemonRunner.hpp"
 
 #include <iostream>
+#include <regex>
+
+#include "communication/SocketClosedException.hpp"
 
 namespace elevation {
 namespace daemon {
@@ -14,8 +17,8 @@ DaemonRunner::DaemonRunner(SslSession clientSession, ClientSocket httpServerSock
 DaemonRunner::~DaemonRunner() { }
 
 void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSocket) {
-    // This thread keeps the clientSession. When this thread ends, the clientSession
-    // is closed by the SslSession destructor.
+    // This thread keeps the clientSession and the socket. When this thread ends, these
+    // are closed by their respective destructors.
 
     std::thread readerThread(&DaemonRunner::reader_, this, std::ref(clientSession), std::ref(httpServerSocket));
     std::thread writerThread(&DaemonRunner::writer_, this, std::ref(clientSession), std::ref(httpServerSocket));
@@ -24,8 +27,19 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
 }
 
 void DaemonRunner::reader_(SslSession& clientSession, ClientSocket& httpServerSocket) {
-    std::string gottenData = clientSession.read();
-    httpServerSocket << gottenData;
+    try {
+        std::string data = clientSession.read();
+        httpServerSocket << data;
+    }
+    catch (const SocketClosedException& e) {
+        std::cerr << "Reader thread : Socket closed." << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "C++ exception thrown in reader thread : " << e.what() << std::endl;
+    }
+    catch (...) {
+        std::cerr << "Unknown exception thrown in reader thread." << std::endl;
+    }
 }
 
 void DaemonRunner::writer_(SslSession& clientSession, ClientSocket& httpServerSocket) {
