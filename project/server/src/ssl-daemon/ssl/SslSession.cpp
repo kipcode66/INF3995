@@ -11,6 +11,9 @@
 #include <cstring>
 #include <string>
 
+#include "communication/SocketClosedException.hpp"
+#include "elevation/daemon/Config.hpp"
+
 namespace elevation {
 namespace daemon {
 
@@ -50,13 +53,58 @@ void SslSession::bindTo(std::unique_ptr<IpSocket> socket) {
 }
 
 void SslSession::write(const std::string& data) {
-    SSL_write(m_ssl, data.c_str(), data.size());
+    int returnCode = ::SSL_write(m_ssl, data.c_str(), data.size());
+    handleSslErrorsIfAny_(returnCode);
 }
 
 std::string SslSession::read() {
-    char buffer[BUFFER_READ_SIZE];
-    SSL_read(m_ssl, buffer, BUFFER_READ_SIZE);
+    char buffer[BUFFER_READ_SIZE + 1];
+    int readSize = ::SSL_read(m_ssl, buffer, BUFFER_READ_SIZE);
+    handleSslErrorsIfAny_(readSize);
+    buffer[readSize] = '\0';
     return std::string(buffer);
+}
+
+void SslSession::handleSslErrorsIfAny_(int sslReturnCode) {
+    if (sslReturnCode <= 0) {
+        int errorNumber = ::SSL_get_error(m_ssl, sslReturnCode);
+
+        std::string failureReason;
+        switch(errorNumber) {
+            case SSL_ERROR_ZERO_RETURN: {
+                throw SocketClosedException();
+                break;
+            }
+            case SSL_ERROR_WANT_READ: {
+                failureReason = "No data to read";
+                break;
+            }
+            case SSL_ERROR_WANT_WRITE: {
+                failureReason = "No data to write";
+                break;
+            }
+            case SSL_ERROR_WANT_CONNECT: // fallthrough
+            case SSL_ERROR_WANT_ACCEPT: {
+                failureReason = "Connection not yet established";
+                break;
+            }
+            case SSL_ERROR_SYSCALL: {
+                failureReason = std::string("SSL system call failure. This can be caused by a distrusted "
+                                            "certificate, in which case add the \"") + SSL_DAEMON_ISSUER_CERTIFICATE +
+                                            "\" file as a trusted authority.";
+            }
+            case SSL_ERROR_SSL: {
+                failureReason = std::string("SSL messed up : ") + ::ERR_error_string(::ERR_get_error(), NULL);
+                break;
+            }
+            default: {
+                failureReason = "Non-trivial";
+                break;
+            }
+        }
+
+        throw std::runtime_error("SSL read/write error : " + failureReason);
+    }
 }
 
 } // namespace daemon

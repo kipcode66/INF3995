@@ -30,6 +30,9 @@ public:
     std::string read();
 
 protected:
+    void handleSslErrorsIfAny_(int sslReturnCode);
+
+protected:
     SSL* m_ssl;
     std::unique_ptr<IpSocket> m_clientSocket;
 };
