@@ -9,6 +9,7 @@
 
 set(SSL_DAEMON_CERTIFICATE "${SSL_RESOURCE_DIR}/elevd.crt")
 set(SSL_DAEMON_PRIVATE_KEYFILE "${SSL_RESOURCE_DIR}/elevd-privkey.key")
+set(SSL_DAEMON_ISSUER_CERTIFICATE "${SSL_RESOURCE_DIR}/CA/ca.crt")
 
 ###############################################################################
 #                        GENERATE FILES FROM TEMPLATES                        #

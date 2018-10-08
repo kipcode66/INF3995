@@ -8,6 +8,7 @@ namespace daemon {
 
 static constexpr const char* SSL_DAEMON_CERTIFICATE = "@SSL_DAEMON_CERTIFICATE@";
 static constexpr const char* SSL_DAEMON_PRIVATE_KEYFILE = "@SSL_DAEMON_PRIVATE_KEYFILE@";
+static constexpr const char* SSL_DAEMON_ISSUER_CERTIFICATE = "@SSL_DAEMON_ISSUER_CERTIFICATE@";
 
 } // namespace daemon
 } // namespace elevation
