@@ -7,8 +7,8 @@
 # the CMake variable MY_VAR to "hello", then the generated file will contain
 # "hello" where there was the @MY_VAR@ in the template file.
 
-set(SSL_DAEMON_CERTIFICATE "${SSL_RESOURCE_DIR}/elevd-cert.pem")
-set(SSL_DAEMON_PRIVATE_KEYFILE "${SSL_RESOURCE_DIR}/elevd-pkey.pem")
+set(SSL_DAEMON_CERTIFICATE "${SSL_RESOURCE_DIR}/elevd.crt")
+set(SSL_DAEMON_PRIVATE_KEYFILE "${SSL_RESOURCE_DIR}/elevd-privkey.key")
 
 ###############################################################################
 #                        GENERATE FILES FROM TEMPLATES                        #

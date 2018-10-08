@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+
+function message() {
+    echo
+    tput setaf 10
+    echo "$@"
+    tput sgr0
+    echo
+}
+
+SSL_RESOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+cd "${SSL_RESOURCE_DIR}"
+message "Cleaning old certificate data..."
+find "${SSL_RESOURCE_DIR}" -maxdepth 1 -type f -not -perm -g+x | xargs rm -rf # Remove all files directly in this script's directory, except executable files.
+
+# TAKEN FROM : https://gist.github.com/Soarez/9688998
+
+message "Generating subject's private/public keys..."
+openssl genrsa -out elevd-privkey.key 2048
+openssl rsa -in elevd-privkey.key -pubout -out elevd.pubkey
+
+message "Generating subject's certificate request..."
+echo '# The main section is named req because the command we are using is req
+# (openssl req ...)
+[ req ]
+# This specifies the default key size in bits. If not specified then 512 is
+# used. It is used if the -new option is used. It can be overridden by using
+# the -newkey option. 
+default_bits = 2048
+
+# This is the default filename to write a private key to. If not specified the
+# key is written to standard output. This can be overridden by the -keyout
+# option.
+default_keyfile = elevd-privkey.key
+
+# If this is set to no then if a private key is generated it is not encrypted.
+# This is equivalent to the -nodes command line option. For compatibility
+# encrypt_rsa_key is an equivalent option. 
+encrypt_key = no
+
+# This option specifies the digest algorithm to use. Possible values include
+# md5 sha1 mdc2. If not present then MD5 is used. This option can be overridden
+# on the command line.
+default_md = sha512
+
+# if set to the value no this disables prompting of certificate fields and just
+# takes values from the config file directly. It also changes the expected
+# format of the distinguished_name and attributes sections.
+prompt = no
+
+# if set to the value yes then field values to be interpreted as UTF8 strings,
+# by default they are interpreted as ASCII. This means that the field values,
+# whether prompted from a terminal or obtained from a configuration file, must
+# be valid UTF8 strings.
+utf8 = yes
+
+# This specifies the section containing the distinguished name fields to
+# prompt for when generating a certificate or certificate request.
+distinguished_name = my_req_distinguished_name
+
+# this specifies the configuration file section containing a list of extensions
+# to add to the certificate request. It can be overridden by the -reqexts
+# command line switch. See the x509v3_config(5) manual page for details of the
+# extension section format.
+req_extensions = my_extensions
+
+[ my_req_distinguished_name ]
+C = CA
+ST = Quebec
+L = Montreal
+O  = Café-Bistro Élévation, Inc.
+CN = 127.0.0.1
+
+[ my_extensions ]
+basicConstraints=CA:FALSE
+subjectAltName=@my_subject_alt_names
+subjectKeyIdentifier = hash
+
+[ my_subject_alt_names ]
+DNS.1 = localhost
+DNS.2 = *.localhost
+IP.1 = 127.0.0.1
+IP.2 = 132.207.89.10
+IP.3 = 132.207.89.11' > elevd-csr.conf
+
+openssl req -new -config elevd-csr.conf -out elevd.csr
+
+# Certificate signature
+
+if [ ! -d CA ]; then
+    message "Generating CA issuer's private key..."
+    openssl genrsa -out CA/ca.key 2048
+
+    message "Generating CA issuer's certificate..."
+    echo $'CA\nQuebec\nMontreal\nTeam One, Inc.\nServer Dept.\n\n\n' | openssl req -new -x509 -key CA/ca.key -out CA/ca.crt
+    echo
+else
+    message "Skipping generation of CA issuer : already exists."
+fi
+
+message "Making CA issuer sign the subject's certificate..."
+echo '# we use "ca" as the default section because we are usign the ca command
+[ ca ]
+default_ca = my_ca
+
+[ my_ca ]
+#  a text file containing the next serial number to use in hex. Mandatory.
+#  This file must be present and contain a valid serial number.
+serial = ./CA/serial
+
+# the text database file to use. Mandatory. This file must be present though
+# initially it will be empty.
+database = ./CA/index.txt
+
+# specifies the directory where new certificates will be placed. Mandatory.
+new_certs_dir = ./CA/newcerts
+
+# the file containing the CA certificate. Mandatory
+certificate = ./CA/ca.crt
+
+# the file contaning the CA private key. Mandatory
+private_key = ./CA/ca.key
+
+# the message digest algorithm. Remember to not use MD5
+default_md = sha512
+
+# for how many days will the signed certificate be valid
+default_days = 365
+
+# a section with a set of variables corresponding to DN fields
+policy = my_policy
+
+[ my_policy ]
+# if the value is "match" then the field value must match the same field in the
+# CA certificate. If the value is "supplied" then it must be present.
+# Optional means it may be present. Any fields not mentioned are silently
+# deleted.
+countryName = supplied
+stateOrProvinceName = supplied
+organizationName = supplied
+commonName = supplied
+organizationalUnitName = optional
+commonName = supplied' > CA/ca.conf
+
+echo 'basicConstraints=CA:FALSE
+subjectAltName=@my_subject_alt_names
+subjectKeyIdentifier = hash
+
+[ my_subject_alt_names ]
+DNS.1 = localhost
+DNS.2 = *.localhost
+IP.1 = 127.0.0.1
+IP.2 = 132.207.89.10
+IP.3 = 132.207.89.11' > elevd.extensions.conf
+
+rm -rf CA/newcerts
+mkdir CA/newcerts
+>CA/index.txt
+>CA/index.txt.attr
+echo '01' > CA/serial
+
+yes | openssl ca -config CA/ca.conf -out elevd.crt -extfile elevd.extensions.conf -in elevd.csr
+
+message "Done."
