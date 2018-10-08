@@ -48,25 +48,21 @@ void RestApi::createDescription() {
     usagerPath
             .route(desc.get("/identification"))
             .bind(&RestApi::getIdentification, this)
-            .response(Http::Code::Ok, "")
             .hide();
 
     usagerPath
             .route(desc.get("/file/:id"))
             .bind(&RestApi::getFileList, this)
-            .response(Http::Code::Ok, "")
             .hide();
 
     usagerPath
             .route(desc.post("/chanson/:id"))
             .bind(&RestApi::postFile, this)
-            .response(Http::Code::Ok, "")
             .hide();
 
     usagerPath
             .route(desc.del("/chanson/:id/:no"))
             .bind(&RestApi::deleteFile, this)
-            .response(Http::Code::Ok, "")
             .hide();
 }
 
@@ -76,6 +72,7 @@ void RestApi::getIdentification(const Rest::Request& request, Http::ResponseWrit
 }
 
 void RestApi::getFileList(const Rest::Request& request, Http::ResponseWriter response) {
+    // querying a param from the request object, by name
     std::string param = request.param(":id").as<std::string>();
     response.send(Http::Code::Ok, "getFileList, param is : " + param);
     printf("getFileList function called, param is %s\n", param.c_str());
