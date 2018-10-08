@@ -70,7 +70,6 @@ std::string Socket::readLine() {
     char nextCharacter = readCharacter_();
     while (nextCharacter != LINE_DELIMITER) {
         dataStream << nextCharacter;
-        std::cout << "Got char " << nextCharacter << std::endl;
         nextCharacter = readCharacter_();
     }
     dataStream << nextCharacter;
