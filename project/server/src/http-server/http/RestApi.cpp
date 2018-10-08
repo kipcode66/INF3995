@@ -64,7 +64,7 @@ void RestApi::createDescription() {
             .hide();
 
     usagerPath
-            .route(desc.del("/chanson/:id"))
+            .route(desc.del("/chanson/:id/:no"))
             .bind(&RestApi::deleteFile, this)
             .response(Http::Code::Ok, "")
             .hide();

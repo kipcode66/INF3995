@@ -1,7 +1,6 @@
 #include <iostream>
 #include <inttypes.h>
 
-//#include "http/RequestHandler.hpp"
 #include "http/RestApi.hpp"
 
 void usage() {
