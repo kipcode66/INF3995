@@ -1,16 +1,11 @@
 package ca.polymtl.inf3990_01.client.controller.event
 
 import ca.polymtl.inf3990_01.client.utils.SingletonHolderNoArg
-import java.util.*
-import kotlin.collections.HashMap
 
 class EventManager private constructor() {
-    init {
-    }
+    private val listeners: MutableMap<Class<out Event>, MutableList<(Event) -> Unit>> = mutableMapOf()
 
-    private val listeners: MutableMap<Class<out Event>, MutableList<(Event) -> Unit>> = HashMap()
-
-    fun <T: Event> addEventListener(event: Class<out T>, listener: (T) -> Unit) {
+    fun <T: Event, L: (T) -> Unit> addEventListener(event: Class<out T>, listener: L) {
         synchronized(listeners) {
             if (listeners[event] == null) {
                 listeners[event] = mutableListOf()
@@ -19,7 +14,13 @@ class EventManager private constructor() {
         }
     }
 
-    fun <T : Event> dispatchEvent(evt: T) {
+    fun <T: Event, L: (T) -> Unit> removeEventListener(event: Class<out T>, listener: L) {
+        synchronized(listeners) {
+            listeners[event]?.remove(listener as (Event) -> Unit)
+        }
+    }
+
+    fun <T: Event> dispatchEvent(evt: T) {
         synchronized(listeners) {
             listeners[evt.javaClass]?.forEach { it(evt) }
         }

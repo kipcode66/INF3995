@@ -11,13 +11,12 @@ import org.koin.dsl.module.module
 class App: Application() {
     override fun onCreate() {
         super.onCreate()
-        var context: Context = this
         startKoin(this, listOf(module {
             appModule
             controllerModule
             presentationModule
             modelModule
-            single {context}
+            single<Context> {this@App}
         }))
     }
 }

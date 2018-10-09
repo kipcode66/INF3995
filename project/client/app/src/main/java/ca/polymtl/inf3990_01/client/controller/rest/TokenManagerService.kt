@@ -8,5 +8,6 @@ class TokenManagerService {
     }
 
     private fun fetchToken(): String {
+        return ""
     }
 }
