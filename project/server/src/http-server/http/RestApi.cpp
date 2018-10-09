@@ -9,6 +9,10 @@ RestApi::RestApi(Address addr)
 , desc("Rest API", "1.0")
 { }
 
+RestApi::~RestApi() {
+    httpEndpoint->shutdown();
+}
+
 void RestApi::init() {
     auto opts = Http::Endpoint::options();
     httpEndpoint->init(opts);
@@ -24,10 +28,6 @@ void RestApi::start() {
 
     httpEndpoint->setHandler(router.handler());
     httpEndpoint->serve();
-}
-
-void RestApi::shutdown() {
-    httpEndpoint->shutdown();
 }
 
 void RestApi::createDescription() {

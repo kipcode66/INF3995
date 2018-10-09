@@ -2,8 +2,8 @@
 // Created by adam on 04/10/18.
 //
 
-#ifndef SERVER_RESTAPI_H
-#define SERVER_RESTAPI_H
+#ifndef HTTP_RESTAPI_HPP
+#define HTTP_RESTAPI_HPP
 
 #include <pistache/net.h>
 #include <pistache/endpoint.h>
@@ -15,15 +15,11 @@ using namespace Pistache;
 class RestApi {
 public:
     RestApi(Address);
-
+    ~RestApi();
     void init();
-
     void start();
 
-    void shutdown();
-
 private:
-
     void createDescription();
     void getIdentification(const Rest::Request& request, Http::ResponseWriter response);
     void getFileList(const Rest::Request& request, Http::ResponseWriter response);
@@ -36,4 +32,4 @@ private:
 };
 
 
-#endif //SERVER_RESTAPI_H
+#endif // HTTP_RESTAPI_HPP
