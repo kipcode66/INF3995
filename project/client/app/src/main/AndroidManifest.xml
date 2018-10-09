@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ca.polymtl.inf3990_01.client">
     <uses-feature android:name="android.hardware.wifi" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".App"
