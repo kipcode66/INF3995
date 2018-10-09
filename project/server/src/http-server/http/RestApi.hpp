@@ -20,15 +20,15 @@ public:
     void start();
 
 private:
-    void createDescription();
-    void getIdentification(const Rest::Request& request, Http::ResponseWriter response);
-    void getFileList(const Rest::Request& request, Http::ResponseWriter response);
-    void postFile(const Rest::Request& request, Http::ResponseWriter response);
-    void deleteFile(const Rest::Request& request, Http::ResponseWriter response);
+    void createDescription_();
+    void getIdentification_(const Rest::Request& request, Http::ResponseWriter response);
+    void getFileList_(const Rest::Request& request, Http::ResponseWriter response);
+    void postFile_(const Rest::Request& request, Http::ResponseWriter response);
+    void deleteFile_(const Rest::Request& request, Http::ResponseWriter response);
 
-    std::shared_ptr<Http::Endpoint> httpEndpoint;
-    Rest::Description desc;
-    Rest::Router router;
+    std::shared_ptr<Http::Endpoint> m_httpEndpoint;
+    Rest::Description m_desc;
+    Rest::Router m_router;
 };
 
 
