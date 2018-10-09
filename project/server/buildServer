@@ -34,6 +34,21 @@ buildOpenSsl() {
     fi
 }
 
+buildSqlite3() {
+    local SQLITE3_ROOT_DIR="${DEPS_DIR}/sqlite3"
+
+    # If this file/directory exists, then the dependency is considered up-to-date.
+    local SQLITE3_BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libsqlite3.a"
+    local SQLITE3_INSTALL_DIR="${DEPS_INSTALL_DIR}"
+
+    cd "${SQLITE3_ROOT_DIR}"
+    if [ ! -e "${SQLITE3_BUILT_FLAG}" ]; then
+        ./configure --prefix="${SQLITE3_INSTALL_DIR}" --includedir="${SQLITE3_INSTALL_DIR}/include/sqlite3"
+        make -j2
+        make install
+    fi
+}
+
 buildDependencies() {
     local DEPS_DIR="${SERVER_DIR}/lib"
     local DEPS_INSTALL_DIR="${SERVER_DIR}/build/dependencies"
@@ -42,6 +57,7 @@ buildDependencies() {
     mkdir -p "${DEPS_INSTALL_DIR}"
     buildOpenSsl
     buildPistache
+    buildSqlite3
 }
 
 buildServer() {
