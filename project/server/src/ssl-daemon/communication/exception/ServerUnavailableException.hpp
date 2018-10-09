@@ -10,6 +10,7 @@ namespace daemon {
 class ServerUnavailableException : std::exception {
 public:
     static const std::string REASON;
+
 public:
     ServerUnavailableException();
 

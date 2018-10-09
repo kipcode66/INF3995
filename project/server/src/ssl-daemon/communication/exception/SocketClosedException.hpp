@@ -10,6 +10,7 @@ namespace daemon {
 class SocketClosedException : std::exception {
 public:
     static const std::string REASON;
+
 public:
     SocketClosedException();
 
