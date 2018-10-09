@@ -10,4 +10,5 @@
     <string name="nav_header_desc">Entête de navigation</string>
     <string name="action_settings">Paramètres</string>
     <string name="communicate_queue_drawer">Communication</string>
+    <string name="server_url">URL du serveur</string>
 </resources>
