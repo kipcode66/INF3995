@@ -3,7 +3,7 @@
 #include <iostream>
 #include <regex>
 
-#include "communication/SocketClosedException.hpp"
+#include "communication/exception/SocketClosedException.hpp"
 
 namespace elevation {
 namespace daemon {

@@ -7,7 +7,7 @@
 #include <openssl/err.h>
 #include <vector>
 
-#include "SocketClosedException.hpp"
+#include "exception/SocketClosedException.hpp"
 
 namespace elevation {
 namespace daemon {
