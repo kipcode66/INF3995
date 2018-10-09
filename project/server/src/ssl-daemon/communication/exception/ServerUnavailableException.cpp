@@ -3,7 +3,7 @@
 namespace elevation {
 namespace daemon {
 
-const std::string ServerUnavailableException::REASON = "Socket closed";
+const std::string ServerUnavailableException::REASON = "Server is not available";
 
 ServerUnavailableException::ServerUnavailableException()
 { }
