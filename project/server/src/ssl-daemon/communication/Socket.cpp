@@ -41,28 +41,6 @@ Socket& Socket::operator<<(const std::string& str) {
     return *this;
 }
 
-Socket& Socket::operator>>(std::string& str) {
-    constexpr int READ_SIZE = 1024;
-    char buffer[READ_SIZE + 1];
-
-    std::ostringstream oStringStream;
-    int bytesRead = 0;
-    char* currentBuffer = buffer;
-    while (bytesRead < READ_SIZE && bytesRead >= 0) {
-        bytesRead += ::read(m_fd, buffer, READ_SIZE - bytesRead);
-    }
-
-    if (bytesRead >= 0) {
-        buffer[bytesRead] = '\0';
-        oStringStream << buffer;
-        str = oStringStream.str();
-    }
-    else {
-        throw std::runtime_error(::strerror(errno));
-    }
-    return *this;
-}
-
 std::string Socket::readLine() {
     constexpr const char LINE_DELIMITER = '\n'; // The server normally sends \r\n, but only the \n interests us.
     std::ostringstream dataStream;
