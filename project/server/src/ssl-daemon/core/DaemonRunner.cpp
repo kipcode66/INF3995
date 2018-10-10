@@ -48,7 +48,6 @@ void DaemonRunner::reader_(SslSession& clientSession, ClientSocket& httpServerSo
     }
     catch (const std::exception& e) {
         std::cerr << "C++ exception thrown in reader thread : " << e.what() << std::endl;
-        // TODO Close socket cleanly.
     }
     catch (...) {
         killAll_();
@@ -88,7 +87,6 @@ void DaemonRunner::writer_(SslSession& clientSession, ClientSocket& httpServerSo
     }
     catch (const std::exception& e) {
         std::cerr << "C++ exception thrown in writer thread : " << e.what() << std::endl;
-        // TODO Close socket cleanly.
     }
     catch (...) {
         killAll_();
