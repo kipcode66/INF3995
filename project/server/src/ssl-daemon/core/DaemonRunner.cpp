@@ -43,9 +43,7 @@ void DaemonRunner::reader_(SslSession& clientSession, ClientSocket& httpServerSo
             httpServerSocket.write(data);
         }
     }
-    catch (const SocketClosedException& e) {
-        std::cerr << "Reader thread : Socket closed." << std::endl;
-    }
+    catch (const SocketClosedException& e) { }
     catch (const std::exception& e) {
         std::cerr << "C++ exception thrown in reader thread : " << e.what() << std::endl;
     }
@@ -82,9 +80,7 @@ void DaemonRunner::writer_(SslSession& clientSession, ClientSocket& httpServerSo
             clientSession.write(data);
         }
     }
-    catch (const SocketClosedException& e) {
-        std::cout << "Writer thread : Socket closed." << std::endl;
-    }
+    catch (const SocketClosedException& e) { }
     catch (const std::exception& e) {
         std::cerr << "C++ exception thrown in writer thread : " << e.what() << std::endl;
     }
