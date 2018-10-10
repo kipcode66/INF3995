@@ -4,6 +4,7 @@
 #include <regex>
 
 #include "communication/exception/SocketClosedException.hpp"
+#include "packet/HttpPacketReader.hpp"
 
 namespace elevation {
 namespace daemon {
@@ -58,25 +59,9 @@ void DaemonRunner::writer_(SslSession& clientSession, ClientSocket& httpServerSo
     try {
         m_tasksReady.wait();
 
+        HttpPacketReader packetReader(httpServerSocket);
         while (true) {
-            const std::regex HTTP_HEADER_END_REGEX("^\r?\n$");
-            const std::regex HTTP_CONTENT_SIZE_REGEX("^Content-Length:\\s*(\\d+)", std::regex_constants::icase);
-            const std::size_t HTTP_CONTENT_SIZE_RESULT_GROUP_ID = 1;
-
-            std::size_t httpBodySize = 0;
-            std::string line = httpServerSocket.readLine();
-            while (!std::regex_search(line, HTTP_HEADER_END_REGEX)) {
-                std::smatch matchResult;
-                if (std::regex_search(line, matchResult, HTTP_CONTENT_SIZE_REGEX)) {
-                    httpBodySize = std::stoi(matchResult[HTTP_CONTENT_SIZE_RESULT_GROUP_ID]);
-                }
-
-                clientSession.write(line);
-                line = httpServerSocket.readLine();
-            }
-            clientSession.write(line);
-            std::string data = httpServerSocket.read(httpBodySize);
-            clientSession.write(data);
+            clientSession.write(packetReader.readPacket());
         }
     }
     catch (const SocketClosedException& e) { }
