@@ -1,10 +1,13 @@
 #ifndef CORE_DAEMON_RUNNER_HPP
 #define CORE_DAEMON_RUNNER_HPP
 
+#include <thread>
+#include <mutex>
+#include <future>
+#include <vector>
+
 #include "ssl/SslSession.hpp"
 #include "communication/ClientSocket.hpp"
-
-#include <thread>
 
 namespace elevation {
 namespace daemon {
@@ -18,6 +21,12 @@ protected:
     void runner_(SslSession clientSession, ClientSocket httpServerSocket);
     void reader_(SslSession& clientSession, ClientSocket& httpServerSocket);
     void writer_(SslSession& clientSession, ClientSocket& httpServerSocket);
+    void killAll_(); ///< Deamon Runners will not hesitate to kill workers if they want to.
+
+protected:
+    std::vector<std::thread> m_workers;
+    std::mutex m_killMutex;
+    std::shared_future<bool> m_tasksReady;
 };
 
 } // namespace daemon
