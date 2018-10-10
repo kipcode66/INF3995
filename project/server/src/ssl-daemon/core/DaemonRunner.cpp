@@ -4,7 +4,6 @@
 #include <regex>
 
 #include "communication/exception/SocketClosedException.hpp"
-#include "communication/exception/ServerUnavailableException.hpp"
 
 namespace elevation {
 namespace daemon {
@@ -47,9 +46,6 @@ void DaemonRunner::reader_(SslSession& clientSession, ClientSocket& httpServerSo
     catch (const SocketClosedException& e) {
         std::cerr << "Reader thread : Socket closed." << std::endl;
     }
-    catch (const ServerUnavailableException& e) {
-        throw;
-    }
     catch (const std::exception& e) {
         std::cerr << "C++ exception thrown in reader thread : " << e.what() << std::endl;
         // TODO Close socket cleanly.
@@ -89,9 +85,6 @@ void DaemonRunner::writer_(SslSession& clientSession, ClientSocket& httpServerSo
     }
     catch (const SocketClosedException& e) {
         std::cout << "Writer thread : Socket closed." << std::endl;
-    }
-    catch (const ServerUnavailableException& e) {
-        throw;
     }
     catch (const std::exception& e) {
         std::cerr << "C++ exception thrown in writer thread : " << e.what() << std::endl;
