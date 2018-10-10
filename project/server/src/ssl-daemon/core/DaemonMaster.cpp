@@ -18,7 +18,6 @@ void DaemonMaster::run() {
 
     while (true) {
         SslSession session = ctx.acceptSession();
-        std::cout << "Accepted HTTPS connection." << std::endl;
         ClientSocket httpServerSocket(m_config.getOutputPort());
 
         DaemonRunner runner(std::move(session), std::move(httpServerSocket));

@@ -31,7 +31,6 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
         m_workers.end(),
         [](std::thread& worker) { worker.join(); }
     );
-    std::cout << "HTTPS connection finished" << std::endl;
 }
 
 void DaemonRunner::reader_(SslSession& clientSession, ClientSocket& httpServerSocket) {
