@@ -7,5 +7,5 @@ class RestRequestService(val tokenMgr: TokenManagerService) {
     fun initRequestService() {
     }
 
-    fun doRequest(msg: String) = Log.d("App", "[token=${tokenMgr.getToken()}] msg: $msg")
+    suspend fun doRequest(msg: String) = Log.d("App", "[token=${tokenMgr.getToken()}] msg: $msg")
 }

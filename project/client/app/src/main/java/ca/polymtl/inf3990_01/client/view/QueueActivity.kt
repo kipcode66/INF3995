@@ -11,14 +11,17 @@ import android.view.MenuItem
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
+import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
 import kotlinx.android.synthetic.main.activity_queue.*
 import kotlinx.android.synthetic.main.app_bar_queue.*
 import kotlinx.android.synthetic.main.content_queue.*
+import kotlinx.coroutines.experimental.async
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 
 class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
+    val tokenMgr: TokenManagerService by inject()
     val restService: RestRequestService by inject()
     lateinit var snack: Snackbar
     lateinit var toast: Toast
@@ -36,6 +39,7 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+        async { myText.setText("Token: ${tokenMgr.getToken()}") }
     }
 
     override fun onBackPressed() {
@@ -69,7 +73,7 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
                 snack.show()
             }
             R.id.nav_gallery -> {
-                restService.doRequest("Something xD")
+                async { restService.doRequest("Something xD") }
             }
             R.id.nav_slideshow -> {
                 toast.show()

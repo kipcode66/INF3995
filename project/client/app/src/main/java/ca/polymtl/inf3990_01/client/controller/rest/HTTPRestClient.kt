@@ -18,6 +18,6 @@ class HTTPRestClient (private val preferences: SharedPreferences, private val co
 
     fun getBaseURL(): String {
         val serverUrl = preferences.getString("server_url", null)
-        return "http://$serverUrl/"
+        return "http://$serverUrl"
     }
 }

@@ -4,7 +4,7 @@
     <string name="title_activity_splash_screen">Client App</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY CONTENT</string>
-    <string name="title_activity_queue">QueueActivity</string>
+    <string name="title_activity_queue">Server Queue</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -15,4 +15,6 @@
     <string name="server_url">Server URL</string>
     <string name="server_url_value1">132.207.89.10</string>
     <string name="server_url_value2">132.207.89.11</string>
+    <string name="client_name">Username</string>
+    <string name="emptyString" />
 </resources>
