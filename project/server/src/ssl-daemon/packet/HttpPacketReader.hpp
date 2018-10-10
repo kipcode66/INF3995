@@ -2,6 +2,7 @@
 #define PACKET_HTTPPACKETREADER_HPP
 
 #include <string>
+#include <regex>
 
 #include "communication/Socket.hpp"
 
@@ -9,6 +10,11 @@ namespace elevation {
 namespace daemon {
 
 class HttpPacketReader {
+
+public:
+    static const std::regex HTTP_HEADER_END_REGEX;
+    static const std::regex HTTP_CONTENT_SIZE_REGEX;
+    static const std::size_t HTTP_CONTENT_SIZE_RESULT_GROUP_ID;
 
 public:
     explicit HttpPacketReader(Socket& socket);
