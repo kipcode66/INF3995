@@ -91,7 +91,7 @@ void SslContext::throwSslError_() {
 }
 
 SslSession SslContext::acceptSession() {
-    std::unique_ptr<IpSocket> acceptedClient(new IpSocket(m_socket.accept()));
+    std::unique_ptr<Socket> acceptedClient(new Socket(m_socket.accept()));
     SSL* ssl = SSL_new(m_ctx);
     SslSession session(ssl);
     session.bindTo(std::move(acceptedClient));

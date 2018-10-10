@@ -14,11 +14,12 @@ public:
     static constexpr int NO_FD = -1;
 
 public:
-    Socket();
+    Socket(uint16_t portNum);
+    Socket(uint16_t portNum, int fd);
     Socket(const Socket& other) = delete;
     Socket(Socket&& other);
 
-    virtual ~Socket() = 0;
+    virtual ~Socket();
 
     Socket& operator=(const Socket& other) = delete;
     Socket& operator=(Socket&& other);
@@ -36,6 +37,7 @@ protected:
 
 protected:
     int m_fd;
+    uint16_t m_portNum;
 };
 
 } // namespace daemon

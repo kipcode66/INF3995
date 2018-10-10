@@ -8,7 +8,7 @@ namespace elevation {
 namespace daemon {
 
 ClientSocket::ClientSocket(uint16_t portNum)
-    : IpSocket(portNum)
+    : Socket(portNum)
 {
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -20,7 +20,7 @@ ClientSocket::ClientSocket(uint16_t portNum)
 }
 
 ClientSocket::ClientSocket(ClientSocket&& that)
-    : IpSocket(std::move(that))
+    : Socket(std::move(that))
 {
     m_portNum = that.m_portNum;
 }
@@ -28,7 +28,7 @@ ClientSocket::ClientSocket(ClientSocket&& that)
 ClientSocket::~ClientSocket() { }
 
 ClientSocket& ClientSocket::operator=(ClientSocket&& that) {
-    IpSocket::operator=(std::move(that));
+    Socket::operator=(std::move(that));
     m_portNum = that.m_portNum;
     return *this;
 }

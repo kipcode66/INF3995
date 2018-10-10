@@ -1,12 +1,12 @@
 #ifndef COMMUNICATION_LISTENER_SOCKET_HPP
 #define COMMUNICATION_LISTENER_SOCKET_HPP
 
-#include "IpSocket.hpp"
+#include "Socket.hpp"
 
 namespace elevation {
 namespace daemon {
 
-class ListenerSocket : public IpSocket {
+class ListenerSocket : public Socket {
 public:
     static constexpr int SOCKET_MAX_BACKLOG = 10; ///< @brief Max Number of pending connections before we drop the next ones.
 
@@ -19,7 +19,7 @@ public:
     ListenerSocket& operator=(const ListenerSocket&) = delete;
     ListenerSocket& operator=(ListenerSocket&&);
 
-    IpSocket accept();
+    Socket accept();
 };
 
 } // namespace daemon

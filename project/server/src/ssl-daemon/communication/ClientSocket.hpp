@@ -1,12 +1,12 @@
 #ifndef COMMUNICATION_CLIENT_SOCKET_HPP
 #define COMMUNICATION_CLIENT_SOCKET_HPP
 
-#include "IpSocket.hpp"
+#include "Socket.hpp"
 
 namespace elevation {
 namespace daemon {
 
-class ClientSocket : public IpSocket {
+class ClientSocket : public Socket {
 public:
     ClientSocket(uint16_t portNum);
     ClientSocket(const ClientSocket&) = delete;

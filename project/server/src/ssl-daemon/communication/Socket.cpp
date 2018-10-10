@@ -2,6 +2,10 @@
 
 #include <unistd.h>
 #include <sstream>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <cstring>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -12,14 +16,27 @@
 namespace elevation {
 namespace daemon {
 
-Socket::Socket()
+Socket::Socket(uint16_t portNum)
     : m_fd(NO_FD)
+    , m_portNum(portNum)
+{
+    // Create socket
+    int socket_fd = ::socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_fd < 0) {
+        throw std::runtime_error(::strerror(errno));
+    }
+    m_fd = socket_fd;
+}
+
+Socket::Socket(uint16_t portNum, int fd)
+    : m_fd(fd)
+    , m_portNum(portNum)
 { }
 
 Socket::Socket(Socket&& that)
-    : m_fd(NO_FD)
+    : m_fd(that.m_fd)
+    , m_portNum(that.m_portNum)
 {
-    m_fd = that.m_fd;
     that.m_fd = NO_FD;
 }
 
@@ -31,6 +48,10 @@ Socket::~Socket()
 }
 
 Socket& Socket::operator=(Socket&& that) {
+    if (m_fd != NO_FD) {
+        ::close(m_fd);
+    }
+
     m_fd = that.m_fd;
     that.m_fd = NO_FD;
     return *this;

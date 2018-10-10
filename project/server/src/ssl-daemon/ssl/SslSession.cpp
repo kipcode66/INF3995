@@ -42,7 +42,7 @@ SslSession& SslSession::operator=(SslSession&& that) {
     that.m_ssl = nullptr;
 }
 
-void SslSession::bindTo(std::unique_ptr<IpSocket> socket) {
+void SslSession::bindTo(std::unique_ptr<Socket> socket) {
     m_clientSocket = std::move(socket);
     SSL_set_fd(m_ssl, m_clientSocket->m_fd);
 
@@ -89,7 +89,7 @@ void SslSession::handleSslErrorsIfAny_(int sslReturnCode) {
                 break;
             }
             case SSL_ERROR_SYSCALL: {
-                if (::SSL_get_error(m_ssl, sslReturnCode) != 0) {
+                if (::ERR_get_error() != 0) {
                     failureReason = std::string("SSL system call failure. This can be caused by a distrusted "
                                                 "certificate, in which case add the \"") + SSL_DAEMON_ISSUER_CERTIFICATE +
                                                 "\" file as a trusted authority.";

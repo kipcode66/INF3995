@@ -18,7 +18,6 @@ set(SSL_DAEMON_CPP_SOURCES
     ArgsParser.cpp
     signal/SignalHandling.cpp
     communication/Socket.cpp
-    communication/IpSocket.cpp
     communication/ListenerSocket.cpp
     communication/ClientSocket.cpp
     communication/exception/SocketClosedException.cpp
@@ -38,7 +37,6 @@ set(SSL_DAEMON_HEADER_SOURCES
     ArgsParser.hpp
     signal/SignalHandling.hpp
     communication/Socket.hpp
-    communication/IpSocket.hpp
     communication/ListenerSocket.hpp
     communication/ClientSocket.hpp
     communication/exception/SocketClosedException.hpp

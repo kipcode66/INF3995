@@ -8,7 +8,7 @@ namespace elevation {
 namespace daemon {
 
 ListenerSocket::ListenerSocket(uint16_t portNum)
-    : IpSocket(portNum)
+    : Socket(portNum)
 {
     // Bind socket to address and port
     struct sockaddr_in addr;
@@ -27,24 +27,24 @@ ListenerSocket::ListenerSocket(uint16_t portNum)
 }
 
 ListenerSocket::ListenerSocket(ListenerSocket&& that)
-    : IpSocket(std::move(that))
+    : Socket(std::move(that))
 { }
 
 ListenerSocket::~ListenerSocket()
 { }
 
 ListenerSocket& ListenerSocket::operator=(ListenerSocket&& that) {
-    IpSocket::operator=(std::move(that));
+    Socket::operator=(std::move(that));
 }
 
-IpSocket ListenerSocket::accept() {
+Socket ListenerSocket::accept() {
     struct sockaddr_in addr;
     socklen_t len = sizeof(addr);
     int ipSocketFd = ::accept(m_fd, (struct sockaddr*)&addr, &len);
     if (ipSocketFd < 0) {
         throw std::runtime_error(::strerror(errno));
     }
-    IpSocket socketObject(m_portNum, ipSocketFd);
+    Socket socketObject(m_portNum, ipSocketFd);
     return socketObject;
 }
 
