@@ -89,9 +89,14 @@ void SslSession::handleSslErrorsIfAny_(int sslReturnCode) {
                 break;
             }
             case SSL_ERROR_SYSCALL: {
-                failureReason = std::string("SSL system call failure. This can be caused by a distrusted "
-                                            "certificate, in which case add the \"") + SSL_DAEMON_ISSUER_CERTIFICATE +
-                                            "\" file as a trusted authority.";
+                if (::SSL_get_error(m_ssl, sslReturnCode) != 0) {
+                    failureReason = std::string("SSL system call failure. This can be caused by a distrusted "
+                                                "certificate, in which case add the \"") + SSL_DAEMON_ISSUER_CERTIFICATE +
+                                                "\" file as a trusted authority.";
+                }
+                else {
+                    throw SocketClosedException();
+                }
             }
             case SSL_ERROR_SSL: {
                 failureReason = std::string("SSL messed up : ") + ::ERR_error_string(::ERR_get_error(), NULL);
