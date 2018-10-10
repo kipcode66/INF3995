@@ -51,7 +51,7 @@ buildServer() {
     buildDependencies
     cd "${SERVER_BINARY_DIR}"
     cmake -DCMAKE_BUILD_TYPE=Debug ../src
-    make
+    make -j2
 }
 
 buildServer
