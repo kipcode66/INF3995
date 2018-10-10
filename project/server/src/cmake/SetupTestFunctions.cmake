@@ -3,7 +3,7 @@
 ###############################################################################
 
 function(addUnitTest unitTest testName testFile)
-    add_test(NAME "${testName}.${unitTest}" COMMAND "${testName}" "--run_test=${unit_test}" "--catch_system_error=true")
+    add_test(NAME "${testName}.${unitTest}" COMMAND "${testName}" "--run_test=${unitTest}" "--catch_system_error=true")
 endfunction()
 
 function(addAllTestsIn testFile includeDirList libraryList)
