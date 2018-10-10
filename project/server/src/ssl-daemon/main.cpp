@@ -1,6 +1,6 @@
 #include "ArgsParser.hpp"
 #include "signal/SignalHandling.hpp"
-#include "core/DaemonManager.hpp"
+#include "core/DaemonMaster.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-        DaemonManager runner(config);
+        DaemonMaster runner(config);
         std::cout << "SSL Daemon starting." << std::endl;
         runner.run();
         std::cout << "SSL Daemon says goodbye!" << std::endl;

@@ -26,7 +26,7 @@ set(SSL_DAEMON_CPP_SOURCES
     ssl/SslContext.cpp
     ssl/SslSession.cpp
     core/DaemonRunner.cpp
-    core/DaemonManager.cpp
+    core/DaemonMaster.cpp
 )
 
 ###############################################################################
@@ -47,7 +47,7 @@ set(SSL_DAEMON_HEADER_SOURCES
     ssl/SslContext.hpp
     ssl/SslSession.hpp
     core/DaemonRunner.hpp
-    core/DaemonManager.hpp
+    core/DaemonMaster.hpp
 )
 
 makeAbsolute(SSL_DAEMON_CPP_SOURCES)

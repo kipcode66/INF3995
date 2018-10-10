@@ -1,14 +1,14 @@
-#ifndef CORE_DAEMON_MANAGER
-#define CORE_DAEMON_MANAGER
+#ifndef CORE_DAEMON_MASTER
+#define CORE_DAEMON_MASTER
 
 #include "ArgsParser.hpp"
 
 namespace elevation {
 namespace daemon {
 
-class DaemonManager {
+class DaemonMaster {
 public:
-    DaemonManager(const ArgsParser::Config& config);
+    DaemonMaster(const ArgsParser::Config& config);
     void run();
 
 protected:
@@ -18,4 +18,4 @@ protected:
 } // namespace daemon
 } // namespace elevation
 
-#endif // !CORE_DAEMON_MANAGER
+#endif // !CORE_DAEMON_MASTER

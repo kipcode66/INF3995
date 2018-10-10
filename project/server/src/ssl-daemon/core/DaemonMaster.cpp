@@ -1,4 +1,4 @@
-#include "DaemonManager.hpp"
+#include "DaemonMaster.hpp"
 #include "signal/SignalHandling.hpp"
 #include "communication/ListenerSocket.hpp"
 #include "communication/ClientSocket.hpp"
@@ -8,11 +8,11 @@
 namespace elevation {
 namespace daemon {
 
-DaemonManager::DaemonManager(const ArgsParser::Config& config)
+DaemonMaster::DaemonMaster(const ArgsParser::Config& config)
     : m_config(config)
 { }
 
-void DaemonManager::run() {
+void DaemonMaster::run() {
     SslContext::createInstance(m_config.getListenPort());
     SslContext& ctx = SslContext::getInstance();
 
