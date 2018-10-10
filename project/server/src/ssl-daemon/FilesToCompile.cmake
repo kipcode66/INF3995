@@ -21,6 +21,7 @@ set(SSL_DAEMON_CPP_SOURCES
     communication/ListenerSocket.cpp
     communication/ClientSocket.cpp
     communication/exception/SocketClosedException.cpp
+    packet/HttpPacketReader.cpp
     ssl/SslContext.cpp
     ssl/SslSession.cpp
     core/DaemonRunner.cpp
@@ -40,6 +41,7 @@ set(SSL_DAEMON_HEADER_SOURCES
     communication/ListenerSocket.hpp
     communication/ClientSocket.hpp
     communication/exception/SocketClosedException.hpp
+    packet/HttpPacketReader.hpp
     ssl/SslContext.hpp
     ssl/SslSession.hpp
     core/DaemonRunner.hpp
