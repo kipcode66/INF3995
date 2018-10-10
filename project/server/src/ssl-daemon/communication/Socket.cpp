@@ -36,9 +36,8 @@ Socket& Socket::operator=(Socket&& that) {
     return *this;
 }
 
-Socket& Socket::operator<<(const std::string& str) {
+void Socket::write(const std::string& str) {
     ::write(m_fd, str.c_str(), str.size() + 1);
-    return *this;
 }
 
 std::string Socket::readLine() {

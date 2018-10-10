@@ -41,7 +41,7 @@ void DaemonRunner::reader_(SslSession& clientSession, ClientSocket& httpServerSo
 
         while (true) {
             std::string data = clientSession.read();
-            httpServerSocket << data;
+            httpServerSocket.write(data);
         }
     }
     catch (const SocketClosedException& e) {
