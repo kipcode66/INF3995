@@ -4,19 +4,18 @@
 #include <unistd.h>
 #include <atomic>
 #include <stdexcept>
+#include <pthread.h>
 
 static std::atomic<struct sigaction> oldSigaction;
 
 extern "C" void signalHandler_(int signal) {
     elevation::daemon::SignalHandling::cleanupRequested.store(true);
 
-    static char message[] = "Caught signal.\nIf the SSL Daemon does not stop immediately, "
-                            "it will on the next HTTPS connection, or if sending the same "
-                            "signal another time.\n";
-    ::write(STDERR_FILENO, message, sizeof(message));
+    ::exit(0);
 
     struct sigaction newSigaction = oldSigaction.load();
-    ::sigaction(signal, &newSigaction, NULL); // Install old sigaction instead
+    ::sigaction(signal, &newSigaction, NULL); // Install old sigaction instead, in case pthread_exit
+                                              // doesn't work because we're stuck on a noncancelling syscall.
 }
 
 namespace elevation {
