@@ -23,8 +23,8 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
 
     std::promise<bool> tasksReadyPromise;
     m_tasksReady = tasksReadyPromise.get_future();
-    m_workers.push_back(std::thread(&DaemonRunner::reader_, this, std::ref(clientSession), std::ref(httpServerSocket)));
-    m_workers.push_back(std::thread(&DaemonRunner::writer_, this, std::ref(clientSession), std::ref(httpServerSocket)));
+    m_workers.push_back(std::thread(&DaemonRunner::forwardToServer_, this, std::ref(clientSession), std::ref(httpServerSocket)));
+    m_workers.push_back(std::thread(&DaemonRunner::forwardToClient_, this, std::ref(clientSession), std::ref(httpServerSocket)));
     tasksReadyPromise.set_value(true);
 
     std::for_each(
@@ -34,7 +34,7 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
     );
 }
 
-void DaemonRunner::reader_(SslSession& clientSession, ClientSocket& httpServerSocket) {
+void DaemonRunner::forwardToServer_(SslSession& clientSession, ClientSocket& httpServerSocket) {
     try {
         m_tasksReady.wait();
 
@@ -55,7 +55,7 @@ void DaemonRunner::reader_(SslSession& clientSession, ClientSocket& httpServerSo
     killAll_();
 }
 
-void DaemonRunner::writer_(SslSession& clientSession, ClientSocket& httpServerSocket) {
+void DaemonRunner::forwardToClient_(SslSession& clientSession, ClientSocket& httpServerSocket) {
     try {
         m_tasksReady.wait();
 
