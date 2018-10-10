@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
+HTTP_SERVER_TEST_DIR="${SERVER_DIR}/build/http-server/test"
+DAEMON_TEST_DIR="${SERVER_DIR}/build/ssl-daemon/test"
+
+testDaemon() {
+    cd "${DAEMON_TEST_DIR}"
+    ctest --output-on-failure
+}
+
+testHttpServer() {
+    cd "${HTTP_SERVER_TEST_DIR}"
+    ctest --output-on-failure
+}
+
+testHttpServer
+testDaemon
