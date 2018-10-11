@@ -86,6 +86,33 @@ stop() {
     fi
 }
 
+message() {
+    tput bold 2>/dev/null
+    tput setaf 10 2>/dev/null
+    echo "$@"
+    tput sgr0 2>/dev/null
+}
+
+testDaemon() {
+    message $'\nTesting SSL Daemon...\n'
+    cd "${DAEMON_TEST_DIR}"
+    ctest --output-on-failure
+}
+
+testHttpServer() {
+    message $'\nTesting HTTP Server...\n'
+    cd "${HTTP_SERVER_TEST_DIR}"
+    ctest --output-on-failure
+}
+
+test() {
+    HTTP_SERVER_TEST_DIR="${SERVER_DIR}/build/${HTTP_SERVER_NAME}/test"
+    DAEMON_TEST_DIR="${SERVER_DIR}/build/${SSL_DAEMON_NAME}/test"
+
+    testHttpServer
+    testDaemon
+}
+
 usage() {
     echo "USAGE"
     echo "    $0 <OPTION>"
@@ -94,6 +121,7 @@ usage() {
     echo "    --help | -h  Print this help menu and exit"
     echo "    --start      Start the Elevation server"
     echo "    --stop       Stop the Elevation server"
+    echo "    --test | -t  Run all automated tests"
 }
 
 runScript() {
@@ -112,6 +140,10 @@ runScript() {
         
         --stop)
             stop
+            ;;
+
+        --test | -t)
+            test
             ;;
         
         *)
