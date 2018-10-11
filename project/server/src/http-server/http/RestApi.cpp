@@ -68,20 +68,18 @@ void RestApi::createDescription_() {
             .hide();
 }
 
-static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
-   int i;
-   for(i = 0; i<argc; i++) {
-      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-   }
-   printf("\n");
-   return 0;
-}
-
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "getIdentification");
     puts("getIdentification function called");
 
     Database* db = Database::instance();
+    const char* mocked_mac = "DE:AD:BE:EF:CA:FE";
+    struct User user = db->getUserByMac(mocked_mac);
+    if (user.mac == NULL) {
+        // create user
+    } else {
+        // return identification
+    }
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {

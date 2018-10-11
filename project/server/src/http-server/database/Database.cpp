@@ -3,6 +3,8 @@
 //
 #include "Database.hpp"
 #include <stdio.h>
+#include <stdint.h>
+#include <string.h>
 
 Database* Database::s_instance = nullptr;
 
@@ -15,9 +17,25 @@ Database* Database::instance() {
 }
 
 struct User Database::getUserByMac(const char* mac) const {
-    struct User user;
-    const char* query = sqlite3_mprintf("select * from user where (mac = '%q');", mac);
-//    int errcode = sqlite3_exec(m_db, query, )
+    struct User user = { 0 };
+    uint8_t errcode = 0;
+    const char* query = sqlite3_mprintf("SELECT * FROM user WHERE (mac = '%q');", mac);
+    sqlite3_stmt *res = 0;
+    errcode = sqlite3_prepare_v2(m_db, query, -1, &res, 0);
+    if (errcode)
+        goto err;
+    errcode = sqlite3_step(res);
+
+    if (errcode == SQLITE_ROW) {
+        strcpy(user.ip, (char *)sqlite3_column_text(res, 0));
+        strcpy(user.mac, (char *)sqlite3_column_text(res, 1));
+        strcpy(user.name, (char *)sqlite3_column_text(res, 2));
+        goto done;
+    }
+err:
+    printf("error: %s\n", sqlite3_errstr(errcode));
+done:
+    return user;
 }
 
 int Database::createUser(struct User* user) {
