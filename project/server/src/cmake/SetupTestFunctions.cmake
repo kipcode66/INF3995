@@ -16,10 +16,10 @@ function(addAllTestsIn testFile includeDirList libraryList)
 
     # Find the subtests (the "test cases") inside the test file.
     file(READ "${testFile}" contents)
-    string(REGEX MATCHALL "BOOST_AUTO_TEST_CASE[^\n]*\\( *[a-zA-Z0-9_]+ *\\)"   unitTests  "${contents}")
+    string(REGEX MATCHALL "BOOST_(AUTO|FIXTURE)_TEST_CASE[^\n,(]*\\( *\"?[a-zA-Z0-9_]+[^)]*\\)"   unitTests  "${contents}")
     string(REGEX MATCHALL "BOOST_TEST_SUITE[^\n]*\\( *\"?[a-zA-Z0-9_ ]+\"? *\\)" testSuites "${contents}")
     foreach(unitTest IN LISTS unitTests testSuites)
-        string(REGEX REPLACE ".*\\( *\"?([A-Za-z_0-9]([A-Za-z_0-9 ]+[A-Za-z_0-9])?)\"? *\\).*" "\\1" unitTest "${unitTest}")
+        string(REGEX REPLACE "[^\n,(]*\\( *\"?([A-Za-z_0-9]([A-Za-z_0-9 ]+[A-Za-z_0-9])?).*" "\\1" unitTest "${unitTest}")
         addUnitTest("${unitTest}" "${testName}" "${testFile}")
     endforeach()
 endfunction()
