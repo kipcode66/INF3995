@@ -141,5 +141,9 @@ BOOST_FIXTURE_TEST_CASE(connectionTest, IntegrationTestFixture) { // Makes the t
     connectToDaemon(); // Boost will make the test fail and print a message if this throws an exception
 }
 
+// We will not implement a "real" integration test, because that would require a
+// working SSL client, which would probably take us 15-20 hours to complete.
+// However, we added such a manual test.
+
 } // namespace daemon
 } // namespace elevation
