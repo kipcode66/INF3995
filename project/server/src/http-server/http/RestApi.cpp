@@ -2,8 +2,9 @@
 // Created by adam on 04/10/18.
 //
 
-#include <sqlite3/sqlite3.h>
 #include "RestApi.hpp"
+#include "../database/Database.hpp"
+
 
 RestApi::RestApi(Address addr)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
@@ -76,53 +77,11 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
    return 0;
 }
 
-struct User {
-    char* ip;
-    char* mac;
-    char* name;
-};
-
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "getIdentification");
     puts("getIdentification function called");
 
-    struct User mocked_user = {
-            .ip = "23.2.2.12",
-            .mac = "FE:FE:FE:FE:FE:FE",
-            .nom = "Jerry",
-    };
-
-    // Open db
-    sqlite3* db;
-    int rc = ::sqlite3_open("server.db", &db);
-    if ( rc ) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-    }
-    else {
-        puts("database opened with ease\n");
-    }
-
-
-    // search for user in db
-
-    const char* SQL_ADD_USER = "SELECT * FROM user WHERE (ip";
-    char* sqlErrMsg = 0;
-    rc = sqlite3_exec(db, SQL_ADD_USER, callback, NULL, &sqlErrMsg);
-    if (rc != SQLITE_OK) {
-        puts("that didn't go well");
-        printf("SQL error: %s\n", sqlErrMsg);
-        sqlite3_free(sqlErrMsg);
-    }
-    // create entry in user
-    const char* SQL_ADD_USER = "INSERT INTO user (ip, mac, name) VALUES ('122.22.22.22', 'EE:FE:EE:EE:EE:EE', 'moi');";
-    char* sqlErrMsg = 0;
-    rc = sqlite3_exec(db, SQL_ADD_USER, callback, NULL, &sqlErrMsg);
-    if (rc != SQLITE_OK) {
-        puts("that didn't go well");
-        printf("SQL error: %s\n", sqlErrMsg);
-        sqlite3_free(sqlErrMsg);
-    }
+    Database* db = Database::instance();
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {

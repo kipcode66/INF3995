@@ -37,7 +37,6 @@ uint32_t parseArgs(int argc, char** argv) {
 int main(int argc, char** argv) {
 
     uint16_t portId = parseArgs(argc, argv);
-
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
 
