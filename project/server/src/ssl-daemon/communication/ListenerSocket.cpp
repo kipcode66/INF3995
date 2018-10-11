@@ -35,6 +35,7 @@ ListenerSocket::~ListenerSocket()
 
 ListenerSocket& ListenerSocket::operator=(ListenerSocket&& that) {
     Socket::operator=(std::move(that));
+    return *this;
 }
 
 Socket ListenerSocket::accept() {

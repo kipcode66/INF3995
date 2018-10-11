@@ -40,6 +40,7 @@ SslSession& SslSession::operator=(SslSession&& that) {
     m_ssl = that.m_ssl;
     m_clientSocket = std::move(that.m_clientSocket);
     that.m_ssl = nullptr;
+    return *this;
 }
 
 void SslSession::bindTo(std::unique_ptr<Socket> socket) {
