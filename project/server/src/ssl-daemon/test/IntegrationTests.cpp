@@ -71,6 +71,8 @@ IntegrationTestFixture::IntegrationTestFixture()
     if (!serverSetupDone) {
         throw std::runtime_error("Could not start fakeServer (no port available?)");
     }
+    m_serverPort = serverPortNum;
+    m_fakeServer = std::move(fakeServer);
 
     childPid = ::vfork();
     if (childPid < 0) {
@@ -86,10 +88,8 @@ IntegrationTestFixture::IntegrationTestFixture()
             std::to_string(serverPortNum).c_str(),
             (char*)NULL
         );
-        throw std::runtime_error(std::string("Could not execl() : ") + ::strerror(errno));
+        throw std::runtime_error(std::string("Child could not execl() : ") + ::strerror(errno));
     }
-    m_fakeServer = std::move(fakeServer);
-    m_serverPort = serverPortNum;
     m_childPid = childPid;
 }
 
