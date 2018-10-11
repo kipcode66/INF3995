@@ -13,7 +13,10 @@ cd "${SSL_RESOURCE_DIR}"
 message "Cleaning old certificate data..."
 find "${SSL_RESOURCE_DIR}" -maxdepth 1 -type f -not -perm -g+x | xargs rm -rf # Remove all files directly in this script's directory, except executable files.
 
-# TAKEN FROM : https://gist.github.com/Soarez/9688998
+#######################################################
+# TAKEN FROM : https://gist.github.com/Soarez/9688998 #
+# SO DON'T BLAME ME IF THE CODE IS UGLY.              #
+#######################################################
 
 message "Generating subject's private/public keys..."
 openssl genrsa -out elevd-privkey.key 2048
