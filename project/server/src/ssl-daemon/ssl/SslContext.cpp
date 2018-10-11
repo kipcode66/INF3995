@@ -15,7 +15,7 @@ namespace daemon {
 std::unique_ptr<SslContext> SslContext::c_instance = nullptr;
 
 void SslContext::createInstance(uint16_t portNum) {
-    if (c_instance != nullptr) {
+    if (c_instance.get() == nullptr) {
         ListenerSocket socket(portNum);
         c_instance = std::unique_ptr<SslContext>(
             new SslContext(std::move(socket), SSL_DAEMON_CERTIFICATE, SSL_DAEMON_PRIVATE_KEYFILE)
@@ -27,7 +27,7 @@ void SslContext::createInstance(uint16_t portNum) {
 }
 
 SslContext& SslContext::getInstance() {
-    if (c_instance != nullptr) {
+    if (c_instance.get() != nullptr) {
         return *c_instance;
     }
     else {
