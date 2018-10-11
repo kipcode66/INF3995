@@ -46,7 +46,7 @@ private:
     void setupFakeServer_();
     void setupDaemon_();
 
-public: // This could be protected, since test cases using this fixture extend this class.
+protected:
     __pid_t m_childPid;
     std::unique_ptr<ListenerSocket> m_fakeServer;
 
