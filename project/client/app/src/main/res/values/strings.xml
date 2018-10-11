@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Client</string>
+    <string name="app_name">Bistro Music</string>
 
     <string name="title_activity_splash_screen">Client App</string>
     <string name="dummy_button">Dummy Button</string>
@@ -8,13 +8,15 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_subtitle" translatable="false">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="communicate_queue_drawer">Communicate</string>
     <string name="server_url">Server URL</string>
-    <string name="server_url_value1">132.207.89.10</string>
-    <string name="server_url_value2">132.207.89.11</string>
+    <string name="server_url_value1" translatable="false">132.207.89.10</string>
+    <string name="server_url_value2" translatable="false">132.207.89.11</string>
     <string name="client_name">Username</string>
-    <string name="emptyString" />
+    <string name="emptyString" translatable="false" />
+    <string name="network_error">Network Error</string>
+    <string name="wifi_disabled">Wifi must be enabled</string>
 </resources>

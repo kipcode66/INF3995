@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Client</string>
+    <string name="app_name">Musique Bistro</string>
     <string name="title_activity_splash_screen">Application Client</string>
     <string name="dummy_button">Bouton Factice</string>
     <string name="dummy_content">CONTENU FACTICE</string>
@@ -12,4 +12,7 @@
     <string name="communicate_queue_drawer">Communication</string>
     <string name="server_url">URL du serveur</string>
     <string name="client_name">Nom d\'Utilisateur</string>
+    <string name="network_error">Erreur Réseau</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="wifi_disabled">Une connection wifi est nécessaire</string>
 </resources>

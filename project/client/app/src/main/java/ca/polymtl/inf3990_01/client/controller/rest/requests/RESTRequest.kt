@@ -17,7 +17,7 @@ class RESTRequest<T>(
         private val clazz: Class<T>,
         private val headers: MutableMap<String, String>?,
         private val listener: Response.Listener<ResponseData<T>>,
-        errorListener: Response.ErrorListener
+        errorListener: Response.ErrorListener?
 ) : Request<ResponseData<T>>(method, url, errorListener) {
     private val gson = Gson()
 

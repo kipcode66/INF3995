@@ -5,6 +5,6 @@ import java.net.URL
 
 val restServiceModule = module {
     single { RestRequestService(get()) }
-    single { TokenManagerService(get(), get()) }
+    single { TokenManagerService(get(), get(), get()) }
     factory { HTTPRestClient(get(), get()) }
 }

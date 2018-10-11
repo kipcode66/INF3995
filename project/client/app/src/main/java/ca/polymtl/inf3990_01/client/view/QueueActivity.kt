@@ -1,11 +1,13 @@
 package ca.polymtl.inf3990_01.client.view
 
 import android.os.Bundle
+import android.support.annotation.MainThread
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -15,9 +17,13 @@ import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
 import kotlinx.android.synthetic.main.activity_queue.*
 import kotlinx.android.synthetic.main.app_bar_queue.*
 import kotlinx.android.synthetic.main.content_queue.*
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.*
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
+import kotlin.concurrent.thread
+import kotlin.coroutines.experimental.CoroutineContext
+
+import kotlinx.coroutines.experimental.javafx.JavaFx as Main
 
 class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -25,6 +31,8 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     val restService: RestRequestService by inject()
     lateinit var snack: Snackbar
     lateinit var toast: Toast
+
+    lateinit var job: Job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +47,17 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-        async { myText.setText("Token: ${tokenMgr.getToken()}") }
+        job = launch {
+            val token = tokenMgr.getToken()
+            this@QueueActivity.runOnUiThread {
+                myText.text = "Token: $token"
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        job.cancel()
+        super.onDestroy()
     }
 
     override fun onBackPressed() {
