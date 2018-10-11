@@ -63,6 +63,10 @@ IntegrationTestFixture::IntegrationTestFixture()
 IntegrationTestFixture::~IntegrationTestFixture()
 {
     if (m_childPid != NO_PID) {
+        using namespace std::chrono_literals; // For s, ms, us, ns suffixes
+
+        ::kill(m_childPid, SIGTERM);
+        std::this_thread::sleep_for(100ms);
         ::kill(m_childPid, SIGKILL);
     }
 }
