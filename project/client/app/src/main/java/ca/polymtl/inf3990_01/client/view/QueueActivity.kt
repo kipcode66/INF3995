@@ -1,5 +1,6 @@
 package ca.polymtl.inf3990_01.client.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
@@ -12,7 +13,6 @@ import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import kotlinx.android.synthetic.main.activity_queue.*
 import kotlinx.android.synthetic.main.app_bar_queue.*
-import kotlinx.android.synthetic.main.content_queue.*
 import org.koin.android.ext.android.inject
 
 class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -25,11 +25,6 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         setContentView(R.layout.activity_queue)
         setSupportActionBar(toolbar)
         snack = Snackbar.make(nav_view, "Hello, World!", Snackbar.LENGTH_LONG)
-
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -66,17 +61,21 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.nav_camera -> {
-                snack.show()
+            R.id.nav_queue -> {
+                val intent = Intent(this, QueueActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                startActivity(intent)
             }
-            R.id.nav_gallery -> {
-                restService.doRequest("Something xD")
+            R.id.nav_local_song -> {
+                val intent = Intent(this, LocalSongActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                startActivity(intent)
             }
             R.id.nav_slideshow -> {
-
+                snack.show()
             }
             R.id.nav_manage -> {
-
+                restService.doRequest("Something xD")
             }
             R.id.nav_share -> {
 
