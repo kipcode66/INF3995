@@ -2,32 +2,122 @@
 
 SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
 
-assignHttpServerPortRange() {
-    if [ "$(whoami)" == root ]; then
-        PORT=80
-        MAX_PORT=100
+processesNotAlreadyStarted() {
+    if pgrep -x http-server >/dev/null; then
+        echo "Cannot start HTTP Server : already started (PID $(pgrep -x http-server))"
+        false
+    elif pgrep -x ssl-daemon >/dev/null; then
+        echo "Cannot start SSL Daemon : already started (PID $(pgrep -x ssl-daemon))"
+        false
     else
-        PORT=8080
-        MAX_PORT=8100
+        true
     fi
 }
 
+assignHttpServerPortRange() {
+    if [ "$(whoami)" == root ]; then
+        HTTP_SERVER_MIN_PORT=80
+    else
+        HTTP_SERVER_MIN_PORT=8080
+    fi
+    HTTP_SERVER_MAX_PORT=$((${HTTP_SERVER_MIN_PORT} + 20))
+}
+
+assignSslDaemonPortRange() {
+    if [ "$(whoami)" == root ]; then
+        SSL_DAEMON_MIN_PORT=443
+    else
+        SSL_DAEMON_MIN_PORT=4433
+    fi
+    SSL_DAEMON_MAX_PORT=$((${SSL_DAEMON_MIN_PORT} + 20))
+}
+
 startHttpServer() {
-    while [ "${PORT}" != "${MAX_PORT}" ]; do
-        echo $'\n'"Trying port number ${PORT}"
-        ./build/http-server/http-server "${PORT}"
-        RETURN_CODE=$?
-        if [ "${RETURN_CODE}" == 255 ]; then
-            PORT=$((${PORT} + 1))
-        fi
-        if [ "${RETURN_CODE}" == 0 ]; then
+    HTTP_SERVER_PORT="${HTTP_SERVER_MIN_PORT}"
+    while [ "${HTTP_SERVER_PORT}" != "${HTTP_SERVER_MAX_PORT}" ]; do
+        echo $'\n'"Trying port number ${HTTP_SERVER_PORT}"
+        ./build/http-server/http-server "${HTTP_SERVER_PORT}" &
+        sleep 0.5
+        if pgrep -x http-server >/dev/null; then
             break
+        else
+            HTTP_SERVER_PORT=$((${HTTP_SERVER_PORT} + 1))
         fi
     done
 }
 
-###############################################################################
+startSslDaemon() {
+    SSL_DAEMON_PORT="${SSL_DAEMON_MIN_PORT}"
+    while [ "${SSL_DAEMON_PORT}" != "${SSL_DAEMON_MAX_PORT}" ]; do
+        echo $'\n'"Trying port number ${SSL_DAEMON_PORT}"
+        ./build/ssl-daemon/ssl-daemon -l "${SSL_DAEMON_PORT}" -o "${HTTP_SERVER_PORT}" &
+        sleep 0.5
+        if pgrep -x ssl-daemon >/dev/null; then
+            break
+        else
+            SSL_DAEMON_PORT=$((${SSL_DAEMON_PORT} + 1))
+        fi
+    done
+}
 
-cd "${SERVER_DIR}"
-assignHttpServerPortRange
-startHttpServer
+start() {
+    if processesNotAlreadyStarted; then
+        cd "${SERVER_DIR}"
+        assignHttpServerPortRange
+        startHttpServer
+        assignSslDaemonPortRange
+        startSslDaemon
+        disown
+    fi
+}
+
+stop() {
+    if pgrep -x http-server >/dev/null; then
+        kill -TERM $(pgrep -x http-server)
+        sleep 0.5
+        kill -KILL $(pgrep -x ssl-daemon) 2>/dev/null
+    fi
+    if pgrep -x ssl-daemon >/dev/null; then
+        kill -TERM $(pgrep -x ssl-daemon)
+        sleep 0.5
+        kill -KILL $(pgrep -x ssl-daemon) 2>/dev/null
+    fi
+}
+
+usage() {
+    echo "USAGE"
+    echo "    $0 <OPTION>"
+    echo
+    echo "OPTIONS"
+    echo "    --help | -h  Print this help menu and exit"
+    echo "    --start      Start the Elevation server"
+    echo "    --stop       Stop the Elevation server"
+}
+
+runScript() {
+    if [ $# != 1 ]; then
+        usage
+    else
+        case $1 in
+
+        -h | --help)
+            usage
+            ;;
+        
+        --start)
+            start
+            ;;
+        
+        --stop)
+            stop
+            ;;
+        
+        *)
+            usage
+            ;;
+
+        esac
+    fi
+}
+
+runScript "$@"
