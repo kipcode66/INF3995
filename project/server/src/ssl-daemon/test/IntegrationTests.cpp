@@ -8,6 +8,7 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include <functional>
 #include <signal.h>
 
 #include "communication/ListenerSocket.hpp"
@@ -17,18 +18,47 @@
 namespace elevation {
 namespace daemon {
 
+// ============================================================================
+// =                              TEST FIXTURE                                =
+// ============================================================================
 
-void tearDown(__pid_t childId) {
-    ::kill(childId, SIGKILL);
-}
+/**
+ * @brief We setup a test class ("test fixture") rather than using BOOST_AUTO_TEST_CASE
+ * because we don't want to have to do the setup and the tearing down
+ * inside the test function. That way, the test cases will have access to this
+ * class's attributes without having to worry about setting them up.
+ */ 
+class IntegrationTestFixture {
 
-static std::pair<__pid_t, std::unique_ptr<ListenerSocket>> setup() {
-    __pid_t childId = -1;
-    try {
-        uint16_t serverPortNum = 10080;
-        const uint16_t SERVER_PORT_NUM_MAX = 10100;
-        std::unique_ptr<ListenerSocket> fakeServer;
-        bool serverSetupDone = false;
+public:
+    static const __pid_t NO_PID = -1;
+    static const uint16_t NO_PORT = 0;
+    static constexpr const auto SERVER_PORT_RANGE =
+        std::pair<uint16_t, uint16_t>(10080, 10100);
+
+public:
+    explicit IntegrationTestFixture();
+    virtual ~IntegrationTestFixture();
+
+public: // This could be protected, since test cases using this fixture extend this class.
+    __pid_t m_childPid;
+    uint16_t m_serverPort;
+    uint16_t m_clientPort;
+    std::unique_ptr<ListenerSocket> m_fakeServer;
+
+};
+
+IntegrationTestFixture::IntegrationTestFixture()
+    : m_childPid(NO_PID)
+    , m_serverPort(NO_PORT)
+    , m_clientPort(NO_PORT)
+    , m_fakeServer(nullptr)
+{
+    __pid_t childPid = NO_PID;
+    uint16_t serverPortNum = SERVER_PORT_RANGE.first;
+    std::unique_ptr<ListenerSocket> fakeServer;
+    bool serverSetupDone = false;
+    while (!serverSetupDone && serverPortNum <= SERVER_PORT_RANGE.second) {
         try {
             fakeServer = std::unique_ptr<ListenerSocket>(new ListenerSocket(serverPortNum));
             serverSetupDone = true;
@@ -36,66 +66,61 @@ static std::pair<__pid_t, std::unique_ptr<ListenerSocket>> setup() {
         catch (const std::exception& e) {
             ++serverPortNum;
         }
-        if (serverPortNum > SERVER_PORT_NUM_MAX) {
-            throw std::runtime_error("Could not start fakeServer : no port available.");
-        }
-
-        childId = ::vfork();
-        if (childId < 0) {
-            throw std::runtime_error(std::string("Could not vfork() : ") + ::strerror(errno));
-        }
-        else if (childId == 0) {
-            int error = ::execl(
-                SSL_DAEMON_EXECUTABLE,
-                SSL_DAEMON_EXECUTABLE,
-                "-l",
-                "4433",
-                "-o",
-                std::to_string(serverPortNum).c_str(),
-                (char*)NULL
-            );
-            throw std::runtime_error(std::string("Could not execl() : ") + ::strerror(errno));
-        }
-        return std::make_pair(childId, std::move(fakeServer));
     }
-    catch (...) {
-        if (childId > 0) {
-            tearDown(childId);
-        }
-        throw;
+    if (!serverSetupDone) {
+        throw std::runtime_error("Could not start fakeServer (no port available?)");
+    }
+
+    childPid = ::vfork();
+    if (childPid < 0) {
+        throw std::runtime_error(std::string("Could not vfork() : ") + ::strerror(errno));
+    }
+    else if (childPid == 0) {
+        ::execl(
+            SSL_DAEMON_EXECUTABLE,
+            SSL_DAEMON_EXECUTABLE,
+            "-l",
+            "4433",
+            "-o",
+            std::to_string(serverPortNum).c_str(),
+            (char*)NULL
+        );
+        throw std::runtime_error(std::string("Could not execl() : ") + ::strerror(errno));
+    }
+    m_fakeServer = std::move(fakeServer);
+    m_serverPort = serverPortNum;
+    m_childPid = childPid;
+}
+
+IntegrationTestFixture::~IntegrationTestFixture()
+{
+    if (m_childPid != NO_PID) {
+        ::kill(m_childPid, SIGKILL);
     }
 }
 
-BOOST_AUTO_TEST_CASE(sanity) {
-    auto data = setup();
-    __pid_t childPid = data.first;
-    std::unique_ptr<ListenerSocket> fakeServer = std::move(data.second);
+// ============================================================================
+// =                                TESTS CASES                               =
+// ============================================================================
 
-    try {
-        using namespace std::chrono_literals; // For s, ms, us, ns suffixes
-        bool connectionEstablished = false;
-        uint32_t tries = 0;
-        constexpr const uint32_t MAX_TRIES = 30;
-        const auto SLEEP_TIME = 100ms;
+BOOST_FIXTURE_TEST_CASE(connectionTest, IntegrationTestFixture) { // Makes the test case a class that is a subclass of IntegrationTestFixture
+    using namespace std::chrono_literals; // For s, ms, us, ns suffixes
+    bool connectionEstablished = false;
+    uint32_t tries = 0;
+    constexpr const uint32_t MAX_TRIES = 30;
+    const auto SLEEP_TIME = 100ms;
 
-        while (!connectionEstablished && tries < MAX_TRIES) {
-            try {
-                ClientSocket client(4433);
-                connectionEstablished = true;
-            }
-            catch (...) {
-                std::this_thread::sleep_for(SLEEP_TIME);
-            }
-            ++tries;
+    while (!connectionEstablished && tries < MAX_TRIES) {
+        try {
+            ClientSocket client(4433);
+            connectionEstablished = true;
         }
-        BOOST_REQUIRE(connectionEstablished);
+        catch (...) {
+            std::this_thread::sleep_for(SLEEP_TIME);
+        }
+        ++tries;
     }
-    catch (...) {
-        tearDown(childPid);
-        throw;
-    }
-
-    tearDown(childPid);
+    BOOST_REQUIRE(connectionEstablished);
 }
 
 } // namespace daemon
