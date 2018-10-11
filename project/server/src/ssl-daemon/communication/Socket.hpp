@@ -28,10 +28,6 @@ public:
     std::string readLine(); ///< Reads data until the next \n character. Throws SocketClosedException if the Socket is closed.
     std::string read(std::size_t dataLength); ///< Reads a certain amount of data. Throws SocketClosedException if the Socket is closed.
 
-    inline int getFd() const {
-        return m_fd;
-    }
-
 protected:
     char readCharacter_();
 
