@@ -41,21 +41,32 @@ public:
     explicit IntegrationTestFixture();
     virtual ~IntegrationTestFixture();
 
+private:
+    void setupFakeServer_();
+    void setupDaemon_();
+
 public: // This could be protected, since test cases using this fixture extend this class.
     __pid_t m_childPid;
-    uint16_t m_serverPort;
-    uint16_t m_clientPort;
     std::unique_ptr<ListenerSocket> m_fakeServer;
 
 };
 
 IntegrationTestFixture::IntegrationTestFixture()
     : m_childPid(NO_PID)
-    , m_serverPort(NO_PORT)
-    , m_clientPort(NO_PORT)
     , m_fakeServer(nullptr)
 {
-    __pid_t childPid = NO_PID;
+    setupFakeServer_();
+    setupDaemon_();
+}
+
+IntegrationTestFixture::~IntegrationTestFixture()
+{
+    if (m_childPid != NO_PID) {
+        ::kill(m_childPid, SIGKILL);
+    }
+}
+
+void IntegrationTestFixture::setupFakeServer_() {
     uint16_t serverPortNum = SERVER_PORT_RANGE.first;
     std::unique_ptr<ListenerSocket> fakeServer;
     bool serverSetupDone = false;
@@ -69,12 +80,13 @@ IntegrationTestFixture::IntegrationTestFixture()
         }
     }
     if (!serverSetupDone) {
-        throw std::runtime_error("Could not start fakeServer (no port available?)");
+        throw std::runtime_error("Could not setup listener socket (no port available?)");
     }
-    m_serverPort = serverPortNum;
     m_fakeServer = std::move(fakeServer);
+}
 
-    childPid = ::vfork();
+void IntegrationTestFixture::setupDaemon_() {
+    __pid_t childPid = ::vfork();
     if (childPid < 0) {
         throw std::runtime_error(std::string("Could not vfork() : ") + ::strerror(errno));
     }
@@ -85,19 +97,12 @@ IntegrationTestFixture::IntegrationTestFixture()
             "-l",
             std::to_string(CLIENT_PORT).c_str(),
             "-o",
-            std::to_string(serverPortNum).c_str(),
+            std::to_string(m_fakeServer->getPort()).c_str(),
             (char*)NULL
         );
         throw std::runtime_error(std::string("Child could not execl() : ") + ::strerror(errno));
     }
     m_childPid = childPid;
-}
-
-IntegrationTestFixture::~IntegrationTestFixture()
-{
-    if (m_childPid != NO_PID) {
-        ::kill(m_childPid, SIGKILL);
-    }
 }
 
 // ============================================================================
