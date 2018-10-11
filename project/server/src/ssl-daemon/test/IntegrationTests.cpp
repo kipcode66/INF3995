@@ -40,6 +40,7 @@ public:
 public:
     explicit IntegrationTestFixture();
     virtual ~IntegrationTestFixture();
+    ClientSocket connectToDaemon();
 
 private:
     void setupFakeServer_();
@@ -66,6 +67,31 @@ IntegrationTestFixture::~IntegrationTestFixture()
     }
 }
 
+ClientSocket IntegrationTestFixture::connectToDaemon() {
+    using namespace std::chrono_literals; // For s, ms, us, ns suffixes
+    constexpr const uint32_t MAX_TRIES = 30;
+    const auto SLEEP_TIME = 100ms;
+
+    std::unique_ptr<ClientSocket> client;
+    bool connectionEstablished = false;
+    uint32_t tries = 0;
+    while (!connectionEstablished && tries < MAX_TRIES) {
+        try {
+            client = std::unique_ptr<ClientSocket>(new ClientSocket(CLIENT_PORT));
+            connectionEstablished = true;
+        }
+        catch (const std::exception& e) {
+            std::this_thread::sleep_for(SLEEP_TIME);
+        }
+        ++tries;
+    }
+    if (!connectionEstablished) {
+        throw std::runtime_error("Could not connect to daemon");
+    }
+
+    return std::move(*client);
+}
+
 void IntegrationTestFixture::setupFakeServer_() {
     uint16_t serverPortNum = SERVER_PORT_RANGE.first;
     std::unique_ptr<ListenerSocket> fakeServer;
@@ -76,11 +102,13 @@ void IntegrationTestFixture::setupFakeServer_() {
             serverSetupDone = true;
         }
         catch (const std::exception& e) {
-            ++serverPortNum;
+            if (serverPortNum == SERVER_PORT_RANGE.second) {
+                throw;
+            }
+            else {
+                ++serverPortNum;
+            }
         }
-    }
-    if (!serverSetupDone) {
-        throw std::runtime_error("Could not setup listener socket (no port available?)");
     }
     m_fakeServer = std::move(fakeServer);
 }
@@ -110,23 +138,7 @@ void IntegrationTestFixture::setupDaemon_() {
 // ============================================================================
 
 BOOST_FIXTURE_TEST_CASE(connectionTest, IntegrationTestFixture) { // Makes the test case a class that is a subclass of IntegrationTestFixture
-    using namespace std::chrono_literals; // For s, ms, us, ns suffixes
-    constexpr const uint32_t MAX_TRIES = 30;
-    const auto SLEEP_TIME = 100ms;
-
-    bool connectionEstablished = false;
-    uint32_t tries = 0;
-    while (!connectionEstablished && tries < MAX_TRIES) {
-        try {
-            ClientSocket client(CLIENT_PORT);
-            connectionEstablished = true;
-        }
-        catch (const std::exception& e) {
-            std::this_thread::sleep_for(SLEEP_TIME);
-        }
-        ++tries;
-    }
-    BOOST_REQUIRE(connectionEstablished);
+    connectToDaemon(); // Boost will make the test fail and print a message if this throws an exception
 }
 
 } // namespace daemon
