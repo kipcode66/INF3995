@@ -15,8 +15,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTP_SERVER_CPP_SOURCES
-    http/RequestHandler.cpp
-    
+    http/RestApi.cpp
 )
 
 ###############################################################################
@@ -26,7 +25,7 @@ set(HTTP_SERVER_CPP_SOURCES
 # All .h, .hpp, .hh files
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTP_SERVER_HEADER_SOURCES
-    http/RequestHandler.hpp
+    http/RestApi.hpp
 )
 
 makeAbsolute(HTTP_SERVER_CPP_SOURCES)

@@ -15,8 +15,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although space in filename is not recommended)
 set(HTTP_SERVER_TEST_CPP_SOURCES
-    http/example.cpp
-    http/example2.cpp
+
 )
 
 makeAbsolute(HTTP_SERVER_TEST_CPP_SOURCES)

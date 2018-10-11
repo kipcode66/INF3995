@@ -1,7 +1,7 @@
 #include <iostream>
 #include <inttypes.h>
 
-#include "http/RequestHandler.hpp"
+#include "http/RestApi.hpp"
 
 void usage() {
     std::cerr << std::endl << "Usage: tp3 [portNum]" << std::endl <<
@@ -11,7 +11,7 @@ void usage() {
         "    NOTE: On Unix systems, opening ports below 1024 requires superuser privileges." << std::endl;
 }
 
-uint16_t parseArgs(int argc, char** argv) {
+uint32_t parseArgs(int argc, char** argv) {
     uint32_t portId;
     if (argc == 1) {
         portId = 80;
@@ -25,7 +25,7 @@ uint16_t parseArgs(int argc, char** argv) {
         exit(0);
     }
 
-    if (portId == 0 || portId > UINT16_MAX) {
+    if (portId == 0 || portId > UINT32_MAX) {
         std::cerr << std::endl <<
             "Cannot bind server to port \"" << argv[1] << "\"" << std::endl;
         usage();
@@ -37,20 +37,14 @@ uint16_t parseArgs(int argc, char** argv) {
 int main(int argc, char** argv) {
 
     uint16_t portId = parseArgs(argc, argv);
-    constexpr std::size_t MAX_PAYLOAD_SIZE = (100 << 20);
 
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
 
-        auto opts = Pistache::Http::Endpoint::options().threads(1).maxPayload(MAX_PAYLOAD_SIZE);
-        Pistache::Http::Endpoint server(addr);
-        server.init(opts);
-
-        auto requestHandler = std::make_shared<elevation::http::RequestHandler>();
-        server.setHandler(requestHandler);
-
+        RestApi api(addr);
+        api.init();
         std::cout << "Server is about to start." << std::endl;
-        server.serve();
+        api.start();
     }
     catch (std::exception& e) {
         std::cerr << "Server crashed with C++ exception: \"" << e.what() << "\"" << std::endl;
