@@ -25,7 +25,7 @@ public:
     SslSession& operator=(const SslSession&) = delete;
 
     void bindTo(std::unique_ptr<Socket> socket);
-    
+
     void write(const std::string& data);
     std::string read();
 

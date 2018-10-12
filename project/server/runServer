@@ -133,11 +133,11 @@ runScript() {
         -h | --help)
             usage
             ;;
-        
+
         --start)
             start
             ;;
-        
+
         --stop)
             stop
             ;;
@@ -145,7 +145,7 @@ runScript() {
         --test | -t)
             test
             ;;
-        
+
         *)
             usage
             ;;

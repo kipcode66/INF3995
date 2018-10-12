@@ -27,7 +27,7 @@ namespace daemon {
  * because we don't want to have to do the setup and the tearing down
  * inside the test function. That way, the test cases will have access to this
  * class's attributes without having to worry about setting them up.
- */ 
+ */
 class IntegrationTestFixture {
 
 public:
