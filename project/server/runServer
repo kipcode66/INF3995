@@ -4,12 +4,19 @@ SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
 HTTP_SERVER_NAME=http-server
 SSL_DAEMON_NAME=ssl-daemon
 
+message() {
+    tput bold 2>/dev/null
+    tput setaf 10 2>/dev/null
+    echo -n "$@"
+    tput sgr0 2>/dev/null
+}
+
 processesNotAlreadyStarted() {
     if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
-        echo "Cannot start HTTP Server : already started (PID $(pgrep -x "${HTTP_SERVER_NAME}"))"
+        message "Cannot start HTTP Server : already started (PID $(pgrep -x "${HTTP_SERVER_NAME}"))"$'\n'
         false
     elif pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
-        echo "Cannot start SSL Daemon : already started (PID $(pgrep -x "${SSL_DAEMON_NAME}"))"
+        echo "Cannot start SSL Daemon : already started (PID $(pgrep -x "${SSL_DAEMON_NAME}"))"$'\n'
         false
     else
         true
@@ -35,6 +42,7 @@ assignSslDaemonPortRange() {
 }
 
 startHttpServer() {
+    message $'\nStarting HTTP Server...\n'
     HTTP_SERVER_PORT="${HTTP_SERVER_MIN_PORT}"
     while [ "${HTTP_SERVER_PORT}" != "${HTTP_SERVER_MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${HTTP_SERVER_PORT}"
@@ -49,6 +57,7 @@ startHttpServer() {
 }
 
 startSslDaemon() {
+    message $'\nStarting SSL Daemon...\n'
     SSL_DAEMON_PORT="${SSL_DAEMON_MIN_PORT}"
     while [ "${SSL_DAEMON_PORT}" != "${SSL_DAEMON_MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${SSL_DAEMON_PORT}"
@@ -70,6 +79,8 @@ start() {
         assignSslDaemonPortRange
         startSslDaemon
         disown
+        message $'\nHTTP Server started on port '${HTTP_SERVER_PORT}',' \
+                $'and SSL Daemon started on port '${SSL_DAEMON_PORT}$'.\n\n'
     fi
 }
 
@@ -84,13 +95,6 @@ stop() {
         sleep 0.5
         kill -KILL $(pgrep -x "${SSL_DAEMON_NAME}") 2>/dev/null
     fi
-}
-
-message() {
-    tput bold 2>/dev/null
-    tput setaf 10 2>/dev/null
-    echo "$@"
-    tput sgr0 2>/dev/null
 }
 
 testDaemon() {
