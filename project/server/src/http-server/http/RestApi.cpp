@@ -69,16 +69,17 @@ void RestApi::createDescription_() {
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "getIdentification");
     puts("getIdentification function called");
 
     Database* db = Database::instance();
-    const char* mocked_mac = "DE:AD:BE:EF:CA:FE";
-    struct User user = db->getUserByMac(mocked_mac);
-    if (user.mac == NULL) {
+    const char* mocked_mac1 = "DE:AD:BE:EF:CA:FE";
+    const char* mocked_mac2 = "DE:AD:FA:11:BA:DD";
+    struct User user;
+    if (db->getUserByMac(mocked_mac2, &user)) {
+        response.send(Http::Code::Ok, "created a new user");
         // create user
     } else {
-        // return identification
+        response.send(Http::Code::Ok, "this user exist, id=" + std::to_string(user.id) + "\n");
     }
 }
 
