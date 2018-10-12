@@ -17,13 +17,19 @@ void DaemonMaster::run() {
     SslContext& ctx = SslContext::getInstance();
 
     while (true) {
-        SslSession session = ctx.acceptSession();
-        ClientSocket httpServerSocket(m_config.getOutputPort());
+        try {
+            SslSession session = ctx.acceptSession();
+            ClientSocket httpServerSocket(m_config.getOutputPort());
 
-        DaemonRunner runner(std::move(session), std::move(httpServerSocket));
+            DaemonRunner runner(std::move(session), std::move(httpServerSocket));
 
-        if (SignalHandling::s_cleanupRequested.load()) {
-            throw std::runtime_error("SSL Daemon killed by signal.");
+            if (SignalHandling::s_cleanupRequested.load()) {
+                throw std::runtime_error("SSL Daemon killed by signal.");
+            }
+        }
+        catch (const std::exception& e) {
+            std::cerr << "A C++ exception occurred while trying to establish client-server connections : " <<
+                e.what() << std::endl;
         }
     }
 }
