@@ -151,6 +151,8 @@ runScript() {
             ;;
 
         *)
+            echo "Invalid option '$1'"
+            echo
             usage
             ;;
 
