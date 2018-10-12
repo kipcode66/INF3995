@@ -6,7 +6,6 @@ import java.util.*
 
 object NetUtils {
     fun translateIP(ip: Int): String {
-        var ipTmp = ip
         val bytes = ByteBuffer.allocate(4).putInt(ip).array()
                 .map(Byte::toPositiveInt)
                 .map(Int::toString).reversed()
@@ -24,9 +23,7 @@ object NetUtils {
         try {
             val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
             for (intf in interfaces) {
-                if (interfaceName != null) {
-                    if (!intf.name.equals(interfaceName, ignoreCase = true)) continue
-                }
+                if (!intf.name.equals(interfaceName, ignoreCase = true)) continue
                 val mac = intf.getHardwareAddress() ?: return ""
                 val buf = StringBuilder()
                 for (aMac in mac) buf.append(String.format("%02x:", aMac))
