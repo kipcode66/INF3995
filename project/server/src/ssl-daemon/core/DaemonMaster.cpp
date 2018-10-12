@@ -22,7 +22,7 @@ void DaemonMaster::run() {
 
         DaemonRunner runner(std::move(session), std::move(httpServerSocket));
 
-        if (SignalHandling::cleanupRequested.load()) {
+        if (SignalHandling::s_cleanupRequested.load()) {
             throw std::runtime_error("SSL Daemon killed by signal.");
         }
     }

@@ -3,13 +3,13 @@
 namespace elevation {
 namespace daemon {
 
-const std::string SocketClosedException::REASON = "Socket closed";
+const std::string SocketClosedException::s_REASON = "Socket closed";
 
 SocketClosedException::SocketClosedException()
 { }
 
 const char* SocketClosedException::what() const noexcept {
-    return REASON.c_str();
+    return s_REASON.c_str();
 }
 
 }

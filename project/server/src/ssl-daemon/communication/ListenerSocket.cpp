@@ -21,7 +21,7 @@ ListenerSocket::ListenerSocket(uint16_t portNum)
     }
 
     // Make this socket wait for connections.
-    if (::listen(m_fd, SOCKET_MAX_BACKLOG) < 0) {
+    if (::listen(m_fd, s_SOCKET_MAX_BACKLOG) < 0) {
         throw std::runtime_error(::strerror(errno));
     }
 }

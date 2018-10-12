@@ -59,8 +59,8 @@ void SslSession::write(const std::string& data) {
 }
 
 std::string SslSession::read() {
-    char buffer[BUFFER_READ_SIZE + 1];
-    int readSize = ::SSL_read(m_ssl, buffer, BUFFER_READ_SIZE);
+    char buffer[s_BUFFER_READ_SIZE + 1];
+    int readSize = ::SSL_read(m_ssl, buffer, s_BUFFER_READ_SIZE);
     handleSslErrorsIfAny_(readSize);
     buffer[readSize] = '\0';
     return std::string(buffer);

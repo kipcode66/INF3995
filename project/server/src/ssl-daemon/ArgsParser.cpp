@@ -8,8 +8,8 @@ namespace daemon {
 ArgsParser::ArgsParser() { }
 
 ArgsParser::Config ArgsParser::parseArgs(const std::vector<std::string>& argv) const {
-    uint16_t listenPort = DEFAULT_LISTEN_PORT;
-    uint16_t outputPort = DEFAULT_OUTPUT_PORT;
+    uint16_t listenPort = s_DEFAULT_LISTEN_PORT;
+    uint16_t outputPort = s_DEFAULT_OUTPUT_PORT;
 
     for (std::size_t i = 0; i < argv.size(); ++i) {
         const std::string arg = argv.at(i);

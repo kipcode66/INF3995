@@ -31,11 +31,11 @@ namespace daemon {
 class IntegrationTestFixture {
 
 public:
-    static const __pid_t NO_PID = -1;
-    static const uint16_t NO_PORT = 0;
-    static constexpr const auto SERVER_PORT_RANGE =
+    static const __pid_t s_NO_PID = -1;
+    static const uint16_t s_NO_PORT = 0;
+    static constexpr const auto s_SERVER_PORT_RANGE =
         std::pair<uint16_t, uint16_t>(10080, 10100);
-    static const uint16_t CLIENT_PORT = 10443;
+    static const uint16_t s_CLIENT_PORT = 10443;
 
 public:
     explicit IntegrationTestFixture();
@@ -53,7 +53,7 @@ protected:
 };
 
 IntegrationTestFixture::IntegrationTestFixture()
-    : m_childPid(NO_PID)
+    : m_childPid(s_NO_PID)
     , m_fakeServer(nullptr)
 {
     setupFakeServer_();
@@ -62,7 +62,7 @@ IntegrationTestFixture::IntegrationTestFixture()
 
 IntegrationTestFixture::~IntegrationTestFixture()
 {
-    if (m_childPid != NO_PID) {
+    if (m_childPid != s_NO_PID) {
         using namespace std::chrono_literals; // For s, ms, us, ns suffixes
 
         ::kill(m_childPid, SIGTERM);
@@ -81,7 +81,7 @@ ClientSocket IntegrationTestFixture::connectToDaemon() {
     uint32_t tries = 0;
     while (!connectionEstablished && tries < MAX_TRIES) {
         try {
-            client = std::unique_ptr<ClientSocket>(new ClientSocket(CLIENT_PORT));
+            client = std::unique_ptr<ClientSocket>(new ClientSocket(s_CLIENT_PORT));
             connectionEstablished = true;
         }
         catch (const std::exception& e) {
@@ -97,16 +97,16 @@ ClientSocket IntegrationTestFixture::connectToDaemon() {
 }
 
 void IntegrationTestFixture::setupFakeServer_() {
-    uint16_t serverPortNum = SERVER_PORT_RANGE.first;
+    uint16_t serverPortNum = s_SERVER_PORT_RANGE.first;
     std::unique_ptr<ListenerSocket> fakeServer;
     bool serverSetupDone = false;
-    while (!serverSetupDone && serverPortNum <= SERVER_PORT_RANGE.second) {
+    while (!serverSetupDone && serverPortNum <= s_SERVER_PORT_RANGE.second) {
         try {
             fakeServer = std::unique_ptr<ListenerSocket>(new ListenerSocket(serverPortNum));
             serverSetupDone = true;
         }
         catch (const std::exception& e) {
-            if (serverPortNum == SERVER_PORT_RANGE.second) {
+            if (serverPortNum == s_SERVER_PORT_RANGE.second) {
                 throw;
             }
             else {
@@ -127,7 +127,7 @@ void IntegrationTestFixture::setupDaemon_() {
             SSL_DAEMON_EXECUTABLE,
             SSL_DAEMON_EXECUTABLE,
             "-l",
-            std::to_string(CLIENT_PORT).c_str(),
+            std::to_string(s_CLIENT_PORT).c_str(),
             "-o",
             std::to_string(m_fakeServer->getPort()).c_str(),
             (char*)NULL

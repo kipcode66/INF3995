@@ -12,9 +12,9 @@ namespace daemon {
 class HttpPacketReader {
 
 public:
-    static const std::regex HTTP_HEADER_END_REGEX;
-    static const std::regex HTTP_CONTENT_SIZE_REGEX;
-    static const std::size_t HTTP_CONTENT_SIZE_RESULT_GROUP_ID;
+    static const std::regex s_HTTP_HEADER_END_REGEX;
+    static const std::regex s_HTTP_CONTENT_SIZE_REGEX;
+    static const std::size_t s_HTTP_CONTENT_SIZE_RESULT_GROUP_ID;
 
 public:
     explicit HttpPacketReader(Socket& socket);

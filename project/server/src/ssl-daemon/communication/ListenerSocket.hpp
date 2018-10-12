@@ -8,7 +8,7 @@ namespace daemon {
 
 class ListenerSocket : public Socket {
 public:
-    static constexpr int SOCKET_MAX_BACKLOG = 10; ///< @brief Max Number of pending connections before we drop the next ones.
+    static constexpr int s_SOCKET_MAX_BACKLOG = 10; ///< @brief Max Number of pending connections before we drop the next ones.
 
 public:
     ListenerSocket(uint16_t portNum);

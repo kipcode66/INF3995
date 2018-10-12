@@ -12,12 +12,12 @@
 namespace elevation {
 namespace daemon {
 
-std::unique_ptr<SslContext> SslContext::c_instance = nullptr;
+std::unique_ptr<SslContext> SslContext::s_instance = nullptr;
 
 void SslContext::createInstance(uint16_t portNum) {
-    if (c_instance.get() == nullptr) {
+    if (s_instance.get() == nullptr) {
         ListenerSocket socket(portNum);
-        c_instance = std::unique_ptr<SslContext>(
+        s_instance = std::unique_ptr<SslContext>(
             new SslContext(std::move(socket), SSL_DAEMON_CERTIFICATE, SSL_DAEMON_PRIVATE_KEYFILE)
         );
     }
@@ -27,8 +27,8 @@ void SslContext::createInstance(uint16_t portNum) {
 }
 
 SslContext& SslContext::getInstance() {
-    if (c_instance.get() != nullptr) {
-        return *c_instance;
+    if (s_instance.get() != nullptr) {
+        return *s_instance;
     }
     else {
         throw std::logic_error("Cannot get SslContext instance : not yet created.");

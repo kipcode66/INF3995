@@ -8,7 +8,9 @@ namespace daemon {
 
 class SignalHandling {
 public:
-    static std::atomic<bool> cleanupRequested; ///< @brief Whether a signal such as SIGINT requested a cleanup.
+    static std::atomic<bool> s_cleanupRequested; ///< @brief Whether a signal such as SIGINT requested a cleanup.
+
+public:
     static void installSignalHandlers();
 
 private:

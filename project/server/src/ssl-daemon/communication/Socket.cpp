@@ -17,7 +17,7 @@ namespace elevation {
 namespace daemon {
 
 Socket::Socket(uint16_t portNum)
-    : m_fd(NO_FD)
+    : m_fd(s_NO_FD)
     , m_portNum(portNum)
 {
     // Create socket
@@ -37,23 +37,23 @@ Socket::Socket(Socket&& that)
     : m_fd(that.m_fd)
     , m_portNum(that.m_portNum)
 {
-    that.m_fd = NO_FD;
+    that.m_fd = s_NO_FD;
 }
 
 Socket::~Socket()
 {
-    if (m_fd != NO_FD) {
+    if (m_fd != s_NO_FD) {
         ::close(m_fd);
     }
 }
 
 Socket& Socket::operator=(Socket&& that) {
-    if (m_fd != NO_FD) {
+    if (m_fd != s_NO_FD) {
         ::close(m_fd);
     }
 
     m_fd = that.m_fd;
-    that.m_fd = NO_FD;
+    that.m_fd = s_NO_FD;
     return *this;
 }
 

@@ -11,7 +11,7 @@ class Socket {
     friend class SslSession; // Requires the file descriptor.
 
 public:
-    static constexpr int NO_FD = -1;
+    static constexpr int s_NO_FD = -1;
 
 public:
     Socket(uint16_t portNum);

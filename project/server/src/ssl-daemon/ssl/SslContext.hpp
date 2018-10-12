@@ -41,7 +41,7 @@ protected:
     ListenerSocket m_socket;
 
 protected:
-    static std::unique_ptr<SslContext> c_instance;
+    static std::unique_ptr<SslContext> s_instance;
 };
 
 } // namespace daemon
