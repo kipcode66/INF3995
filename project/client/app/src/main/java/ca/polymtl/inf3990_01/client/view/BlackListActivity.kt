@@ -1,46 +1,28 @@
 package ca.polymtl.inf3990_01.client.view
 
-import android.content.Intent
 import android.os.Bundle
-import android.support.annotation.MainThread
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
-import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
-import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
-import kotlinx.android.synthetic.main.activity_queue.*
-import kotlinx.android.synthetic.main.app_bar_queue.*
-import kotlinx.android.synthetic.main.content_queue.*
-import kotlinx.coroutines.experimental.*
-import org.koin.android.ext.android.get
-import org.koin.android.ext.android.inject
-import kotlin.concurrent.thread
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlinx.android.synthetic.main.activity_black_list.*
+import kotlinx.android.synthetic.main.app_bar_black_list.*
 
-import kotlinx.coroutines.experimental.javafx.JavaFx as Main
-
-class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-
-    val tokenMgr: TokenManagerService by inject()
-    val restService: RestRequestService by inject()
-    lateinit var snack: Snackbar
-    lateinit var toast: Toast
-
-    lateinit var job: Job
+class BlackListActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_queue)
+        setContentView(R.layout.activity_black_list)
         setSupportActionBar(toolbar)
-        snack = Snackbar.make(nav_view, "Hello, World!", Snackbar.LENGTH_LONG)
-        toast = Toast.makeText(get(), "Slide show!", Toast.LENGTH_SHORT)
+
+        fab.setOnClickListener { view ->
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
+        }
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -48,17 +30,6 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-        job = launch {
-            val token = tokenMgr.getToken()
-            this@QueueActivity.runOnUiThread {
-                myText.text = "Token: $token"
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        job.cancel()
-        super.onDestroy()
     }
 
     override fun onBackPressed() {
@@ -71,7 +42,7 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.queue, menu)
+        menuInflater.inflate(R.menu.black_list, menu)
         return true
     }
 
@@ -89,23 +60,19 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_queue -> {
-                val intent = Intent(this, QueueActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                startActivity(intent)
+                // Handle the camera action
             }
             R.id.nav_local_song -> {
-                val intent = Intent(this, LocalSongActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                startActivity(intent)
+
             }
             R.id.nav_slideshow -> {
-                snack.show()
+
             }
             R.id.nav_manage -> {
-                async { restService.doRequest("Something xD") }
+
             }
             R.id.nav_share -> {
-                toast.show()
+
             }
             R.id.nav_send -> {
 

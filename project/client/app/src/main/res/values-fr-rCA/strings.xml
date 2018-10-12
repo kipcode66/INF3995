@@ -15,4 +15,10 @@
     <string name="network_error">Erreur Réseau</string>
     <string name="nav_header_title">Android Studio</string>
     <string name="wifi_disabled">Une connection wifi est nécessaire</string>
+    <string name="title_activity_local_song">Vos Chansons</string>
+    <string name="title_activity_statistics">Statistiques</string>
+    <string name="title_activity_black_list">Liste Noire</string>
+    <string name="title_activity_setting">Paramètres</string>
+    <string name="action_reload">Rafraîchir</string>
+    <string name="songs_list_title">Liste des Chansons</string>
 </resources>
