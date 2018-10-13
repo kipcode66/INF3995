@@ -1,53 +1,26 @@
 package ca.polymtl.inf3990_01.client.view
 
-import android.content.Intent
 import android.os.Bundle
-import android.support.annotation.MainThread
-import android.support.design.widget.Snackbar
-import android.support.design.widget.NavigationView
-import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
-import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
-import kotlinx.android.synthetic.main.activity_queue.*
-import kotlinx.android.synthetic.main.app_bar_queue.*
+import ca.polymtl.inf3990_01.client.model.state.AppStateService
 import kotlinx.android.synthetic.main.content_queue.*
 import kotlinx.coroutines.experimental.*
-import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
-import kotlin.concurrent.thread
-import kotlin.coroutines.experimental.CoroutineContext
 
 import kotlinx.coroutines.experimental.javafx.JavaFx as Main
 
-class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawer_layout) {
 
     val tokenMgr: TokenManagerService by inject()
-    val restService: RestRequestService by inject()
-    lateinit var snack: Snackbar
-    lateinit var toast: Toast
 
     lateinit var job: Job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_queue)
-        setSupportActionBar(toolbar)
-        snack = Snackbar.make(nav_view, "Hello, World!", Snackbar.LENGTH_LONG)
-        toast = Toast.makeText(get(), "Slide show!", Toast.LENGTH_SHORT)
 
-        val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        nav_view.setNavigationItemSelectedListener(this)
         job = launch {
             val token = tokenMgr.getToken()
             this@QueueActivity.runOnUiThread {
@@ -61,14 +34,6 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         super.onDestroy()
     }
 
-    override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
-            drawer_layout.closeDrawer(GravityCompat.START)
-        } else {
-            super.onBackPressed()
-        }
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.queue, menu)
@@ -80,39 +45,13 @@ class QueueActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelect
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
-            R.id.action_settings -> return true
+            R.id.action_settings -> {
+                val currState = stateService.getState().type
+                val v = AppStateService.State.values()
+                stateService.setState(v[(v.indexOf(currState) + 1) % v.size])
+                return true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        // Handle navigation view item clicks here.
-        when (item.itemId) {
-            R.id.nav_queue -> {
-                val intent = Intent(this, QueueActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                startActivity(intent)
-            }
-            R.id.nav_local_song -> {
-                val intent = Intent(this, LocalSongActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                startActivity(intent)
-            }
-            R.id.nav_slideshow -> {
-                snack.show()
-            }
-            R.id.nav_manage -> {
-                async { restService.doRequest("Something xD") }
-            }
-            R.id.nav_share -> {
-                toast.show()
-            }
-            R.id.nav_send -> {
-
-            }
-        }
-
-        drawer_layout.closeDrawer(GravityCompat.START)
-        return false
     }
 }

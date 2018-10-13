@@ -1,14 +1,10 @@
 package ca.polymtl.inf3990_01.client.view
-import android.content.Intent
+
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.support.design.widget.NavigationView
 import android.support.v4.app.ActivityCompat
-import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -16,39 +12,19 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.model.LocalSong
-import kotlinx.android.synthetic.main.activity_local_song.*
-import kotlinx.android.synthetic.main.app_bar_local_song.*
 import kotlinx.android.synthetic.main.content_local_song.*
 import kotlinx.android.synthetic.main.song.view.*
 
-
-class LocalSongActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R.id.drawer_layout) {
 
     var songsList=ArrayList<LocalSong>()
     var adapter:SongAdapter=SongAdapter(songsList)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_local_song)
-        setSupportActionBar(toolbar)
-
-        val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
-
-        nav_view.setNavigationItemSelectedListener(this)
 
         SongsList.adapter = adapter
         verifyPermsions()
-    }
-
-    override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
-            drawer_layout.closeDrawer(GravityCompat.START)
-        } else {
-            super.onBackPressed()
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -122,38 +98,6 @@ class LocalSongActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             }
             cursor.close()
         }
-    }
-
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        // Handle navigation view item clicks here.
-        when (item.itemId) {
-            R.id.nav_queue -> {
-                val intent = Intent(this, QueueActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY)
-                startActivity(intent)
-            }
-            R.id.nav_local_song -> {
-                val intent = Intent(this, LocalSongActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-                startActivity(intent)
-            }
-            R.id.nav_slideshow -> {
-
-            }
-            R.id.nav_manage -> {
-
-            }
-            R.id.nav_share -> {
-
-            }
-            R.id.nav_send -> {
-
-            }
-        }
-
-        drawer_layout.closeDrawer(GravityCompat.START)
-        return false
     }
 }
 
