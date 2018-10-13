@@ -43,6 +43,7 @@ abstract class AbstractDrawerActivity(
         setContentView(layoutRes)
         drawerLayout = findViewById(drawerLayoutId)
         toolbar = drawerLayout.findViewWithTag(getString(R.string.tag_toolbar))
+        navView = drawerLayout.findViewWithTag(getString(R.string.tag_nav_view))
 
         setSupportActionBar(toolbar)
 
