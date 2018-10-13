@@ -30,16 +30,24 @@ class TokenManagerService(private val appCtx: Context, private val httpClient: H
     }
 
     private var token: Int = 0
+    private var tokenLock = Object()
 
     suspend fun getToken(): Int {
         // TODO Ensure that the token is still valid.
+        var oldToken = token // Temporary value, we can't trust it when we are not synchronized
+        synchronized(tokenLock) {
+            oldToken = token
+        }
         val resp = updateToken()
-        token = resp.identificateur
-
-        // TODO Send a signal to the Presenter to show popup with the response message.
-        // Temporarly, opening a Toast (a little message at the bottom of the screen)
-        Handler(appCtx.mainLooper).post {
-            Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
+        synchronized(tokenLock) {
+            token = resp.identificateur
+        }
+        if (oldToken != token || resp.identificateur == 0) {
+            // TODO Send a signal to the Presenter to show popup with the response message.
+            // Temporarly, opening a Toast (a little message at the bottom of the screen)
+            Handler(appCtx.mainLooper).post {
+                Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
+            }
         }
         return token
     }
@@ -50,7 +58,9 @@ class TokenManagerService(private val appCtx: Context, private val httpClient: H
                 var resp: GetTokenResponseData
                 try {
                     resp = fetchToken()
-                    token = resp.identificateur
+                    synchronized(tokenLock) {
+                        token = resp.identificateur
+                    }
                 } catch (e: VolleyError) {
                     val msg: String = when (e.networkResponse.statusCode) {
                         400 -> appCtx.getString(R.string.error_message_bad_request)

@@ -52,7 +52,7 @@ class RestRequestService(private val appCtx: Context, private val tokenMgr: Toke
             }
             for (chanson in resp.value.chansons) {
                 val duration = chanson.duree.split(":").map(String::toInt).reduce { acc, i -> acc * 60 + i }
-                list.add(Song(chanson.titre, chanson.artiste, duration, chanson.no, chanson.proposeePar))
+                list.add(Song(chanson.titre, chanson.artiste, duration, chanson.no, if (chanson.proprietaire) null else chanson.proposeePar))
             }
         }
         return list
