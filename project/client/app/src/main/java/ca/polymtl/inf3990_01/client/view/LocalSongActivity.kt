@@ -13,7 +13,7 @@ import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.model.LocalSong
 import kotlinx.android.synthetic.main.content_local_song.*
-import kotlinx.android.synthetic.main.song.view.*
+import kotlinx.android.synthetic.main.local_song.view.*
 
 class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R.id.drawer_layout) {
 
@@ -50,12 +50,12 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
 
     inner  class SongAdapter(val listOfSongOnTheDevice: ArrayList<LocalSong>): BaseAdapter() {
         override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {
-            val view = v ?: layoutInflater.inflate(R.layout.song, viewGroup, false)
+            val view = v ?: layoutInflater.inflate(R.layout.local_song, viewGroup, false)
             val song = this.listOfSongOnTheDevice[postion]
             view.songName.text = song.title
             view.author.text = song.authorName
             view.send.setOnClickListener {
-                //TODO : send song to server
+                //TODO : send local_song to server
             }
             return view
 

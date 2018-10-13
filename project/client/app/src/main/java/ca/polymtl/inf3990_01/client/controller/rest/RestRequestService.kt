@@ -1,11 +1,18 @@
 package ca.polymtl.inf3990_01.client.controller.rest
 
-import android.content.Context
-import android.util.Log
+import ca.polymtl.inf3990_01.client.model.LocalSong
+import ca.polymtl.inf3990_01.client.model.Song
 
-class RestRequestService(val tokenMgr: TokenManagerService) {
-    fun initRequestService() {
+class RestRequestService(private val tokenMgr: TokenManagerService, private val httpClient: HTTPRestClient) {
+    suspend fun getSongList(): List<Song> {
+        TODO("Not Implemented")
     }
 
-    suspend fun doRequest(msg: String) = Log.d("App", "[token=${tokenMgr.getToken()}] msg: $msg")
+    suspend fun sendSong(song: LocalSong) {
+        TODO("Not Implemented")
+    }
+
+    suspend fun deleteSong(song: Song) {
+        TODO("Not Implemented")
+    }
 }
