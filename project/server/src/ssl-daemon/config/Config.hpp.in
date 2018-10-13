@@ -1,0 +1,17 @@
+// THIS HEADER IS CONFIGURED AUTOMATICALLY BY CMAKE.
+
+#ifndef CONFIG_SSL_DAEMON_CONFIG_HPP
+#define CONFIG_SSL_DAEMON_CONFIG_HPP
+
+namespace elevation {
+namespace daemon {
+
+static constexpr const char* SSL_DAEMON_EXECUTABLE = "@SSL_DAEMON_EXECUTABLE@";
+static constexpr const char* SSL_DAEMON_CERTIFICATE = "@SSL_DAEMON_CERTIFICATE@";
+static constexpr const char* SSL_DAEMON_PRIVATE_KEYFILE = "@SSL_DAEMON_PRIVATE_KEYFILE@";
+static constexpr const char* SSL_DAEMON_ISSUER_CERTIFICATE = "@SSL_DAEMON_ISSUER_CERTIFICATE@";
+
+} // namespace daemon
+} // namespace elevation
+
+#endif // !CONFIG_SSL_DAEMON_CONFIG_HPP

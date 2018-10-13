@@ -67,14 +67,22 @@ void RestApi::createDescription_() {
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "getIdentification");
-    puts("getIdentification function called");
+    auto token = request.headers().getRaw("X-Auth-Token");
+    uint32_t t = std::stoi(token.value());
+    if (t == 0) {
+        t = rand();
+    }
+    response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au café-bistro Élévation!\"}");
+    printf("getIdentification function called, token is %d\n", t);
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::string param = request.param(":id").as<std::string>();
-    response.send(Http::Code::Ok, "getFileList, param is : " + param);
+    response.send(Http::Code::Ok, "{\n\"chansons\":[\n"
+        "{\n\"titre\":\"Never Gonna Give You Up\",\n\"artiste\":\"Foo\",\n\"duree\":\"4:20\",\n\"proposeePar\":\"Chuck Norris\",\n\"proprietaire\":false,\n\"no\":42},\n"
+        "{\n\"titre\":\"Hey Jude\",\n\"artiste\":\"Beatles\",\n\"duree\":\"7:05\",\n\"proposeePar\":\"Claude\",\n\"proprietaire\":true,\n\"no\":25}\n"
+    "]\n}\n");
     printf("getFileList function called, param is %s\n", param.c_str());
 }
 

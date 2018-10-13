@@ -16,6 +16,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # Use quotes "" if a file contains a space (although space in filename is not recommended)
 set(SSL_DAEMON_TEST_CPP_SOURCES
     TestArgsParser.cpp
+    IntegrationTests.cpp
 )
 
 makeAbsolute(SSL_DAEMON_TEST_CPP_SOURCES)

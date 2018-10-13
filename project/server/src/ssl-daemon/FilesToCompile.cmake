@@ -16,6 +16,16 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # Use quotes "" if a file contains a space (although not recommended)
 set(SSL_DAEMON_CPP_SOURCES
     ArgsParser.cpp
+    signal/SignalHandling.cpp
+    communication/Socket.cpp
+    communication/ListenerSocket.cpp
+    communication/ClientSocket.cpp
+    communication/exception/SocketClosedException.cpp
+    packet/HttpPacketReader.cpp
+    ssl/SslContext.cpp
+    ssl/SslSession.cpp
+    core/DaemonRunner.cpp
+    core/DaemonMaster.cpp
 )
 
 ###############################################################################
@@ -26,6 +36,16 @@ set(SSL_DAEMON_CPP_SOURCES
 # Use quotes "" if a file contains a space (although not recommended)
 set(SSL_DAEMON_HEADER_SOURCES
     ArgsParser.hpp
+    signal/SignalHandling.hpp
+    communication/Socket.hpp
+    communication/ListenerSocket.hpp
+    communication/ClientSocket.hpp
+    communication/exception/SocketClosedException.hpp
+    packet/HttpPacketReader.hpp
+    ssl/SslContext.hpp
+    ssl/SslSession.hpp
+    core/DaemonRunner.hpp
+    core/DaemonMaster.hpp
 )
 
 makeAbsolute(SSL_DAEMON_CPP_SOURCES)

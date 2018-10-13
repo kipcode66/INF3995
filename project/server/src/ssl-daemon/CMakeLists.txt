@@ -4,14 +4,21 @@
 
 set(DEPS_DIR "${CMAKE_BINARY_DIR}/dependencies")
 
-include(FilesToCompile.cmake) # Call CMake script "FilesToCompile.cmake"
+include(FilesToCompile.cmake)  # Call CMake script "FilesToCompile.cmake"
+include(FilesToGenerate.cmake) # Call CMake script "FilesToGenerate.cmake"
 
 # Configure compiler
 set(CMAKE_CXX_STANDARD 14)                 # Equivalent to the --std=c++<version> flag in g++
 set(CMAKE_CXX_STANDARD_REQUIRED ON)        # C++ version 14 is required, not optional
-include_directories("${DEPS_DIR}/include") # Equivalent to the -I flag in g++
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall")
+include_directories(                       # Equivalent to the -I flag in g++
+    "${DEPS_DIR}/include"
+    "${COMMON_INCLUDE_DIR}"
+    "${SSL_DAEMON_GENERATED_INCLUDE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+)
 link_directories("${DEPS_DIR}/lib")        # Equivalent to the -L flag in g++
-link_libraries(ssl)                        # Equivalent to the -l flag in g++
+link_libraries(ssl crypto atomic)          # Equivalent to the -l flag in g++
 
 # Create targets
 add_executable(ssl-daemon     main.cpp "${SSL_DAEMON_HEADER_SOURCES}")

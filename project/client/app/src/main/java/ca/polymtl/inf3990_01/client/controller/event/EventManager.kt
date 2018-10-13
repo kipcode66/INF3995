@@ -3,20 +3,19 @@ package ca.polymtl.inf3990_01.client.controller.event
 import ca.polymtl.inf3990_01.client.utils.SingletonHolderNoArg
 
 class EventManager private constructor() {
-    interface Listener<in T: Event>: (T) -> Unit
-    private val listeners: MutableMap<Class<out Event>, ArrayList<Listener<Event>>> = mutableMapOf()
+    private val listeners: MutableMap<Class<out Event>, ArrayList<(Event) -> Unit>> = mutableMapOf()
 
-    fun <T: Event> addEventListener(event: Class<out T>, listener: Listener<T>) {
+    fun <T: Event> addEventListener(event: Class<out T>, listener: (T) -> Unit) {
         synchronized(listeners) {
             if (listeners[event] == null) {
                 listeners[event] = arrayListOf()
             }
             @Suppress("UNCHECKED_CAST")
-            listeners[event]?.add(listener as Listener<Event>)
+            listeners[event]?.add(listener as (Event) -> Unit)
         }
     }
 
-    fun <T: Event> removeEventListener(event: Class<out T>, listener: Listener<T>) {
+    fun <T: Event> removeEventListener(event: Class<out T>, listener: (T) -> Unit) {
         synchronized(listeners) {
             listeners[event]?.remove(listener)
         }
