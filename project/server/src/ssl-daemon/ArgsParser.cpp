@@ -8,8 +8,8 @@ namespace daemon {
 ArgsParser::ArgsParser() { }
 
 ArgsParser::Config ArgsParser::parseArgs(const std::vector<std::string>& argv) const {
-    uint16_t listenPort = DEFAULT_LISTEN_PORT;
-    uint16_t outputPort = DEFAULT_OUTPUT_PORT;
+    uint16_t listenPort = s_DEFAULT_LISTEN_PORT;
+    uint16_t outputPort = s_DEFAULT_OUTPUT_PORT;
 
     for (std::size_t i = 0; i < argv.size(); ++i) {
         const std::string arg = argv.at(i);
@@ -43,11 +43,13 @@ ArgsParser::Config ArgsParser::parseArgs(const std::vector<std::string>& argv) c
 
 void ArgsParser::usage() const {
     std::cout <<
-        "Usage : " << std::endl <<
+        "USAGE" << std::endl <<
         "    ssl-daemon [-l <portNum>] [-o <portNum>]" << std::endl <<
         std::endl <<
         "OPTIONS" << std::endl <<
-        "    --help | -h\t\tPrint this help menu and exit." << std::endl;
+        "    --help | -h     Print this help menu and exit." << std::endl <<
+        "    -l <portNum>    Port number to listen on. [Default: 443]" << std::endl <<
+        "    -o <portNum>    Port number to send decyphered output to. [Default: 7777]" << std::endl;
 
 }
 
