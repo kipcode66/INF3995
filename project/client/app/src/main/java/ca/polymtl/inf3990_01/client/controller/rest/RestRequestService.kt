@@ -44,7 +44,7 @@ class RestRequestService(private val appCtx: Context, private val tokenMgr: Toke
                             Handler(appCtx.mainLooper).post {
                                 Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show()
                             }
-                            val resp = ResponseData(error.networkResponse.statusCode, SongListResponseData(listOf()))
+                            val resp = ResponseData(error.networkResponse?.statusCode ?: 0, SongListResponseData(listOf()))
                             continuation.resume(resp)
                         }
                 )
