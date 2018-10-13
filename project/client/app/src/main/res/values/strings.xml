@@ -27,5 +27,6 @@
     <string name="songs_list_title">Songs List</string>
     <string name="tag_toolbar" translatable="false">tag.nav_view.toolbar</string>
     <string name="tag_drawer_layout" translatable="false">tag.layout.drawer_layout</string>
-    <string name="tag_nav_view">tag.nav_view</string>
+    <string name="tag_nav_view" translatable="false">tag.nav_view</string>
+    <string name="action_change_state">Change State</string>
 </resources>

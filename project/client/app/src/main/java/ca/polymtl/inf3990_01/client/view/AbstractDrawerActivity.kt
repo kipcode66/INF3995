@@ -12,7 +12,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import ca.polymtl.inf3990_01.client.R
-import ca.polymtl.inf3990_01.client.model.state.AppStateService
+import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import org.koin.android.ext.android.inject
 import java.util.Observer
 
@@ -29,13 +29,8 @@ abstract class AbstractDrawerActivity(
 
     private val stateObserver = Observer { o, arg ->
         if (o is AppStateService) {
-            setNavItemsVisibility()
+            stateService.getState().updateNavigationView(navView)
         }
-    }
-
-    protected fun setNavItemsVisibility() {
-        navView.menu.findItem(R.id.nav_blacklist).isVisible = stateService.getState().canDisplayBlackList()
-        navView.menu.findItem(R.id.nav_statistics).isVisible = stateService.getState().canDisplayStatistics()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +47,7 @@ abstract class AbstractDrawerActivity(
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-        setNavItemsVisibility()
+        stateService.getState().updateNavigationView(navView)
         stateService.addObserver(stateObserver)
         navView.setNavigationItemSelectedListener(this)
     }

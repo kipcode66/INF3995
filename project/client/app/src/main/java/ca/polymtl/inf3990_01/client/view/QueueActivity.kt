@@ -5,7 +5,7 @@ import android.view.Menu
 import android.view.MenuItem
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
-import ca.polymtl.inf3990_01.client.model.state.AppStateService
+import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import kotlinx.android.synthetic.main.content_queue.*
 import kotlinx.coroutines.experimental.*
 import org.koin.android.ext.android.inject
