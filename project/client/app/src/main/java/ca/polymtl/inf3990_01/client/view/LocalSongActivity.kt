@@ -93,7 +93,8 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
                     val authorName = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
                     val songTitle = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
                     val songFileUri = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                    songsList.add(LocalSong(songTitle, authorName, Uri.parse(songFileUri)))
+                    val duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
+                    songsList.add(LocalSong(songTitle, authorName, duration, Uri.parse(songFileUri)))
                 } while (cursor.moveToNext())
             }
             cursor.close()

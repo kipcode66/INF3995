@@ -4,7 +4,7 @@ import org.koin.dsl.module.module
 import java.net.URL
 
 val restServiceModule = module {
-    single { RestRequestService(get(), get()) }
+    single { RestRequestService(get(), get(), get()) }
     single { TokenManagerService(get(), get(), get()) }
     factory { HTTPRestClient(get(), get()) }
 }

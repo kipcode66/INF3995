@@ -1,9 +1,11 @@
 package ca.polymtl.inf3990_01.client.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import kotlinx.android.synthetic.main.content_queue.*
@@ -15,6 +17,7 @@ import kotlinx.coroutines.experimental.javafx.JavaFx as Main
 class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawer_layout) {
 
     val tokenMgr: TokenManagerService by inject()
+    val restService: RestRequestService by inject()
 
     lateinit var job: Job
 
@@ -23,8 +26,10 @@ class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawe
 
         job = launch {
             val token = tokenMgr.getToken()
+            val list = restService.getSongList()
             this@QueueActivity.runOnUiThread {
                 myText.text = "Token: $token"
+                Log.d("LIST", list.toString())
             }
         }
     }

@@ -1,7 +1,5 @@
 package ca.polymtl.inf3990_01.client.controller.rest
 
-import android.app.AlertDialog
-import android.app.Notification
 import android.content.Context
 import android.content.SharedPreferences
 import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
@@ -13,13 +11,12 @@ import kotlinx.coroutines.experimental.async
 import kotlin.coroutines.experimental.suspendCoroutine
 import android.net.wifi.WifiManager
 import android.os.Handler
-import android.os.Parcel
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.utils.NetUtils
 import com.android.volley.DefaultRetryPolicy
+import com.android.volley.VolleyError
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
 import java.lang.Exception
 import java.lang.RuntimeException
 
@@ -34,22 +31,15 @@ class TokenManagerService(private val appCtx: Context, private val httpClient: H
 
     private var token: Int = 0
 
-    init {
-        async {
-            getToken()
-        }
-    }
-
     suspend fun getToken(): Int {
         // TODO Ensure that the token is still valid.
         val resp = updateToken()
         token = resp.identificateur
-        if (resp.identificateur == 0) {
-            // TODO Send a signal to the Presenter to show popup with the response message.
-            // Temporarly, opening a popup
-            Handler(appCtx.mainLooper).post {
-                Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
-            }
+
+        // TODO Send a signal to the Presenter to show popup with the response message.
+        // Temporarly, opening a Toast (a little message at the bottom of the screen)
+        Handler(appCtx.mainLooper).post {
+            Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
         }
         return token
     }
@@ -61,10 +51,17 @@ class TokenManagerService(private val appCtx: Context, private val httpClient: H
                 try {
                     resp = fetchToken()
                     token = resp.identificateur
+                } catch (e: VolleyError) {
+                    val msg: String = when (e.networkResponse.statusCode) {
+                        400 -> appCtx.getString(R.string.error_message_bad_request)
+                        403 -> appCtx.getString(R.string.error_message_forbidden)
+                        500 -> appCtx.getString(R.string.error_message_server)
+                        else -> appCtx.getString(R.string.error_message_unknown)
+                    }
+                    resp = GetTokenResponseData(0, msg)
                 } catch (e: Exception) {
-                    // TODO It's here that we put the messages for the errors
-                    val msg = appCtx.getString(R.string.network_error)
-                    resp = GetTokenResponseData(0, "$msg: ${e.localizedMessage}")
+                    val msg = appCtx.getString(R.string.error_message_network)
+                    resp = GetTokenResponseData(0, "$msg: ${e.localizedMessage}]")
                 }
                 continuation.resume(resp)
             }

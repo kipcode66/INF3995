@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Musique Bistro</string>
-    <string name="title_activity_splash_screen">Application Client</string>
+    <string name="title_activity_splash_screen">Musique Bistro</string>
     <string name="dummy_button">Bouton Factice</string>
     <string name="dummy_content">CONTENU FACTICE</string>
     <string name="title_activity_queue">File de chanson</string>
@@ -9,10 +9,9 @@
     <string name="navigation_drawer_close">Fermer le tiroire de navigation</string>
     <string name="nav_header_desc">Entête de navigation</string>
     <string name="action_settings">Paramètres</string>
-    <string name="communicate_queue_drawer">Communication</string>
     <string name="server_url">URL du serveur</string>
     <string name="client_name">Nom d\'Utilisateur</string>
-    <string name="network_error">Erreur Réseau</string>
+    <string name="error_message_network">"Erreur de Réseau "</string>
     <string name="nav_header_title">Android Studio</string>
     <string name="wifi_disabled">Une connection wifi est nécessaire</string>
     <string name="title_activity_local_song">Vos Chansons</string>
@@ -22,4 +21,8 @@
     <string name="action_reload">Rafraîchir</string>
     <string name="songs_list_title">Liste des Chansons</string>
     <string name="action_change_state">Changer d\'État</string>
+    <string name="error_message_server">Erreur Serveur - Veuillez réessayer plus tard</string>
+    <string name="error_message_bad_request">Erreur de Requête</string>
+    <string name="error_message_unknown">Erreur Inconnue</string>
+    <string name="error_message_forbidden">Accès Refusé</string>
 </resources>

@@ -11,13 +11,12 @@
     <string name="nav_header_subtitle" translatable="false">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-    <string name="communicate_queue_drawer">Communicate</string>
     <string name="server_url">Server URL</string>
     <string name="server_url_value1" translatable="false">132.207.89.10</string>
     <string name="server_url_value2" translatable="false">132.207.89.11</string>
     <string name="client_name">Username</string>
     <string name="emptyString" translatable="false" />
-    <string name="network_error">Network Error</string>
+    <string name="error_message_network">Network Error</string>
     <string name="wifi_disabled">Wifi must be enabled</string>
     <string name="title_activity_local_song">Your Songs</string>
     <string name="title_activity_statistics">Statistics</string>
@@ -29,4 +28,8 @@
     <string name="tag_drawer_layout" translatable="false">tag.layout.drawer_layout</string>
     <string name="tag_nav_view" translatable="false">tag.nav_view</string>
     <string name="action_change_state">Change State</string>
+    <string name="error_message_server">Server Error - Please retry later</string>
+    <string name="error_message_bad_request">Bad Request</string>
+    <string name="error_message_unknown">Unknown Error</string>
+    <string name="error_message_forbidden">Forbidden</string>
 </resources>
