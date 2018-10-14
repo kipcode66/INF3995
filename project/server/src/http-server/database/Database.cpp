@@ -26,7 +26,7 @@ int Database::getUserByMac(const char* mac,
             "SELECT rowid, ip, mac, name FROM user WHERE (mac = '%q');", mac);
 
     sqlite3_stmt *res = 0;
-    errcode = sqlite3_prepare_v2(m_db, query, -1, &res, 0);
+    errcode = sqlite3_prepare_v2(m_db, query, -1, &res, 0); // TODO give exact strlen for perfo
     if (errcode)
         goto err;
 
@@ -45,7 +45,7 @@ done:
     return errcode;
 }
 
-int Database::createUser(struct User* user) {
+int Database::createUser(const struct User* user) {
     return 0;
 }
 
