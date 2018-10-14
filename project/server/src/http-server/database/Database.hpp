@@ -9,8 +9,8 @@
 
 struct User {
     int64_t id;
-    char ip[15];
-    char mac[17];
+    char ip[16];
+    char mac[18];
     char name[256];
 };
 
