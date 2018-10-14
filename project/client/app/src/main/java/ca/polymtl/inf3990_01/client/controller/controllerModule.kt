@@ -7,5 +7,5 @@ import org.koin.dsl.module.module
 val controllerModule = module(createOnStart = true) {
     single { EventManager.getInstance() }
     single { AppStateService() }
-    single { AppController(get(), get(), get()) }
+    single { AppController(get(), get(), get(), get()) }
 }

@@ -13,4 +13,11 @@
         android:dialogTitle="@string/client_name"
         android:defaultValue="@string/emptyString"
         android:hint="@android:string/unknownName" />
+    <MultiSelectListPreference
+        android:key="queue_period"
+        android:title="@string/setting_title_queue_period"
+        android:dialogTitle="@string/setting_title_queue_period"
+        android:entries="@array/setting_labels_queue_period"
+        android:entryValues="@array/setting_values_queue_period"
+        android:defaultValue="4000"/>
 </PreferenceScreen>

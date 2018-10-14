@@ -28,4 +28,8 @@
     <string name="desc_message_remove_song">Demande au serveur de retier une chanson</string>
     <string name="error_message_no_ip">&lt;aucun ip&gt;</string>
     <string name="error_message_no_mac">&lt;aucun MAC&gt;</string>
+    <string name="setting_title_queue_period">Fréquence de mise à jour</string>
+    <string name="setting_queue_period_label1">Lent (10 sec)</string>
+    <string name="setting_queue_period_label2">Normal (4 sec)</string>
+    <string name="setting_queue_period_label3">Rapide (1 sec)</string>
 </resources>

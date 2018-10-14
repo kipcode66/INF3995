@@ -47,6 +47,7 @@ class SongQueueAdapter(
         view.remove_song.visibility = if (stateService.getState().canRemoveSong(song)) View.VISIBLE else View.INVISIBLE
         view.remove_song.setOnClickListener {
             //TODO : send query to server to remove 'song'
+            //TODO : Send an event in the event manager that the AppController will catch and handle
         }
         return view
     }

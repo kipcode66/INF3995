@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.LocalSong
 import kotlinx.android.synthetic.main.content_local_song.*
 import kotlinx.android.synthetic.main.local_song.view.*
@@ -38,6 +39,12 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
+            R.id.action_change_state -> {
+                val currState = stateService.getState().type
+                val v = AppStateService.State.values()
+                stateService.setState(v[(v.indexOf(currState) + 1) % v.size])
+                return true
+            }
             R.id.action_reload -> {
                 songsList.clear()
                 foundSong(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
@@ -83,6 +90,7 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
         songsList.clear()
         foundSong(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
         foundSong(MediaStore.Audio.Media.INTERNAL_CONTENT_URI)
+        runOnUiThread(Runnable(adapter::notifyDataSetChanged))
     }
     fun foundSong(songsURI: Uri) {
         val music = MediaStore.Audio.Media.IS_MUSIC + "!=0 and " + MediaStore.Audio.Media.MIME_TYPE + "==\"audio/mpeg\""

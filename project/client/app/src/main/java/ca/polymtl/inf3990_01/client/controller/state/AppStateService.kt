@@ -4,6 +4,9 @@ import android.support.design.widget.NavigationView
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.model.LocalSong
 import ca.polymtl.inf3990_01.client.model.Song
+import ca.polymtl.inf3990_01.client.view.AbstractDrawerActivity
+import ca.polymtl.inf3990_01.client.view.BlackListActivity
+import ca.polymtl.inf3990_01.client.view.StatisticsActivity
 import java.util.*
 
 class AppStateService: Observable() {
@@ -29,6 +32,7 @@ class AppStateService: Observable() {
                 }
 
                 override fun canDisplaySongOwnerData(): Boolean = false
+                override fun <A: AbstractDrawerActivity> finishActivityIfNeeded(activity: A) {}
             }),
             Pair(State.Admin, object : AppState {
                 override val type = State.Admin
@@ -42,11 +46,15 @@ class AppStateService: Observable() {
                     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
 
-                override fun canRemoveSong(song: Song): Boolean {
-                    return true
-                }
+                override fun canRemoveSong(song: Song): Boolean = true
 
                 override fun canDisplaySongOwnerData(): Boolean = true
+                override fun <A: AbstractDrawerActivity> finishActivityIfNeeded(activity: A) {
+                    when (activity.javaClass) {
+                        BlackListActivity::class.java,
+                        StatisticsActivity::class.java -> activity.finish()
+                    }
+                }
             }))
 
     private var mStateInternal: AppState = states[State.User]!!

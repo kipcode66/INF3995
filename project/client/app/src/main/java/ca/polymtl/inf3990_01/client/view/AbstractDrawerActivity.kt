@@ -12,7 +12,9 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
+import ca.polymtl.inf3990_01.client.presentation.Presenter
 import org.koin.android.ext.android.inject
 import java.util.Observer
 
@@ -22,14 +24,17 @@ abstract class AbstractDrawerActivity(
 ): AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     protected val stateService: AppStateService by inject()
+    protected val presenter: Presenter by inject()
 
     protected lateinit var drawerLayout: DrawerLayout
     protected lateinit var toolbar: Toolbar
     protected lateinit var navView: NavigationView
 
-    private val stateObserver = Observer { o, arg ->
-        if (o is AppStateService) {
-            stateService.getState().updateNavigationView(navView)
+    private val stateObserver = Observer { o, state ->
+        if (state is AppState) {
+            state.updateNavigationView(navView)
+            //DONE : If it's an activity that is not available in the current state, finish the activity.
+            state.finishActivityIfNeeded(this@AbstractDrawerActivity)
         }
     }
 
@@ -48,7 +53,7 @@ abstract class AbstractDrawerActivity(
         toggle.syncState()
 
         stateService.getState().updateNavigationView(navView)
-        stateService.addObserver(stateObserver)
+        presenter.addObserver(stateObserver)
         navView.setNavigationItemSelectedListener(this)
     }
 
