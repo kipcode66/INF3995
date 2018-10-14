@@ -68,26 +68,33 @@ void RestApi::createDescription_() {
             .hide();
 }
 
+void buildUserFromQuery_(struct User* __restrict__ newUser, const auto* __restrict__ query) {
+    strcpy(newUser->mac,
+                    query->get("mac").get().c_str());
+    strcpy(newUser->ip,
+                    query->get("ip").get().c_str());
+    strcpy(newUser->name,
+                    query->get("name").get().c_str());
+}
+
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
     puts("getIdentification function called");
 
-    Database* db = Database::instance();
-    const char* mocked_mac1 = "DE:AD:BE:EF:CA:FE";
-    const char* mocked_mac2 = "DE:AD:FA:11:BA:DD";
-    struct User user;
-    if (db->getUserByMac(mocked_mac2, &user)) {
-        response.send(Http::Code::Ok, "created a new user");
-        // create user
-    } else {
-        response.send(Http::Code::Ok, "this user exist, id=" + std::to_string(user.id) + "\n");
-    }
     auto query = request.query();
     std::string mac = query.get("mac").get();
-    std::string ip = query.get("ip").get();
-    std::string name = query.get("name").get();
-    // check if exit
 
-    // create
+    struct User newUser = { 0 };
+
+    Database* db = Database::instance();
+    if (db->getUserByMac(mac.c_str(), &newUser)) {
+        // create user
+        buildUserFromQuery_(&newUser, &query);
+        // TODO register this user to db
+    } else {
+        // TODO send id to in json
+        // TODO overwrite in db
+        response.send(Http::Code::Ok, "this user exist, id=" + std::to_string(newUser.id) + "\n");
+    }
     response.send(Http::Code::Ok, "getIdentification called");
 }
 

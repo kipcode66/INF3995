@@ -18,8 +18,8 @@ struct User {
 class Database {
 public:
     static Database* instance();
-    int getUserByMac(const char*, struct User*) const;
-    int createUser(struct User*);
+    int getUserByMac(const char*, struct User* __restrict__) const;
+    int createUser(const struct User*);
 
 private:
     Database();
