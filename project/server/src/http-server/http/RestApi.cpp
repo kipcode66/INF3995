@@ -67,8 +67,14 @@ void RestApi::createDescription_() {
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "getIdentification");
-    puts("getIdentification function called");
+    auto query = request.query();
+    std::string mac = query.get("mac").get();
+    std::string ip = query.get("ip").get();
+    std::string name = query.get("name").get();
+    // check if exit
+
+    // create
+    response.send(Http::Code::Ok, "getIdentification called");
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
