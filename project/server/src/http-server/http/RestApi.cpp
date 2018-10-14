@@ -81,6 +81,14 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     } else {
         response.send(Http::Code::Ok, "this user exist, id=" + std::to_string(user.id) + "\n");
     }
+    auto query = request.query();
+    std::string mac = query.get("mac").get();
+    std::string ip = query.get("ip").get();
+    std::string name = query.get("name").get();
+    // check if exit
+
+    // create
+    response.send(Http::Code::Ok, "getIdentification called");
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
