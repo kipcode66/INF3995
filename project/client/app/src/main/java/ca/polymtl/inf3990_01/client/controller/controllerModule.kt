@@ -4,7 +4,8 @@ import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import org.koin.dsl.module.module
 
-val controllerModule = module {
+val controllerModule = module(createOnStart = true) {
     single { EventManager.getInstance() }
     single { AppStateService() }
+    single { AppController(get(), get(), get()) }
 }

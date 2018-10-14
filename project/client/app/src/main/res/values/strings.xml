@@ -32,4 +32,7 @@
     <string name="error_message_bad_request">Bad Request</string>
     <string name="error_message_unknown">Unknown Error</string>
     <string name="error_message_forbidden">Forbidden</string>
+    <string name="desc_message_remove_song">Query the server to remove a song</string>
+    <string name="error_message_no_ip">&lt;no IP&gt;</string>
+    <string name="error_message_no_mac">&lt;no MAC&gt;</string>
 </resources>

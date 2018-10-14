@@ -5,5 +5,8 @@ open class Song(
         val authorName:String,
         val durationSec:Int,
         val id:Int,
-        val sentBy:String?
+        val sentBy:String?,
+        val ip: String? = null,
+        val mac: String? = null,
+        val ownerId: Int? = null
 )

@@ -3,6 +3,7 @@ package ca.polymtl.inf3990_01.client.controller.state
 import android.support.design.widget.NavigationView
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.model.LocalSong
+import ca.polymtl.inf3990_01.client.model.Song
 import java.util.*
 
 class AppStateService: Observable() {
@@ -22,6 +23,12 @@ class AppStateService: Observable() {
                 override fun sendFile(song: LocalSong): Boolean {
                     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
+
+                override fun canRemoveSong(song: Song): Boolean {
+                    return song.sentBy == null
+                }
+
+                override fun canDisplaySongOwnerData(): Boolean = false
             }),
             Pair(State.Admin, object : AppState {
                 override val type = State.Admin
@@ -34,6 +41,12 @@ class AppStateService: Observable() {
                 override fun sendFile(song: LocalSong): Boolean {
                     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
+
+                override fun canRemoveSong(song: Song): Boolean {
+                    return true
+                }
+
+                override fun canDisplaySongOwnerData(): Boolean = true
             }))
 
     private var mStateInternal: AppState = states[State.User]!!

@@ -16,7 +16,7 @@ import kotlin.coroutines.experimental.suspendCoroutine
 class RestRequestService(private val appCtx: Context, private val tokenMgr: TokenManagerService, private val httpClient: HTTPRestClient) {
     private class SongResponseData(
             val titre: String, val artiste: String, val duree: String,
-            val proposeePar: String, val proprietaire: Boolean, val no: Int)
+            val proposeePar: String?, val proprietaire: Boolean, val no: Int)
     private class SongListResponseData(val chansons: List<SongResponseData>)
 
     suspend fun getSongList(): List<Song> {
@@ -52,7 +52,7 @@ class RestRequestService(private val appCtx: Context, private val tokenMgr: Toke
             }
             for (chanson in resp.value.chansons) {
                 val duration = chanson.duree.split(":").map(String::toInt).reduce { acc, i -> acc * 60 + i }
-                list.add(Song(chanson.titre, chanson.artiste, duration, chanson.no, if (chanson.proprietaire) null else chanson.proposeePar))
+                list.add(Song(chanson.titre, chanson.artiste, duration, chanson.no, if (chanson.proprietaire) null else (chanson.proposeePar ?: "")))
             }
         }
         return list

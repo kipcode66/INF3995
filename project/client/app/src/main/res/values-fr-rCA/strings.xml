@@ -25,4 +25,7 @@
     <string name="error_message_bad_request">Erreur de Requête</string>
     <string name="error_message_unknown">Erreur Inconnue</string>
     <string name="error_message_forbidden">Accès Refusé</string>
+    <string name="desc_message_remove_song">Demande au serveur de retier une chanson</string>
+    <string name="error_message_no_ip">&lt;aucun ip&gt;</string>
+    <string name="error_message_no_mac">&lt;aucun MAC&gt;</string>
 </resources>
