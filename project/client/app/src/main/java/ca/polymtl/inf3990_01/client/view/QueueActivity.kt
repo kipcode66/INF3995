@@ -9,6 +9,7 @@ import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.event.RequestQueueReloadEvent
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
+import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.Song
 import ca.polymtl.inf3990_01.client.model.SongQueue
@@ -24,40 +25,14 @@ import kotlinx.coroutines.experimental.javafx.JavaFx as Main
 
 class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawer_layout) {
 
-    val tokenMgr: TokenManagerService by inject()
-    val presenter: Presenter by inject()
     val eventMgr: EventManager by inject()
 
     val songQueue: SongQueue = SongQueue()
     val songQueueAdapter: SongQueueAdapter by inject{ ParameterList(songQueue, layoutInflater) }
 
-    lateinit var job: Job
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         song_queue.adapter = songQueueAdapter
-
-        presenter.addObserver(Observer(this::onPresenterUpdate))
-
-        job = launch {
-            val token = tokenMgr.getToken()
-            this@QueueActivity.runOnUiThread {
-                myText.text = "Token: $token"
-            }
-        }
-    }
-
-    private fun onPresenterUpdate(o: Observable, arg: Any?) {
-        if (arg is SongQueue) {
-            songQueue.clear()
-            songQueue.addAll(arg)
-            this.runOnUiThread(Runnable(songQueueAdapter::notifyDataSetChanged))
-        }
-    }
-
-    override fun onDestroy() {
-        job.cancel()
-        super.onDestroy()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

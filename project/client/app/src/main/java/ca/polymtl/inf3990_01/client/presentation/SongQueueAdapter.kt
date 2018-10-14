@@ -1,15 +1,39 @@
 package ca.polymtl.inf3990_01.client.presentation
 
+import android.content.Context
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.SongQueue
 import kotlinx.android.synthetic.main.server_song.view.*
+import java.util.*
 
-class SongQueueAdapter(val songQueue: SongQueue, val layoutInflater: LayoutInflater, val stateService: AppStateService): BaseAdapter() {
+class SongQueueAdapter(
+        private val songQueue: SongQueue,
+        private val layoutInflater: LayoutInflater,
+        private val stateService: AppStateService,
+        private val appCtx: Context,
+        presenter: Presenter
+): BaseAdapter() {
+    init {
+        presenter.addObserver(Observer(this::onPresenterUpdate))
+    }
+    private fun onPresenterUpdate(o: Observable, arg: Any?) {
+        if (arg is SongQueue) {
+            songQueue.clear()
+            songQueue.addAll(arg)
+            Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
+        }
+        else if (arg is AppState) {
+            Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
+        }
+    }
+
     override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {
         val view = v ?: layoutInflater.inflate(R.layout.server_song, viewGroup, false)
         val song = this.songQueue[postion]
