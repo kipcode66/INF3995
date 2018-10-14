@@ -51,7 +51,7 @@ int Database::createUser(const struct User* user) {
     int errcode = 0;
     char* errmsg = NULL;
     const char* query = sqlite3_mprintf(
-                "INSERT INTO user VALUES ('%q', '%q', '%q');",
+                "INSERT OR REPLACE INTO user VALUES ('%q', '%q', '%q');",
                 user->ip,
                 user->mac,
                 user->name);
