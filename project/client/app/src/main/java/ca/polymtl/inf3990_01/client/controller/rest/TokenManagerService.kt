@@ -62,11 +62,11 @@ class TokenManagerService(private val appCtx: Context, private val httpClient: H
                         token = resp.identificateur
                     }
                 } catch (e: VolleyError) {
-                    val msg: String = when (e.networkResponse.statusCode) {
+                    val msg: String = when (e.networkResponse?.statusCode ?: -1) {
                         400 -> appCtx.getString(R.string.error_message_bad_request)
                         403 -> appCtx.getString(R.string.error_message_forbidden)
                         500 -> appCtx.getString(R.string.error_message_server)
-                        else -> appCtx.getString(R.string.error_message_unknown)
+                        else -> appCtx.getString(R.string.error_message_unknown) + ": $e"
                     }
                     resp = GetTokenResponseData(0, msg)
                 } catch (e: Exception) {
