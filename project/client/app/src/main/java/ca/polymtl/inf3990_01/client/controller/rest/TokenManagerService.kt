@@ -1,45 +1,95 @@
 package ca.polymtl.inf3990_01.client.controller.rest
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
-import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
-import com.android.volley.Request
-import com.android.volley.Response
-import com.google.gson.Gson
-import kotlinx.coroutines.experimental.async
-import kotlin.coroutines.experimental.suspendCoroutine
 import android.net.wifi.WifiManager
 import android.os.Handler
+import android.util.Log
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
+import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
 import ca.polymtl.inf3990_01.client.utils.NetUtils
+import ca.polymtl.inf3990_01.client.utils.SingletonHolder
 import com.android.volley.DefaultRetryPolicy
+import com.android.volley.Request
+import com.android.volley.Response
 import com.android.volley.VolleyError
+import com.google.gson.Gson
 import kotlinx.coroutines.experimental.launch
-import java.lang.Exception
-import java.lang.RuntimeException
+import kotlin.coroutines.experimental.suspendCoroutine
 
 
-class TokenManagerService(private val appCtx: Context, private val httpClient: HTTPRestClient, private val preferences: SharedPreferences) {
+class TokenManagerService private constructor(private val appCtx: Context, private val httpClient: HTTPRestClient, private val preferences: SharedPreferences) {
     companion object { // Static properties
         private class GetTokenRequestData(val ip: String, val MAC: String, val nom: String)
         private class GetTokenResponseData(val identificateur: Int, val message: String)
 
-        val SOCKET_TIMEOUT_MS = 3 * 1000
+        const val SOCKET_TIMEOUT_MS = 3 * 1000
+        const val RESOURCE_URI = "/usager/identification"
+        const val PREFERENCE_KEY_USERNAME = "client_name"
+        const val HTTP_HEADER_NAME_X_AUTH_TOKEN = "X-Auth-Token"
+
+
+        @SuppressLint("StaticFieldLeak")
+        @Volatile private var instance: TokenManagerService? = null
+
+        fun getInstance(appCtx: Context, httpClient: HTTPRestClient, preferences: SharedPreferences): TokenManagerService {
+            val i = instance
+            if (i != null) {
+                return i
+            }
+
+            return synchronized(this) {
+                val i2 = instance
+                if (i2 != null) {
+                    i2
+                } else {
+                    val created = TokenManagerService(appCtx, httpClient, preferences)
+                    instance = created
+                    created
+                }
+            }
+        }
+
+        fun getInstanceOrThrow(): TokenManagerService {
+            return synchronized(this) {
+                instance!!
+            }
+        }
+
+        fun hasInstance(): Boolean {
+            return synchronized(this) {
+                instance != null
+            }
+        }
     }
 
     private var token: Int = 0
     private var tokenLock = Object()
     private var lastMessage: String? = null
+    private var isUpdating = false
 
-    suspend fun getToken(): Int {
-        // TODO Ensure that the token is still valid.
-        var oldToken = token // Temporary value, we can't trust it when we are not synchronized
+    fun getToken(): Int {
+        return token
+    }
+
+    suspend fun updateToken() {
+        synchronized(isUpdating) {
+            if (isUpdating) {
+                return
+            }
+            isUpdating = true
+        }
+
+        Log.d(TokenManagerService::class.java.simpleName, "Starting token update")
+
+        var oldToken = token // Dummy value to make Kotlin happy
         synchronized(tokenLock) {
             oldToken = token
         }
-        val resp = updateToken()
+        val resp = fetchTokenAndWrapErrors()
         synchronized(tokenLock) {
             token = resp.identificateur
         }
@@ -48,13 +98,17 @@ class TokenManagerService(private val appCtx: Context, private val httpClient: H
             // Temporarly, opening a Toast (a little message at the bottom of the screen)
             Handler(appCtx.mainLooper).post {
                 Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
-                lastMessage = resp.message
+                lastMessage = resp.message // Prevent to continuously show the same message (can be annoying)
             }
         }
-        return token
+        Log.d(TokenManagerService::class.java.simpleName, "Token updated")
+
+        synchronized(isUpdating) {
+            isUpdating = false
+        }
     }
 
-    private suspend fun updateToken(): GetTokenResponseData {
+    private suspend fun fetchTokenAndWrapErrors(): GetTokenResponseData {
         return suspendCoroutine { continuation ->
             launch {
                 var resp: GetTokenResponseData
@@ -80,31 +134,35 @@ class TokenManagerService(private val appCtx: Context, private val httpClient: H
         }
     }
 
+    /*
+     * We can't put this function in RestRequestService because it would create circular dependencies.
+     */
     private suspend fun fetchToken(): GetTokenResponseData {
         val manager = appCtx.getSystemService(Context.WIFI_SERVICE) as WifiManager?
         if (manager != null && manager.isWifiEnabled) {
             val info = manager.connectionInfo
             val ip = NetUtils.translateIP(info.ipAddress)
-            val mac = NetUtils.getMacAddress("wlan0")
+            val mac = NetUtils.getMacAddress(appCtx.getString(R.string.interface_name_wifi))
             return suspendCoroutine { continuation ->
                 val request = RESTRequest(
                         Request.Method.GET,
-                        httpClient.getBaseURL() + "/usager/identification",
+                        httpClient.getBaseURL() + RESOURCE_URI,
                         Gson().toJson(GetTokenRequestData(
                                 ip,
                                 mac,
-                                preferences.getString("client_name", "")!!
+                                preferences.getString(PREFERENCE_KEY_USERNAME, "")!!
                         )),
                         GetTokenResponseData::class.java,
-                        mutableMapOf("X-Auth-Token" to token.toString()), // Headers
-                        Response.Listener { respData: ResponseData<GetTokenResponseData> ->
-                            continuation.resume(respData.value)
+                        mutableMapOf(HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()), // Headers
+                        Response.Listener { respData: ResponseData<GetTokenResponseData> -> // Success listener
+                            continuation.resume(respData.value) // Equivalent to Promise.resolve(value)
                         },
-                        Response.ErrorListener { error ->
+                        Response.ErrorListener { error -> // Error Listener
                             error.printStackTrace()
-                            continuation.resumeWithException(error)
+                            continuation.resumeWithException(error) // Equivalent to Promise.reject(error)
                         }
                 )
+                // Set the request timeout
                 request.retryPolicy = DefaultRetryPolicy(
                         SOCKET_TIMEOUT_MS,
                         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,

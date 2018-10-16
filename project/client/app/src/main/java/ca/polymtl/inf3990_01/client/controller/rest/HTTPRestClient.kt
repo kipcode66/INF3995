@@ -6,6 +6,9 @@ import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.Volley
 
+/**
+ * It's an HTTP client to which we can pass a RESTRequest object.
+ */
 class HTTPRestClient (private val preferences: SharedPreferences, private val context: Context) {
     private val requestQueue: RequestQueue by lazy {
         // applicationContext is key, it keeps you from leaking the

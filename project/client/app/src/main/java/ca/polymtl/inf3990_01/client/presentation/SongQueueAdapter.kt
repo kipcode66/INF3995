@@ -23,6 +23,7 @@ class SongQueueAdapter(
     init {
         presenter.addObserver(Observer(this::onPresenterUpdate))
     }
+
     private fun onPresenterUpdate(o: Observable, arg: Any?) {
         if (arg is SongQueue) {
             songQueue.clear()

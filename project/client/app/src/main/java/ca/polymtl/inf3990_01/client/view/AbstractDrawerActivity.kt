@@ -33,7 +33,7 @@ abstract class AbstractDrawerActivity(
     private val stateObserver = Observer { o, state ->
         if (state is AppState) {
             state.updateNavigationView(navView)
-            //DONE : If it's an activity that is not available in the current state, finish the activity.
+            // If it's an activity that is not available in the current state, finish the activity.
             state.finishActivityIfNeeded(this@AbstractDrawerActivity)
         }
     }

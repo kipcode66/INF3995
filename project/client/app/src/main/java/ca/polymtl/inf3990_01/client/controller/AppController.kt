@@ -25,6 +25,7 @@ class AppController(
 ) {
     companion object {
         const val QUEUE_PERIOD_KEY = "queue_period"
+        const val QUEUE_PERIOD_DEFAULT = 4000L
     }
 
     private val executor = ScheduledThreadPoolExecutor(1)
@@ -59,17 +60,19 @@ class AppController(
 
     private fun reloadQueue(event: RequestQueueReloadEvent) {
         Log.d("AppController", "Reloading the song's queue")
-        val jobTmp = reloadQueueJob
-        reloadQueueJob = async {
-            jobTmp?.cancelAndJoin()
-            val list = restService.getSongList()
-            presenter.setQueue(list)
+        if (reloadQueueJob?.isCompleted != false) {
+            val jobTmp = reloadQueueJob
+            reloadQueueJob = async {
+                jobTmp?.join()
+                val list = restService.getSongList()
+                presenter.setQueue(list)
+            }
         }
     }
 
     private fun scheduleQueueTask(prefs: SharedPreferences): ScheduledFuture<*> {
         return executor.scheduleAtFixedRate({
             eventMgr.dispatchEvent(RequestQueueReloadEvent())
-        }, 0, prefs.getString(QUEUE_PERIOD_KEY, "4000")?.toLong() ?: 4000, TimeUnit.MILLISECONDS)
+        }, 0, prefs.getString(QUEUE_PERIOD_KEY, "$QUEUE_PERIOD_DEFAULT")?.toLong() ?: QUEUE_PERIOD_DEFAULT, TimeUnit.MILLISECONDS)
     }
 }

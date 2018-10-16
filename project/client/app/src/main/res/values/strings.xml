@@ -39,4 +39,5 @@
     <string name="setting_queue_period_label1">Slow (10 sec)</string>
     <string name="setting_queue_period_label2">Normal (4 sec)</string>
     <string name="setting_queue_period_label3">Quick (1 sec)</string>
+    <string name="interface_name_wifi" translatable="false">wlan0</string>
 </resources>

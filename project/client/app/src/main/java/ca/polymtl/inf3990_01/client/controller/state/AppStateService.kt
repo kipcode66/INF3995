@@ -57,18 +57,18 @@ class AppStateService: Observable() {
                 override fun <A: AbstractDrawerActivity> finishActivityIfNeeded(activity: A) {}
             }))
 
-    private var mStateInternal: AppState = states[State.User]!!
+    private var stateInternal: AppState = states[State.User]!!
 
     init {
         setState(State.User)
     }
 
     fun getState(): AppState {
-        return mStateInternal
+        return stateInternal
     }
 
     fun setState(state: State) {
-        mStateInternal = states[state]!!
+        stateInternal = states[state]!!
         setChanged()
         notifyObservers()
     }
