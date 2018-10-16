@@ -31,6 +31,7 @@ class TokenManagerService(private val appCtx: Context, private val httpClient: H
 
     private var token: Int = 0
     private var tokenLock = Object()
+    private var lastMessage: String? = null
 
     suspend fun getToken(): Int {
         // TODO Ensure that the token is still valid.
@@ -42,11 +43,12 @@ class TokenManagerService(private val appCtx: Context, private val httpClient: H
         synchronized(tokenLock) {
             token = resp.identificateur
         }
-        if (oldToken != token || resp.identificateur == 0) {
+        if ((oldToken != token || resp.identificateur == 0) && lastMessage != resp.message) {
             // TODO Send a signal to the Presenter to show popup with the response message.
             // Temporarly, opening a Toast (a little message at the bottom of the screen)
             Handler(appCtx.mainLooper).post {
                 Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
+                lastMessage = resp.message
             }
         }
         return token

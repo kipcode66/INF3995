@@ -32,7 +32,12 @@ class AppStateService: Observable() {
                 }
 
                 override fun canDisplaySongOwnerData(): Boolean = false
-                override fun <A: AbstractDrawerActivity> finishActivityIfNeeded(activity: A) {}
+                override fun <A: AbstractDrawerActivity> finishActivityIfNeeded(activity: A) {
+                    when (activity.javaClass) {
+                        BlackListActivity::class.java,
+                        StatisticsActivity::class.java -> activity.finish()
+                    }
+                }
             }),
             Pair(State.Admin, object : AppState {
                 override val type = State.Admin
@@ -49,12 +54,7 @@ class AppStateService: Observable() {
                 override fun canRemoveSong(song: Song): Boolean = true
 
                 override fun canDisplaySongOwnerData(): Boolean = true
-                override fun <A: AbstractDrawerActivity> finishActivityIfNeeded(activity: A) {
-                    when (activity.javaClass) {
-                        BlackListActivity::class.java,
-                        StatisticsActivity::class.java -> activity.finish()
-                    }
-                }
+                override fun <A: AbstractDrawerActivity> finishActivityIfNeeded(activity: A) {}
             }))
 
     private var mStateInternal: AppState = states[State.User]!!

@@ -10,9 +10,9 @@
         <item>@string/setting_queue_period_label2</item>
         <item>@string/setting_queue_period_label3</item>
     </string-array>
-    <integer-array name="setting_values_queue_period">
+    <string-array name="setting_values_queue_period">
         <item>10000</item>
         <item>4000</item>
         <item>1000</item>
-    </integer-array>
+    </string-array>
 </resources>

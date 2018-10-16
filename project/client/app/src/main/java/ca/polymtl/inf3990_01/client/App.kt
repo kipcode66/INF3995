@@ -2,6 +2,7 @@ package ca.polymtl.inf3990_01.client
 
 import android.app.Application
 import android.preference.PreferenceManager
+import android.util.Log
 import ca.polymtl.inf3990_01.client.controller.controllerModule
 import ca.polymtl.inf3990_01.client.controller.rest.restServiceModule
 import ca.polymtl.inf3990_01.client.controller.event.AppStartEvent
@@ -32,6 +33,7 @@ class App: Application() {
         eventMgr = EventManager.getInstance()
         isStartedInternal = true
         eventMgr.dispatchEvent(AppStartEvent(this))
+        Log.d(resources.getString(R.string.app_name), "App started!")
     }
 
     override fun onTerminate() {
