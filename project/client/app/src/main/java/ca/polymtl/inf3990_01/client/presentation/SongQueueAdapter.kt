@@ -24,6 +24,7 @@ class SongQueueAdapter(
         presenter.addObserver(Observer(this::onPresenterUpdate))
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onPresenterUpdate(o: Observable, arg: Any?) {
         if (arg is SongQueue) {
             songQueue.clear()

@@ -30,7 +30,7 @@ abstract class AbstractDrawerActivity(
     protected lateinit var toolbar: Toolbar
     protected lateinit var navView: NavigationView
 
-    private val stateObserver = Observer { o, state ->
+    private val stateObserver = Observer { _, state ->
         if (state is AppState) {
             state.updateNavigationView(navView)
             // If it's an activity that is not available in the current state, finish the activity.

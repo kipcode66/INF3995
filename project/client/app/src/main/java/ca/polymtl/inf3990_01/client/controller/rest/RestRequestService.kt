@@ -4,15 +4,23 @@ import android.content.Context
 import android.os.Handler
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.InitializationManager
 import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
 import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
 import ca.polymtl.inf3990_01.client.model.LocalSong
 import ca.polymtl.inf3990_01.client.model.Song
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.RetryPolicy
 import kotlin.coroutines.experimental.suspendCoroutine
 
-class RestRequestService(private val appCtx: Context, private val tokenMgr: TokenManagerService, private val httpClient: HTTPRestClient) {
+class RestRequestService(
+    private val appCtx: Context,
+    private val tokenMgr: TokenManagerService,
+    private val httpClient: HTTPRestClient,
+    private val initMgr: InitializationManager
+) {
     companion object {
         private class SongResponseData(
                 val titre: String, val artiste: String, val duree: String,
@@ -26,6 +34,7 @@ class RestRequestService(private val appCtx: Context, private val tokenMgr: Toke
         val list: MutableList<Song> = mutableListOf()
         val token = tokenMgr.getToken()
         val resp: ResponseData<SongListResponseData> = suspendCoroutine { continuation ->
+            var canDisplayMessage = initMgr.isInitialized
             val request = RESTRequest<SongListResponseData>(
                     Request.Method.GET,
                     httpClient.getBaseURL() + RESOURCE_URI + token,
@@ -33,7 +42,7 @@ class RestRequestService(private val appCtx: Context, private val tokenMgr: Toke
                     SongListResponseData::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
                     Response.Listener { resp ->
-                        continuation.resume(resp)
+                        continuation.resume(resp as ResponseData<SongListResponseData>)
                     },
                     Response.ErrorListener { error ->
                         val msg = when (error.networkResponse?.statusCode ?: 0) {
@@ -43,13 +52,16 @@ class RestRequestService(private val appCtx: Context, private val tokenMgr: Toke
                         }
                         // TODO Send a signal to the Presenter to show popup with the response message.
                         // Temporarly, opening a Toast (a little message at the bottom of the screen)
-                        Handler(appCtx.mainLooper).post {
-                            Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show()
+                        if (canDisplayMessage) {
+                            Handler(appCtx.mainLooper).post {
+                                Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show()
+                            }
                         }
-                        val resp = ResponseData(error.networkResponse?.statusCode ?: 0, SongListResponseData(listOf()))
+                        val resp = ResponseData(error.networkResponse?.statusCode ?: 0, SongListResponseData(listOf()), error.networkResponse)
                         continuation.resume(resp)
                     }
             )
+            request.setRetryPolicy(DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
             httpClient.addToRequestQueue(request)
         }
         for (chanson in resp.value.chansons) {

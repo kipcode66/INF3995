@@ -3,10 +3,7 @@ package ca.polymtl.inf3990_01.client.controller
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import ca.polymtl.inf3990_01.client.controller.event.AppStartEvent
-import ca.polymtl.inf3990_01.client.controller.event.AppStopEvent
-import ca.polymtl.inf3990_01.client.controller.event.EventManager
-import ca.polymtl.inf3990_01.client.controller.event.RequestQueueReloadEvent
+import ca.polymtl.inf3990_01.client.controller.event.*
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.presentation.Presenter
 import kotlinx.coroutines.experimental.Job
@@ -41,23 +38,26 @@ class AppController(
     }
 
     init {
-        eventMgr.addEventListener(AppStartEvent::class.java, this::onAppStart)
+        eventMgr.addEventListener(AppInitEvent::class.java, this::onAppInit)
         eventMgr.addEventListener(AppStopEvent::class.java, this::onAppStop)
         reloadQueue(RequestQueueReloadEvent())
         eventMgr.addEventListener(RequestQueueReloadEvent::class.java, this::reloadQueue)
     }
 
-    private fun onAppStart(event: AppStartEvent) {
-        eventMgr.removeEventListener(AppStartEvent::class.java, this::onAppStart) // Run it just once
+    @Suppress("UNUSED_PARAMETER")
+    private fun onAppInit(event: AppInitEvent) {
+        eventMgr.removeEventListener(AppInitEvent::class.java, this::onAppInit) // Run it just once
         // Start the updating loop
         task = scheduleQueueTask(preferences)
         preferences.registerOnSharedPreferenceChangeListener(prefChangeListener)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onAppStop(event: AppStopEvent) {
         task.cancel(true)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun reloadQueue(event: RequestQueueReloadEvent) {
         Log.d("AppController", "Reloading the song's queue")
         if (reloadQueueJob?.isCompleted != false) {
