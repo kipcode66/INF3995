@@ -80,31 +80,32 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 
     auto query = request.query();
     if (!query.has("mac")) {
-        response.send(Http::Code::Ok, "Malformed request");
-    }
-    printf("get is =(%s)\n", query.get("mac").get());
-    std::string mac(query.get("mac").get());
-
-    printf("mac is=%s\n", mac.c_str());
-    struct User newUser = { 0 };
-    struct User oldUser = { 0 };
-
-    Database* db = Database::instance();
-    db->getUserByMac(mac.c_str(), &oldUser);
-    if (*oldUser.mac == 0) {
-        buildUserFromQuery_(&newUser, &query);
-        db->createUser(&newUser);
-        response.send(Http::Code::Ok, "New user created, id=" + std::to_string(newUser.id) + "\n");
+        response.send(Http::Code::Bad_Request, "Malformed request");
     } else {
-        buildUserFromQuery_(&newUser, &query);
-        newUser.id = oldUser.id;
-        if (db->createUser(&newUser)) {
-            response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
+        std::string mac(query.get("mac").get());
+
+        struct User newUser = { 0 };
+        struct User oldUser = { 0 };
+
+        Database* db = Database::instance();
+        db->getUserByMac(mac.c_str(), &oldUser);
+        if (*oldUser.mac == 0) {
+            buildUserFromQuery_(&newUser, &query);
+            db->createUser(&newUser);
+            response.send(Http::Code::Ok, "New user created, id=" + std::to_string(newUser.id) + "\n");
         } else {
-            response.send(Http::Code::Ok, "this user exist, id=" + std::to_string(newUser.id) + "\n");
+            buildUserFromQuery_(&newUser, &query);
+            newUser.id = oldUser.id;
+            if (db->createUser(&newUser)) {
+                response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
+            } else {
+                response.send(Http::Code::Ok, "this user exist, id=" + std::to_string(newUser.id) + "\n");
+            }
         }
+        response.send(Http::Code::Ok, "getIdentification called");
     }
-    response.send(Http::Code::Ok, "getIdentification called");
+
+    return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
