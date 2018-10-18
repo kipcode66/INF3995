@@ -27,8 +27,8 @@ void Database::getUserByMac(const char* mac,
     const char* query = sqlite3_mprintf(
             "SELECT rowid, ip, mac, name FROM user WHERE (mac = '%q');", mac);
 
-    sqlite3_stmt *statement = 0;
-    errcode = sqlite3_prepare_v2(m_db, query, -1, &statement, 0); // TODO give exact strlen for perfo
+    sqlite3_stmt *statement = nullptr;
+    errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
     if (errcode)
         throw std::runtime_error(sqlite3_errstr(errcode));
 
@@ -38,20 +38,21 @@ void Database::getUserByMac(const char* mac,
         strcpy(user->ip, (char *)sqlite3_column_text(statement, 1));
         strcpy(user->name, (char *)sqlite3_column_text(statement, 3));
         strcpy(user->mac, (char *)sqlite3_column_text(statement, 2)); // do last as a coherence check
+    } else {
+        *user = { 0 };
     }
     return;
 }
 
 int Database::createUser(const struct User* user) {
     int errcode = 0;
-    char* errmsg = NULL;
+    char* errmsg = nullptr;
     const char* query = sqlite3_mprintf(
                 "INSERT OR REPLACE INTO user VALUES ('%q', '%q', '%q');",
                 user->ip,
                 user->mac,
                 user->name);
 
-    sqlite3_stmt *res = 0;
     errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
     if (errcode != SQLITE_OK) {
         std::string message;
@@ -63,18 +64,6 @@ int Database::createUser(const struct User* user) {
         }
         throw std::runtime_error(message);
     }
-//    errcode = sqlite3_prepare_v2(m_db, query, -1, &res, 0); // TODO give exact strlen for perfo
-//    if (errcode)
-//        goto err;
-//
-//    errcode = sqlite3_step(res);
-//    if (errcode == SQLITE_ROW) {
-//        user->id = sqlite3_column_int(res, 0);
-//        strcpy(user->ip, (char *)sqlite3_column_text(res, 1));
-//        strcpy(user->name, (char *)sqlite3_column_text(res, 3));
-//        strcpy(user->mac, (char *)sqlite3_column_text(res, 2)); // do last as a coherence check
-//        errcode = 0;
-//    }
     return errcode;
 }
 
