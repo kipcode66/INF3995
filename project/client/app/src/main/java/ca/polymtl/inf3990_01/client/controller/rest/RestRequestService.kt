@@ -10,6 +10,7 @@ import ca.polymtl.inf3990_01.client.model.LocalSong
 import ca.polymtl.inf3990_01.client.model.Song
 import com.android.volley.Request
 import com.android.volley.Response
+import java.io.File
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
@@ -67,7 +68,7 @@ class RestRequestService(private val appCtx: Context, private val tokenMgr: Toke
         val resp: ResponseData<String> = suspendCoroutine { continuation ->
             val request = RESTRequest(
                     Request.Method.POST,
-                    httpClient.getBaseURL() + "/usager/file/$token",
+                    httpClient.getBaseURL() + "/usager/chanson/$token",
                     songToSend,
                     String::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
@@ -98,7 +99,7 @@ class RestRequestService(private val appCtx: Context, private val tokenMgr: Toke
     }
 
     private fun encoder(song: LocalSong): String {
-        val bytes = appCtx.openFileInput(song.file.toString()).readBytes()
+        val bytes = File(song.file.toString()).readBytes()
         val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
         return base64
     }
