@@ -2,6 +2,13 @@
 
 SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
 
+message() {
+    tput bold 2>/dev/null
+    tput setaf 10 2>/dev/null
+    echo -n "$@"
+    tput sgr0 2>/dev/null
+}
+
 obtainSQLite() {
     # SQLite does not have a Git repository ; wget the tarball instead
     cd "${DEPS_DIR}"
@@ -14,6 +21,8 @@ obtainSQLite() {
 }
 
 obtainDependencies() {
+    message $'\nObtaining dependencies, this may take up to 5 minutes if they are not already there...\n'
+
     # Obtain submodules
     git submodule update --init --recursive
 
@@ -22,6 +31,7 @@ obtainDependencies() {
 }
 
 buildPistache() {
+    message $'\nBuilding and installing Pistache...\n'
     local PISTACHE_BINARY_DIR="${DEPS_DIR}/pistache/build"
 
     # If this file/directory exists, then the dependency is considered up-to-date.
@@ -37,6 +47,7 @@ buildPistache() {
 }
 
 buildOpenSsl() {
+    message $'\nBuilding and installing OpenSSL...\n'
     local OPEN_SSL_ROOT_DIR="${DEPS_DIR}/openssl"
 
     # If this file/directory exists, then the dependency is considered up-to-date.
@@ -54,6 +65,7 @@ buildOpenSsl() {
 }
 
 buildSqlite3() {
+    message $'\nBuilding and installing SQLite3...\n'
     local SQLITE3_ROOT_DIR="${DEPS_DIR}/sqlite3"
 
     # If this file/directory exists, then the dependency is considered up-to-date.
