@@ -5,9 +5,9 @@
 
 #include <stdexcept>
 
-BOOST_AUTO_TEST_CASE(mp3HeaderFailure) { 
+BOOST_AUTO_TEST_CASE(mp3HeaderFailure) {
     std::vector<std::string> testInput;
-    
+
     testInput.push_back("test.txt");
     testInput.push_back("test1.mp3");
     testInput.push_back("test1.txt");
@@ -17,9 +17,9 @@ BOOST_AUTO_TEST_CASE(mp3HeaderFailure) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(mp3HeaderSucces) { 
+BOOST_AUTO_TEST_CASE(mp3HeaderSucces) {
     Mp3Header mp3TestHeader = Mp3Header("test.mp3");
-    
+
     BOOST_CHECK_EQUAL(mp3TestHeader.getAlbum(), "Plain Pat & Emile Presents A KiD Named CuDi");
     BOOST_CHECK_EQUAL(mp3TestHeader.getAlbum(), "Plain Pat & Emile Presents A KiD Named CuDi");
     BOOST_CHECK_EQUAL(mp3TestHeader.getArtist(), "Kid Cudi");

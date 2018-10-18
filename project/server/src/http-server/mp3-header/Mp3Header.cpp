@@ -1,11 +1,11 @@
 #include "Mp3Header.hpp"
 #include <stdexcept>
 
-Mp3Header::Mp3Header(const std::string& fileName)  
-{   
+Mp3Header::Mp3Header(const std::string& fileName)
+{
     TagLib::MPEG::File mp3File(fileName.c_str());
     if (!mp3File.isOpen() || !isMP3File_(fileName)) {
-        throw std::invalid_argument( "MP3 file failed to open" );   
+        throw std::invalid_argument( "MP3 file failed to open" );
     }
     TagLib::ID3v2::Tag* mp3Tag = mp3File.ID3v2Tag(true);
     TagLib::MPEG::Properties* mp3Properties = mp3File.audioProperties();
@@ -26,7 +26,7 @@ void Mp3Header::getSongInfo_(TagLib::ID3v2::Tag* mp3Tag, TagLib::MPEG::Propertie
     m_title = mp3Tag->title().toCString();
     m_artist = mp3Tag->artist().toCString();
     m_album = mp3Tag->album().toCString();
-    m_genre = mp3Tag->genre().toCString();   
+    m_genre = mp3Tag->genre().toCString();
     m_year = mp3Tag->year();
     m_track = mp3Tag->track();
     m_duration = Mp3Duration(mp3Properties->lengthInSeconds());

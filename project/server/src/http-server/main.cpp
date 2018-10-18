@@ -1,7 +1,6 @@
 #include <iostream>
 #include <inttypes.h>
 
-#include "mp3-header/Mp3Header.hpp"
 #include "http/RestApi.hpp"
 
 void usage() {
@@ -17,7 +16,7 @@ uint32_t parseArgs(int argc, char** argv) {
     if (argc == 1) {
         portId = 80;
     }
-    else if (argc >= 2 && std::string(argv[1]) != "-h" && std::string(argv[1]) != "--help") {
+    else if (argc == 2 && std::string(argv[1]) != "-h" && std::string(argv[1]) != "--help") {
         std::istringstream iStrStrm(argv[1]);
         iStrStrm >> portId;
     }
@@ -40,9 +39,8 @@ int main(int argc, char** argv) {
     uint16_t portId = parseArgs(argc, argv);
 
     try {
-        /*Mp3Header mp3Header = Mp3Header(argv[2]);
-        mp3Header.displaySongInfo();*/
-        
+        Mp3Header mp3Header = Mp3Header(argv[2]);
+        mp3Header.displaySongInfo();
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
 
         RestApi api(addr);
