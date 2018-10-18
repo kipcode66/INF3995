@@ -1,8 +1,7 @@
-//
-// Created by adam on 04/10/18.
-//
-
 #include "RestApi.hpp"
+#include "database/Database.hpp"
+
+using namespace elevation;
 
 RestApi::RestApi(Address addr)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
@@ -66,24 +65,59 @@ void RestApi::createDescription_() {
             .hide();
 }
 
+void buildUserFromQuery_(struct User* __restrict__ newUser,
+                         Pistache::Http::Uri::Query* __restrict__ query) {
+    strcpy(newUser->mac, query->get("mac").get().c_str());
+    strcpy(newUser->ip, query->get("ip").get().c_str());
+    strcpy(newUser->name, query->get("name").get().c_str());
+}
+
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "getIdentification");
     puts("getIdentification function called");
+
+    auto query = request.query();
+    if (!query.has("mac")) {
+        response.send(Http::Code::Bad_Request, "Malformed request");
+    } else {
+        std::string mac(query.get("mac").get());
+
+        struct User newUser = { 0 };
+        struct User oldUser = { 0 };
+
+        Database* db = Database::instance();
+        db->getUserByMac(mac.c_str(), &oldUser);
+        if (*oldUser.mac == 0) {
+            buildUserFromQuery_(&newUser, &query);
+            db->createUser(&newUser);
+            response.send(Http::Code::Ok, "New user created, id=" + std::to_string(newUser.id) + "\n");
+        } else {
+            buildUserFromQuery_(&newUser, &query);
+            newUser.id = oldUser.id;
+            if (db->createUser(&newUser)) {
+                response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
+            } else {
+                response.send(Http::Code::Ok, "this user exist, id=" + std::to_string(newUser.id) + "\n");
+            }
+        }
+        response.send(Http::Code::Ok, "getIdentification called");
+    }
+
+    return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::string param = request.param(":id").as<std::string>();
     response.send(Http::Code::Ok, "getFileList, param is : " + param);
-    printf("getFileList function called, param is %s\n", param.c_str());
+    std::cout << "getFileList function called, param is " << param << std::endl;
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "postFile");
-    puts("postFile function called");
+    std::cout << "postFile function called" << std::endl;
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "deleteFile");
-    puts("deleteFile function called");
+    std::cout << "deleteFile function called" << std::endl;
 }

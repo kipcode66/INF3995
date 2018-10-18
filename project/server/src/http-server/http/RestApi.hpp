@@ -1,7 +1,3 @@
-//
-// Created by adam on 04/10/18.
-//
-
 #ifndef HTTP_RESTAPI_HPP
 #define HTTP_RESTAPI_HPP
 
@@ -11,6 +7,7 @@
 #include <pistache/description.h>
 
 using namespace Pistache;
+namespace elevation {
 
 class RestApi {
 public:
@@ -31,5 +28,6 @@ private:
     Rest::Router m_router;
 };
 
+} // namespace elevation
 
 #endif // HTTP_RESTAPI_HPP

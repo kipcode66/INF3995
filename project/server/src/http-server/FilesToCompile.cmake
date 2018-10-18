@@ -18,6 +18,7 @@ set(HTTP_SERVER_CPP_SOURCES
     http/RestApi.cpp
     mp3-header/Mp3Duration.cpp
     mp3-header/Mp3Header.cpp
+    database/Database.cpp
 )
 
 ###############################################################################
@@ -30,6 +31,7 @@ set(HTTP_SERVER_HEADER_SOURCES
     http/RestApi.hpp
     mp3-header/Mp3Duration.hpp
     mp3-header/Mp3Header.hpp
+    database/Database.hpp
 )
 
 makeAbsolute(HTTP_SERVER_CPP_SOURCES)

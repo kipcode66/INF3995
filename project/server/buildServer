@@ -2,7 +2,38 @@
 
 SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
 
+message() {
+    tput bold 2>/dev/null
+    tput setaf 10 2>/dev/null
+    echo -n "$@"
+    tput sgr0 2>/dev/null
+}
+
+obtainSQLite() {
+    # SQLite does not have a Git repository ; wget the tarball instead
+    cd "${DEPS_DIR}"
+    if [ ! -e "sqlite3/sqlite.tar.gz" ]; then
+        mkdir -p sqlite3
+        cd sqlite3
+        wget https://www.sqlite.org/src/tarball/sqlite.tar.gz
+        tar xzf sqlite.tar.gz
+        mv sqlite/* .
+        rmdir sqlite
+    fi
+}
+
+obtainDependencies() {
+    message $'\nObtaining dependencies, this may take up to 5 minutes if they are not already there...\n'
+
+    # Obtain submodules
+    git submodule update --init --recursive
+
+    # Obtain SQLite
+    obtainSQLite
+}
+
 buildPistache() {
+    message $'\nBuilding and installing Pistache...\n'
     local PISTACHE_BINARY_DIR="${DEPS_DIR}/pistache/build"
 
     # If this file/directory exists, then the dependency is considered up-to-date.
@@ -13,11 +44,12 @@ buildPistache() {
         mkdir -p "${PISTACHE_BINARY_DIR}"
         cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX="${DEPS_INSTALL_DIR}" ..
     fi
-    make -j2
+    make -j
     make install
 }
 
 buildOpenSsl() {
+    message $'\nBuilding and installing OpenSSL...\n'
     local OPEN_SSL_ROOT_DIR="${DEPS_DIR}/openssl"
 
     # If this file/directory exists, then the dependency is considered up-to-date.
@@ -29,7 +61,7 @@ buildOpenSsl() {
     if [ ! -e "${OPEN_SSL_BUILT_FLAG}" ]; then
         mkdir -p "${OPEN_SSL_CERTIFICATE_DIR}"
         ./config --prefix="${OPEN_SSL_INSTALL_DIR}" --openssldir="${OPEN_SSL_CERTIFICATE_DIR}"
-        make -j2
+        make -j
         make install_sw
     fi
 }
@@ -71,16 +103,33 @@ buildZLib() {
     fi
 }
 
+buildSqlite3() {
+    message $'\nBuilding and installing SQLite3...\n'
+    local SQLITE3_ROOT_DIR="${DEPS_DIR}/sqlite3"
+
+    # If this file/directory exists, then the dependency is considered up-to-date.
+    local SQLITE3_BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libsqlite3.a"
+    local SQLITE3_INSTALL_DIR="${DEPS_INSTALL_DIR}"
+
+    cd "${SQLITE3_ROOT_DIR}"
+    if [ ! -e "${SQLITE3_BUILT_FLAG}" ]; then
+        ./configure --prefix="${SQLITE3_INSTALL_DIR}" --includedir="${SQLITE3_INSTALL_DIR}/include/sqlite3"
+        make -j
+        make install
+    fi
+}
+
 buildDependencies() {
     local DEPS_DIR="${SERVER_DIR}/lib"
     local DEPS_INSTALL_DIR="${SERVER_DIR}/build/dependencies"
 
-    git submodule update --init --recursive
+    obtainDependencies
     mkdir -p "${DEPS_INSTALL_DIR}"
     buildOpenSsl
     buildPistache
     buildZLib # REQUIRED BY TAGLIB
     buildTagLib
+    buildSqlite3
 }
 
 buildServer() {
@@ -90,7 +139,7 @@ buildServer() {
     buildDependencies
     cd "${SERVER_BINARY_DIR}"
     cmake -DCMAKE_BUILD_TYPE=Debug ../src
-    make -j2
+    make -j
 }
 
 buildServer
