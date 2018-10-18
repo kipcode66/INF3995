@@ -61,9 +61,8 @@ buildOpenSsl() {
     if [ ! -e "${OPEN_SSL_BUILT_FLAG}" ]; then
         mkdir -p "${OPEN_SSL_CERTIFICATE_DIR}"
         ./config --prefix="${OPEN_SSL_INSTALL_DIR}" --openssldir="${OPEN_SSL_CERTIFICATE_DIR}"
-<<<<<<< HEAD
         make -j
-        make install
+        make install_sw
     fi
 }
 
@@ -80,10 +79,6 @@ buildSqlite3() {
         ./configure --prefix="${SQLITE3_INSTALL_DIR}" --includedir="${SQLITE3_INSTALL_DIR}/include/sqlite3"
         make -j
         make install
-=======
-        make -j2
-        make install_sw
->>>>>>> dev
     fi
 }
 
