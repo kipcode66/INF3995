@@ -68,28 +68,33 @@ void RestApi::createDescription_() {
             .hide();
 }
 
-void buildUserFromQuery_(struct User* __restrict__ newUser, const auto* __restrict__ query) {
-    strcpy(newUser->mac,
-                    query->get("mac").get().c_str());
-    strcpy(newUser->ip,
-                    query->get("ip").get().c_str());
-    strcpy(newUser->name,
-                    query->get("name").get().c_str());
+void buildUserFromQuery_(struct User* __restrict__ newUser,
+                         Pistache::Http::Uri::Query* __restrict__ query) {
+    strcpy(newUser->mac, query->get("mac").get().c_str());
+    strcpy(newUser->ip, query->get("ip").get().c_str());
+    strcpy(newUser->name, query->get("name").get().c_str());
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
     puts("getIdentification function called");
 
     auto query = request.query();
-    std::string mac = query.get("mac").get();
+    if (!query.has("mac")) {
+        response.send(Http::Code::Ok, "Malformed request");
+    }
+    printf("get is =(%s)\n", query.get("mac").get());
+    std::string mac(query.get("mac").get());
 
+    printf("mac is=%s\n", mac.c_str());
     struct User newUser = { 0 };
     struct User oldUser = { 0 };
 
     Database* db = Database::instance();
-    if (db->getUserByMac(mac.c_str(), &oldUser)) {
+    db->getUserByMac(mac.c_str(), &oldUser);
+    if (*oldUser.mac == 0) {
         buildUserFromQuery_(&newUser, &query);
         db->createUser(&newUser);
+        response.send(Http::Code::Ok, "New user created, id=" + std::to_string(newUser.id) + "\n");
     } else {
         buildUserFromQuery_(&newUser, &query);
         newUser.id = oldUser.id;

@@ -19,32 +19,27 @@ Database* Database::instance() {
 }
 
 /*
- * Returns an empty user on unsuccesful search
+ * Returns an empty user (all 0s) on unsuccesful search
  */
-int Database::getUserByMac(const char* mac,
-                    struct User* __restrict__ user) const {
+void Database::getUserByMac(const char* mac,
+                            struct User* __restrict__ user) const {
     int errcode = 0;
     const char* query = sqlite3_mprintf(
             "SELECT rowid, ip, mac, name FROM user WHERE (mac = '%q');", mac);
 
-    sqlite3_stmt *res = 0;
-    errcode = sqlite3_prepare_v2(m_db, query, -1, &res, 0); // TODO give exact strlen for perfo
+    sqlite3_stmt *statement = 0;
+    errcode = sqlite3_prepare_v2(m_db, query, -1, &statement, 0); // TODO give exact strlen for perfo
     if (errcode)
-        goto err;
+        throw std::runtime_error(sqlite3_errstr(errcode));
 
-    errcode = sqlite3_step(res);
+    errcode = sqlite3_step(statement);
     if (errcode == SQLITE_ROW) {
-        user->id = sqlite3_column_int(res, 0);
-        strcpy(user->ip, (char *)sqlite3_column_text(res, 1));
-        strcpy(user->name, (char *)sqlite3_column_text(res, 3));
-        strcpy(user->mac, (char *)sqlite3_column_text(res, 2)); // do last as a coherence check
-        errcode = 0;
+        user->id = sqlite3_column_int(statement, 0);
+        strcpy(user->ip, (char *)sqlite3_column_text(statement, 1));
+        strcpy(user->name, (char *)sqlite3_column_text(statement, 3));
+        strcpy(user->mac, (char *)sqlite3_column_text(statement, 2)); // do last as a coherence check
     }
-    goto done;
-err:
-    fprintf(stderr, "error: %s\n", sqlite3_errstr(errcode));
-done:
-    return errcode;
+    return;
 }
 
 int Database::createUser(const struct User* user) {
