@@ -30,7 +30,7 @@ buildOpenSsl() {
         mkdir -p "${OPEN_SSL_CERTIFICATE_DIR}"
         ./config --prefix="${OPEN_SSL_INSTALL_DIR}" --openssldir="${OPEN_SSL_CERTIFICATE_DIR}"
         make -j2
-        make install
+        make install_sw
     fi
 }
 
