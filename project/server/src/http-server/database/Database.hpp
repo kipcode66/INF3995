@@ -1,5 +1,6 @@
 #include <sqlite3/sqlite3.h>
 #include <stdint.h>
+#include <cstddef>
 
 #ifndef DATABASE_DATABASE_HPP
 #define DATABASE_DATABASE_HPP
@@ -7,10 +8,14 @@
 namespace elevation {
 
 struct User {
+    static const size_t IP_LENGTH = 16;
+    static const size_t MAC_LENGTH = 18;
+    static const size_t NAME_LENGTH = 256;
+
     int64_t id;
-    char ip[16];
-    char mac[18];
-    char name[256];
+    char ip[IP_LENGTH];
+    char mac[MAC_LENGTH];
+    char name[NAME_LENGTH];
 };
 
 
@@ -28,5 +33,6 @@ private:
 };
 
 } // namespace elevation
+
 
 #endif // DATABASE_DATABASE_HPP

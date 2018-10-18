@@ -1,9 +1,5 @@
-//
-// Created by adam on 04/10/18.
-//
-
 #include "RestApi.hpp"
-#include "../database/Database.hpp"
+#include "database/Database.hpp"
 
 using namespace elevation;
 
@@ -113,15 +109,15 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
     // querying a param from the request object, by name
     std::string param = request.param(":id").as<std::string>();
     response.send(Http::Code::Ok, "getFileList, param is : " + param);
-    printf("getFileList function called, param is %s\n", param.c_str());
+    std::cout << "getFileList function called, param is " << param << std::endl;
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "postFile");
-    puts("postFile function called");
+    std::cout << "postFile function called" << std::endl;
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "deleteFile");
-    puts("deleteFile function called");
+    std::cout << "deleteFile function called" << std::endl;
 }

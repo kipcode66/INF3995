@@ -28,6 +28,6 @@ private:
     Rest::Router m_router;
 };
 
-} // elevation
+} // namespace elevation
 
 #endif // HTTP_RESTAPI_HPP

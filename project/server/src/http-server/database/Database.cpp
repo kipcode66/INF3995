@@ -1,12 +1,9 @@
-//
-// Created by adam on 09/10/18.
-//
 #include "Database.hpp"
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <string>
 #include <stdexcept>
+#include <iostream>
 
 using namespace elevation;
 
@@ -72,8 +69,10 @@ int Database::createUser(const struct User* user) {
 Database::Database() {
     int errcode = sqlite3_open("server.db", &m_db);
     if (errcode) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(m_db));
+        std::cerr << "Can't open database: " << sqlite3_errmsg(m_db) << std::endl;
+
         sqlite3_close(m_db);
-        throw "Cannot connect to database";
+        throw std::runtime_error("Cannot connect to database");
     }
 }
+
