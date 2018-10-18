@@ -32,7 +32,7 @@ buildPistache() {
         mkdir -p "${PISTACHE_BINARY_DIR}"
         cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX="${DEPS_INSTALL_DIR}" ..
     fi
-    make -j2
+    make -j
     make install
 }
 
@@ -48,7 +48,7 @@ buildOpenSsl() {
     if [ ! -e "${OPEN_SSL_BUILT_FLAG}" ]; then
         mkdir -p "${OPEN_SSL_CERTIFICATE_DIR}"
         ./config --prefix="${OPEN_SSL_INSTALL_DIR}" --openssldir="${OPEN_SSL_CERTIFICATE_DIR}"
-        make -j2
+        make -j
         make install
     fi
 }
@@ -63,7 +63,7 @@ buildSqlite3() {
     cd "${SQLITE3_ROOT_DIR}"
     if [ ! -e "${SQLITE3_BUILT_FLAG}" ]; then
         ./configure --prefix="${SQLITE3_INSTALL_DIR}" --includedir="${SQLITE3_INSTALL_DIR}/include/sqlite3"
-        make -j2
+        make -j
         make install
     fi
 }
@@ -86,7 +86,7 @@ buildServer() {
     buildDependencies
     cd "${SERVER_BINARY_DIR}"
     cmake -DCMAKE_BUILD_TYPE=Debug ../src
-    make -j2
+    make -j
 }
 
 buildServer
