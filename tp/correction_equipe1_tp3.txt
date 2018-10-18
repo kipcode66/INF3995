@@ -1,0 +1,7 @@
+Équipe 1                            Commentaires
+Conformité de la remise      1/1    
+Clarté                       3/3    
+Documentation                -/0    
+Qualité du code            6.5/7    Fuite de mémoire pour HelloHandler::c_printQueue (oui même si c'est une variable statique). Il faut éviter les new/delete à la main en C++; utilisez des pointeurs intelligents (std::unique_ptr ou std::shared_ptr) 
+Fonctionnement               9/9    
+Total                     19.5/20   
