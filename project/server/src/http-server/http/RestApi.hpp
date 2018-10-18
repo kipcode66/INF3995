@@ -16,7 +16,7 @@ public:
     void init();
     void start();
 
-private:
+protected:
     void createDescription_();
     void getIdentification_(const Rest::Request& request, Http::ResponseWriter response);
     void getFileList_(const Rest::Request& request, Http::ResponseWriter response);
