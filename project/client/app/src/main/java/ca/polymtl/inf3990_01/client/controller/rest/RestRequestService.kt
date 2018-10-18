@@ -42,7 +42,7 @@ class RestRequestService(
                     SongListResponseData::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
                     Response.Listener { resp ->
-                        continuation.resume(resp as ResponseData<SongListResponseData>)
+                        continuation.resume(resp)
                     },
                     Response.ErrorListener { error ->
                         val msg = when (error.networkResponse?.statusCode ?: 0) {

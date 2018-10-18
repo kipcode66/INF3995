@@ -150,8 +150,8 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
                         )),
                         GetTokenResponseData::class.java,
                         mutableMapOf(HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()), // Headers
-                        Response.Listener { respData: ResponseData<GetTokenResponseData?> -> // Success listener
-                            continuation.resume(respData as ResponseData<GetTokenResponseData>) // Equivalent to Promise.resolve(value)
+                        Response.Listener { respData: ResponseData<GetTokenResponseData> -> // Success listener
+                            continuation.resume(respData) // Equivalent to Promise.resolve(value)
                         },
                         Response.ErrorListener { error -> // Error Listener
                             error.printStackTrace()

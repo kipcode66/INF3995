@@ -20,9 +20,9 @@ class RESTRequest<T>(
         private val body: String = "",
         private val responseClass: Class<T>?,
         private val headers: MutableMap<String, String>?,
-        private var listener: Response.Listener<ResponseData<T?>>,
+        private var listener: Response.Listener<ResponseData<T>>,
         errorListener: Response.ErrorListener?
-) : Request<ResponseData<T?>>(method, url, Response.ErrorListener {error ->
+) : Request<ResponseData<T>>(method, url, Response.ErrorListener {error ->
     if (error.networkResponse?.statusCode == CODE_FORBIDDEN && TokenManagerService.hasInstance()) {
         val tokenService = TokenManagerService.getInstanceOrThrow()
         launch {
@@ -35,7 +35,7 @@ class RESTRequest<T>(
     }
 }) {
     companion object { const val CODE_FORBIDDEN = 403 }
-    private val DUMMY_LISTENER = Response.Listener<ResponseData<T?>>{ _ -> }
+    private val DUMMY_LISTENER = Response.Listener<ResponseData<T>>{ _ -> }
     private val gson = Gson()
 
     override fun getHeaders(): MutableMap<String, String> {
@@ -56,15 +56,15 @@ class RESTRequest<T>(
         listener = DUMMY_LISTENER
     }
 
-    override fun deliverResponse(response: ResponseData<T?>) = listener.onResponse(response)
+    override fun deliverResponse(response: ResponseData<T>) = listener.onResponse(response)
 
-    override fun parseNetworkResponse(response: NetworkResponse?): Response<ResponseData<T?>> {
+    override fun parseNetworkResponse(response: NetworkResponse?): Response<ResponseData<T>> {
         return try {
             val json = String(
                     response?.data ?: ByteArray(0),
                     Charset.forName(HttpHeaderParser.parseCharset(response?.headers)))
             Response.success(
-                    ResponseData(response?.statusCode ?: -1, if (responseClass!=null) gson.fromJson(json, responseClass) else null,
+                    ResponseData(response?.statusCode ?: -1, gson.fromJson(json, responseClass),
                         response),
                     HttpHeaderParser.parseCacheHeaders(response))
         } catch (e: UnsupportedEncodingException) {
