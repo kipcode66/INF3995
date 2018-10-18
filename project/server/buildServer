@@ -12,12 +12,14 @@ message() {
 obtainSQLite() {
     # SQLite does not have a Git repository ; wget the tarball instead
     cd "${DEPS_DIR}"
-    mkdir -p sqlite3
-    cd sqlite3
-    wget https://www.sqlite.org/src/tarball/sqlite.tar.gz
-    tar xzf sqlite.tar.gz
-    mv sqlite/* .
-    rmdir sqlite
+    if [ ! -e "sqlite3/sqlite.tar.gz" ]; then
+        mkdir -p sqlite3
+        cd sqlite3
+        wget https://www.sqlite.org/src/tarball/sqlite.tar.gz
+        tar xzf sqlite.tar.gz
+        mv sqlite/* .
+        rmdir sqlite
+    fi
 }
 
 obtainDependencies() {

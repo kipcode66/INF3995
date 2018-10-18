@@ -1,0 +1,223 @@
+[1mdiff --git a/project/server/src/http-server/CMakeLists.txt b/project/server/src/http-server/CMakeLists.txt[m
+[1mindex 7af3295..0f37bd2 100644[m
+[1m--- a/project/server/src/http-server/CMakeLists.txt[m
+[1m+++ b/project/server/src/http-server/CMakeLists.txt[m
+[36m@@ -16,7 +16,7 @@[m [minclude_directories(                       # Equivalent to the -I flag in g++[m
+     "${CMAKE_CURRENT_SOURCE_DIR}"[m
+ )[m
+ link_directories("${DEPS_DIR}/lib")        # Equivalent to the -L flag in g++[m
+[31m-link_libraries(pistache)                   # Equivalent to the -l flag in g++[m
+[32m+[m[32mlink_libraries(pistache sqlite3)           # Equivalent to the -l flag in g++[m
+ [m
+ # Create targets[m
+ add_executable(http-server     main.cpp "${HTTP_SERVER_HEADER_SOURCES}")[m
+[1mdiff --git a/project/server/src/http-server/FilesToCompile.cmake b/project/server/src/http-server/FilesToCompile.cmake[m
+[1mindex 13415f7..ae4641e 100644[m
+[1m--- a/project/server/src/http-server/FilesToCompile.cmake[m
+[1m+++ b/project/server/src/http-server/FilesToCompile.cmake[m
+[36m@@ -16,6 +16,7 @@[m [minclude("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")[m
+ # Use quotes "" if a file contains a space (although not recommended)[m
+ set(HTTP_SERVER_CPP_SOURCES[m
+     http/RestApi.cpp[m
+[32m+[m[32m    database/Database.cpp[m
+ )[m
+ [m
+ ###############################################################################[m
+[36m@@ -26,6 +27,7 @@[m [mset(HTTP_SERVER_CPP_SOURCES[m
+ # Use quotes "" if a file contains a space (although not recommended)[m
+ set(HTTP_SERVER_HEADER_SOURCES[m
+     http/RestApi.hpp[m
+[32m+[m[32m    database/Database.hpp[m
+ )[m
+ [m
+ makeAbsolute(HTTP_SERVER_CPP_SOURCES)[m
+[1mdiff --git a/project/server/src/http-server/database/Database.cpp b/project/server/src/http-server/database/Database.cpp[m
+[1mnew file mode 100644[m
+[1mindex 0000000..89d13ae[m
+[1m--- /dev/null[m
+[1m+++ b/project/server/src/http-server/database/Database.cpp[m
+[36m@@ -0,0 +1,77 @@[m
+[32m+[m[32m//[m
+[32m+[m[32m// Created by adam on 09/10/18.[m
+[32m+[m[32m//[m
+[32m+[m[32m#include "Database.hpp"[m
+[32m+[m[32m#include <stdio.h>[m
+[32m+[m[32m#include <stdint.h>[m
+[32m+[m[32m#include <string.h>[m
+[32m+[m[32m#include <string>[m
+[32m+[m[32m#include <stdexcept>[m
+[32m+[m
+[32m+[m[32mDatabase* Database::s_instance = nullptr;[m
+[32m+[m
+[32m+[m[32mDatabase* Database::instance() {[m
+[32m+[m
+[32m+[m[32m    if(!s_instance) {[m
+[32m+[m[32m        s_instance = new Database;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    return s_instance;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m/*[m
+[32m+[m[32m * Returns an empty user (all 0s) on unsuccesful search[m
+[32m+[m[32m */[m
+[32m+[m[32mvoid Database::getUserByMac(const char* mac,[m
+[32m+[m[32m                            struct User* __restrict__ user) const {[m
+[32m+[m[32m    int errcode = 0;[m
+[32m+[m[32m    const char* query = sqlite3_mprintf([m
+[32m+[m[32m            "SELECT rowid, ip, mac, name FROM user WHERE (mac = '%q');", mac);[m
+[32m+[m
+[32m+[m[32m    sqlite3_stmt *statement = nullptr;[m
+[32m+[m[32m    errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo[m
+[32m+[m[32m    if (errcode)[m
+[32m+[m[32m        throw std::runtime_error(sqlite3_errstr(errcode));[m
+[32m+[m
+[32m+[m[32m    errcode = sqlite3_step(statement);[m
+[32m+[m[32m    if (errcode == SQLITE_ROW) {[m
+[32m+[m[32m        user->id = sqlite3_column_int(statement, 0);[m
+[32m+[m[32m        strcpy(user->ip, (char *)sqlite3_column_text(statement, 1));[m
+[32m+[m[32m        strcpy(user->name, (char *)sqlite3_column_text(statement, 3));[m
+[32m+[m[32m        strcpy(user->mac, (char *)sqlite3_column_text(statement, 2)); // do last as a coherence check[m
+[32m+[m[32m    } else {[m
+[32m+[m[32m        *user = { 0 };[m
+[32m+[m[32m    }[m
+[32m+[m[32m    return;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mint Database::createUser(const struct User* user) {[m
+[32m+[m[32m    int errcode = 0;[m
+[32m+[m[32m    char* errmsg = nullptr;[m
+[32m+[m[32m    const char* query = sqlite3_mprintf([m
+[32m+[m[32m                "INSERT OR REPLACE INTO user VALUES ('%q', '%q', '%q');",[m
+[32m+[m[32m                user->ip,[m
+[32m+[m[32m                user->mac,[m
+[32m+[m[32m                user->name);[m
+[32m+[m
+[32m+[m[32m    errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);[m
+[32m+[m[32m    if (errcode != SQLITE_OK) {[m
+[32m+[m[32m        std::string message;[m
+[32m+[m[32m        if (errmsg) {[m
+[32m+[m[32m            message = errmsg;[m
+[32m+[m[32m            free(errmsg);[m
+[32m+[m[32m        } else {[m
+[32m+[m[32m            message = "unknown database error";[m
+[32m+[m[32m        }[m
+[32m+[m[32m        throw std::runtime_error(message);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    return errcode;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mDatabase::Database() {[m
+[32m+[m[32m    int errcode = sqlite3_open("server.db", &m_db);[m
+[32m+[m[32m    if (errcode) {[m
+[32m+[m[32m        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(m_db));[m
+[32m+[m[32m        sqlite3_close(m_db);[m
+[32m+[m[32m        throw "Cannot connect to database";[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[1mdiff --git a/project/server/src/http-server/database/Database.hpp b/project/server/src/http-server/database/Database.hpp[m
+[1mnew file mode 100644[m
+[1mindex 0000000..35d66d9[m
+[1m--- /dev/null[m
+[1m+++ b/project/server/src/http-server/database/Database.hpp[m
+[36m@@ -0,0 +1,30 @@[m
+[32m+[m[32m//[m
+[32m+[m[32m// Created by adam on 09/10/18.[m
+[32m+[m[32m//[m
+[32m+[m[32m#include <sqlite3/sqlite3.h>[m
+[32m+[m[32m#include <stdint.h>[m
+[32m+[m
+[32m+[m[32m#ifndef DATABASE_DATABASE_HPP[m
+[32m+[m[32m#define DATABASE_DATABASE_HPP[m
+[32m+[m
+[32m+[m[32mstruct User {[m
+[32m+[m[32m    int64_t id;[m
+[32m+[m[32m    char ip[16];[m
+[32m+[m[32m    char mac[18];[m
+[32m+[m[32m    char name[256];[m
+[32m+[m[32m};[m
+[32m+[m
+[32m+[m
+[32m+[m[32mclass Database {[m
+[32m+[m[32mpublic:[m
+[32m+[m[32m    static Database* instance();[m
+[32m+[m[32m    void getUserByMac(const char*, struct User* __restrict__) const;[m
+[32m+[m[32m    int createUser(const struct User*);[m
+[32m+[m
+[32m+[m[32mprivate:[m
+[32m+[m[32m    Database();[m
+[32m+[m
+[32m+[m[32m    sqlite3* m_db = 0;[m
+[32m+[m[32m    static Database* s_instance;[m
+[32m+[m[32m};[m
+[32m+[m[32m#endif // DATABASE_DATABASE_HPP[m
+[1mdiff --git a/project/server/src/http-server/http/RestApi.cpp b/project/server/src/http-server/http/RestApi.cpp[m
+[1mindex c4c53b2..8aae4e6 100644[m
+[1m--- a/project/server/src/http-server/http/RestApi.cpp[m
+[1m+++ b/project/server/src/http-server/http/RestApi.cpp[m
+[36m@@ -3,6 +3,8 @@[m
+ //[m
+ [m
+ #include "RestApi.hpp"[m
+[32m+[m[32m#include "../database/Database.hpp"[m
+[32m+[m
+ [m
+ RestApi::RestApi(Address addr)[m
+ : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))[m
+[36m@@ -66,9 +68,44 @@[m [mvoid RestApi::createDescription_() {[m
+             .hide();[m
+ }[m
+ [m
+[32m+[m[32mvoid buildUserFromQuery_(struct User* __restrict__ newUser,[m
+[32m+[m[32m                         Pistache::Http::Uri::Query* __restrict__ query) {[m
+[32m+[m[32m    strcpy(newUser->mac, query->get("mac").get().c_str());[m
+[32m+[m[32m    strcpy(newUser->ip, query->get("ip").get().c_str());[m
+[32m+[m[32m    strcpy(newUser->name, query->get("name").get().c_str());[m
+[32m+[m[32m}[m
+[32m+[m
+ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {[m
+[31m-    response.send(Http::Code::Ok, "getIdentification");[m
+     puts("getIdentification function called");[m
+[32m+[m
+[32m+[m[32m    auto query = request.query();[m
+[32m+[m[32m    if (!query.has("mac")) {[m
+[32m+[m[32m        response.send(Http::Code::Bad_Request, "Malformed request");[m
+[32m+[m[32m    } else {[m
+[32m+[m[32m        std::string mac(query.get("mac").get());[m
+[32m+[m
+[32m+[m[32m        struct User newUser = { 0 };[m
+[32m+[m[32m        struct User oldUser = { 0 };[m
+[32m+[m
+[32m+[m[32m        Database* db = Database::instance();[m
+[32m+[m[32m        db->getUserByMac(mac.c_str(), &oldUser);[m
+[32m+[m[32m        if (*oldUser.mac == 0) {[m
+[32m+[m[32m            buildUserFromQuery_(&newUser, &query);[m
+[32m+[m[32m            db->createUser(&newUser);[m
+[32m+[m[32m            response.send(Http::Code::Ok, "New user created, id=" + std::to_string(newUser.id) + "\n");[m
+[32m+[m[32m        } else {[m
+[32m+[m[32m            buildUserFromQuery_(&newUser, &query);[m
+[32m+[m[32m            newUser.id = oldUser.id;[m
+[32m+[m[32m            if (db->createUser(&newUser)) {[m
+[32m+[m[32m                response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");[m
+[32m+[m[32m            } else {[m
+[32m+[m[32m                response.send(Http::Code::Ok, "this user exist, id=" + std::to_string(newUser.id) + "\n");[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m[32m        response.send(Http::Code::Ok, "getIdentification called");[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    return;[m
+ }[m
+ [m
+ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {[m
+[1mdiff --git a/project/server/src/http-server/main.cpp b/project/server/src/http-server/main.cpp[m
+[1mindex c2e4f4b..a2ec315 100644[m
+[1m--- a/project/server/src/http-server/main.cpp[m
+[1m+++ b/project/server/src/http-server/main.cpp[m
+[36m@@ -37,7 +37,6 @@[m [muint32_t parseArgs(int argc, char** argv) {[m
+ int main(int argc, char** argv) {[m
+ [m
+     uint16_t portId = parseArgs(argc, argv);[m
+[31m-[m
+     try {[m
+         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));[m
+ [m
