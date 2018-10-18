@@ -3,3 +3,6 @@ build/
 **/.idea/
 **/venv/
 cmake-build-debug/
+tags
+*.db
+
