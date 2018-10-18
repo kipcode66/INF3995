@@ -44,9 +44,9 @@ buildTagLib() {
 
     cd "${TAG_LIB_ROOT_DIR}"
     if [ ! -e "${TAG_LIB_BUILT_FLAG}" ]; then
-	mkdir -p "${TAG_LIB_BINARY_DIR}"
-	cd "${TAG_LIB_BINARY_DIR}"
-	cmake -DCMAKE_INSTALL_PREFIX="${TAG_LIB_INSTALL_DIR}" -DCMAKE_BUILD_TYPE=Release ..
+        mkdir -p "${TAG_LIB_BINARY_DIR}"
+        cd "${TAG_LIB_BINARY_DIR}"
+        cmake -DCMAKE_INSTALL_PREFIX="${TAG_LIB_INSTALL_DIR}" -DCMAKE_BUILD_TYPE=Release ..
         make -j8
         make install
     fi
@@ -63,9 +63,9 @@ buildZLib() {
 
     cd "${Z_LIB_ROOT_DIR}"
     if [ ! -e "${Z_LIB_BUILT_FLAG}" ]; then
-	mkdir -p "${Z_LIB_BINARY_DIR}"
-	cd "${Z_LIB_BINARY_DIR}"
-	cmake -DCMAKE_INSTALL_PREFIX="${Z_LIB_INSTALL_DIR}" -DCMAKE_BUILD_TYPE=Release ..
+        mkdir -p "${Z_LIB_BINARY_DIR}"
+        cd "${Z_LIB_BINARY_DIR}"
+        cmake -DCMAKE_INSTALL_PREFIX="${Z_LIB_INSTALL_DIR}" -DCMAKE_BUILD_TYPE=Release ..
         make -j8
         make install
     fi
