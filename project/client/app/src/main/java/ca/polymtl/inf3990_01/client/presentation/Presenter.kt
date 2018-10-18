@@ -1,6 +1,8 @@
 package ca.polymtl.inf3990_01.client.presentation
 
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
+import ca.polymtl.inf3990_01.client.model.LocalSong
+import ca.polymtl.inf3990_01.client.model.LocalSongs
 import ca.polymtl.inf3990_01.client.model.Song
 import ca.polymtl.inf3990_01.client.model.SongQueue
 import java.util.*
@@ -12,6 +14,7 @@ import java.util.*
  */
 class Presenter(stateService: AppStateService): Observable() {
     private val songQueue: SongQueue = SongQueue()
+    private val localSongs: LocalSongs = LocalSongs()
 
     init {
         stateService.addObserver(this::onStateUpdate)
@@ -22,6 +25,13 @@ class Presenter(stateService: AppStateService): Observable() {
         songQueue.addAll(queue)
         setChanged()
         notifyObservers(songQueue)
+    }
+
+    fun setLocalSongs(songs: Collection<LocalSong>) {
+        localSongs.clear()
+        localSongs.addAll(songs)
+        setChanged()
+        notifyObservers(localSongs)
     }
 
     private fun onStateUpdate(o: Observable, arg: Any?) {
