@@ -2,6 +2,25 @@
 
 SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
 
+obtainSQLite() {
+    # SQLite does not have a Git repository ; wget the tarball instead
+    cd "${DEPS_DIR}"
+    mkdir -p sqlite3
+    cd sqlite3
+    wget https://www.sqlite.org/src/tarball/sqlite.tar.gz
+    tar xzf sqlite.tar.gz
+    mv sqlite/* .
+    rmdir sqlite
+}
+
+obtainDependencies() {
+    # Obtain submodules
+    git submodule update --init --recursive
+
+    # Obtain SQLite
+    obtainSQLite
+}
+
 buildPistache() {
     local PISTACHE_BINARY_DIR="${DEPS_DIR}/pistache/build"
 
@@ -53,7 +72,7 @@ buildDependencies() {
     local DEPS_DIR="${SERVER_DIR}/lib"
     local DEPS_INSTALL_DIR="${SERVER_DIR}/build/dependencies"
 
-    git submodule update --init --recursive
+    obtainDependencies
     mkdir -p "${DEPS_INSTALL_DIR}"
     buildOpenSsl
     buildPistache
