@@ -8,6 +8,8 @@
 #include <string>
 #include <stdexcept>
 
+using namespace elevation;
+
 Database* Database::s_instance = nullptr;
 
 Database* Database::instance() {

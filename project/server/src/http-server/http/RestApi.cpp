@@ -5,6 +5,7 @@
 #include "RestApi.hpp"
 #include "../database/Database.hpp"
 
+using namespace elevation;
 
 RestApi::RestApi(Address addr)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))

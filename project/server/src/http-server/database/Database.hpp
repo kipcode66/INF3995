@@ -1,11 +1,10 @@
-//
-// Created by adam on 09/10/18.
-//
 #include <sqlite3/sqlite3.h>
 #include <stdint.h>
 
 #ifndef DATABASE_DATABASE_HPP
 #define DATABASE_DATABASE_HPP
+
+namespace elevation {
 
 struct User {
     int64_t id;
@@ -27,4 +26,7 @@ private:
     sqlite3* m_db = 0;
     static Database* s_instance;
 };
+
+} // namespace elevation
+
 #endif // DATABASE_DATABASE_HPP
