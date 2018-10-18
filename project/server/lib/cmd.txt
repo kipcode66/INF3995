@@ -1,0 +1,1 @@
+mkdir sqlite3 && pushd sqlite3 && wget https://www.sqlite.org/src/tarball/sqlite.tar.gz && tar zxf sqlite.tar.gz
