@@ -39,8 +39,6 @@ int main(int argc, char** argv) {
     uint16_t portId = parseArgs(argc, argv);
 
     try {
-        Mp3Header mp3Header = Mp3Header(argv[2]);
-        mp3Header.displaySongInfo();
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
 
         RestApi api(addr);
