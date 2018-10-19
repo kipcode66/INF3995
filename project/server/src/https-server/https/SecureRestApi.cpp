@@ -1,5 +1,5 @@
 #include "SecureRestApi.hpp"
-#include "database/Database.hpp"
+#include "http-server/database/Database.hpp"
 
 using namespace elevation;
 
