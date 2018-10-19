@@ -65,7 +65,7 @@ void RestApi::createDescription_() {
             .hide();
 }
 
-void buildUserFromQuery_(struct User* __restrict__ newUser,
+void buildUserFromQuery_(User_t* __restrict__ newUser,
                          Pistache::Http::Uri::Query* __restrict__ query) {
     strcpy(newUser->mac, query->get("mac").get().c_str());
     strcpy(newUser->ip, query->get("ip").get().c_str());
@@ -81,8 +81,8 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     } else {
         std::string mac(query.get("mac").get());
 
-        struct User newUser = { 0 };
-        struct User oldUser = { 0 };
+        User_t newUser = { 0 };
+        User_t oldUser = { 0 };
 
         Database* db = Database::instance();
         db->getUserByMac(mac.c_str(), &oldUser);

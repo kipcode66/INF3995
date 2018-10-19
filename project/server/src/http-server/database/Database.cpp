@@ -21,7 +21,7 @@ Database* Database::instance() {
  * Returns an empty user (all 0s) on unsuccesful search
  */
 void Database::getUserByMac(const char* mac,
-                            struct User* __restrict__ user) const {
+                            User_t* __restrict__ user) const {
     int errcode = 0;
     const char* query = sqlite3_mprintf(
             "SELECT rowid, ip, mac, name FROM user WHERE (mac = '%q');", mac);
@@ -43,7 +43,7 @@ void Database::getUserByMac(const char* mac,
     return;
 }
 
-int Database::createUser(const struct User* user) {
+int Database::createUser(const User_t* user) {
     int errcode = 0;
     char* errmsg = nullptr;
     const char* query = sqlite3_mprintf(

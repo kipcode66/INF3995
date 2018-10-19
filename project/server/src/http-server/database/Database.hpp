@@ -7,7 +7,8 @@
 
 namespace elevation {
 
-struct User {
+
+struct User_t {
     static const size_t IP_LENGTH = 16;
     static const size_t MAC_LENGTH = 18;
     static const size_t NAME_LENGTH = 256;
@@ -22,8 +23,8 @@ struct User {
 class Database {
 public:
     static Database* instance();
-    void getUserByMac(const char*, struct User* __restrict__) const;
-    int createUser(const struct User*);
+    void getUserByMac(const char*, User_t* __restrict__) const;
+    int createUser(const User_t*);
 
 private:
     Database();
