@@ -52,7 +52,7 @@ class AppController(
     }
 
     /**
-     * When the app resumes from inactivity (when starting or coming back from being paused) we start the reload loop.
+     * When the app resumes from inactivity (when starting or coming back from being paused), we start the reload loop.
      */
     private fun onAppStart(event: AppResumeEvent) {
         // Make sure that the previous task was stopped
