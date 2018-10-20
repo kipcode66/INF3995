@@ -160,12 +160,18 @@ buildDependencies() {
     buildSqlite3
 }
 
+buildServer() {
+    message $'\nBuilding and installing the Elevation server...\n'
+    cd "${SERVER_BINARY_DIR}"
+    cmake -DCMAKE_BUILD_TYPE=Debug ../src
+    make -j$(getCoreCount)
+    message $'Building the Elevation server done!\n'
+}
+
 build() {
     local SERVER_BINARY_DIR="${SERVER_DIR}/build"
     mkdir -p "${SERVER_BINARY_DIR}"
 
     buildDependencies
-    cd "${SERVER_BINARY_DIR}"
-    cmake -DCMAKE_BUILD_TYPE=Debug ../src
-    make -j$(getCoreCount)
+    buildServer
 }
