@@ -48,7 +48,7 @@ class SongQueueAdapter(
         view.title.text = song.title
         view.author.text = song.authorName
         view.sent_by.text =
-            if (song.sentBy == null || song.sentBy.isNotEmpty())
+            if (song.sentBy == null || !song.sentBy.isEmpty())
                 appCtx.getString(R.string.song_queue_item_sent_by, song.sentBy ?: userName)
             else ""
         view.sender_ip.text = song.ip ?: view.context.getString(R.string.error_message_no_ip)
