@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+
+THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
+
+HTTP_SERVER_NAME=http-server
+SSL_DAEMON_NAME=ssl-daemon
+
+processesNotAlreadyStarted() {
+    if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
+        message "Cannot start HTTP Server : already started (PID $(pgrep -x "${HTTP_SERVER_NAME}"))"$'\n'
+        false
+    elif pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
+        echo "Cannot start SSL Daemon : already started (PID $(pgrep -x "${SSL_DAEMON_NAME}"))"$'\n'
+        false
+    else
+        true
+    fi
+}
+
+assignHttpServerPortRange() {
+    if [ "$(whoami)" == root ]; then
+        HTTP_SERVER_MIN_PORT=80
+    else
+        HTTP_SERVER_MIN_PORT=8080
+    fi
+    HTTP_SERVER_MAX_PORT=$((${HTTP_SERVER_MIN_PORT} + 20))
+}
+
+assignSslDaemonPortRange() {
+    if [ "$(whoami)" == root ]; then
+        SSL_DAEMON_MIN_PORT=443
+    else
+        SSL_DAEMON_MIN_PORT=4433
+    fi
+    SSL_DAEMON_MAX_PORT=$((${SSL_DAEMON_MIN_PORT} + 20))
+}
+
+startHttpServer() {
+    message $'\nStarting HTTP Server...\n'
+    HTTP_SERVER_PORT="${HTTP_SERVER_MIN_PORT}"
+    while [ "${HTTP_SERVER_PORT}" != "${HTTP_SERVER_MAX_PORT}" ]; do
+        echo $'\n'"Trying port number ${HTTP_SERVER_PORT}"
+        "./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}" "${HTTP_SERVER_PORT}" &
+        sleep 0.5
+        if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
+            break
+        else
+            HTTP_SERVER_PORT=$((${HTTP_SERVER_PORT} + 1))
+        fi
+    done
+}
+
+startSslDaemon() {
+    message $'\nStarting SSL Daemon...\n'
+    SSL_DAEMON_PORT="${SSL_DAEMON_MIN_PORT}"
+    while [ "${SSL_DAEMON_PORT}" != "${SSL_DAEMON_MAX_PORT}" ]; do
+        echo $'\n'"Trying port number ${SSL_DAEMON_PORT}"
+        "./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}" -l "${SSL_DAEMON_PORT}" -o "${HTTP_SERVER_PORT}" &
+        sleep 0.5
+        if pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
+            break
+        else
+            SSL_DAEMON_PORT=$((${SSL_DAEMON_PORT} + 1))
+        fi
+    done
+}
+
+start() {
+    if processesNotAlreadyStarted; then
+        cd "${SERVER_DIR}"
+        assignHttpServerPortRange
+        startHttpServer
+        assignSslDaemonPortRange
+        startSslDaemon
+        disown
+        message $'\nHTTP Server started on port '${HTTP_SERVER_PORT}',' \
+                $'and SSL Daemon started on port '${SSL_DAEMON_PORT}$'.\n\n'
+    fi
+}
+
+stop() {
+    if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
+        kill -TERM $(pgrep -x "${HTTP_SERVER_NAME}")
+        sleep 0.5
+        kill -KILL $(pgrep -x "${SSL_DAEMON_NAME}") 2>/dev/null
+    fi
+    if pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
+        kill -TERM $(pgrep -x "${SSL_DAEMON_NAME}")
+        sleep 0.5
+        kill -KILL $(pgrep -x "${SSL_DAEMON_NAME}") 2>/dev/null
+    fi
+}
