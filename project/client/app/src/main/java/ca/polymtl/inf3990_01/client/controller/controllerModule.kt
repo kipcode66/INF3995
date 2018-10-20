@@ -6,6 +6,7 @@ import org.koin.dsl.module.module
 
 val controllerModule = module(createOnStart = true) {
     single(createOnStart = true) { InitializationManager.getInstance(get(), get()) }
+    single { ActiveActivityTrackingService(get()) }
     single { EventManager.getInstance() }
     single { AppStateService() }
     single { AppController(get(), get(), get(), get(), get()) }

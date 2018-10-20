@@ -46,6 +46,20 @@ class EventManagerUnitTest : KoinTest {
     }
 
     @Test
+    fun `can register and call a listener with shortened methods`() {
+        // TODO: Test the case.
+        var ran = false
+        val listener : (CustomEvent) -> Unit = { evt ->
+            ran = true
+            System.out.println("Hello there!" + evt.data.toString())
+        }
+        eventMgr.addEventListener(listener)
+        eventMgr.addEventListener {evt: CustomEvent -> System.out.print(evt)}
+        eventMgr.dispatchEvent(CustomEvent("my_event", " and here!"))
+        assert(ran) {"listener was not run : $ran"}
+    }
+
+    @Test
     fun `can remove a listener`() {
         // TODO: Test the case.
         var ran = false
@@ -55,6 +69,20 @@ class EventManagerUnitTest : KoinTest {
         }
         eventMgr.addEventListener(CustomEvent::class.java, listener)
         eventMgr.removeEventListener(CustomEvent::class.java, listener)
+        eventMgr.dispatchEvent(CustomEvent("my_event", " and here!"))
+        assert(!ran) {"listener was run (it shouldn't) : $ran"}
+    }
+
+    @Test
+    fun `can remove a listener with shortened methods`() {
+        // TODO: Test the case.
+        var ran = false
+        val listener : (CustomEvent) -> Unit = { evt ->
+            ran = true
+            System.out.println("Hello there!" + evt.data.toString())
+        }
+        eventMgr.addEventListener(listener)
+        eventMgr.removeEventListener(listener)
         eventMgr.dispatchEvent(CustomEvent("my_event", " and here!"))
         assert(!ran) {"listener was run (it shouldn't) : $ran"}
     }

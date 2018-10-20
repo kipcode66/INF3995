@@ -13,8 +13,16 @@ class EventManager private constructor() {
         listeners[event]?.add(listener as (Event) -> Unit)
     }
 
+    @Synchronized inline fun <reified T: Event> addEventListener(noinline listener: (T) -> Unit) {
+        addEventListener(T::class.java, listener)
+    }
+
     @Synchronized fun <T: Event> removeEventListener(event: Class<out T>, listener: (T) -> Unit) {
         listeners[event]?.remove(listener)
+    }
+
+    @Synchronized inline fun <reified T: Event> removeEventListener(noinline listener: (T) -> Unit) {
+        removeEventListener(T::class.java, listener)
     }
 
     @Synchronized fun <T: Event> dispatchEvent(evt: T) {

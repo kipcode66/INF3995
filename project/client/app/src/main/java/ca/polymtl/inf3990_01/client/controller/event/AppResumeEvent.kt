@@ -1,8 +1,8 @@
 package ca.polymtl.inf3990_01.client.controller.event
 
-class AppStopEvent: Event {
+class AppResumeEvent: Event {
     companion object {
-        val EVENT_TYPE = "app_stop"
+        const val EVENT_TYPE = "app_resume"
     }
     override val type = EVENT_TYPE
 }

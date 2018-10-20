@@ -1,6 +1,7 @@
 package ca.polymtl.inf3990_01.client.presentation
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,7 @@ class SongQueueAdapter(
         private val layoutInflater: LayoutInflater,
         private val stateService: AppStateService,
         private val appCtx: Context,
+        private val preferences: SharedPreferences,
         presenter: Presenter
 ): BaseAdapter() {
     init {
@@ -39,14 +41,24 @@ class SongQueueAdapter(
     override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {
         val view = v ?: layoutInflater.inflate(R.layout.server_song, viewGroup, false)
         val song = this.songQueue[postion]
+        val appState = stateService.getState()
+        var userName = preferences.getString("client_name", appCtx.getString(R.string.client_name_default)) as String
+        userName = if (userName.isBlank()) appCtx.getString(R.string.client_name_default) else userName
 
         view.title.text = song.title
         view.author.text = song.authorName
-        view.sent_by.text = song.sentBy
+        view.sent_by.text =
+            if (song.sentBy == null || song.sentBy.isNotEmpty())
+                appCtx.getString(R.string.song_queue_item_sent_by, song.sentBy ?: userName)
+            else ""
         view.sender_ip.text = song.ip ?: view.context.getString(R.string.error_message_no_ip)
         view.sender_mac.text = song.mac ?: view.context.getString(R.string.error_message_no_mac)
-        view.layout_admin.visibility = if (stateService.getState().canDisplaySongOwnerData()) View.VISIBLE else View.GONE
-        view.remove_song.visibility = if (stateService.getState().canRemoveSong(song)) View.VISIBLE else View.INVISIBLE
+        view.layout_admin.visibility = if (appState.canDisplaySongOwnerData()) View.VISIBLE else View.INVISIBLE
+        view.remove_song.visibility = if (appState.canRemoveSong(song)) View.VISIBLE else View.INVISIBLE
+        view.setBackgroundResource(
+            if (appState.isSongHighlighted(song)) R.color.colorAccent
+            else android.R.color.background_light
+        )
         view.remove_song.setOnClickListener {
             //TODO : send query to server to remove 'song'
             //TODO : Send an event in the event manager that the AppController will catch and handle

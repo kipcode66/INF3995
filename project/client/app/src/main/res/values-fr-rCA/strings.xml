@@ -32,4 +32,6 @@
     <string name="setting_queue_period_label1">Lent (10 sec)</string>
     <string name="setting_queue_period_label2">Normal (4 sec)</string>
     <string name="setting_queue_period_label3">Rapide (1 sec)</string>
+    <string name="song_queue_item_sent_by">Proposée par: %1$s</string>
+    <string name="client_name_default">Vous</string>
 </resources>
