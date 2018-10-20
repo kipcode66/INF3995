@@ -74,10 +74,23 @@ obtainSQLite() {
     if [ ! -e "sqlite3/sqlite.tar.gz" ]; then
         mkdir -p sqlite3
         cd sqlite3
-        wget https://www.sqlite.org/src/tarball/sqlite.tar.gz
+        wget "https://www.sqlite.org/src/tarball/sqlite.tar.gz"
         tar xzf sqlite.tar.gz
         mv sqlite/* .
         rmdir sqlite
+    fi
+}
+
+obtainLibmad() {
+    # libmad does not have a Git repository ; wget the tarball instead
+    cd "${DEPS_DIR}"
+    if [ ! -e "libmad/libmad-0.15.0b.tar.gz" ]; then
+        mkdir -p libmad
+        cd libmad
+        wget -O libmad.tar.gz "ftp://ftp.mars.org/pub/mpeg/libmad-0.15.0b.tar.gz"
+        tar xzf libmad.tar.gz
+        mv libmad-0.15.0b/* .
+        rmdir libmad-0.15.0b
     fi
 }
 
@@ -87,8 +100,9 @@ obtainDependencies() {
     # Obtain submodules
     git submodule update --init --recursive
 
-    # Obtain SQLite
+    # Obtain other dependencies
     obtainSQLite
+    obtainLibmad
 
     message $'Obtaining dependencies done!\n'
 }
