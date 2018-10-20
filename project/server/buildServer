@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 
 SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
-
-message() {
-    tput bold 2>/dev/null
-    tput setaf 10 2>/dev/null
-    echo -n "$@"
-    tput sgr0 2>/dev/null
-}
+SCRIPTS_DIR="${SERVER_DIR}/res/scripts"
+source "${SCRIPTS_DIR}/build" # Add the functions in 'build'
 
 obtainSQLite() {
     # SQLite does not have a Git repository ; wget the tarball instead
@@ -23,7 +18,7 @@ obtainSQLite() {
 }
 
 obtainDependencies() {
-    message $'\nObtaining dependencies, this may take up to 5 minutes if they are not already there...\n'
+    message $'\nObtaining dependencies, this should take 3-10 minutes if they are not already there...\n'
 
     # Obtain submodules
     git submodule update --init --recursive
@@ -33,90 +28,57 @@ obtainDependencies() {
 }
 
 buildPistache() {
-    message $'\nBuilding and installing Pistache...\n'
-    local PISTACHE_BINARY_DIR="${DEPS_DIR}/pistache/build"
+    local SOURCE_DIR="${DEPS_DIR}/pistache"
+    local BINARY_DIR="${DEPS_DIR}/pistache/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/cmake/pistache"
+    local BUILD_TYPE=Debug
 
-    # If this file/directory exists, then the dependency is considered up-to-date.
-    local PISTACHE_BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/cmake/pistache"
-
-    cd "${PISTACHE_BINARY_DIR}"
-    if [ ! -e "${PISTACHE_BUILT_FLAG}" ] || [ ! -d "${PISTACHE_BINARY_DIR}" ]; then
-        mkdir -p "${PISTACHE_BINARY_DIR}"
-        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX="${DEPS_INSTALL_DIR}" ..
-    fi
-    make -j
-    make install
+    buildWithCMake "pistache" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${BUILD_TYPE}"
 }
 
 buildOpenSsl() {
-    message $'\nBuilding and installing OpenSSL...\n'
-    local OPEN_SSL_ROOT_DIR="${DEPS_DIR}/openssl"
-
-    # If this file/directory exists, then the dependency is considered up-to-date.
-    local OPEN_SSL_BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libssl.a"
-    local OPEN_SSL_INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local SOURCE_DIR="${DEPS_DIR}/openssl"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libssl.a"
+    local CONFIGURE=config
     local OPEN_SSL_CERTIFICATE_DIR="${SERVER_BINARY_DIR}/ssl"
+    local EXTRA_ARGS="--openssldir=${OPEN_SSL_CERTIFICATE_DIR}"
+    local INSTALL_TARGET=install_sw
 
-    cd "${OPEN_SSL_ROOT_DIR}"
-    if [ ! -e "${OPEN_SSL_BUILT_FLAG}" ]; then
-        mkdir -p "${OPEN_SSL_CERTIFICATE_DIR}"
-        ./config --prefix="${OPEN_SSL_INSTALL_DIR}" --openssldir="${OPEN_SSL_CERTIFICATE_DIR}"
-        make -j
-        make install_sw
-    fi
+    buildWithConfigure "openssl" "${SOURCE_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
 }
 
 buildTagLib() {
-    local TAG_LIB_ROOT_DIR="${DEPS_DIR}/taglib"
-    local TAG_LIB_BINARY_DIR="${TAG_LIB_ROOT_DIR}/build"
+    local SOURCE_DIR="${DEPS_DIR}/taglib"
+    local BINARY_DIR="${DEPS_DIR}/taglib/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libtag.a"
+    local BUILD_TYPE=Release
 
-    # If this file/directory exists, then the dependency is considered up-to-date.
-    local TAG_LIB_BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libtag.a"
-    local TAG_LIB_INSTALL_DIR="${DEPS_INSTALL_DIR}"
-
-    cd "${TAG_LIB_ROOT_DIR}"
-    if [ ! -e "${TAG_LIB_BUILT_FLAG}" ]; then
-        mkdir -p "${TAG_LIB_BINARY_DIR}"
-        cd "${TAG_LIB_BINARY_DIR}"
-        cmake -DCMAKE_INSTALL_PREFIX="${TAG_LIB_INSTALL_DIR}" -DCMAKE_BUILD_TYPE=Release ..
-        make -j8
-        make install
-    fi
+    buildWithCMake "taglib" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${BUILD_TYPE}"
 }
 
 buildZLib() {
-    local Z_LIB_ROOT_DIR="${DEPS_DIR}/zlib"
-    local Z_LIB_BINARY_DIR="${Z_LIB_ROOT_DIR}/build"
+    local SOURCE_DIR="${DEPS_DIR}/zlib"
+    local BINARY_DIR="${DEPS_DIR}/zlib/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libz.a"
+    local BUILD_TYPE=Release
 
-    # If this file/directory exists, then the dependency is considered up-to-date.
-    local Z_LIB_BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libz.a"
-    Z_LIB="${DEPS_INSTALL_DIR}/lib/libz.a" # REQUIRED BY TAGLIB
-    local Z_LIB_INSTALL_DIR="${DEPS_INSTALL_DIR}"
-
-    cd "${Z_LIB_ROOT_DIR}"
-    if [ ! -e "${Z_LIB_BUILT_FLAG}" ]; then
-        mkdir -p "${Z_LIB_BINARY_DIR}"
-        cd "${Z_LIB_BINARY_DIR}"
-        cmake -DCMAKE_INSTALL_PREFIX="${Z_LIB_INSTALL_DIR}" -DCMAKE_BUILD_TYPE=Release ..
-        make -j8
-        make install
-    fi
+    buildWithCMake "zlib" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${BUILD_TYPE}"
 }
 
 buildSqlite3() {
-    message $'\nBuilding and installing SQLite3...\n'
-    local SQLITE3_ROOT_DIR="${DEPS_DIR}/sqlite3"
+    local SOURCE_DIR="${DEPS_DIR}/sqlite3"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libsqlite3.a"
+    local CONFIGURE=configure
+    local SQLITE3_INCLUDE_DIR="${INSTALL_DIR}/include/sqlite3"
+    local EXTRA_ARGS="--includedir=${SQLITE3_INCLUDE_DIR}"
+    local INSTALL_TARGET=install
 
-    # If this file/directory exists, then the dependency is considered up-to-date.
-    local SQLITE3_BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libsqlite3.a"
-    local SQLITE3_INSTALL_DIR="${DEPS_INSTALL_DIR}"
-
-    cd "${SQLITE3_ROOT_DIR}"
-    if [ ! -e "${SQLITE3_BUILT_FLAG}" ]; then
-        ./configure --prefix="${SQLITE3_INSTALL_DIR}" --includedir="${SQLITE3_INSTALL_DIR}/include/sqlite3"
-        make -j
-        make install
-    fi
+    buildWithConfigure "sqlite3" "${SOURCE_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
 }
 
 buildDependencies() {
@@ -139,7 +101,7 @@ buildServer() {
     buildDependencies
     cd "${SERVER_BINARY_DIR}"
     cmake -DCMAKE_BUILD_TYPE=Debug ../src
-    make -j
+    make -j$(getCoreCount)
 }
 
 buildServer
