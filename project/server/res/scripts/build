@@ -31,7 +31,7 @@ buildWithCMake() {
         make -j$(getCoreCount) install
         message $'Building '"${DEPENDENCY_NAME}"$' done!\n'
     else
-        message $' Skipping : Already built\n'
+        message $'Skipping : Already built\n'
     fi
 }
 
@@ -64,7 +64,7 @@ buildWithConfigure() {
         make -j$(getCoreCount) "${INSTALL_TARGET}"
         message $'Building '"${DEPENDENCY_NAME}"$' done!\n'
     else
-        message $' Skipping : Already built\n'
+        message $'Skipping : Already built\n'
     fi
 }
 
@@ -90,7 +90,7 @@ obtainDependencies() {
     # Obtain SQLite
     obtainSQLite
 
-    message $'\nObtaining dependencies done!\n'
+    message $'Obtaining dependencies done!\n'
 }
 
 buildPistache() {
