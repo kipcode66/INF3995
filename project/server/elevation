@@ -1,33 +1,10 @@
 #!/usr/bin/env bash
 
-SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
-HTTP_SERVER_NAME=http-server
-SSL_DAEMON_NAME=ssl-daemon
-
-SCRIPTS_DIR="${SERVER_DIR}/res/scripts"
-source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
+THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+SCRIPTS_DIR="${THIS_SCRIPT_DIR}/res/scripts"
 source "${SCRIPTS_DIR}/build" # Add the functions in 'build'
 source "${SCRIPTS_DIR}/start" # Add the functions in 'start'
-
-testDaemon() {
-    message $'\nTesting SSL Daemon...\n'
-    cd "${DAEMON_TEST_DIR}"
-    ctest --output-on-failure
-}
-
-testHttpServer() {
-    message $'\nTesting HTTP Server...\n'
-    cd "${HTTP_SERVER_TEST_DIR}"
-    ctest --output-on-failure
-}
-
-test() {
-    HTTP_SERVER_TEST_DIR="${SERVER_DIR}/build/${HTTP_SERVER_NAME}/test"
-    DAEMON_TEST_DIR="${SERVER_DIR}/build/${SSL_DAEMON_NAME}/test"
-
-    testHttpServer
-    testDaemon
-}
+source "${SCRIPTS_DIR}/test" # Add the functions in 'test'
 
 usage() {
     echo "USAGE"
