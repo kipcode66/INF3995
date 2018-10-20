@@ -4,6 +4,10 @@ SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
 HTTP_SERVER_NAME=http-server
 SSL_DAEMON_NAME=ssl-daemon
 
+SCRIPTS_DIR="${SERVER_DIR}/res/scripts"
+source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
+source "${SCRIPTS_DIR}/build" # Add the functions in 'build'
+
 message() {
     tput bold 2>/dev/null
     tput setaf 10 2>/dev/null
@@ -122,10 +126,11 @@ usage() {
     echo "    $0 <OPTION>"
     echo
     echo "OPTIONS"
-    echo "    --help | -h  Print this help menu and exit"
-    echo "    --start      Start the Elevation server"
-    echo "    --stop       Stop the Elevation server"
-    echo "    --test | -t  Run all automated tests"
+    echo "    --help  | -h  Print this help menu and exit"
+    echo "    --start | -a  Start the Elevation server"
+    echo "    --stop  | -o  Stop the Elevation server"
+    echo "    --build | -b  Build the Elevation server"
+    echo "    --test  | -t  Run all automated tests"
 }
 
 runScript() {
@@ -138,15 +143,19 @@ runScript() {
             usage
             ;;
 
-        --start)
+        -a |--start)
             start
             ;;
 
-        --stop)
+        -o | --stop)
             stop
             ;;
 
-        --test | -t)
+        -b | --build)
+            build
+            ;;
+
+        -t | --test)
             test
             ;;
 
@@ -154,6 +163,7 @@ runScript() {
             echo "Invalid option '$1'"
             echo
             usage
+            exit 1
             ;;
 
         esac
