@@ -1,16 +1,19 @@
 package ca.polymtl.inf3990_01.client.controller
 
 import android.annotation.SuppressLint
+import android.content.SharedPreferences
 import ca.polymtl.inf3990_01.client.controller.event.AppInitEvent
 import ca.polymtl.inf3990_01.client.controller.event.AppStartEvent
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.joinChildren
 import kotlinx.coroutines.experimental.launch
 
 class InitializationManager private constructor(
     private val eventMgr: EventManager,
-    private val tokenService: TokenManagerService
+    private val tokenService: TokenManagerService,
+    private val preferences: SharedPreferences
 ) {
     companion object {
         /*
@@ -29,7 +32,7 @@ class InitializationManager private constructor(
         @SuppressLint("StaticFieldLeak")
         @Volatile private var instance: InitializationManager? = null
 
-        fun getInstance(eventMgr: EventManager, tokenService: TokenManagerService): InitializationManager {
+        fun getInstance(eventMgr: EventManager, tokenService: TokenManagerService, preferences: SharedPreferences): InitializationManager {
             val i = instance
             if (i != null) {
                 return i
@@ -40,7 +43,7 @@ class InitializationManager private constructor(
                 if (i2 != null) {
                     i2
                 } else {
-                    val created = InitializationManager(eventMgr, tokenService)
+                    val created = InitializationManager(eventMgr, tokenService, preferences)
                     instance = created
                     created
                 }
@@ -79,6 +82,17 @@ class InitializationManager private constructor(
             launch {
                 // We just want to wait for the request to finish. We don't really care if it succeeded or not.
                 tokenService.updateToken()
+            }
+
+            // Register handler for username update
+            launch {
+                preferences.registerOnSharedPreferenceChangeListener { sharedPreferences, key ->
+                    if (key == "client_name") {
+                        launch {
+                            tokenService.updateToken()
+                        }
+                    }
+                }
             }
         }
 
