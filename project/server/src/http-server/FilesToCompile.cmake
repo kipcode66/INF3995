@@ -18,6 +18,7 @@ set(HTTP_SERVER_CPP_SOURCES
     http/RestApi.cpp
     mp3-header/Mp3Duration.cpp
     mp3-header/Mp3Header.cpp
+    mp3/player/Mp3Player.cpp
     database/Database.cpp
 )
 
@@ -31,6 +32,7 @@ set(HTTP_SERVER_HEADER_SOURCES
     http/RestApi.hpp
     mp3-header/Mp3Duration.hpp
     mp3-header/Mp3Header.hpp
+    mp3/player/Mp3Player.hpp
     database/Database.hpp
 )
 
