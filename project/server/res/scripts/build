@@ -105,6 +105,13 @@ obtainLibmad() {
     local RESOURCE_URL="ftp://ftp.mars.org/pub/mpeg/libmad-0.15.0b.tar.gz"
 
     obtainWithWGet "${DESTINATION_DIR}" "${RESOURCE_URL}"
+    
+    # Libmad's configure script uses the '-fforce-mem' option, which isn't supported by gcc anymore.
+    # Comment out the line that adds the -fforce-mem options to the gcc flags.
+    pushd "${DESTINATION_DIR}"
+    sed configure -i -e 's|^.*-fforce-mem|#&|g' # Means : "Change the configure file by searching for all
+                                                # lines that contains -fforce-mem, and add a "#" in front of those lines."
+    popd
 }
 
 obtainDependencies() {
@@ -174,6 +181,17 @@ buildSqlite3() {
     buildWithConfigure "sqlite3" "${SOURCE_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
 }
 
+buildLibmad() {
+    local SOURCE_DIR="${DEPS_DIR}/libmad"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libmad.a"
+    local CONFIGURE=configure
+    local EXTRA_ARGS=""
+    local INSTALL_TARGET=install
+
+    buildWithConfigure "libmad" "${SOURCE_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
+}
+
 buildDependencies() {
     local DEPS_DIR="${SERVER_DIR}/lib"
     local DEPS_INSTALL_DIR="${SERVER_DIR}/build/dependencies"
@@ -185,10 +203,11 @@ buildDependencies() {
     buildZLib # REQUIRED BY TAGLIB
     buildTagLib
     buildSqlite3
+    buildLibmad
 }
 
 buildServer() {
-    message $'\nBuilding and installing the Elevation server...\n'
+    message $'\nBuilding and installing the Elevation server...'
     cd "${SERVER_BINARY_DIR}"
     cmake -DCMAKE_BUILD_TYPE=Debug ../src
     make -j$(getCoreCount)
