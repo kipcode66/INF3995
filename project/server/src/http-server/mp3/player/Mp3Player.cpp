@@ -16,4 +16,4 @@ void Mp3Player::startPlaying(const std::string& fileName) {
 
 }
 
-}
+} // namespace elevation

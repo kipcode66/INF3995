@@ -35,6 +35,6 @@ protected:
     static std::unique_ptr<MadDecoder> s_instance;
 };
 
-}
+} // namespace elevation
 
 #endif // !MP3_PLAYER_MAD_MADDECODER_HPP
