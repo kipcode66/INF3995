@@ -68,30 +68,43 @@ buildWithConfigure() {
     fi
 }
 
-obtainSQLite() {
-    # SQLite does not have a Git repository ; wget the tarball instead
-    cd "${DEPS_DIR}"
-    if [ ! -e "sqlite3/sqlite.tar.gz" ]; then
-        mkdir -p sqlite3
-        cd sqlite3
-        wget "https://www.sqlite.org/src/tarball/sqlite.tar.gz"
-        tar xzf sqlite.tar.gz
-        mv sqlite/* .
-        rmdir sqlite
+# EXPECTED PARAMS :
+# 1 : Directory to place the dependency in.
+# 2 : URL to obtain the dependency.
+obtainWithWGet() {
+    checkParamNum 2 $# || exit 2
+    local DESTINATION_DIR="${1}"
+    local RESOURCE_URL="${2}"
+    if ! echo "${RESOURCE_URL}" | grep -Po '\.tar.gz$'; then
+        messageError "${FUNCNAME[0]}"$' : Resource "'"${RESOURCE_URL}"'" is not a tarball\n'
+        exit 1
+    fi
+    local RESOURCE_NAME=$(basename "${RESOURCE_URL}")
+    local RESOURCE_NAME_WITHOUT_EXTENSION=$(basename "${RESOURCE_URL}" .tar.gz)
+    
+    if [ ! -e "${DESTINATION_DIR}/${RESOURCE_NAME}" ]; then
+        mkdir -p "${DESTINATION_DIR}"
+        cd "${DESTINATION_DIR}"
+        wget "${RESOURCE_URL}"
+        tar xzf "${RESOURCE_NAME}"
+        mv "${RESOURCE_NAME_WITHOUT_EXTENSION}"/{.,}* . 2>/dev/null # We excpect the tarball to contain a directory whose name matches
+                                                                    # exactly the tarball's name (apart from the .tar.gz extension).
+        rmdir "${RESOURCE_NAME_WITHOUT_EXTENSION}"
     fi
 }
 
+obtainSQLite() {
+    local DESTINATION_DIR="${DEPS_DIR}/sqlite3"
+    local RESOURCE_URL="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
+
+    obtainWithWGet "${DESTINATION_DIR}" "${RESOURCE_URL}"
+}
+
 obtainLibmad() {
-    # libmad does not have a Git repository ; wget the tarball instead
-    cd "${DEPS_DIR}"
-    if [ ! -e "libmad/libmad-0.15.0b.tar.gz" ]; then
-        mkdir -p libmad
-        cd libmad
-        wget -O libmad.tar.gz "ftp://ftp.mars.org/pub/mpeg/libmad-0.15.0b.tar.gz"
-        tar xzf libmad.tar.gz
-        mv libmad-0.15.0b/* .
-        rmdir libmad-0.15.0b
-    fi
+    local DESTINATION_DIR="${DEPS_DIR}/libmad"
+    local RESOURCE_URL="ftp://ftp.mars.org/pub/mpeg/libmad-0.15.0b.tar.gz"
+
+    obtainWithWGet "${DESTINATION_DIR}" "${RESOURCE_URL}"
 }
 
 obtainDependencies() {
