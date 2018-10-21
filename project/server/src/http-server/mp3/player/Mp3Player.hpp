@@ -16,6 +16,6 @@ public:
     void startPlaying(const std::string& fileName);
 };
 
-}
+} // namespace elevation
 
 #endif // !MP3_PLAYER_MP3PLAYER_HPP

@@ -52,4 +52,4 @@ void MadDecoder::tearDownLibmad_() {
     mad_stream_finish(&m_stream);
 }
 
-}
+} // namespace elevation
