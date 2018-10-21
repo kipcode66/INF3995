@@ -1,16 +1,27 @@
 #include "MadStream.hpp"
 
+#include <stdexcept>
+
 namespace elevation {
 
 std::unique_ptr<MadStream> MadStream::s_instance(nullptr);
 
 void MadStream::createInstance(std::vector<uint8_t> buffer) {
-    // TODO Throw when instance is already created.
+    if (s_instance == nullptr) {
+        s_instance = std::unique_ptr<MadStream>(new MadStream(std::move(buffer)));
+    }
+    else {
+        throw std::runtime_error("Cannot create MadStream instance : Already exists");
+    }
 }
 
 MadStream& MadStream::getInstance() {
-    // TODO Throw when instance not yet created.
-    return *s_instance;
+    if (s_instance != nullptr) {
+        return *s_instance;
+    }
+    else {
+        throw std::runtime_error("Cannot get MadStream instance : Not yet created");
+    }
 }
 
 MadStream::MadStream(std::vector<uint8_t> buffer)
