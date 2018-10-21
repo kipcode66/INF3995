@@ -1,5 +1,5 @@
-#ifndef MP3_PLAYER_MAD_MADSTREAM_HPP
-#define MP3_PLAYER_MAD_MADSTREAM_HPP
+#ifndef MP3_PLAYER_MAD_MADDECODER_HPP
+#define MP3_PLAYER_MAD_MADDECODER_HPP
 
 #include <vector>
 #include <inttypes.h>
@@ -9,16 +9,16 @@
 
 namespace elevation {
 
-class MadStream {
+class MadDecoder {
 public:
     static void createInstance(std::vector<uint8_t> buffer);
-    static MadStream& getInstance();
+    static MadDecoder& getInstance();
 
 public:
-    virtual ~MadStream();
+    virtual ~MadDecoder();
 
 private:
-    explicit MadStream(std::vector<uint8_t> buffer);
+    explicit MadDecoder(std::vector<uint8_t> buffer);
 
 protected:
     void setupLibmad_();
@@ -32,9 +32,9 @@ protected:
     struct ::mad_synth m_synth;
 
 protected:
-    static std::unique_ptr<MadStream> s_instance;
+    static std::unique_ptr<MadDecoder> s_instance;
 };
 
 }
 
-#endif // !MP3_PLAYER_MAD_MADSTREAM_HPP
+#endif // !MP3_PLAYER_MAD_MADDECODER_HPP

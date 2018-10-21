@@ -19,7 +19,7 @@ set(HTTP_SERVER_CPP_SOURCES
     mp3-header/Mp3Duration.cpp
     mp3-header/Mp3Header.cpp
     mp3/player/Mp3Player.cpp
-    mp3/player/mad/MadStream.cpp
+    mp3/player/mad/MadDecoder.cpp
     database/Database.cpp
 )
 
@@ -34,7 +34,7 @@ set(HTTP_SERVER_HEADER_SOURCES
     mp3-header/Mp3Duration.hpp
     mp3-header/Mp3Header.hpp
     mp3/player/Mp3Player.hpp
-    mp3/player/mad/MadStream.hpp
+    mp3/player/mad/MadDecoder.hpp
     database/Database.hpp
 )
 
