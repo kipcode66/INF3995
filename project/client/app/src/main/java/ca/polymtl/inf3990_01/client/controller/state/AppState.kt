@@ -8,6 +8,7 @@ import ca.polymtl.inf3990_01.client.view.AbstractDrawerActivity
 interface AppState {
     val type: AppStateService.State
     fun updateNavigationView(navView: NavigationView)
+    fun isSongHighlighted(song: Song): Boolean
     fun sendFile(song: LocalSong): Boolean
     fun canRemoveSong(song: Song): Boolean
     fun canDisplaySongOwnerData(): Boolean

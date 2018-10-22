@@ -28,33 +28,45 @@ class AppController(
     private val executor = ScheduledThreadPoolExecutor(1)
 
     private var reloadQueueJob: Job? = null
-    private lateinit var task: ScheduledFuture<*>
+    private var task: ScheduledFuture<*>? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
         if (key == QUEUE_PERIOD_KEY) {
-            task.cancel(true)
+            task?.cancel(true)
             task = scheduleQueueTask(sharedPreferences)
         }
     }
 
     init {
-        eventMgr.addEventListener(AppInitEvent::class.java, this::onAppInit)
-        eventMgr.addEventListener(AppStopEvent::class.java, this::onAppStop)
-        reloadQueue(RequestQueueReloadEvent())
-        eventMgr.addEventListener(RequestQueueReloadEvent::class.java, this::reloadQueue)
+        eventMgr.addEventListener(this::onAppInit)
+        eventMgr.addEventListener(this::onAppStart)
+        eventMgr.addEventListener(this::onAppStop)
+        eventMgr.addEventListener(this::reloadQueue)
     }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onAppInit(event: AppInitEvent) {
-        eventMgr.removeEventListener(AppInitEvent::class.java, this::onAppInit) // Run it just once
-        // Start the updating loop
-        task = scheduleQueueTask(preferences)
+        eventMgr.removeEventListener(this::onAppInit) // Run it just once
+        // Setup the preference listener
         preferences.registerOnSharedPreferenceChangeListener(prefChangeListener)
     }
 
+    /**
+     * When the app resumes from inactivity (when starting or coming back from being paused), we start the reload loop.
+     */
+    private fun onAppStart(event: AppResumeEvent) {
+        // Make sure that the previous task was stopped
+        task?.cancel(true)
+        // Start the updating loop
+        task = scheduleQueueTask(preferences)
+    }
+
+    /**
+     * When the app is no longer visible (when no activities are being shown, when paused), we stop the reload loop.
+     */
     @Suppress("UNUSED_PARAMETER")
     private fun onAppStop(event: AppStopEvent) {
-        task.cancel(true)
+        task?.cancel(true)
     }
 
     @Suppress("UNUSED_PARAMETER")

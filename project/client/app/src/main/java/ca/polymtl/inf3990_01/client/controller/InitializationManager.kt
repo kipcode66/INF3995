@@ -70,7 +70,7 @@ class InitializationManager private constructor(
         get() = initState >= InitState.INITIALIZED && initState != InitState.CANCELED
 
     init {
-        eventMgr.addEventListener(AppStartEvent::class.java, this::onAppStart)
+        eventMgr.addEventListener(this::onAppStart)
     }
 
     @Suppress("UNUSED_PARAMETER")

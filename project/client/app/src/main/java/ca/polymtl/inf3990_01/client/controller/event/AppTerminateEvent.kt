@@ -3,11 +3,11 @@ package ca.polymtl.inf3990_01.client.controller.event
 import ca.polymtl.inf3990_01.client.App
 
 /**
- * An event that is fired when the application is first launched.
+ * An event that is fired when the app is about to be destroyed.
  */
-class AppStartEvent(val app: App): Event {
+class AppTerminateEvent(val app: App): Event {
     companion object {
-        val EVENT_TYPE = "app_start"
+        const val EVENT_TYPE = "app_terminate"
     }
     override val type = EVENT_TYPE
 }
