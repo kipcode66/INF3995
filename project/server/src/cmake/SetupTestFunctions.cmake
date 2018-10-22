@@ -27,8 +27,9 @@ endfunction()
 macro(setupTests testSourceList includeDirList libraryList)
     set(Boost_USE_STATIC_LIBS ON) # FindBoost.cmake uses this variable. If it's at ON, that CMake script will output the
                                   # static libraries, rather than the shared libraries.
-    find_package(Boost REQUIRED COMPONENTS unit_test_framework) # This finds where the Boost unit test libraries and
-                                                                # header files are, and sets some variables accoridngly.
+    find_package(Boost 1.65 REQUIRED
+                 COMPONENTS unit_test_framework) # This finds where the Boost unit test libraries and
+                                                 # header files are, and sets some variables accoridngly.
     set(BOOST_INCLUDE_DIRS "${boost_installation_prefix}/include")
 
     enable_testing()
