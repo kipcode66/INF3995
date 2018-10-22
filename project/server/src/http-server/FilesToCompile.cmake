@@ -17,6 +17,7 @@ set(HTTP_SERVER_CPP_SOURCES
     mp3/player/Mp3Player.cpp
     mp3/player/mad/MadDecoder.cpp
     database/Database.cpp
+    os/SharedMemory.cpp
 )
 
 ###############################################################################
@@ -32,6 +33,7 @@ set(HTTP_SERVER_HEADER_SOURCES
     mp3/player/Mp3Player.hpp
     mp3/player/mad/MadDecoder.hpp
     database/Database.hpp
+    os/SharedMemory.hpp
 )
 
 makeAbsolute(HTTP_SERVER_CPP_SOURCES)
