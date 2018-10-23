@@ -22,8 +22,11 @@ public:
 
 protected:
     std::size_t getFileSize_(const std::string& fileName) const;
+    void openSharedMemory_(const std::string& fileName, std::size_t fileSize);
+    void closeSharedMemory_();
 
 protected:
+    std::size_t m_fileSize;
     uint8_t* m_buffer;
 };
 
