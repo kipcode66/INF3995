@@ -7,10 +7,29 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".view.QueueActivity"
     tools:showIn="@layout/app_bar_queue">
-    <TextView
-        android:id="@+id/myText"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/app_name"/>
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="0dp">
+
+        <TextView
+            android:id="@+id/myText"
+            style="@style/TextAppearance.AppCompat.Headline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/song_item_margin"
+            android:text="@string/songs_list_title" />
+
+        <ListView
+            android:id="@+id/song_queue"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/song_item_margin"
+            android:layout_weight="1"
+            android:divider="@android:drawable/divider_horizontal_bright" />
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
