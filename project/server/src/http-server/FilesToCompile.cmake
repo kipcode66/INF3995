@@ -16,6 +16,7 @@ set(HTTP_SERVER_CPP_SOURCES
     mp3-header/Mp3Header.cpp
     mp3/player/Mp3Player.cpp
     mp3/player/mad/MadDecoder.cpp
+    mp3/player/pulse/PulseController.cpp
     database/Database.cpp
     os/SharedFileMemory.cpp
 )
@@ -32,6 +33,7 @@ set(HTTP_SERVER_HEADER_SOURCES
     mp3-header/Mp3Header.hpp
     mp3/player/Mp3Player.hpp
     mp3/player/mad/MadDecoder.hpp
+    mp3/player/pulse/PulseController.hpp
     database/Database.hpp
     os/SharedFileMemory.hpp
 )
