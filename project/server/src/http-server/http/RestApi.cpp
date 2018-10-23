@@ -1,3 +1,5 @@
+#include <pistache/serializer/rapidjson.h>
+
 #include "RestApi.hpp"
 #include "database/Database.hpp"
 
@@ -73,6 +75,9 @@ void buildUserFromQuery_(User_t* __restrict__ newUser,
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
+
+    auto body = request.body();
+    std::cout << body << std::endl;
     puts("getIdentification function called");
 
     auto query = request.query();
