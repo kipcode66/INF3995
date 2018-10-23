@@ -81,7 +81,7 @@ obtainWithWGet() {
     fi
     local RESOURCE_NAME=$(basename "${RESOURCE_URL}")
     local RESOURCE_NAME_WITHOUT_EXTENSION=$(basename "${RESOURCE_URL}" .tar.gz)
-    
+
     if [ ! -e "${DESTINATION_DIR}/${RESOURCE_NAME}" ]; then
         mkdir -p "${DESTINATION_DIR}"
         cd "${DESTINATION_DIR}"
@@ -105,7 +105,7 @@ obtainLibmad() {
     local RESOURCE_URL="ftp://ftp.mars.org/pub/mpeg/libmad-0.15.0b.tar.gz"
 
     obtainWithWGet "${DESTINATION_DIR}" "${RESOURCE_URL}"
-    
+
     # Libmad's configure script uses the '-fforce-mem' option, which isn't supported by gcc anymore.
     # Comment out the line that adds the -fforce-mem options to the gcc flags.
     pushd "${DESTINATION_DIR}"
@@ -175,7 +175,8 @@ buildSqlite3() {
     local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libsqlite3.a"
     local CONFIGURE=configure
     local SQLITE3_INCLUDE_DIR="${INSTALL_DIR}/include/sqlite3"
-    local EXTRA_ARGS="--includedir=${SQLITE3_INCLUDE_DIR}"
+    # local EXTRA_ARGS="--includedir=${SQLITE3_INCLUDE_DIR}"
+    local EXTRA_ARGS=""
     local INSTALL_TARGET=install
 
     buildWithConfigure "sqlite3" "${SOURCE_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
@@ -192,6 +193,16 @@ buildLibmad() {
     buildWithConfigure "libmad" "${SOURCE_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
 }
 
+buildRapidjson() {
+    local SOURCE_DIR="${DEPS_DIR}/rapidjson/rapidjson"
+    local BINARY_DIR="${SOURCE_DIR}/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/include/rapidjson/rapidjson.h"
+    local BUILD_TYPE=Release
+
+    buildWithCMake "rapidjson" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${BUILD_TYPE}"
+}
+
 buildDependencies() {
     local DEPS_DIR="${SERVER_DIR}/lib"
     local DEPS_INSTALL_DIR="${SERVER_DIR}/build/dependencies"
@@ -204,6 +215,7 @@ buildDependencies() {
     buildTagLib
     buildSqlite3
     buildLibmad
+    buildRapidjson
 }
 
 buildServer() {
