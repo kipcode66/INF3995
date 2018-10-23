@@ -11,17 +11,26 @@ namespace elevation {
 
 SharedFileMemory::SharedFileMemory(const std::string& fileName)
     : m_buffer(nullptr)
-{ }
+{
+    std::size_t fileSize = getFileSize_(fileName);
+    openSharedMemory_(fileName, fileSize);
+}
 
 SharedFileMemory::SharedFileMemory(SharedFileMemory&& that)
-    : m_buffer(nullptr)
-{ }
+{
+    operator=(std::move(that));
+}
 
 SharedFileMemory::~SharedFileMemory() {
     closeSharedMemory_();
 }
 
 SharedFileMemory& SharedFileMemory::operator=(SharedFileMemory&& that) {
+    closeSharedMemory_();
+    this->m_buffer   = that.m_buffer;
+    this->m_fileSize = that.m_fileSize;
+    that .m_buffer   = nullptr;
+    that .m_fileSize = 0;
     return *this;
 }
 
