@@ -21,6 +21,9 @@ public:
     const uint8_t* operator*() const { return m_buffer; }
 
 protected:
+    std::size_t getFileSize_(const std::string& fileName) const;
+
+protected:
     uint8_t* m_buffer;
 };
 
