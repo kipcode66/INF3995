@@ -1,11 +1,13 @@
 package ca.polymtl.inf3990_01.client.controller
 
-import android.content.Context
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
-import ca.polymtl.inf3990_01.client.controller.rest.restServiceModule
+import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import org.koin.dsl.module.module
 
-val controllerModule = module {
-    restServiceModule
+val controllerModule = module(createOnStart = true) {
+    single(createOnStart = true) { InitializationManager.getInstance(get(), get()) }
+    single { ActiveActivityTrackingService(get()) }
     single { EventManager.getInstance() }
+    single { AppStateService() }
+    single { AppController(get(), get(), get(), get(), get()) }
 }

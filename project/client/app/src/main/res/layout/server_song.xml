@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:columnCount="3"
+    android:padding="@dimen/song_item_padding"
+    android:focusable="true"
+    android:clickable="true"
+    android:longClickable="true"
+    android:hapticFeedbackEnabled="true"
+    android:focusableInTouchMode="true" >
+
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_column="0"
+        android:layout_columnWeight="1" >
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Song Title"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            style="@style/Base.TextAppearance.AppCompat.Title" />
+
+        <TextView
+            android:id="@+id/author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Artiste"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            style="@style/Base.TextAppearance.AppCompat.Medium" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/song_item_margin"
+        android:orientation="vertical"
+        android:layout_column="1"
+        android:layout_columnWeight="1" >
+
+        <TextView
+            android:id="@+id/sent_by"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:text="Sent by" />
+        <LinearLayout
+            android:id="@+id/layout_admin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+            <TextView
+                android:id="@+id/sender_ip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:text="IP" />
+            <TextView
+                android:id="@+id/sender_mac"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:text="MAC" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/remove_song"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:contentDescription="@string/desc_message_remove_song"
+        android:layout_column="2"
+        android:layout_columnWeight="0" />
+
+</GridLayout>
