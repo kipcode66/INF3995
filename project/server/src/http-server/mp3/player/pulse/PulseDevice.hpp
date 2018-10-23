@@ -14,8 +14,17 @@ class PulseDevice {
 public:
     ~PulseDevice();
 
+    PulseDevice(const PulseDevice&) = delete;
+    PulseDevice(PulseDevice&& that);
+
+    PulseDevice& operator=(const PulseDevice&) = delete;
+    PulseDevice& operator=(PulseDevice&& that);
+
 private:
     PulseDevice();
+
+protected:
+    void cleanup_();
 
 protected:
     pa_simple* m_device;
