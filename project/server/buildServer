@@ -66,6 +66,43 @@ buildOpenSsl() {
     fi
 }
 
+buildTagLib() {
+    local TAG_LIB_ROOT_DIR="${DEPS_DIR}/taglib"
+    local TAG_LIB_BINARY_DIR="${TAG_LIB_ROOT_DIR}/build"
+
+    # If this file/directory exists, then the dependency is considered up-to-date.
+    local TAG_LIB_BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libtag.a"
+    local TAG_LIB_INSTALL_DIR="${DEPS_INSTALL_DIR}"
+
+    cd "${TAG_LIB_ROOT_DIR}"
+    if [ ! -e "${TAG_LIB_BUILT_FLAG}" ]; then
+        mkdir -p "${TAG_LIB_BINARY_DIR}"
+        cd "${TAG_LIB_BINARY_DIR}"
+        cmake -DCMAKE_INSTALL_PREFIX="${TAG_LIB_INSTALL_DIR}" -DCMAKE_BUILD_TYPE=Release ..
+        make -j8
+        make install
+    fi
+}
+
+buildZLib() {
+    local Z_LIB_ROOT_DIR="${DEPS_DIR}/zlib"
+    local Z_LIB_BINARY_DIR="${Z_LIB_ROOT_DIR}/build"
+
+    # If this file/directory exists, then the dependency is considered up-to-date.
+    local Z_LIB_BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libz.a"
+    Z_LIB="${DEPS_INSTALL_DIR}/lib/libz.a" # REQUIRED BY TAGLIB
+    local Z_LIB_INSTALL_DIR="${DEPS_INSTALL_DIR}"
+
+    cd "${Z_LIB_ROOT_DIR}"
+    if [ ! -e "${Z_LIB_BUILT_FLAG}" ]; then
+        mkdir -p "${Z_LIB_BINARY_DIR}"
+        cd "${Z_LIB_BINARY_DIR}"
+        cmake -DCMAKE_INSTALL_PREFIX="${Z_LIB_INSTALL_DIR}" -DCMAKE_BUILD_TYPE=Release ..
+        make -j8
+        make install
+    fi
+}
+
 buildSqlite3() {
     message $'\nBuilding and installing SQLite3...\n'
     local SQLITE3_ROOT_DIR="${DEPS_DIR}/sqlite3"
@@ -90,6 +127,8 @@ buildDependencies() {
     mkdir -p "${DEPS_INSTALL_DIR}"
     buildOpenSsl
     buildPistache
+    buildZLib # REQUIRED BY TAGLIB
+    buildTagLib
     buildSqlite3
 }
 

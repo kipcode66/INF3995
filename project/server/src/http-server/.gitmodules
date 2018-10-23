@@ -9,7 +9,7 @@
 	url = https://github.com/openssl/openssl
 [submodule "project/server/lib/taglib"]
 	path = project/server/lib/taglib
-	url = https://github.com/taglib/taglib
+	url = https://github.com/taglib/taglib.git
 [submodule "project/server/lib/zlib"]
 	path = project/server/lib/zlib
 	url = https://github.com/madler/zlib
