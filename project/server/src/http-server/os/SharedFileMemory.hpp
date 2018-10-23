@@ -17,6 +17,9 @@ public:
     SharedFileMemory& operator=(const SharedFileMemory&) = delete;
     SharedFileMemory& operator=(SharedFileMemory&& that);
 
+    explicit operator       uint8_t*()       { return m_buffer; }
+    explicit operator const uint8_t*() const { return m_buffer; }
+
           uint8_t* operator*()       { return m_buffer; }
     const uint8_t* operator*() const { return m_buffer; }
 
