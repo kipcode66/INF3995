@@ -6,10 +6,9 @@
 
 namespace elevation {
 
-class PulseController; // Because of forward dependencies.
-
 class PulseDevice {
-    friend class PulseController;
+public:
+    static constexpr pa_sample_spec PULSE_SPECIFICATION = { .format = PA_SAMPLE_S16LE, .rate = 44100, .channels = 2 };
 
 public:
     ~PulseDevice();
@@ -31,7 +30,5 @@ protected:
 };
 
 } // namespace elevation
-
-#include "PulseController.hpp" // Could not include above because of forward dependencies.
 
 #endif // !MP3_PLAYER_PULSE_PULSEDEVICE_HPP

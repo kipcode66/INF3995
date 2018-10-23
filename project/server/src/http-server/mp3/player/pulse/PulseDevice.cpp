@@ -1,10 +1,20 @@
+// TAKEN AND MODIFIED FROM : https://lauri.xn--vsandi-pxa.com/2013/12/implementing-mp3-player.en.html
+
 #include "PulseDevice.hpp"
+
+#include <stdexcept>
+#include <utility>
 
 namespace elevation {
 
 PulseDevice::PulseDevice()
 {
-    // TODO
+    int error;
+    pa_simple* device = pa_simple_new(NULL, "Elevation player", PA_STREAM_PLAYBACK, NULL, "Elevation stream", &PULSE_SPECIFICATION, NULL, NULL, &error);
+    if (error != PA_OK) {
+        throw std::runtime_error(::pa_strerror(error));
+    }
+    m_device = device;
 }
 
 PulseDevice::PulseDevice(PulseDevice&& that)
@@ -26,7 +36,7 @@ PulseDevice& PulseDevice::operator=(PulseDevice&& that) {
 
 void PulseDevice::cleanup_() {
     if (m_device != nullptr) {
-        // TODO Cleanup
+        ::pa_simple_free(m_device);
     }
 }
 
