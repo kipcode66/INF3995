@@ -1,6 +1,8 @@
 #ifndef MP3_PLAYER_PULSE_PULSEDEVICE_HPP
 #define MP3_PLAYER_PULSE_PULSEDEVICE_HPP
 
+#include <vector>
+
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
@@ -18,6 +20,8 @@ public:
 
     PulseDevice& operator=(const PulseDevice&) = delete;
     PulseDevice& operator=(PulseDevice&& that);
+
+    void play(const std::vector<uint8_t>& data);
 
 private:
     PulseDevice();
