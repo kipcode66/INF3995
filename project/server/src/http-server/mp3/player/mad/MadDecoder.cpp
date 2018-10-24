@@ -8,9 +8,9 @@ namespace elevation {
 
 std::unique_ptr<MadDecoder> MadDecoder::s_instance(nullptr);
 
-void MadDecoder::createInstance(std::vector<uint8_t> buffer) {
+void MadDecoder::createInstance(std::vector<uint8_t> buffer, MadAudioFormatter formatter) {
     if (s_instance == nullptr) {
-        s_instance = std::unique_ptr<MadDecoder>(new MadDecoder(std::move(buffer)));
+        s_instance = std::unique_ptr<MadDecoder>(new MadDecoder(std::move(buffer), std::move(formatter)));
     }
     else {
         throw std::runtime_error("Cannot create MadDecoder instance : Already exists");
@@ -26,8 +26,9 @@ MadDecoder& MadDecoder::getInstance() {
     }
 }
 
-MadDecoder::MadDecoder(std::vector<uint8_t> buffer)
+MadDecoder::MadDecoder(std::vector<uint8_t> buffer, MadAudioFormatter formatter)
     : m_buffer(std::move(buffer))
+    , m_formatter(std::move(formatter))
 {
     setupLibmad_();
     setupStreamBuffer_();
