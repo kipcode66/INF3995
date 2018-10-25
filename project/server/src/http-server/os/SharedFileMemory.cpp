@@ -36,6 +36,20 @@ SharedFileMemory& SharedFileMemory::operator=(SharedFileMemory&& that) {
     return *this;
 }
 
+uint8_t& SharedFileMemory::operator[] (std::size_t index) {
+    if (index >= m_fileSize) {
+        throw std::out_of_range(std::string(__FUNCTION__));
+    }
+    return m_buffer[index];
+}
+
+uint8_t  SharedFileMemory::operator[] (std::size_t index) const {
+    if (index >= m_fileSize) {
+        throw std::out_of_range(std::string(__FUNCTION__));
+    }
+    return m_buffer[index];
+}
+
 std::size_t SharedFileMemory::getFileSize_(const std::string& fileName) const {
     std::ifstream file(fileName, std::ifstream::binary | std::ifstream::ate);
     if (!file.is_open()) {
