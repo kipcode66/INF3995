@@ -36,7 +36,7 @@ std::vector<uint8_t> MadAudioFormatter::format(struct mad_pcm* pcm) {
             data.push_back((sample >> 8) & 0xff);
         }
     } else {
-        throw std::runtime_error("Libmad does not support stereo");
+        throw std::runtime_error("MP3 file does not support stereo");
     }
 
     return data;
