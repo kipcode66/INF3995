@@ -6,6 +6,7 @@
 namespace elevation {
 
 static constexpr char* TEST_MP3_PATH = "@TEST_MP3_PATH@";
+static constexpr char* TIPPERARY_SHORT_PATH = "@TIPPERARY_SHORT_PATH@";
 
 } // namespace elevation
 
