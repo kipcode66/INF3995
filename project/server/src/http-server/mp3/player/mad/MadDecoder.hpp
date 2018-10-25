@@ -21,6 +21,7 @@ public:
     virtual ~MadDecoder();
 
     std::vector<uint8_t> decodeNextFrame();
+    bool isDone() const { return m_isDone; }
 
 private:
     explicit MadDecoder(SharedFileMemory fileMemory, MadAudioFormatter formatter);
@@ -37,6 +38,8 @@ protected:
 
     SharedFileMemory m_fileMemory;
     MadAudioFormatter m_formatter;
+
+    bool m_isDone;
 
 protected:
     static std::unique_ptr<MadDecoder> s_instance;

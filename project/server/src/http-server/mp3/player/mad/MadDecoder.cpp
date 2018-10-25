@@ -29,6 +29,7 @@ MadDecoder& MadDecoder::getInstance() {
 MadDecoder::MadDecoder(SharedFileMemory fileMemory, MadAudioFormatter formatter)
     : m_fileMemory(std::move(fileMemory))
     , m_formatter(std::move(formatter))
+    , m_isDone(false)
 {
     setupLibmad_();
     setupStreamBuffer_();
@@ -43,8 +44,13 @@ std::vector<uint8_t> MadDecoder::decodeNextFrame() {
     // Decode frame from the stream
     int error = ::mad_frame_decode(&m_frame, &m_stream);
     if (error != 0) {
-        if (!MAD_RECOVERABLE(m_stream.error) && m_stream.error != MAD_ERROR_BUFLEN) {
-            throw std::runtime_error(mad_stream_errorstr(&m_stream));
+        if (!MAD_RECOVERABLE(m_stream.error)) {
+            if (m_stream.error == MAD_ERROR_BUFLEN) {
+                m_isDone = true;
+            }
+            else {
+                throw std::runtime_error(mad_stream_errorstr(&m_stream));
+            }
         }
     }
     else {
