@@ -17,6 +17,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 set(HTTP_SERVER_TEST_CPP_SOURCES
     Mp3HeaderTest.cpp
     mp3/player/mad/TestMadDecoder.cpp
+    mp3/player/pulse/TestPulseDevice.cpp
 )
 
 makeAbsolute(HTTP_SERVER_TEST_CPP_SOURCES)
