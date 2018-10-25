@@ -28,23 +28,23 @@ std::vector<uint8_t> MadAudioFormatter::format(struct mad_pcm* pcm) {
         while (nsamples--) {
             mad_fixed_t sample;
 
-            sample = scale_(*left_ch++);
+            sample = formatSample_(*left_ch++);
             data[(pcm->length - nsamples) * 4 + 0] = ((sample >> 0) & 0xff);
             data[(pcm->length - nsamples) * 4 + 1] = ((sample >> 8) & 0xff);
 
-            sample = scale_(*right_ch++);
+            sample = formatSample_(*right_ch++);
             data[(pcm->length - nsamples) * 4 + 2] = ((sample >> 0) & 0xff);
             data[(pcm->length - nsamples) * 4 + 3] = ((sample >> 8) & 0xff);
         }
     } else {
         throw std::runtime_error("Libmad does not support stereo");
     }
-    
+
     return data;
 }
 
 mad_fixed_t MadAudioFormatter::formatSample_(mad_fixed_t sample) {
-    return scale_(sample);
+    return dither_(scale_(sample));
 }
 
 mad_fixed_t MadAudioFormatter::scale_(mad_fixed_t sample) {
@@ -62,7 +62,7 @@ mad_fixed_t MadAudioFormatter::scale_(mad_fixed_t sample) {
 }
 
 mad_fixed_t MadAudioFormatter::dither_(mad_fixed_t sample) {
-    return sample;
+    return sample + m_ditheringDistribution(m_rng); // Simple white noise.
 }
 
 } // namespace elevation
