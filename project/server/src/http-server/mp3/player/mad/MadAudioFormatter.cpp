@@ -15,7 +15,6 @@ MadAudioFormatter::~MadAudioFormatter() { }
 std::vector<uint8_t> MadAudioFormatter::format(struct mad_pcm* pcm) {
     constexpr std::size_t MAX_NUM_SAMPLES = 1152;
     constexpr std::size_t NUM_BYTES_PER_SAMPLE = 2 * 2;
-    constexpr std::size_t BUFFER_SIZE = MAX_NUM_SAMPLES * NUM_BYTES_PER_SAMPLE;
 
     std::size_t nsamples = pcm->length;
     mad_fixed_t const* left_ch  = pcm->samples[0];
