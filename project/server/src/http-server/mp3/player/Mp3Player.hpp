@@ -25,7 +25,7 @@ protected:
     void run_(std::string fileName);
 
 protected:
-    static std::future<void> defautFuture_();
+    static std::future<void> defaultFuture_();
 
 private:
     std::future<void> m_player;

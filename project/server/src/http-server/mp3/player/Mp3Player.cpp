@@ -3,16 +3,30 @@
 #include <iostream>
 #include <functional>
 
+#include "mp3/player/mad/MadDecoder.hpp"
+#include "mp3/player/mad/MadAudioFormatter.hpp"
+#include "mp3/player/pulse/PulseDevice.hpp"
+
 namespace elevation {
 
 void Mp3Player::run_(std::string fileName) {
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-    std::cout << __PRETTY_FUNCTION__ << ':' << fileName << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    try {
+        MadDecoder::createInstance(SharedFileMemory(fileName), MadAudioFormatter());
+        MadDecoder& decoder = MadDecoder::getInstance();
+        PulseDevice pulse;
+
+        while (true) {
+            std::vector<uint8_t> frame = decoder.decodeNextFrame();
+            pulse.play(frame);
+        }
+    }
+    catch (const std::exception& e) {
+        std::cout << "MP3 player crashed with error : \"" << e.what() << '"' << std::endl;
+    }
 }
 
 Mp3Player::Mp3Player()
-    : m_player(defautFuture_())
+    : m_player(defaultFuture_())
 { }
 
 Mp3Player::Mp3Player(Mp3Player&& that)
@@ -33,9 +47,10 @@ void Mp3Player::startPlaying(const std::string& fileName) {
 
 void Mp3Player::waitUntilSongFinished() {
     m_player.get();
+    m_player = defaultFuture_();
 }
 
-std::future<void> Mp3Player::defautFuture_() {
+std::future<void> Mp3Player::defaultFuture_() {
     return std::async([](){});
 }
 
