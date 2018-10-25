@@ -6,7 +6,9 @@
 
 namespace elevation {
 
-MadAudioFormatter::MadAudioFormatter() { }
+MadAudioFormatter::MadAudioFormatter()
+    : m_ditheringDistribution(DITHERING_MIN, DITHERING_MAX)
+{ }
 
 MadAudioFormatter::~MadAudioFormatter() { }
 
@@ -41,6 +43,10 @@ std::vector<uint8_t> MadAudioFormatter::format(struct mad_pcm* pcm) {
     return data;
 }
 
+mad_fixed_t MadAudioFormatter::formatSample_(mad_fixed_t sample) {
+    return scale_(sample);
+}
+
 mad_fixed_t MadAudioFormatter::scale_(mad_fixed_t sample) {
      /* round */
      sample += (1L << (MAD_F_FRACBITS - 16));
@@ -53,6 +59,10 @@ mad_fixed_t MadAudioFormatter::scale_(mad_fixed_t sample) {
      return sample >> (MAD_F_FRACBITS + 1 - 16); // NOTE : Right-shifting a negative value is undefined
                                                  // behavior, although it generally performs a sign extension.
                                                  // Oh well.
+}
+
+mad_fixed_t MadAudioFormatter::dither_(mad_fixed_t sample) {
+    return sample;
 }
 
 } // namespace elevation
