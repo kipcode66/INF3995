@@ -15,9 +15,31 @@ MadDecoder::MadDecoder(SharedFileMemory fileMemory, MadAudioFormatter formatter)
     setupStreamBuffer_();
 }
 
+MadDecoder::MadDecoder(MadDecoder&& that) 
+    : m_fileMemory(std::move(that.m_fileMemory))
+    , m_formatter(std::move(that.m_formatter))
+    , m_isDone(that.m_isDone)
+{
+    this->m_stream = std::move(that.m_stream);
+    this->m_frame  = std::move(that.m_frame );
+    this->m_synth  = std::move(that.m_synth );
+}
+
 MadDecoder::~MadDecoder()
 {
     tearDownLibmad_();
+}
+
+MadDecoder& MadDecoder::operator=(MadDecoder&& that) {
+    tearDownLibmad_();
+    this->m_fileMemory = std::move(that.m_fileMemory);
+    this->m_formatter  = std::move(that.m_formatter );
+    this->m_stream = std::move(that.m_stream);
+    this->m_frame  = std::move(that.m_frame );
+    this->m_synth  = std::move(that.m_synth );
+    this->m_isDone = that.m_isDone;
+    that .m_isDone = true;
+    return *this;
 }
 
 std::vector<uint8_t> MadDecoder::decodeNextFrame() {
