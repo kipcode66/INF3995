@@ -5,6 +5,7 @@
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
 #include <pistache/description.h>
+#include <string>
 
 using namespace Pistache;
 namespace elevation {
@@ -15,6 +16,7 @@ public:
     ~RestApi();
     void init();
     void start();
+    std::string hashMacAdress_(const std::string& macAdress);
 
 private:
     void createDescription_();

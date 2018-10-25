@@ -1,5 +1,7 @@
 #include "RestApi.hpp"
 #include "database/Database.hpp"
+#include <iostream>
+#include <openssl/md5.h>
 
 using namespace elevation;
 
@@ -125,4 +127,16 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "deleteFile");
     std::cout << "deleteFile function called" << std::endl;
+}
+
+std::string RestApi::hashMacAdress_(const std::string& macAdress) {
+    uint32_t lengthOfMd5Hash = 32;
+    char stringToHash[macAdress.length()];
+    strcpy(stringToHash, macAdress.c_str()); 
+    unsigned char digest[MD5_DIGEST_LENGTH];
+    MD5((unsigned char*)&stringToHash, strlen(stringToHash), (unsigned char*)&digest);    
+    char mdString[lengthOfMd5Hash];
+    for(int i = 0; i < 16; i++)
+         sprintf(&mdString[i*2], "%02x", (unsigned int)digest[i]);
+    return mdString;
 }
