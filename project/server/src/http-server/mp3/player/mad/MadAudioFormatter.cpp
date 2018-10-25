@@ -51,7 +51,7 @@ mad_fixed_t MadAudioFormatter::scale_(mad_fixed_t sample) {
          sample = -MAD_F_ONE;
      /* quantize */
      return sample >> (MAD_F_FRACBITS + 1 - 16); // NOTE : Right-shifting a negative value is undefined
-                                                 // behavior but it generally performs a sign extension.
+                                                 // behavior, although it generally performs a sign extension.
                                                  // Oh well.
 }
 
