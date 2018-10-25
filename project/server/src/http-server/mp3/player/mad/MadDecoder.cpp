@@ -23,6 +23,7 @@ MadDecoder::MadDecoder(MadDecoder&& that)
     this->m_stream = std::move(that.m_stream);
     this->m_frame  = std::move(that.m_frame );
     this->m_synth  = std::move(that.m_synth );
+    that .m_isDone = true;
 }
 
 MadDecoder::~MadDecoder()
