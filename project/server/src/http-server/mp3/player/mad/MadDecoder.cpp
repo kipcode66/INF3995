@@ -41,15 +41,18 @@ MadDecoder::~MadDecoder()
 
 std::vector<uint8_t> MadDecoder::decodeNextFrame() {
     // Decode frame from the stream
-    if (mad_frame_decode(&m_frame, &m_stream) < 0) {
+    int error = ::mad_frame_decode(&m_frame, &m_stream);
+    if (error != 0) {
         if (!MAD_RECOVERABLE(m_stream.error) && m_stream.error != MAD_ERROR_BUFLEN) {
             throw std::runtime_error(mad_stream_errorstr(&m_stream));
         }
     }
-
-    // Synthesize PCM data of frame
-    mad_synth_frame(&m_synth, &m_frame);
-    return m_formatter.format(&m_synth.pcm);
+    else {
+        // Synthesize PCM data of frame
+        mad_synth_frame(&m_synth, &m_frame);
+        return m_formatter.format(&m_synth.pcm);
+    }
+    return std::vector<uint8_t>();
 }
 
 void MadDecoder::setupLibmad_() {
