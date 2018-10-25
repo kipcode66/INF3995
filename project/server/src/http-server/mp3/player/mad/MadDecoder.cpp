@@ -56,19 +56,19 @@ std::vector<uint8_t> MadDecoder::decodeNextFrame() {
 }
 
 void MadDecoder::setupLibmad_() {
-    mad_stream_init(&m_stream);
-    mad_synth_init (&m_synth );
-    mad_frame_init (&m_frame );
+    ::mad_stream_init(&m_stream);
+    ::mad_synth_init (&m_synth );
+    ::mad_frame_init (&m_frame );
 }
 
 void MadDecoder::setupStreamBuffer_() {
-    mad_stream_buffer(&m_stream, (uint8_t*)m_fileMemory, m_fileMemory.size() * sizeof(*(uint8_t*)m_fileMemory));
+    ::mad_stream_buffer(&m_stream, (uint8_t*)m_fileMemory, m_fileMemory.size() * sizeof(*(uint8_t*)m_fileMemory));
 }
 
 void MadDecoder::tearDownLibmad_() {
-    mad_synth_finish (&m_synth );
-    mad_frame_finish (&m_frame );
-    mad_stream_finish(&m_stream);
+      mad_synth_finish (&m_synth );
+    ::mad_frame_finish (&m_frame );
+    ::mad_stream_finish(&m_stream);
 }
 
 } // namespace elevation
