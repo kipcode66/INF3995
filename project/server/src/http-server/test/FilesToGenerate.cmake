@@ -12,6 +12,7 @@ set(TEST_MP3_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/test.mp3")
 set(TEST_TEXT_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/test.txt")
 set(TEST_MP3_AS_TXT_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/test1.txt")
 set(TIPPERARY_SHORT_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/tipperary_short.mp3")
+set(TIPPERARY_SHORT_WAV_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/tipperary_short.wav")
 
 ###############################################################################
 #                        GENERATE FILES FROM TEMPLATES                        #
