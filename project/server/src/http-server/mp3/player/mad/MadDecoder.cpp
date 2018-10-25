@@ -6,26 +6,6 @@
 
 namespace elevation {
 
-std::unique_ptr<MadDecoder> MadDecoder::s_instance(nullptr);
-
-void MadDecoder::createInstance(SharedFileMemory fileMemory, MadAudioFormatter formatter) {
-    if (s_instance == nullptr) {
-        s_instance = std::unique_ptr<MadDecoder>(new MadDecoder(std::move(fileMemory), std::move(formatter)));
-    }
-    else {
-        throw std::runtime_error("Cannot create MadDecoder instance : Already exists");
-    }
-}
-
-MadDecoder& MadDecoder::getInstance() {
-    if (s_instance != nullptr) {
-        return *s_instance;
-    }
-    else {
-        throw std::runtime_error("Cannot get MadDecoder instance : Not yet created");
-    }
-}
-
 MadDecoder::MadDecoder(SharedFileMemory fileMemory, MadAudioFormatter formatter)
     : m_fileMemory(std::move(fileMemory))
     , m_formatter(std::move(formatter))

@@ -14,17 +14,11 @@ namespace elevation {
 
 class MadDecoder {
 public:
-    static void createInstance(SharedFileMemory fileMemory, MadAudioFormatter formatter);
-    static MadDecoder& getInstance();
-
-public:
+    explicit MadDecoder(SharedFileMemory fileMemory, MadAudioFormatter formatter);
     virtual ~MadDecoder();
 
     std::vector<uint8_t> decodeNextFrame();
     bool isDone() const { return m_isDone; }
-
-private:
-    explicit MadDecoder(SharedFileMemory fileMemory, MadAudioFormatter formatter);
 
 protected:
     void setupLibmad_();
@@ -40,9 +34,6 @@ protected:
     MadAudioFormatter m_formatter;
 
     bool m_isDone;
-
-protected:
-    static std::unique_ptr<MadDecoder> s_instance;
 };
 
 } // namespace elevation
