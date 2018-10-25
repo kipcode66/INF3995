@@ -24,8 +24,8 @@ BOOST_FIXTURE_TEST_CASE(moveConstructor, TestFixture) {
 unsigned int TIMEOUT_SECONDS = 10;
 BOOST_AUTO_TEST_CASE(startPlaying_and_waitUntilSongFinished, *boost::unit_test::timeout(TIMEOUT_SECONDS)) {
     using namespace std::chrono_literals;
-    const auto MINIMUM_DURATION = TIPPERARY_DURATION_SECONDS - 1.0s;
-    const auto MAXIMUM_DURATION = TIPPERARY_DURATION_SECONDS + 1.0s;
+    const auto MINIMUM_DURATION = TIPPERARY_SHORT_DURATION_SECONDS / 1.2;
+    const auto MAXIMUM_DURATION = TIPPERARY_SHORT_DURATION_SECONDS * 1.2;
 
     Mp3Player player;
     BOOST_CHECK_NO_THROW(player.waitUntilSongFinished());
@@ -38,9 +38,9 @@ BOOST_AUTO_TEST_CASE(startPlaying_and_waitUntilSongFinished, *boost::unit_test::
         BOOST_CHECK_NO_THROW(player.waitUntilSongFinished());
         auto endTime = std::chrono::system_clock::now();
 
-        std::chrono::duration<double> duration(std::chrono::duration_cast<std::chrono::duration<double>>(endTime - startTime).count());
-        BOOST_CHECK(duration > MINIMUM_DURATION); // Using BOOST_CHECK and not BOOST_TEST because the operands are not printable using operator<<.
-        BOOST_CHECK(duration < MAXIMUM_DURATION);
+        auto duration(std::chrono::duration_cast<std::chrono::duration<double>>(endTime - startTime));
+        BOOST_TEST(duration.count() > MINIMUM_DURATION.count());
+        BOOST_TEST(duration.count() < MAXIMUM_DURATION.count());
     }
 }
 
