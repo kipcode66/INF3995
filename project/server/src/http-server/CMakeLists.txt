@@ -16,7 +16,14 @@ include_directories(                       # Equivalent to the -I flag in g++
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 link_directories("${DEPS_DIR}/lib")        # Equivalent to the -L flag in g++
-link_libraries(pistache sqlite3 tag z)           # Equivalent to the -l flag in g++
+link_libraries(                            # Equivalent to the -l flag in g++
+    pistache
+    sqlite3
+    tag
+    z
+    pulse
+    pulse-simple
+)
 
 # Create targets
 add_executable(http-server     main.cpp "${HTTP_SERVER_HEADER_SOURCES}")
