@@ -8,12 +8,13 @@
 #include <mad.h>
 
 #include "MadAudioFormatter.hpp"
+#include "os/SharedFileMemory.hpp"
 
 namespace elevation {
 
 class MadDecoder {
 public:
-    static void createInstance(std::vector<uint8_t> buffer, MadAudioFormatter formatter);
+    static void createInstance(SharedFileMemory fileMemory, MadAudioFormatter formatter);
     static MadDecoder& getInstance();
 
 public:
@@ -22,7 +23,7 @@ public:
     std::vector<uint8_t> decodeNextFrame();
 
 private:
-    explicit MadDecoder(std::vector<uint8_t> buffer, MadAudioFormatter formatter);
+    explicit MadDecoder(SharedFileMemory fileMemory, MadAudioFormatter formatter);
 
 protected:
     void setupLibmad_();
@@ -30,11 +31,11 @@ protected:
     void tearDownLibmad_();
 
 protected:
-    std::vector<uint8_t> m_buffer;
     struct ::mad_stream m_stream;
     struct ::mad_frame m_frame;
     struct ::mad_synth m_synth;
 
+    SharedFileMemory m_fileMemory;
     MadAudioFormatter m_formatter;
 
 protected:

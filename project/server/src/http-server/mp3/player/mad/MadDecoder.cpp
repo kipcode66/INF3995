@@ -8,9 +8,9 @@ namespace elevation {
 
 std::unique_ptr<MadDecoder> MadDecoder::s_instance(nullptr);
 
-void MadDecoder::createInstance(std::vector<uint8_t> buffer, MadAudioFormatter formatter) {
+void MadDecoder::createInstance(SharedFileMemory fileMemory, MadAudioFormatter formatter) {
     if (s_instance == nullptr) {
-        s_instance = std::unique_ptr<MadDecoder>(new MadDecoder(std::move(buffer), std::move(formatter)));
+        s_instance = std::unique_ptr<MadDecoder>(new MadDecoder(std::move(fileMemory), std::move(formatter)));
     }
     else {
         throw std::runtime_error("Cannot create MadDecoder instance : Already exists");
@@ -26,8 +26,8 @@ MadDecoder& MadDecoder::getInstance() {
     }
 }
 
-MadDecoder::MadDecoder(std::vector<uint8_t> buffer, MadAudioFormatter formatter)
-    : m_buffer(std::move(buffer))
+MadDecoder::MadDecoder(SharedFileMemory fileMemory, MadAudioFormatter formatter)
+    : m_fileMemory(std::move(fileMemory))
     , m_formatter(std::move(formatter))
 {
     setupLibmad_();
@@ -59,7 +59,7 @@ void MadDecoder::setupLibmad_() {
 }
 
 void MadDecoder::setupStreamBuffer_() {
-    mad_stream_buffer(&m_stream, &m_buffer.at(0), m_buffer.size() * sizeof(m_buffer.at(0)));
+    mad_stream_buffer(&m_stream, (uint8_t*)m_fileMemory, m_fileMemory.size() * sizeof(*(uint8_t*)m_fileMemory));
 }
 
 void MadDecoder::tearDownLibmad_() {
