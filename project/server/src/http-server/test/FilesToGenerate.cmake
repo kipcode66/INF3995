@@ -8,8 +8,10 @@
 # "hello" where there was the @MY_VAR@ in the template file.
 
 set(HTTP_SERVER_TEST_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/resources")
-set(TEST_MP3_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/../test.mp3")
-set(TIPPERARY_SHORT_PATH "${CMAKE_CURRENT_BINARY_DIR}/tipperary_short.mp3")
+set(TEST_MP3_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/test.mp3")
+set(TEST_TEXT_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/test.txt")
+set(TEST_MP3_AS_TXT_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/test1.txt")
+set(TIPPERARY_SHORT_PATH "${CMAKE_CURRENT_BINARY_DIR}/mp3/tipperary_short.mp3")
 
 ###############################################################################
 #                        GENERATE FILES FROM TEMPLATES                        #
@@ -18,6 +20,3 @@ set(TIPPERARY_SHORT_PATH "${CMAKE_CURRENT_BINARY_DIR}/tipperary_short.mp3")
 set(HTTP_SERVER_TEST_GENERATED_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 configure_file(config/TestConfiguration.hpp.in "${HTTP_SERVER_TEST_GENERATED_INCLUDE_DIR}/TestConfiguration.hpp" @ONLY)
-configure_file(test.mp3 "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
-configure_file(test.txt "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
-configure_file(test1.txt "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
