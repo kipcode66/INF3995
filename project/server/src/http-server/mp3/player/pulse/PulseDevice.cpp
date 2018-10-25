@@ -38,8 +38,10 @@ PulseDevice& PulseDevice::operator=(PulseDevice&& that) {
 
 void PulseDevice::play(const std::vector<uint8_t>& data) {
     int error;
-    if (::pa_simple_write(m_device, &data.at(0), data.size() * sizeof(data.at(0)), &error) < 0) {
-        throw std::runtime_error(::pa_strerror(error));
+    if (data.size() > 0) {
+        if (::pa_simple_write(m_device, &data.at(0), data.size() * sizeof(data.at(0)), &error) < 0) {
+            throw std::runtime_error(::pa_strerror(error));
+        }
     }
 }
 
