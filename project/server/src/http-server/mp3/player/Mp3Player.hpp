@@ -3,7 +3,7 @@
 
 #include <string>
 #include <thread>
-#include <condition_variable>
+#include <future>
 
 namespace elevation {
 
@@ -16,16 +16,10 @@ public:
     void waitUntilSongFinished();
 
 protected:
-    void run_(std::string fileName);
-    bool isSongPlaying_();
-    void waitUntilSongStarted_();
-    void setIsPlayingTo_(bool value);
+    bool run_(std::string fileName);
 
 private:
-    std::thread m_playerThread;
-    bool m_isPlaying;
-    std::condition_variable m_isPlayingCondition;
-    std::mutex m_isPlayingMutex;
+    std::future<bool> m_player;
 };
 
 } // namespace elevation
