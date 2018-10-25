@@ -11,8 +11,7 @@ namespace elevation {
 
 void Mp3Player::run_(std::string fileName) {
     try {
-        MadDecoder::createInstance(SharedFileMemory(fileName), MadAudioFormatter());
-        MadDecoder& decoder = MadDecoder::getInstance();
+        MadDecoder decoder(std::move(SharedFileMemory(fileName)), MadAudioFormatter());
         PulseDevice pulse;
 
         while (!decoder.isDone()) {
