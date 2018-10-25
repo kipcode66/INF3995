@@ -25,7 +25,7 @@ BOOST_FIXTURE_TEST_CASE(moveAssignment, TestFixture) {
     movedPulse = std::move(m_pulse);
 }
 
-constexpr unsigned int TIPPERARY_SHORT_TIMEOUT_SECONDS = 7;
+constexpr unsigned int TIPPERARY_SHORT_TIMEOUT_SECONDS = 4;
 BOOST_AUTO_TEST_CASE(playSanityCheck, *boost::unit_test::timeout(TIPPERARY_SHORT_TIMEOUT_SECONDS)) {
     // Creating a class manually because it seems only BOOST_AUTO_TEST_CASE has a timeout option.
     class TestCase : public TestFixture {
