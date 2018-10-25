@@ -6,47 +6,54 @@ import sys
 
 from requests.exceptions import ConnectionError
 
-port_no = '8080'
-BASE_PATH = 'http://127.0.0.1:' + port_no
+BASE_PATH = 'http://127.0.0.1:'
 mock_ip = '123.2.2.2'
-mock_mac = '22:22:22:22:22:22'
-mock_name = 'Bob Ross'
+mock_mac = '21:22:F2:22:22:FF'
+mock_name = 'Martha Stewart'
 
-class TestRestApiSanity(unittest.TestCase):
+class UsagerIdentification_TestCase(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
 
-    def test__sanity_good_request(self):
+    def test__good_request(self):
         req = None
         try:
-            req = requests.get(BASE_PATH + '/usager/identification',
+            req = requests.get(BASE_PATH + port_no + '/usager/identification',
                     json={'ip': mock_ip, 'mac': mock_mac, 'name': mock_name})
         except ConnectionError:
-            self.assertIsNotNone(req, "No connection established")
-        self.assertEqual(req.status_code, 200, "wrong status code received")
+            self.assertIsNotNone(req, "Connection established")
+        self.assertEqual(req.status_code, 200, "status code is correct")
 
-    def test__get_usager_bad_request(self):
+    def test__bad_request(self):
         req = None
         try:
-            req = requests.get(BASE_PATH + '/usager/identification',
+            req = requests.get(BASE_PATH + port_no + '/usager/identification',
                     json={'spam': 'egg', 'egg': 'more egg', 'foo': 'baz'})
         except ConnectionError:
-            self.assertIsNotNone(req, "No connection established")
-        self.assertEqual(req.status_code, 400, "wrong status code received")
+            self.assertIsNotNone(req, "Connection established")
+        self.assertEqual(req.status_code, 400, "status code is correct")
 
-    def test__get_usager_response(self):
+    def test__response_format(self):
         req = None
         try:
-            req = requests.get(BASE_PATH + '/usager/identification',
+            req = requests.get(BASE_PATH + port_no + '/usager/identification',
                     json={'ip': mock_ip, 'mac': mock_mac, 'name': mock_name})
         except ConnectionError:
-            self.assertIsNotNone(req, "No connection established")
-        self.assertEqual(req.status_code, 200, "wrong status code received")
-        print(req.content)
+            self.assertIsNotNone(req, "Connection established")
+        json = req.json()
+        # print(json)
+        self.assertTrue('id' in json, "field 'id' in response")
+        self.assertTrue('message' in json, "field 'message' in response")
+        self.assertTrue('success' in json["message"], "response message indicate 'uccess'")
 
 if __name__ == '__main__':
-    # if len(sys.argv) == 2:
-    #     # print('var=' + sys.argv[1])
-    #     port_no = str(sys.argv[1])
+    global port_no
+
+    if len(sys.argv) == 2:
+        port_no = str(sys.argv.pop(1))
+        print(port_no)
+    else:
+        port_no = '8080'
     unittest.main()
+
