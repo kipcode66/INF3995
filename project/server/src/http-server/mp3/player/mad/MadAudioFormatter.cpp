@@ -20,7 +20,7 @@ std::vector<uint8_t> MadAudioFormatter::format(struct mad_pcm* pcm) {
     mad_fixed_t const* right_ch = pcm->samples[1];
 
     std::vector<uint8_t> data;
-    data.reserve(BUFFER_SIZE);
+    data.resize(NUM_BYTES_PER_SAMPLE * nsamples);
 
     if (pcm->channels == 2) {
         while (nsamples--) {
