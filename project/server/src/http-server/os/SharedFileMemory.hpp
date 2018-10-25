@@ -20,6 +20,9 @@ public:
     explicit operator       uint8_t*()       { return m_buffer; }
     explicit operator const uint8_t*() const { return m_buffer; }
 
+    uint8_t& operator[] (std::size_t index);
+    uint8_t  operator[] (std::size_t index) const;
+
     std::size_t size() const { return m_fileSize; }
 
 protected:
