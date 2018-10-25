@@ -11,7 +11,7 @@ namespace elevation {
 
 class MadAudioFormatter {
 public:
-    static constexpr mad_fixed_t DITHERING_MAX = (1 << 16) / 500;
+    static constexpr mad_fixed_t DITHERING_MAX = (1 << 16) / 1000;
     static constexpr mad_fixed_t DITHERING_MIN = -DITHERING_MAX;
 
 public:
