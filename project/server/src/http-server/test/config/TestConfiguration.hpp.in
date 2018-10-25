@@ -10,6 +10,7 @@ static constexpr const char* TEST_MP3_PATH = "@TEST_MP3_PATH@";
 static constexpr const char* TEST_TEXT_PATH = "@TEST_TEXT_PATH@";
 static constexpr const char* TEST_MP3_AS_TXT_PATH = "@TEST_MP3_AS_TXT_PATH@";
 static constexpr const char* TIPPERARY_SHORT_PATH = "@TIPPERARY_SHORT_PATH@";
+static constexpr const char* TIPPERARY_SHORT_WAV_PATH = "@TIPPERARY_SHORT_WAV_PATH@";
 
 } // namespace elevation
 
