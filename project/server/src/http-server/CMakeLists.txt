@@ -23,6 +23,7 @@ link_libraries(                            # Equivalent to the -l flag in g++
     z
     pulse
     pulse-simple
+    mad
 )
 
 # Create targets
