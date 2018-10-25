@@ -2,19 +2,17 @@
 
 #include <iostream>
 #include <functional>
-#include <chrono>
 
 namespace elevation {
 
-bool Mp3Player::run_(std::string fileName) {
+void Mp3Player::run_(std::string fileName) {
     std::this_thread::sleep_for(std::chrono::seconds(2));
     std::cout << __PRETTY_FUNCTION__ << ':' << fileName << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(2));
-    return true;
 }
 
 Mp3Player::Mp3Player()
-    : m_player(std::async([](){return true;}))
+    : m_player(defautFuture_())
 { }
 
 Mp3Player::Mp3Player(Mp3Player&& that)
@@ -35,6 +33,10 @@ void Mp3Player::startPlaying(const std::string& fileName) {
 
 void Mp3Player::waitUntilSongFinished() {
     m_player.get();
+}
+
+std::future<void> Mp3Player::defautFuture_() {
+    return std::async([](){});
 }
 
 } // namespace elevation
