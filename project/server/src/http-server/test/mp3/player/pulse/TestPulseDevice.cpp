@@ -1,10 +1,6 @@
 #define BOOST_TEST_MODULE PulseDevice
 #include <boost/test/unit_test.hpp>
 
-#include <chrono>
-#include <thread>
-#include <cstring>
-
 #include <mp3/player/pulse/PulseDevice.hpp>
 #include <os/SharedFileMemory.hpp>
 
