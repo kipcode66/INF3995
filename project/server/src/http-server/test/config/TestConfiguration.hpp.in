@@ -1,0 +1,12 @@
+// THIS HEADER IS CONFIGURED AUTOMATICALLY BY CMAKE.
+
+#ifndef TEST_CONFIG_TESTCONFIGURATION_HPP
+#define TEST_CONFIG_TESTCONFIGURATION_HPP
+
+namespace elevation {
+
+static constexpr char* TEST_MP3_PATH = "@TEST_MP3_PATH@";
+
+} // namespace elevation
+
+#endif // !TEST_CONFIG_TESTCONFIGURATION_HPP
