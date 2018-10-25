@@ -3,21 +3,29 @@
 
 #include <string>
 #include <thread>
+#include <condition_variable>
 
 namespace elevation {
 
 class Mp3Player {
-protected:
-    static void run_(std::string fileName);
-
 public:
     explicit Mp3Player();
     virtual ~Mp3Player();
 
     void startPlaying(const std::string& fileName);
+    void waitUntilSongFinished();
+
+protected:
+    void run_(std::string fileName);
+    bool isSongPlaying_();
+    void waitUntilSongStarted_();
+    void setIsPlayingTo_(bool value);
 
 private:
-    std::thread m_playing;
+    std::thread m_playerThread;
+    bool m_isPlaying;
+    std::condition_variable m_isPlayingCondition;
+    std::mutex m_isPlayingMutex;
 };
 
 } // namespace elevation
