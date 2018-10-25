@@ -5,12 +5,16 @@
 
 #include <stdexcept>
 
+#include <TestConfiguration.hpp>
+
+namespace elevation {
+
 BOOST_AUTO_TEST_CASE(mp3HeaderFailure) {
     std::vector<std::string> testInput;
 
-    testInput.push_back("test.txt");
-    testInput.push_back("test1.mp3");
-    testInput.push_back("test1.txt");
+    testInput.push_back(TEST_TEXT_PATH);
+    testInput.push_back("does-not-exist.mp3");
+    testInput.push_back(TEST_MP3_AS_TXT_PATH);
 
     for (const auto& testCase : testInput) {
         BOOST_CHECK_THROW(Mp3Header mp3Header(testCase), std::invalid_argument);
@@ -18,7 +22,7 @@ BOOST_AUTO_TEST_CASE(mp3HeaderFailure) {
 }
 
 BOOST_AUTO_TEST_CASE(mp3HeaderSucces) {
-    Mp3Header mp3TestHeader = Mp3Header("test.mp3");
+    Mp3Header mp3TestHeader = Mp3Header(TEST_MP3_PATH);
 
     BOOST_CHECK_EQUAL(mp3TestHeader.getAlbum(), "Plain Pat & Emile Presents A KiD Named CuDi");
     BOOST_CHECK_EQUAL(mp3TestHeader.getAlbum(), "Plain Pat & Emile Presents A KiD Named CuDi");
@@ -31,3 +35,4 @@ BOOST_AUTO_TEST_CASE(mp3HeaderSucces) {
     BOOST_CHECK_EQUAL(mp3TestHeader.getYear(), 2008);
 }
 
+} // namespace elevation
