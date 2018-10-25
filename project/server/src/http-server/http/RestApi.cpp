@@ -68,11 +68,11 @@ void RestApi::createDescription_() {
             .hide();
 }
 
-void buildUserFromQuery_(User_t* __restrict__ newUser,
+void buildUserFromQuery_(User_t* __restrict__ requestUser,
                          Pistache::Http::Uri::Query* __restrict__ query) {
-    strcpy(newUser->mac, query->get("mac").get().c_str());
-    strcpy(newUser->ip, query->get("ip").get().c_str());
-    strcpy(newUser->name, query->get("name").get().c_str());
+    strcpy(requestUser->mac, query->get("mac").get().c_str());
+    strcpy(requestUser->ip, query->get("ip").get().c_str());
+    strcpy(requestUser->name, query->get("name").get().c_str());
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -81,38 +81,48 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     auto body = request.body();
     rapidjson::Document document;
     document.Parse(body.c_str());
-    auto mac = document["mac"].GetString();
-    auto ip = document["ip"].GetString();
-    auto name = document["nom"].GetString();
 
-    // TODO use infos from json instead
-    auto query = request.query();
-    if (!query.has("mac")) {
+    User_t requestUser = { 0 };
+    if (!document.HasMember("mac")
+            || !document.HasMember("ip")
+            || !document.HasMember("name")
+            || document["mac"] == '\n'
+            || document["ip"] == '\n') {
         response.send(Http::Code::Bad_Request, "Malformed request");
-    } else {
-        std::string mac(query.get("mac").get());
-
-        User_t newUser = { 0 };
-        User_t oldUser = { 0 };
-
-        Database* db = Database::instance();
-        db->getUserByMac(mac.c_str(), &oldUser);
-        if (*oldUser.mac == 0) {
-            buildUserFromQuery_(&newUser, &query);
-            db->createUser(&newUser);
-            response.send(Http::Code::Ok, "New user created, id=" + std::to_string(newUser.id) + "\n");
-        } else {
-            buildUserFromQuery_(&newUser, &query);
-            newUser.id = oldUser.id;
-            if (db->createUser(&newUser)) {
-                response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
-            } else {
-                response.send(Http::Code::Ok, "this user exist, id=" + std::to_string(newUser.id) + "\n");
-            }
-        }
-        response.send(Http::Code::Ok, "getIdentification called");
+        return;
     }
+    strcpy(requestUser.mac, document["mac"].GetString());
+    strcpy(requestUser.ip, document["ip"].GetString());
+    strcpy(requestUser.name, document["name"].GetString());
 
+    std::string mac(requestUser.mac);
+
+    User_t oldUser = { 0 };
+
+    Database* db = Database::instance();
+    db->getUserByMac(mac.c_str(), &oldUser);
+    if (*oldUser.mac == 0) {
+        db->createUser(&requestUser);
+
+        /* rapidjson::Document response_json; */
+        /* response_json.SetObject(); */
+        /* auto& allocator = response_json.GetAllocator(); */
+        /* response_json.AddMember("id", 345, allocator); */
+        /* response_json.AddMember("message", "connection succesful", allocator); */
+        /* std::string s(response_json.GetString()); */
+        /* std::cout << s << std::endl; */
+        std::string body("{\"id\": \"asdfasdfasdf\", \"message\": \"connection succesfull\" ");
+        response.send(Http::Code::Ok, body);
+    } else {
+        requestUser.id = oldUser.id;
+        if (db->createUser(&requestUser)) {
+            response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
+        } else {
+        std::string body("{\"id\": \"asdfasdfasdf\", \"message\": \"connection succesfull\"}");
+        response.send(Http::Code::Ok, body);
+        }
+    }
+    response.send(Http::Code::Ok, "getIdentification called");
     return;
 }
 
