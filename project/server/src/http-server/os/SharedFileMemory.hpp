@@ -23,6 +23,8 @@ public:
           uint8_t* operator*()       { return m_buffer; }
     const uint8_t* operator*() const { return m_buffer; }
 
+    std::size_t size() const { return m_fileSize; }
+
 protected:
     std::size_t getFileSize_(const std::string& fileName) const;
     void openSharedMemory_(const std::string& fileName, std::size_t fileSize);
