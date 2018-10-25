@@ -17,7 +17,7 @@ void Mp3Player::run_(std::string fileName) {
 
         while (true) {
             std::vector<uint8_t> frame = decoder.decodeNextFrame();
-            pulse.play(frame);
+            pulse.play(std::move(frame));
         }
     }
     catch (const std::exception& e) {
