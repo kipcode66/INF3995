@@ -21,19 +21,20 @@ std::vector<uint8_t> MadAudioFormatter::format(struct mad_pcm* pcm) {
     mad_fixed_t const* right_ch = pcm->samples[1];
 
     std::vector<uint8_t> data;
-    data.resize(NUM_BYTES_PER_SAMPLE * nsamples);
+    data.reserve(NUM_BYTES_PER_SAMPLE * nsamples); // Reserve the right size in advance so no
+                                                   // copy occurs when we push_back.
 
     if (pcm->channels == 2) {
         while (nsamples--) {
             mad_fixed_t sample;
 
             sample = formatSample_(*left_ch++);
-            data[(pcm->length - nsamples) * 4 + 0] = ((sample >> 0) & 0xff);
-            data[(pcm->length - nsamples) * 4 + 1] = ((sample >> 8) & 0xff);
+            data.push_back((sample >> 0) & 0xff);
+            data.push_back((sample >> 8) & 0xff);
 
             sample = formatSample_(*right_ch++);
-            data[(pcm->length - nsamples) * 4 + 2] = ((sample >> 0) & 0xff);
-            data[(pcm->length - nsamples) * 4 + 3] = ((sample >> 8) & 0xff);
+            data.push_back((sample >> 0) & 0xff);
+            data.push_back((sample >> 8) & 0xff);
         }
     } else {
         throw std::runtime_error("Libmad does not support stereo");
