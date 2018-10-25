@@ -10,21 +10,19 @@ namespace elevation {
 
 class PulseDevice {
 public:
-    static constexpr pa_sample_spec PULSE_SPECIFICATION = { .format = PA_SAMPLE_S16LE, .rate = 44100, .channels = 2 };
+    static const pa_sample_spec PULSE_SPECIFICATION;
 
 public:
-    ~PulseDevice();
-
+    PulseDevice();
     PulseDevice(const PulseDevice&) = delete;
     PulseDevice(PulseDevice&& that);
+
+    ~PulseDevice();
 
     PulseDevice& operator=(const PulseDevice&) = delete;
     PulseDevice& operator=(PulseDevice&& that);
 
     void play(const std::vector<uint8_t>& data);
-
-private:
-    PulseDevice();
 
 protected:
     void cleanup_();
