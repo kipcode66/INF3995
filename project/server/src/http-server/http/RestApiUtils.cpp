@@ -25,8 +25,10 @@ std::string generateSalt(int length) {
 
 std::string hashMacAdress(const std::string& macAdress) {
     uint32_t lengthOfMd5Hash = 32;
-    char stringToHash[macAdress.length()];
-    strcpy(stringToHash, macAdress.c_str()); 
+    std::string salt = generateSalt(macAdress.length());
+    std::string macAdressTemp = macAdress + salt;
+    char stringToHash[macAdress.length() + salt.length()];
+    strcpy(stringToHash, macAdressTemp.c_str()); 
     unsigned char digest[MD5_DIGEST_LENGTH];
     MD5((unsigned char*)&stringToHash, strlen(stringToHash), (unsigned char*)&digest);    
     char mdString[lengthOfMd5Hash];
