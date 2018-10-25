@@ -15,7 +15,7 @@ void Mp3Player::run_(std::string fileName) {
         MadDecoder& decoder = MadDecoder::getInstance();
         PulseDevice pulse;
 
-        while (true) {
+        while (!decoder.isDone()) {
             std::vector<uint8_t> frame = decoder.decodeNextFrame();
             pulse.play(std::move(frame));
         }
