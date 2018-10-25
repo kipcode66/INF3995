@@ -15,7 +15,13 @@ namespace elevation {
 class MadDecoder {
 public:
     explicit MadDecoder(SharedFileMemory fileMemory, MadAudioFormatter formatter);
+    MadDecoder(const MadDecoder&) = delete;
+    MadDecoder(MadDecoder&& that);
+
     virtual ~MadDecoder();
+
+    MadDecoder& operator=(const MadDecoder&) = delete;
+    MadDecoder& operator=(MadDecoder&& that);
 
     std::vector<uint8_t> decodeNextFrame();
     bool isDone() const { return m_isDone; }
