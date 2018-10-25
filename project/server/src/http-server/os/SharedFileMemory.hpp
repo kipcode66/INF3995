@@ -20,9 +20,6 @@ public:
     explicit operator       uint8_t*()       { return m_buffer; }
     explicit operator const uint8_t*() const { return m_buffer; }
 
-          uint8_t* operator*()       { return m_buffer; }
-    const uint8_t* operator*() const { return m_buffer; }
-
     std::size_t size() const { return m_fileSize; }
 
 protected:
@@ -31,8 +28,8 @@ protected:
     void closeSharedMemory_();
 
 protected:
-    std::size_t m_fileSize;
     uint8_t* m_buffer;
+    std::size_t m_fileSize;
 };
 
 } // namespace elevation
