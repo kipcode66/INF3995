@@ -39,7 +39,7 @@ MadDecoder::~MadDecoder()
     tearDownLibmad_();
 }
 
-void MadDecoder::decodeNextFrame() {
+std::vector<uint8_t> MadDecoder::decodeNextFrame() {
     // Decode frame from the stream
     if (mad_frame_decode(&m_frame, &m_stream) < 0) {
         if (!MAD_RECOVERABLE(m_stream.error) && m_stream.error != MAD_ERROR_BUFLEN) {
@@ -49,6 +49,7 @@ void MadDecoder::decodeNextFrame() {
 
     // Synthesize PCM data of frame
     mad_synth_frame(&m_synth, &m_frame);
+    return m_formatter.format(&m_synth.pcm);
 }
 
 void MadDecoder::setupLibmad_() {
