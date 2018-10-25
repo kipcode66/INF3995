@@ -17,6 +17,8 @@ SharedFileMemory::SharedFileMemory(const std::string& fileName)
 }
 
 SharedFileMemory::SharedFileMemory(SharedFileMemory&& that)
+    : m_buffer(nullptr)
+    , m_fileSize(0)
 {
     operator=(std::move(that));
 }
