@@ -19,7 +19,7 @@ public:
 public:
     virtual ~MadDecoder();
 
-    void decodeNextFrame();
+    std::vector<uint8_t> decodeNextFrame();
 
 private:
     explicit MadDecoder(std::vector<uint8_t> buffer, MadAudioFormatter formatter);
