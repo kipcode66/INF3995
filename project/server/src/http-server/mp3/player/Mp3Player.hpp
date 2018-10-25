@@ -22,10 +22,13 @@ public:
     void waitUntilSongFinished();
 
 protected:
-    bool run_(std::string fileName);
+    void run_(std::string fileName);
+
+protected:
+    static std::future<void> defautFuture_();
 
 private:
-    std::future<bool> m_player;
+    std::future<void> m_player;
 };
 
 } // namespace elevation
