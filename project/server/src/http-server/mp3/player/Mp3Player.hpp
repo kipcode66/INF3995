@@ -4,10 +4,14 @@
 #include <string>
 #include <thread>
 #include <future>
+#include <atomic>
 
 namespace elevation {
 
 class Mp3Player {
+protected:
+    static void run_(std::string fileName);
+
 public:
     explicit Mp3Player();
     Mp3Player(const Mp3Player&) = delete;
@@ -19,16 +23,15 @@ public:
     Mp3Player& operator=(Mp3Player&& that);
 
     void startPlaying(const std::string& fileName);
+    void stopPlaying();
     void waitUntilSongFinished();
-
-protected:
-    void run_(std::string fileName);
 
 protected:
     static std::future<void> defaultFuture_();
 
 private:
     std::future<void> m_player;
+    std::atomic<bool> m_stopRequested;
 };
 
 } // namespace elevation
