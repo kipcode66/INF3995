@@ -23,7 +23,6 @@ BOOST_FIXTURE_TEST_CASE(moveConstructor, TestFixture) {
 
 unsigned int TIMEOUT_SECONDS = 10;
 BOOST_AUTO_TEST_CASE(startPlaying_and_waitUntilSongFinished, *boost::unit_test::timeout(TIMEOUT_SECONDS)) {
-    using namespace std::chrono_literals;
     const auto MINIMUM_DURATION = TIPPERARY_SHORT_DURATION_SECONDS / 1.2;
     const auto MAXIMUM_DURATION = TIPPERARY_SHORT_DURATION_SECONDS * 1.2;
 
@@ -45,9 +44,18 @@ BOOST_AUTO_TEST_CASE(startPlaying_and_waitUntilSongFinished, *boost::unit_test::
 }
 
 BOOST_AUTO_TEST_CASE(shouldWaitUntilFinishedIfAlreadyPlaying) {
+    const auto MINIMUM_DURATION = TIPPERARY_SHORT_DURATION_SECONDS / 1.2;
+    const auto MAXIMUM_DURATION = TIPPERARY_SHORT_DURATION_SECONDS * 1.2;
+
     Mp3Player player;
+    auto startTime = std::chrono::system_clock::now();
     BOOST_CHECK_NO_THROW(player.startPlaying(TIPPERARY_SHORT_PATH));
-    BOOST_CHECK_THROW(player.startPlaying(TIPPERARY_SHORT_PATH), std::exception);
+    BOOST_CHECK_NO_THROW(player.startPlaying(TIPPERARY_SHORT_PATH));
+    auto endTime = std::chrono::system_clock::now();
+
+    auto duration(std::chrono::duration_cast<std::chrono::duration<double>>(endTime - startTime));
+    BOOST_TEST(duration.count() > MINIMUM_DURATION.count());
+    BOOST_TEST(duration.count() < MAXIMUM_DURATION.count());
 }
 
 } // namespace elevation
