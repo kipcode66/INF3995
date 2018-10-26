@@ -58,6 +58,7 @@ BOOST_AUTO_TEST_CASE(stopPlaying, *boost::unit_test::timeout(TIMEOUT_SECONDS)) {
         auto startTime = std::chrono::system_clock::now();
         BOOST_CHECK_NO_THROW(player.startPlaying(TIPPERARY_SHORT_PATH));
         BOOST_CHECK_NO_THROW(player.stopPlaying());
+        BOOST_CHECK_NO_THROW(player.waitUntilSongFinished());
         auto endTime = std::chrono::system_clock::now();
 
         auto duration(std::chrono::duration_cast<std::chrono::duration<double>>(endTime - startTime));
