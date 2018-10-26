@@ -10,6 +10,7 @@ namespace elevation {
 const pa_sample_spec PulseDevice::PULSE_SPECIFICATION = { .format = PA_SAMPLE_S16LE, .rate = 44100, .channels = 2 };
 
 PulseDevice::PulseDevice()
+    : m_device(nullptr)
 {
     int error;
     pa_simple* device = pa_simple_new(NULL, "Elevation player", PA_STREAM_PLAYBACK, NULL, "Elevation stream", &PULSE_SPECIFICATION, NULL, NULL, &error);
@@ -20,6 +21,7 @@ PulseDevice::PulseDevice()
 }
 
 PulseDevice::PulseDevice(PulseDevice&& that)
+    : m_device(nullptr)
 {
     operator=(std::move(that));
 }
