@@ -44,4 +44,10 @@ BOOST_AUTO_TEST_CASE(startPlaying_and_waitUntilSongFinished, *boost::unit_test::
     }
 }
 
+BOOST_AUTO_TEST_CASE(shouldWaitUntilFinishedIfAlreadyPlaying) {
+    Mp3Player player;
+    BOOST_CHECK_NO_THROW(player.startPlaying(TIPPERARY_SHORT_PATH));
+    BOOST_CHECK_THROW(player.startPlaying(TIPPERARY_SHORT_PATH), std::exception);
+}
+
 } // namespace elevation
