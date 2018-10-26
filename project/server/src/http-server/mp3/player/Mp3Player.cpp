@@ -32,16 +32,20 @@ Mp3Player::Mp3Player(Mp3Player&& that)
     : m_player(std::move(that.m_player))
 { }
 
+Mp3Player::~Mp3Player() { }
+
 Mp3Player& Mp3Player::operator=(Mp3Player&& that) {
     this->m_player = std::move(that.m_player);
     return *this;
 }
 
-Mp3Player::~Mp3Player() { }
-
 void Mp3Player::startPlaying(const std::string& fileName) {
     m_player.get();
-    m_player = std::async(&Mp3Player::run_, this, fileName);
+    m_player = std::async(&Mp3Player::run_, fileName);
+}
+
+void Mp3Player::stopPlaying() {
+    // TODO
 }
 
 void Mp3Player::waitUntilSongFinished() {
