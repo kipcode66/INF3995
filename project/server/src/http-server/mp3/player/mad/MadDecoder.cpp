@@ -15,7 +15,7 @@ MadDecoder::MadDecoder(SharedFileMemory fileMemory, MadAudioFormatter formatter)
     setupStreamBuffer_();
 }
 
-MadDecoder::MadDecoder(MadDecoder&& that) 
+MadDecoder::MadDecoder(MadDecoder&& that)
     : m_fileMemory(std::move(that.m_fileMemory))
     , m_formatter(std::move(that.m_formatter))
     , m_isDone(that.m_isDone)
