@@ -175,8 +175,7 @@ buildSqlite3() {
     local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libsqlite3.a"
     local CONFIGURE=configure
     local SQLITE3_INCLUDE_DIR="${INSTALL_DIR}/include/sqlite3"
-    # local EXTRA_ARGS="--includedir=${SQLITE3_INCLUDE_DIR}"
-    local EXTRA_ARGS=""
+    local EXTRA_ARGS="--includedir=${SQLITE3_INCLUDE_DIR} --disable-tcl"
     local INSTALL_TARGET=install
 
     buildWithConfigure "sqlite3" "${SOURCE_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
