@@ -8,6 +8,7 @@
 using namespace elevation;
 
 Database* Database::s_instance = nullptr;
+constexpr char Database::DB_NAME[] = "server.db";
 
 Database* Database::instance() {
 
@@ -67,7 +68,7 @@ int Database::createUser(const User_t* user) {
 }
 
 Database::Database() {
-    int errcode = sqlite3_open("server.db", &m_db);
+    int errcode = sqlite3_open(Database::DB_NAME, &m_db);
     if (errcode) {
         std::cerr << "Can't open database: " << sqlite3_errmsg(m_db) << std::endl;
 

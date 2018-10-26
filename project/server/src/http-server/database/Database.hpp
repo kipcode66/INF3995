@@ -32,6 +32,7 @@ private:
 
     sqlite3* m_db = 0;
     static Database* s_instance;
+    const static char DB_NAME[];
 };
 
 } // namespace elevation
