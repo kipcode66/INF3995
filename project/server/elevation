@@ -11,11 +11,11 @@ usage() {
     echo "    $0 <OPTION>"
     echo
     echo "OPTIONS"
-    echo "    --help  | -h  Print this help menu and exit"
-    echo "    --start | -a  Start the Elevation server"
-    echo "    --stop  | -o  Stop the Elevation server"
-    echo "    --build | -b  Build the Elevation server"
-    echo "    --test  | -t  Run all automated tests"
+    echo "    --help  | -h     Print this help menu and exit"
+    echo "    --start | -a     Start the Elevation server"
+    echo "    --stop  | -o     Stop the Elevation server"
+    echo "    --build | -b     Build the Elevation server"
+    echo "    --test  | -t     Run all automated tests"
 }
 
 runScript() {
