@@ -5,12 +5,13 @@
 #include <thread>
 #include <future>
 #include <atomic>
+#include <memory>
 
 namespace elevation {
 
 class Mp3Player {
 protected:
-    static void run_(std::string fileName);
+    static void run_(std::string fileName, std::shared_ptr<std::atomic<bool>> stopRequested);
 
 public:
     explicit Mp3Player();
@@ -31,7 +32,7 @@ protected:
 
 private:
     std::future<void> m_player;
-    std::atomic<bool> m_stopRequested;
+    std::shared_ptr<std::atomic<bool>> m_stopRequested;
 };
 
 } // namespace elevation
