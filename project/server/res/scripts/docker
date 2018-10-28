@@ -3,23 +3,42 @@
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
-SERVER_DIR="${SCRIPTS_DIR}/../.."
+SERVER_DIR=$(makeRelative "${SCRIPTS_DIR}/../.." .)
 DOCKER_DIR="${SERVER_DIR}/res/docker"
+CONTAINER_TAG=elevation
 
-buildImage() {
-    # This might require root
+stopAndRemoveContainers() {
+    local AWK_SCRIPT='{
+        if ($2 == "'"${CONTAINER_TAG}"'") {
+            print $1
+        }
+    }'
+    docker container ls       | awk "${AWK_SCRIPT}" | xargs docker container stop 2>/dev/null # Stop running elevation containers
+    docker container ls --all | awk "${AWK_SCRIPT}" | xargs docker container rm   2>/dev/null # Remove elevation containers
+}
+
+createImage() {
     cd "${SERVER_DIR}"
+    # Make these paths relative because
+    # an absolute path makes the Dockerfile COPY fail.
+    local relativeServerDir=$(  makeRelative "${SERVER_DIR}" .)
+    local relativeBuildScript=$(makeRelative "${DOCKER_DIR}/build-image" .)
+    local relativeRunScript=$(  makeRelative "${DOCKER_DIR}/run-container" .)
     docker build \
-        --tag elevation \
-        --build-arg \
-            build-script="${DOCKER_DIR}/build-image" \
-            run-script="${DOCKER_DIR}/run-container" \
-            source-dir="${SERVER_DIR}" \
-            destination-dir=elevation-server \
+        --tag "${CONTAINER_TAG}" \
+        --build-arg build_script="${relativeBuildScript}" \
+        --build-arg run_script="${relativeRunScript}" \
+        --build-arg source_dir="${relativeServerDir}" \
+        --build-arg destination_dir=elevation-server \
+        -f "${DOCKER_DIR}/Dockerfile" \
         .
 }
 
+removeImage() {
+    stopAndRemoveContainers
+    docker image rm "${CONTAINER_TAG}"
+}
+
 runContainer() {
-    # This might require root
-    docker run -p 80:80 443:443 elevation
+    docker run -p 80:80 -p 443:443 "${CONTAINER_TAG}"
 }
