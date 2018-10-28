@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd elevation-git/
+git checkout dev # Just in case
+cd project/server
+./elevation --start
