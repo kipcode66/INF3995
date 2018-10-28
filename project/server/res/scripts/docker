@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
+SERVER_DIR="${SCRIPTS_DIR}/../.."
+DOCKER_DIR="${SERVER_DIR}/res/docker"
+
+buildImage() {
+    # This might require root
+    cd "${SERVER_DIR}"
+    docker build \
+        --tag elevation \
+        --build-arg \
+            build-script="${DOCKER_DIR}/build-image" \
+            run-script="${DOCKER_DIR}/run-container" \
+            source-dir="${SERVER_DIR}" \
+            destination-dir=elevation-server \
+        .
+}
+
+runContainer() {
+    # This might require root
+    docker run -p 80:80 443:443 elevation
+}
