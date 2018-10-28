@@ -39,3 +39,10 @@ getCoreCount() {
     cat /proc/cpuinfo | awk '/^processor/ {print($3)}' | wc -l
 }
 
+# EXPECTED PARAMS:
+# 1 : The path that should be made relative
+# 2 : The path that <1> should be relative to.
+makeRelative() {
+    realpath "${1}" --relative-to="${2}"
+}
+
