@@ -8,7 +8,7 @@ FileCache::FileCache(const std::string& cachePath)
     ensureCacheDirCreated_();
 }
 
-FileCache::FileCache(const std::experimental::filesystem::path::path& cachePath)
+FileCache::FileCache(const std::experimental::filesystem::path& cachePath)
     :m_path(cachePath)
 {
     ensureCacheDirCreated_();

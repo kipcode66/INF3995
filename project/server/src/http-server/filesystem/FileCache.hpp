@@ -17,7 +17,7 @@ public:
 
     size_t fileCount() const;
     size_t cacheSize() const;
-    std::vector<std::experimental::filesystem::path::path> getFileList() const;
+    std::vector<std::experimental::filesystem::path> getFileList() const;
     void setFileContent(const std::string& fileName, const std::string& data);
     void deleteFile(const std::string& fileName);
     bool isFileCached(const std::string& fileName);
@@ -28,7 +28,7 @@ protected:
     void wipeCachedFiles_();
 
 protected:
-    const std::experimental::filesystem::path::path& m_path;
+    const std::experimental::filesystem::path& m_path;
 };
 
 } // namespace elevation
