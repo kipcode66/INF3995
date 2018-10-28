@@ -2,13 +2,14 @@
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}/res/scripts"
-source "${SCRIPTS_DIR}/build" # Add the functions in 'build'
-source "${SCRIPTS_DIR}/start" # Add the functions in 'start'
-source "${SCRIPTS_DIR}/test" # Add the functions in 'test'
+source "${SCRIPTS_DIR}/build"  # Add the functions in 'build'
+source "${SCRIPTS_DIR}/start"  # Add the functions in 'start'
+source "${SCRIPTS_DIR}/test"   # Add the functions in 'test'
+source "${SCRIPTS_DIR}/docker" # Add the functions in 'docker'
 
 usage() {
     echo "USAGE"
-    echo "    $0 <OPTION>"
+    echo "    $0 <OPTION | DOCKER OPTION>"
     echo
     echo "OPTIONS"
     echo "    --help  | -h     Print this help menu and exit"
@@ -16,6 +17,11 @@ usage() {
     echo "    --stop  | -o     Stop the Elevation server"
     echo "    --build | -b     Build the Elevation server"
     echo "    --test  | -t     Run all automated tests"
+    echo
+    echo "DOCKER OPTIONS"
+    echo "    --create-image  | -i    Build docker image."
+    echo "    --remove-image  | -r    Remove docker image."
+    echo "    --run-container | -c    Run docker container."
 }
 
 runScript() {
@@ -42,6 +48,18 @@ runScript() {
 
         -t | --test)
             test
+            ;;
+
+        -i | --build-image)
+            createImage
+            ;;
+
+        -r | --remove-image)
+            removeImage
+            ;;
+
+        -c | --run-container)
+            runContainer
             ;;
 
         *)
