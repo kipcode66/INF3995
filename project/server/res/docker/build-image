@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd elevation-git
+git checkout dev
+cd project/server
+./elevation --build
