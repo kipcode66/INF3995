@@ -32,4 +32,8 @@
     <string name="setting_queue_period_label1">Lent (10 sec)</string>
     <string name="setting_queue_period_label2">Normal (4 sec)</string>
     <string name="setting_queue_period_label3">Rapide (1 sec)</string>
+    <string name="error_message_access_denied">Accès refusé</string>
+    <string name="error_message_song">Chanson trop longue, file pleine sur le serveur ou limite de chansons dans la file pour l’usager atteinte</string>
+    <string name="error_message_song_ID3" >Le fichier soumis n’est pas un MP3 ou n’a pas d’en-tête ID3</string>
+    <string name="error_message_server_not_available">Service non disponible</string>
 </resources>

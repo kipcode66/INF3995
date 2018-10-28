@@ -40,4 +40,8 @@
     <string name="setting_queue_period_label2">Normal (4 sec)</string>
     <string name="setting_queue_period_label3">Quick (1 sec)</string>
     <string name="interface_name_wifi" translatable="false">wlan0</string>
+    <string name="error_message_access_denied">Access denied</string>
+    <string name="error_message_song">Song too long, full queue on the server or limit of songs in the queue for the user reached</string>
+    <string name="error_message_song_ID3" >The submitted file is not an MP3 or does not have an ID3 header</string>
+    <string name="error_message_server_not_available">Service not available</string>
 </resources>

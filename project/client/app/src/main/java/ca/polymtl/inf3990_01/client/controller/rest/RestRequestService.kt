@@ -76,10 +76,10 @@ class RestRequestService(private val appCtx: Context, private val tokenMgr: Toke
                     },
                     Response.ErrorListener { error ->
                         val msg = when (error.networkResponse?.statusCode ?: 0) {
-                            403 -> appCtx.getString(R.string.error_message_forbidden)
-                            413 -> appCtx.getString(R.string.error_message_server)
-                            415 -> appCtx.getString(R.string.error_message_server)
-                            500 -> appCtx.getString(R.string.error_message_server)
+                            403 -> appCtx.getString(R.string.error_message_access_denied)
+                            413 -> appCtx.getString(R.string.error_message_song)
+                            415 -> appCtx.getString(R.string.error_message_song_ID3)
+                            500 -> appCtx.getString(R.string.error_message_server_not_available)
                             else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
                         }
                         continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg))
