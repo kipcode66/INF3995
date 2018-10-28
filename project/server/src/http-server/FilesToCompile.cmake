@@ -20,6 +20,7 @@ set(HTTP_SERVER_CPP_SOURCES
     mp3/player/pulse/PulseDevice.cpp
     database/Database.cpp
     os/SharedFileMemory.cpp
+    filesystem/FileCache.cpp
 )
 
 ###############################################################################
@@ -38,6 +39,8 @@ set(HTTP_SERVER_HEADER_SOURCES
     mp3/player/mad/MadAudioFormatter.hpp
     database/Database.hpp
     os/SharedFileMemory.hpp
+    filesystem/FileCache.hpp
+    misc/Base64.hpp
 )
 
 makeAbsolute(HTTP_SERVER_CPP_SOURCES)
