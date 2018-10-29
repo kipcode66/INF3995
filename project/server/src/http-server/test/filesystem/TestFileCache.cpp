@@ -7,7 +7,7 @@
 
 namespace elevation {
 
-using namespace fs = std::experimental::filesystem;
+namespace fs = std::experimental::filesystem;
 
 /**
  * Cleans up after all FileCache test case.
@@ -19,11 +19,11 @@ void cleanup() {
 }
 
 BOOST_AUTO_TEST_CASE(simpleConstructionDestruction) {
-    fs::path fileCacheDir(FILE_CACHE_TEST_DIRECTORY);
+    fs::path fileCacheDir(std::string(FILE_CACHE_TEST_DIRECTORY));
     // Ensure the cache directory is deleted.
     fs::remove_all(fileCacheDir);
 
-    FileCache* fileCache = new FileCache(FILE_CACHE_TEST_DIRECTORY);
+    FileCache* fileCache = new FileCache(std::string(FILE_CACHE_TEST_DIRECTORY));
     BOOST_TEST(fs::exists(fileCacheDir));
     delete fileCache;
     BOOST_TEST(!fs::exists(fileCacheDir));
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(afterCrashConstructionDestruction) {
     fs::copy_file(dummyMp3SourceFile, dummyMp3DestinationFile);
     BOOST_REQUIRE(fs::exists(dummyMp3DestinationFile))
 
-    FileCache* fileCache = new FileCache(FILE_CACHE_TEST_DIRECTORY);
+    FileCache* fileCache = new FileCache(std::string(FILE_CACHE_TEST_DIRECTORY));
     BOOST_TEST(fs::exists(fileCacheDir));
     BOOST_TEST(!fs::exists(dummyMp3DestinationFile))
     delete fileCache;
