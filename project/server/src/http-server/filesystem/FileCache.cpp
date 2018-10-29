@@ -68,7 +68,12 @@ fs::directory_entry FileCache::getFile(const std::string& fileName) const {
 void FileCache::ensureCacheDirCreated_() noexcept {
     try {
         fs::create_directories(m_path);
-        m_isInitialized = fs::exists(m_path);
+        if (fs::exists(m_path)) {
+            for (auto& entry : fs::directory_iterator(m_path)) {
+                fs::remove_all(entry.path());
+            }
+            m_isInitialized = true;
+        }
     }
     catch (fs::filesystem_error& e) {
         std::clog << e.what();
