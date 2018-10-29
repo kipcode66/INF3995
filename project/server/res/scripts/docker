@@ -51,5 +51,5 @@ removeImage() {
 }
 
 runContainer() {
-    docker run -p 80:80 -p 443:443 "${CONTAINER_TAG}"
+    docker run -d -p 80:80 -p 443:443 "${CONTAINER_TAG}"
 }
