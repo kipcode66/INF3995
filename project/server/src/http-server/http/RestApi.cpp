@@ -76,14 +76,13 @@ void buildUserFromQuery_(struct User* __restrict__ newUser,
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
     puts("getIdentification function called");
-    auto token = request.headers().getRaw("X-Auth-Token");
-    uint32_t t = std::stoi(token.value());
 
     auto query = request.query();
     if (!query.has("mac")) {
         response.send(Http::Code::Bad_Request, "Malformed request");
     } else {
         std::string mac(query.get("mac").get());
+        std::string userToken = restApiUtils::generateToken(mac);
 
         struct User newUser = { 0 };
         struct User oldUser = { 0 };
@@ -92,15 +91,19 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         db->getUserByMac(mac.c_str(), &oldUser);
         if (*oldUser.mac == 0) {
             buildUserFromQuery_(&newUser, &query);
+            *newUser.token = *userToken.c_str(); // we only get a new token if the user has never been registered inside the database
             db->createUser(&newUser);
-            response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au café-bistro Élévation!\"}");
+            db->connectUser(&newUser);
+            response.send(Http::Code::Ok, "{\"identificateur\": " + userToken + ", \"message\":\"Bienvenue au café-bistro Élévation!\"}");
         } else {
             buildUserFromQuery_(&newUser, &query);
             newUser.id = oldUser.id;
             if (db->createUser(&newUser)) {
                 response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
             } else {
-                response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au cafe-bistro Elevation!\"}");
+                //db->connectUser(&newUser);
+                db->updateTimestamp(mac.c_str()); 
+                response.send(Http::Code::Ok, "{\"identificateur\": " + userToken + ", \"message\":\"Bienvenue au cafe-bistro Elevation!\"}");
             }
         }
         response.send(Http::Code::Ok, "getIdentification called");

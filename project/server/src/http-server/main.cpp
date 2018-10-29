@@ -2,6 +2,7 @@
 #include <inttypes.h>
 
 #include "http/RestApi.hpp"
+#include "http/RestApiUtils.hpp"
 
 void usage() {
     std::cerr << std::endl << "Usage: tp3 [portNum]" << std::endl <<
@@ -41,6 +42,7 @@ int main(int argc, char** argv) {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
 
         elevation::RestApi api(addr);
+        
         api.init();
         std::cout << "Server is about to start." << std::endl;
         api.start();
