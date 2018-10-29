@@ -15,6 +15,7 @@ usage() {
     echo "OPTIONS"
     echo "     -h | --help     Print this help menu and exit"
     echo "     -a | --start    Start the Elevation server"
+    echo "     -r | --run      Start the Elevation server and wait until it terminates"
     echo "     -o | --stop     Stop the Elevation server"
     echo "     -b | --build    Build the Elevation server"
     echo "     -c | --clean    Clean the Elevation server and its dependencies"
@@ -22,7 +23,7 @@ usage() {
     echo
     echo "DOCKER OPTIONS"
     echo "     -i | --create-image     Build docker image"
-    echo "     -r | --remove-image     Remove docker image"
+    echo "     -m | --remove-image     Remove docker image"
     echo "     -n | --run-container    Run docker container"
 }
 
@@ -38,6 +39,10 @@ runScript() {
 
         -a |--start)
             start
+            ;;
+
+        -r |--run)
+            run
             ;;
 
         -o | --stop)
@@ -60,7 +65,7 @@ runScript() {
             createImage
             ;;
 
-        -r | --remove-image)
+        -m | --remove-image)
             removeImage
             ;;
 
