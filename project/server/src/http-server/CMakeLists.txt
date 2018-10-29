@@ -24,6 +24,7 @@ link_libraries(                            # Equivalent to the -l flag in g++
     pulse
     pulse-simple
     mad
+    stdc++fs
 )
 
 # Create targets
