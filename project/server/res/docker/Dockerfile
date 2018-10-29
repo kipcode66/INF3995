@@ -21,7 +21,7 @@ ENV run_script ${run_script}
 ENV destination_dir ${destination_dir}
 
 # Prepare image (install dependencies, build the server, ...)
-RUN yes | pacman -Syu core/automake core/make core/gcc core/curl extra/boost extra/pulseaudio-alsa extra/pulseaudio extra/tcl extra/wget extra/cmake extra/python3
+RUN yes | pacman -Syu core/automake core/make core/gcc core/curl extra/boost extra/pulseaudio-alsa extra/pulseaudio extra/tcl extra/wget extra/git extra/cmake extra/python3
 RUN chmod +x "${build_script}" "${run_script}"
 RUN ./"${build_script}" "${destination_dir}"
 
