@@ -1,6 +1,7 @@
 #include "FileCache.hpp"
 #include <iostream>
 #include <algorithm>
+#include <numeric>
 
 namespace elevation {
 
@@ -49,9 +50,9 @@ size_t FileCache::fileCount() const {
 size_t FileCache::cacheSize() const {
     auto cacheIt = fs::directory_iterator(m_path);
     std::vector<uintmax_t> sizes;
-    std::transform(fs::begin(cacheIt), fs::end(cacheIt), std::back_inserter(sizes), [](fs::directory_entry& dirEntry){
+    std::transform(fs::begin(cacheIt), fs::end(cacheIt), std::back_inserter(sizes), [](const fs::directory_entry& dirEntry){
         try {
-            return fs::file_size(dirEntry.path);
+            return fs::file_size(dirEntry.path());
         } catch (fs::filesystem_error& e) {
             return (uintmax_t)0;
         }
