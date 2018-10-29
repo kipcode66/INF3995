@@ -19,12 +19,15 @@ FileCache::~FileCache() {
 }
 
 size_t FileCache::fileCount() const {
+    return 0;
 }
 
 size_t FileCache::cacheSize() const {
+    return 0;
 }
 
 std::vector<std::experimental::filesystem::path> FileCache::getFileList() const {
+    return std::vector();
 }
 
 void FileCache::setFileContent(const std::string& fileName, const std::string& data) {
@@ -37,6 +40,12 @@ bool FileCache::isFileCached(const std::string& fileName) {
 }
 
 std::experimental::filesystem::directory_entry FileCache::getFile(const std::string& fileName) const {
+}
+
+void FileCache::ensureCacheDirCreated_() {
+}
+
+void FileCache::wipeCachedFiles_() {
 }
 
 } // namespace elevation
