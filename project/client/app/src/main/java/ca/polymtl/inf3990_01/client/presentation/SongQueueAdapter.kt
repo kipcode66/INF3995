@@ -28,8 +28,6 @@ class SongQueueAdapter(
         if (arg is SongQueue) {
             songQueue.clear()
             songQueue.addAll(arg)
-            //val ownedSongs = arg.filter { song -> song.sentBy == null }
-
             Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
         }
         else if (arg is AppState) {

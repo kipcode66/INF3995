@@ -40,4 +40,7 @@ class Presenter(stateService: AppStateService): Observable() {
             notifyObservers(o.getState())
         }
     }
+    fun getSong(): SongQueue {
+        return songQueue
+    }
 }
