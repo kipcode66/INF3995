@@ -16,12 +16,13 @@ usage() {
     echo "    --start | -a     Start the Elevation server"
     echo "    --stop  | -o     Stop the Elevation server"
     echo "    --build | -b     Build the Elevation server"
+    echo "    --clean | -c     Clean the Elevation server and its dependencies"
     echo "    --test  | -t     Run all automated tests"
     echo
     echo "DOCKER OPTIONS"
-    echo "    --create-image  | -i    Build docker image."
-    echo "    --remove-image  | -r    Remove docker image."
-    echo "    --run-container | -c    Run docker container."
+    echo "    --create-image  | -i    Build docker image"
+    echo "    --remove-image  | -r    Remove docker image"
+    echo "    --run-container | -n    Run docker container"
 }
 
 runScript() {
@@ -46,6 +47,10 @@ runScript() {
             build
             ;;
 
+        -c | --clean)
+            test
+            ;;
+
         -t | --test)
             test
             ;;
@@ -58,7 +63,7 @@ runScript() {
             removeImage
             ;;
 
-        -c | --run-container)
+        -n | --run-container)
             runContainer
             ;;
 
