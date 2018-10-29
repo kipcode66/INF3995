@@ -15,6 +15,8 @@ set(TIPPERARY_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/tipperary.mp3")
 set(TIPPERARY_SHORT_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/tipperary_short.mp3")
 set(TIPPERARY_SHORT_WAV_PATH "${HTTP_SERVER_TEST_RESOURCE_DIR}/mp3/tipperary_short.wav")
 
+set(FILE_CACHE_TEST_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/file_cache")
+
 ###############################################################################
 #                        GENERATE FILES FROM TEMPLATES                        #
 ###############################################################################

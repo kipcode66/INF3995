@@ -20,6 +20,7 @@ set(HTTP_SERVER_TEST_CPP_SOURCES
     mp3/player/pulse/TestPulseDevice.cpp
     mp3/player/TestMp3Player.cpp
     os/TestSharedFileMemory.cpp
+    filesystem/TestFileCache.cpp
 )
 
 makeAbsolute(HTTP_SERVER_TEST_CPP_SOURCES)

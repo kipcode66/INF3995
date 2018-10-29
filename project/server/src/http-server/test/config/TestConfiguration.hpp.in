@@ -16,6 +16,8 @@ static constexpr const char* TIPPERARY_SHORT_PATH = "@TIPPERARY_SHORT_PATH@";
 static constexpr const char* TIPPERARY_SHORT_WAV_PATH = "@TIPPERARY_SHORT_WAV_PATH@";
 static const std::chrono::duration<double> TIPPERARY_SHORT_DURATION_SECONDS(0.7);
 
+static constexpr const char* FILE_CACHE_TEST_DIRECTORY = "@FILE_CACHE_TEST_DIRECTORY@";
+
 } // namespace elevation
 
 #endif // !TEST_CONFIG_TESTCONFIGURATION_HPP
