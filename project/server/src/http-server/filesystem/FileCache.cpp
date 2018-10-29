@@ -61,7 +61,12 @@ size_t FileCache::cacheSize() const {
 }
 
 std::vector<fs::path> FileCache::getFileList() const {
-    return std::vector<std::experimental::filesystem::path>();
+    std::vector<std::experimental::filesystem::path> paths;
+    auto cacheIt = fs::directory_iterator(m_path);
+    std::transform(fs::begin(cacheIt), fs::end(cacheIt), std::back_inserter(paths), [](const fs::directory_entry& dirEntry) {
+        return dirEntry.path();
+    });
+    return paths;
 }
 
 void FileCache::setFileContent(const std::string& fileName, const std::string& data) {
