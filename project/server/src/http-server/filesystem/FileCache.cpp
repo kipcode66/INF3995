@@ -18,10 +18,10 @@ FileCache::FileCache(const std::experimental::filesystem::path& cachePath)
 }
 
 FileCache::FileCache()
-    :m_path("")
+    :m_path(""), m_isInitialized(false)
 {
     try {
-        auto tmpDir = fs::temp_directory_path();
+        m_path = fs::temp_directory_path();
         ensureCacheDirCreated_();
     }
     catch (fs::filesystem_error& e) {

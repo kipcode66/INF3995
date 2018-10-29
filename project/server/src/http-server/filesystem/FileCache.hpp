@@ -31,7 +31,7 @@ protected:
     void wipeCachedFiles_();
 
 protected:
-    std::experimental::filesystem::path& m_path;
+    std::experimental::filesystem::path m_path;
     bool m_isInitialized;
 };
 
