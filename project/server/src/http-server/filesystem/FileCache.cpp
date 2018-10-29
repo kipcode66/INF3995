@@ -27,7 +27,7 @@ size_t FileCache::cacheSize() const {
 }
 
 std::vector<std::experimental::filesystem::path> FileCache::getFileList() const {
-    return std::vector();
+    return std::vector<std::experimental::filesystem::path>();
 }
 
 void FileCache::setFileContent(const std::string& fileName, const std::string& data) {
@@ -37,6 +37,7 @@ void FileCache::deleteFile(const std::string& fileName) {
 }
 
 bool FileCache::isFileCached(const std::string& fileName) {
+    return false;
 }
 
 std::experimental::filesystem::directory_entry FileCache::getFile(const std::string& fileName) const {
