@@ -11,9 +11,12 @@ public:
     explicit FileCache(const std::string& cachePath);
     FileCache(const std::experimental::filesystem::path& cachePath);
     FileCache(const FileCache&) = delete;
+    FileCache();
     virtual ~FileCache();
 
     FileCache& operator=(const FileCache&) = delete;
+
+    bool isInitialized();
 
     size_t fileCount() const;
     size_t cacheSize() const;
@@ -28,7 +31,8 @@ protected:
     void wipeCachedFiles_();
 
 protected:
-    const std::experimental::filesystem::path& m_path;
+    std::experimental::filesystem::path& m_path;
+    bool m_isInitialized;
 };
 
 } // namespace elevation
