@@ -1,8 +1,4 @@
 #!/bin/bash
 
 cd elevation-git/project/server
-./elevation --start
-wait -n # TODO This doesn't work because we disowned the processes
-RETURN_CODE=$?
-./elevation --stop
-exit ${RETURN_CODE}
+./elevation --run
