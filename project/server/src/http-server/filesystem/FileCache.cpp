@@ -24,7 +24,7 @@ size_t FileCache::fileCount() const {
 size_t FileCache::cacheSize() const {
 }
 
-std::vector<std::experimental::filesystem::path::path> FileCache::getFileList() const {
+std::vector<std::experimental::filesystem::path> FileCache::getFileList() const {
 }
 
 void FileCache::setFileContent(const std::string& fileName, const std::string& data) {
