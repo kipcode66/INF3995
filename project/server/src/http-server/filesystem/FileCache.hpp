@@ -9,7 +9,7 @@ namespace elevation {
 class FileCache {
 public:
     explicit FileCache(const std::string& cachePath);
-    FileCache(const std::experimental::filesystem::path::path& cachePath);
+    FileCache(const std::experimental::filesystem::path& cachePath);
     FileCache(const FileCache&) = delete;
     virtual ~FileCache();
 
