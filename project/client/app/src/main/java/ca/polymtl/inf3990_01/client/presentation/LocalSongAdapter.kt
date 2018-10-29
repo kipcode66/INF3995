@@ -34,7 +34,7 @@ class LocalSongAdapter(
             Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))        }
     }
 
-    val ownedSongs = presenter.getSong().filter { song -> song.sentBy == null }
+    val ownedSongs = presenter.getSongs().filter { song -> song.sentBy == null }
     override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {
         val view = v ?: layoutInflater.inflate(R.layout.local_song, viewGroup, false)
         val song = this.localSongs[postion]
