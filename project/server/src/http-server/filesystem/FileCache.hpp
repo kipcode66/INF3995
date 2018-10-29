@@ -27,8 +27,8 @@ public:
     std::experimental::filesystem::directory_entry getFile(const std::string& fileName) const;
 
 protected:
-    void ensureCacheDirCreated_();
-    void wipeCachedFiles_();
+    void ensureCacheDirCreated_() noexcept;
+    void wipeCachedFiles_() noexcept;
 
 protected:
     std::experimental::filesystem::path m_path;
