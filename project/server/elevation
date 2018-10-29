@@ -4,6 +4,7 @@ THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}/res/scripts"
 source "${SCRIPTS_DIR}/build"  # Add the functions in 'build'
 source "${SCRIPTS_DIR}/start"  # Add the functions in 'start'
+source "${SCRIPTS_DIR}/clean"  # Add the functions in 'clean'
 source "${SCRIPTS_DIR}/test"   # Add the functions in 'test'
 source "${SCRIPTS_DIR}/docker" # Add the functions in 'docker'
 
@@ -48,7 +49,7 @@ runScript() {
             ;;
 
         -c | --clean)
-            test
+            clean
             ;;
 
         -t | --test)
