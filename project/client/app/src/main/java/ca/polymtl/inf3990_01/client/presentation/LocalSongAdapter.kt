@@ -9,7 +9,6 @@ import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.event.SendSongEvent
 import ca.polymtl.inf3990_01.client.model.LocalSongs
-import ca.polymtl.inf3990_01.client.presentation.Presenter
 import kotlinx.android.synthetic.main.local_song.view.*
 import kotlinx.android.synthetic.main.local_song.view.send
 import java.util.*
@@ -47,7 +46,6 @@ class LocalSongAdapter(
         { view.send.isClickable = true }
 
         view.send.setOnClickListener {
-            //TODO : send local_song to server
             eventMgr.dispatchEvent(SendSongEvent(song))
         }
         return view
