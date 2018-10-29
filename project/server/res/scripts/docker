@@ -3,40 +3,51 @@
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
-SERVER_DIR=$(makeRelative "${SCRIPTS_DIR}/../.." .)
+GIT_DIR="${SCRIPTS_DIR}/../../../.."
+SERVER_DIR="${GIT_DIR}/project/server"
 DOCKER_DIR="${SERVER_DIR}/res/docker"
 CONTAINER_TAG=elevation
 
 stopAndRemoveContainers() {
     local AWK_SCRIPT='{
-        if ($2 == "'"${CONTAINER_TAG}"'") {
-            print $1
+        if ($2 == "'"${CONTAINER_TAG}"'") { # If the container name is our tag
+            print $1 # Print the container id
         }
     }'
     docker container ls       | awk "${AWK_SCRIPT}" | xargs docker container stop 2>/dev/null # Stop running elevation containers
     docker container ls --all | awk "${AWK_SCRIPT}" | xargs docker container rm   2>/dev/null # Remove elevation containers
 }
 
+removeImages() {
+    local AWK_SCRIPT='{
+        if ($1 == "<none>") { # If the repository column is "<none>"
+            print $3 # Print the image id
+        }
+    }'
+    docker image ls --all | awk "${AWK_SCRIPT}" | xargs docker image rm 2>/dev/null # Remove images with the <none> tag
+    docker image rm "${CONTAINER_TAG}" 2>/dev/null # Remove the images with our tag
+}
+
 createImage() {
-    cd "${SERVER_DIR}"
+    cd "${GIT_DIR}"
     # Make these paths relative because
     # an absolute path makes the Dockerfile COPY fail.
-    local relativeServerDir=$(  makeRelative "${SERVER_DIR}" .)
+    local relativeSourceDir=$(  makeRelative "${GIT_DIR}" .)
     local relativeBuildScript=$(makeRelative "${DOCKER_DIR}/build-image" .)
     local relativeRunScript=$(  makeRelative "${DOCKER_DIR}/run-container" .)
     docker build \
         --tag "${CONTAINER_TAG}" \
         --build-arg build_script="${relativeBuildScript}" \
         --build-arg run_script="${relativeRunScript}" \
-        --build-arg source_dir="${relativeServerDir}" \
-        --build-arg destination_dir=elevation-server \
+        --build-arg source_dir="${relativeSourceDir}" \
+        --build-arg destination_dir=elevation-git \
         -f "${DOCKER_DIR}/Dockerfile" \
         .
 }
 
 removeImage() {
     stopAndRemoveContainers
-    docker image rm "${CONTAINER_TAG}"
+    removeImages
 }
 
 runContainer() {
