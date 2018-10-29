@@ -52,7 +52,7 @@ size_t FileCache::cacheSize() const {
     std::vector<uintmax_t> sizes;
     std::transform(fs::begin(cacheIt), fs::end(cacheIt), std::back_inserter(sizes), [](const fs::directory_entry& dirEntry){
         try {
-            return fs::file_size(dirEntry.path());
+            return fs::file_size(dirEntry);
         } catch (fs::filesystem_error& e) {
             return (uintmax_t)0;
         }
