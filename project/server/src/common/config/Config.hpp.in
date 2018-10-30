@@ -1,0 +1,12 @@
+// THIS HEADER IS CONFIGURED AUTOMATICALLY BY CMAKE.
+
+#ifndef COMMON_CONFIG_CONFIG_HPP
+#define COMMON_CONFIG_CONFIG_HPP
+
+namespace elevation {
+
+// TODO
+
+} // namespace elevation
+
+#endif // !COMMON_CONFIG_CONFIG_HPP

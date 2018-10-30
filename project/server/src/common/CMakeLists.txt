@@ -1,1 +1,1 @@
-message(STATUS "TODO : build the common/")
+include(FilesToGenerate.cmake) # Call CMake script "FilesToGenerate.cmake"
