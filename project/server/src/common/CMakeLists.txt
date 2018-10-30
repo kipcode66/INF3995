@@ -12,6 +12,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall")
 include_directories(                       # Equivalent to the -I flag in g++
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
+link_libraries(                            # Equivalent to the -l flag in g++
+    stdc++fs
+)
 
 # Create targets
 add_library(common "${COMMON_CPP_SOURCES}" "${COMMON_HEADER_SOURCES}")
