@@ -35,7 +35,7 @@ checkParamNum() {
 # EXPECTED PARAMS:
 # None
 getCoreCount() {
-    checkParamNum 0 $# || exit 1 
+    checkParamNum 0 $# || exit 1
     cat /proc/cpuinfo | awk '/^processor/ {print($3)}' | wc -l
 }
 
