@@ -23,6 +23,10 @@ public:
     void log(const std::string& data);
 
 protected:
+    void createDirectory_();
+    void openLogFile_();
+
+protected:
     std::string m_prefix;
     std::ofstream m_logFile;
 };
