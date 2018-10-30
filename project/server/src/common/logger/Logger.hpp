@@ -9,6 +9,9 @@
 
 namespace elevation {
 
+/**
+ * @brief This class implements a thread-safe logger.
+ */
 class Logger {
 protected:
     static constexpr const char* FILENAME_EXTENSION = "log";
