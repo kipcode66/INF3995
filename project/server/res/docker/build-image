@@ -1,0 +1,11 @@
+#!/bin/bash
+
+DESTINATION_DIR="${1}"
+cd "${DESTINATION_DIR}/project/server"
+ls -l
+./elevation --clean # Have to clean in case the OS that build this
+                    # container doesn't use a libc compatible to the
+                    # container's OS (which is the case when the builder
+                    # OS is Ubuntu...).
+./elevation --build
+true

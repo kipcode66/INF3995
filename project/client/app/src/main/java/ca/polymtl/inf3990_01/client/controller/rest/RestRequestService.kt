@@ -12,8 +12,10 @@ import ca.polymtl.inf3990_01.client.model.Song
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.RetryPolicy
+import java.io.File
 import kotlin.coroutines.experimental.suspendCoroutine
+
+
 
 class RestRequestService(
     private val appCtx: Context,
@@ -72,10 +74,45 @@ class RestRequestService(
     }
 
     suspend fun sendSong(song: LocalSong) {
-        TODO("Not Implemented")
+        val songToSend = encoder(song)
+        val token = tokenMgr.getToken()
+        val resp: ResponseData<String> = suspendCoroutine { continuation ->
+            val request = RESTRequest(
+                    Request.Method.POST,
+                    httpClient.getBaseURL() + "/usager/file/$token",
+                    songToSend,
+                    String::class.java,
+                    mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
+                    Response.Listener { resp ->
+                        continuation.resume(resp)
+                    },
+                    Response.ErrorListener { error ->
+                        val msg = when (error.networkResponse?.statusCode ?: 0) {
+                            403 -> appCtx.getString(R.string.error_message_forbidden)
+                            413 -> appCtx.getString(R.string.error_message_server)
+                            415 -> appCtx.getString(R.string.error_message_server)
+                            500 -> appCtx.getString(R.string.error_message_server)
+                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
+                        }
+                        continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
+                    }
+            )
+            //request.setRetryPolicy(DefaultRetryPolicy(10*1000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            httpClient.addToRequestQueue(request)
+        }
+        if (resp.code != 200) {
+            Handler(appCtx.mainLooper).post(Runnable { Toast.makeText(appCtx, resp.value, Toast.LENGTH_LONG) })
+        }
     }
 
     suspend fun deleteSong(song: Song) {
         TODO("Not Implemented")
     }
+
+    private fun encoder(song: LocalSong): String {
+        val bytes = File(song.file.toString()).readBytes()
+        val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
+        return base64
+    }
+
 }
