@@ -26,7 +26,7 @@ cleanPistache() {
 
 cleanOpenSsl() {
     local NAME="openssl"
-    local MAKEFILE_DIR="${DEPS_DIR}/openssl"
+    local MAKEFILE_DIR="${DEPS_DIR}/openssl/build"
     cleanProject "${NAME}" "${MAKEFILE_DIR}"
 }
 
@@ -44,13 +44,13 @@ cleanZLib() {
 
 cleanSqlite3() {
     local NAME="sqlite3"
-    local MAKEFILE_DIR="${DEPS_DIR}/sqlite3"
+    local MAKEFILE_DIR="${DEPS_DIR}/sqlite3/build"
     cleanProject "${NAME}" "${MAKEFILE_DIR}"
 }
 
 cleanLibmad() {
     local NAME="libmad"
-    local MAKEFILE_DIR="${DEPS_DIR}/libmad"
+    local MAKEFILE_DIR="${DEPS_DIR}/libmad/build"
     cleanProject "${NAME}" "${MAKEFILE_DIR}"
 }
 
