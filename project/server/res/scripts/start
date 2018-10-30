@@ -131,7 +131,12 @@ stop() {
     if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
         kill -TERM $(pgrep -x "${HTTP_SERVER_NAME}")
         sleep 0.5
-        kill -KILL $(pgrep -x "${SSL_DAEMON_NAME}") 2>/dev/null
+        kill -KILL $(pgrep -x "${HTTP_SERVER_NAME}") 2>/dev/null
+    fi
+    if pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
+        kill -TERM $(pgrep -x "${HTTPS_SERVER_NAME}")
+        sleep 0.5
+        kill -KILL $(pgrep -x "${HTTPS_SERVER_NAME}") 2>/dev/null
     fi
     if pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
         kill -TERM $(pgrep -x "${SSL_DAEMON_NAME}")
