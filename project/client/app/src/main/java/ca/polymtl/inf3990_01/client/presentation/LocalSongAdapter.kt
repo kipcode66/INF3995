@@ -47,7 +47,8 @@ class LocalSongAdapter(
         view.songName.text = song.title
         view.author.text = song.authorName
 
-        view.send.isEnabled = !(ownedSongs.size >= 5)
+        val isSongInQueue = ownedSongs.any { s -> s.title == song.title && s.authorName == s.authorName }
+        view.send.isEnabled = !(ownedSongs.size >= 5) && !isSongInQueue
 
         view.send.setOnClickListener {
             eventMgr.dispatchEvent(SendSongEvent(song))
