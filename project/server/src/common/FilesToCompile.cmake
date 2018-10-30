@@ -11,6 +11,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although not recommended)
 set(COMMON_CPP_SOURCES
+    logger/Logger.cpp
 )
 
 ###############################################################################
@@ -20,6 +21,7 @@ set(COMMON_CPP_SOURCES
 # All .h, .hpp, .hh files
 # Use quotes "" if a file contains a space (although not recommended)
 set(COMMON_HEADER_SOURCES
+    logger/Logger.hpp
 )
 
 makeAbsolute(COMMON_CPP_SOURCES)
