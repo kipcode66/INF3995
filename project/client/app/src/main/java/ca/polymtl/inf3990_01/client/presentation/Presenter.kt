@@ -10,6 +10,7 @@ import java.util.*
 /**
  * Observer will receive an argument of type:
  *  - SongQueue : If it's for the server's song queue update
+ *  - LocalSongs : If it's for the local song's list update
  *  - AppState : If it's an update of the application's state
  */
 class Presenter(stateService: AppStateService): Observable() {
