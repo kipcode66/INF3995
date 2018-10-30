@@ -1,4 +1,4 @@
-#include "mp3-header/Mp3Header.hpp"
+#include "mp3/header/Mp3Header.hpp"
 
 #define BOOST_TEST_MODULE Mp3Header
 #include <boost/test/unit_test.hpp>

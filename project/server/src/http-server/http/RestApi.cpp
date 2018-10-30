@@ -135,10 +135,10 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
             Database& db = *Database::instance();
 
-            std::stringstream encoded(request.body());
-            std::stringstream decoded;
-            Base64::Decode(encoded, decoded);
-            StringID3v2Tag tag(decoded.str());
+            std::string encoded = request.body();
+            std::string decoded;
+            Base64::Decode(encoded, &decoded);
+            StringID3v2Tag tag(decoded);
             if (!tag.isEmpty()) {
                 std::cout << "It's tag id3v2 !!!" << std::endl;
                 std::cout << "Title: " << tag.title() << std::endl;
