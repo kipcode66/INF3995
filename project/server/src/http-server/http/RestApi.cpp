@@ -142,6 +142,10 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             if (!tag.isEmpty()) {
                 std::cout << "It's tag id3v2 !!!" << std::endl;
                 std::cout << "Title: " << tag.title() << std::endl;
+                response.send(Http::Code::Ok, "Ok");
+            }
+            else {
+                response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
             }
         }
         catch (std::logic_error &e) {
