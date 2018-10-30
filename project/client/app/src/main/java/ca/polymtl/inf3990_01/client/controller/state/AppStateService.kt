@@ -23,6 +23,8 @@ class AppStateService: Observable() {
                     navView.menu.findItem(R.id.nav_statistics).isVisible = false
                 }
 
+                override fun isSongHighlighted(song: Song): Boolean = song.sentBy == null
+
                 override fun sendFile(song: LocalSong): Boolean {
                     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
@@ -50,6 +52,8 @@ class AppStateService: Observable() {
                 override fun sendFile(song: LocalSong): Boolean {
                     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
+
+                override fun isSongHighlighted(song: Song): Boolean = false
 
                 override fun canRemoveSong(song: Song): Boolean = true
 

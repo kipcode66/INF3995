@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.ActiveActivityTrackingService
 import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.presentation.Presenter
@@ -25,12 +26,13 @@ abstract class AbstractDrawerActivity(
 
     protected val stateService: AppStateService by inject()
     protected val presenter: Presenter by inject()
+    protected val activeActivityTracker: ActiveActivityTrackingService by inject()
 
     protected lateinit var drawerLayout: DrawerLayout
     protected lateinit var toolbar: Toolbar
     protected lateinit var navView: NavigationView
 
-    private val stateObserver = Observer { o, state ->
+    private val stateObserver = Observer { _, state ->
         if (state is AppState) {
             state.updateNavigationView(navView)
             // If it's an activity that is not available in the current state, finish the activity.
@@ -60,6 +62,16 @@ abstract class AbstractDrawerActivity(
     override fun onDestroy() {
         stateService.deleteObserver(stateObserver)
         super.onDestroy()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        activeActivityTracker.activityStarted()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        activeActivityTracker.activityStopped()
     }
 
     override fun onBackPressed() {

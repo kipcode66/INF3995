@@ -1,8 +1,7 @@
-//
-// Created by adam on 04/10/18.
-//
-
 #include "RestApi.hpp"
+#include "database/Database.hpp"
+
+using namespace elevation;
 
 RestApi::RestApi(Address addr)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
@@ -66,14 +65,46 @@ void RestApi::createDescription_() {
             .hide();
 }
 
+void buildUserFromQuery_(struct User* __restrict__ newUser,
+                         Pistache::Http::Uri::Query* __restrict__ query) {
+    strcpy(newUser->mac, query->get("mac").get().c_str());
+    strcpy(newUser->ip, query->get("ip").get().c_str());
+    strcpy(newUser->name, query->get("name").get().c_str());
+}
+
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
+    puts("getIdentification function called");
     auto token = request.headers().getRaw("X-Auth-Token");
     uint32_t t = std::stoi(token.value());
-    if (t == 0) {
-        t = rand();
+
+    auto query = request.query();
+    if (!query.has("mac")) {
+        response.send(Http::Code::Bad_Request, "Malformed request");
+    } else {
+        std::string mac(query.get("mac").get());
+
+        struct User newUser = { 0 };
+        struct User oldUser = { 0 };
+
+        Database* db = Database::instance();
+        db->getUserByMac(mac.c_str(), &oldUser);
+        if (*oldUser.mac == 0) {
+            buildUserFromQuery_(&newUser, &query);
+            db->createUser(&newUser);
+            response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au café-bistro Élévation!\"}");
+        } else {
+            buildUserFromQuery_(&newUser, &query);
+            newUser.id = oldUser.id;
+            if (db->createUser(&newUser)) {
+                response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
+            } else {
+                response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au cafe-bistro Elevation!\"}");
+            }
+        }
+        response.send(Http::Code::Ok, "getIdentification called");
     }
-    response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au café-bistro Élévation!\"}");
-    printf("getIdentification function called, token is %d\n", t);
+
+    return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -83,15 +114,15 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
         "{\n\"titre\":\"Never Gonna Give You Up\",\n\"artiste\":\"Foo\",\n\"duree\":\"4:20\",\n\"proposeePar\":\"Chuck Norris\",\n\"proprietaire\":false,\n\"no\":42},\n"
         "{\n\"titre\":\"Hey Jude\",\n\"artiste\":\"Beatles\",\n\"duree\":\"7:05\",\n\"proposeePar\":\"Claude\",\n\"proprietaire\":true,\n\"no\":25}\n"
     "]\n}\n");
-    printf("getFileList function called, param is %s\n", param.c_str());
+    std::cout << "getFileList function called, param is " << param << std::endl;
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "postFile");
-    puts("postFile function called");
+    std::cout << "postFile function called" << std::endl;
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "deleteFile");
-    puts("deleteFile function called");
+    std::cout << "deleteFile function called" << std::endl;
 }

@@ -8,16 +8,15 @@ import android.os.Handler
 import android.util.Log
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.InitializationManager
 import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
 import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
 import ca.polymtl.inf3990_01.client.utils.NetUtils
-import ca.polymtl.inf3990_01.client.utils.SingletonHolder
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.VolleyError
+import com.android.volley.*
 import com.google.gson.Gson
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
+import kotlin.coroutines.experimental.coroutineContext
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
@@ -69,54 +68,51 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
     private var token: Int = 0
     private var tokenLock = Object()
     private var lastMessage: String? = null
-    private var isUpdating = false
+    private var currentUpdateJob: Job? = null
+
+    init {
+        launch {
+            updateToken()
+        }
+    }
 
     fun getToken(): Int {
         return token
     }
 
-    suspend fun updateToken() {
-        synchronized(isUpdating) {
-            if (isUpdating) {
-                return
-            }
-            isUpdating = true
-        }
-
+    @Synchronized suspend fun updateToken(): NetworkResponse? {
         Log.d(TokenManagerService::class.java.simpleName, "Starting token update")
+        val canDisplayMessage = InitializationManager.hasInstance() && InitializationManager.getInstanceOrThrow().isInitialized
 
         var oldToken = token // Dummy value to make Kotlin happy
         synchronized(tokenLock) {
             oldToken = token
         }
-        val resp = fetchTokenAndWrapErrors()
+        val respData = fetchTokenAndWrapErrors()
+        val resp = respData.value
         synchronized(tokenLock) {
             token = resp.identificateur
         }
         if ((oldToken != token || resp.identificateur == 0) && lastMessage != resp.message) {
             // TODO Send a signal to the Presenter to show popup with the response message.
             // Temporarly, opening a Toast (a little message at the bottom of the screen)
-            Handler(appCtx.mainLooper).post {
-                Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
-                lastMessage = resp.message // Prevent to continuously show the same message (can be annoying)
+            if (canDisplayMessage || resp.identificateur != 0) {
+                Handler(appCtx.mainLooper).post {
+                    Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
+                    lastMessage = resp.message // Prevent to continuously show the same message (can be annoying)
+                }
             }
         }
         Log.d(TokenManagerService::class.java.simpleName, "Token updated")
 
-        synchronized(isUpdating) {
-            isUpdating = false
-        }
+        return respData.networkData
     }
 
-    private suspend fun fetchTokenAndWrapErrors(): GetTokenResponseData {
+    private suspend fun fetchTokenAndWrapErrors(): ResponseData<GetTokenResponseData> {
         return suspendCoroutine { continuation ->
             launch {
-                var resp: GetTokenResponseData
-                try {
-                    resp = fetchToken()
-                    synchronized(tokenLock) {
-                        token = resp.identificateur
-                    }
+                val resp: ResponseData<GetTokenResponseData> = try {
+                    fetchToken()
                 } catch (e: VolleyError) {
                     val msg: String = when (e.networkResponse?.statusCode ?: -1) {
                         400 -> appCtx.getString(R.string.error_message_bad_request)
@@ -124,10 +120,10 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
                         500 -> appCtx.getString(R.string.error_message_server)
                         else -> appCtx.getString(R.string.error_message_unknown) + ": $e"
                     }
-                    resp = GetTokenResponseData(0, msg)
+                    ResponseData(0, GetTokenResponseData(0, msg), null)
                 } catch (e: Exception) {
                     val msg = appCtx.getString(R.string.error_message_network)
-                    resp = GetTokenResponseData(0, "$msg: ${e.localizedMessage}]")
+                    ResponseData(0, GetTokenResponseData(0, "$msg: ${e.localizedMessage}]"), null)
                 }
                 continuation.resume(resp)
             }
@@ -137,7 +133,7 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
     /*
      * We can't put this function in RestRequestService because it would create circular dependencies.
      */
-    private suspend fun fetchToken(): GetTokenResponseData {
+    private suspend fun fetchToken(): ResponseData<GetTokenResponseData> {
         val manager = appCtx.getSystemService(Context.WIFI_SERVICE) as WifiManager?
         if (manager != null && manager.isWifiEnabled) {
             val info = manager.connectionInfo
@@ -155,7 +151,7 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
                         GetTokenResponseData::class.java,
                         mutableMapOf(HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()), // Headers
                         Response.Listener { respData: ResponseData<GetTokenResponseData> -> // Success listener
-                            continuation.resume(respData.value) // Equivalent to Promise.resolve(value)
+                            continuation.resume(respData) // Equivalent to Promise.resolve(value)
                         },
                         Response.ErrorListener { error -> // Error Listener
                             error.printStackTrace()

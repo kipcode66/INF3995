@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 
-SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
+THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
+
 HTTP_SERVER_NAME=http-server
 SSL_DAEMON_NAME=ssl-daemon
-
-message() {
-    tput bold 2>/dev/null
-    tput setaf 10 2>/dev/null
-    echo -n "$@"
-    tput sgr0 2>/dev/null
-}
 
 processesNotAlreadyStarted() {
     if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
@@ -71,20 +67,44 @@ startSslDaemon() {
     done
 }
 
-start() {
+# EXPECTED PARAMS :
+# 1 : Expression which, if true, makes us wait until any of the processes is finished.
+lanunchEverything() {
+    checkParamNum 1 $# || exit 1
+    local SHOULD_WAIT="${1}"
+
     if processesNotAlreadyStarted; then
         cd "${SERVER_DIR}"
         assignHttpServerPortRange
         startHttpServer
         assignSslDaemonPortRange
         startSslDaemon
-        disown
-        message $'\nHTTP Server started on port '${HTTP_SERVER_PORT}',' \
-                $'and SSL Daemon started on port '${SSL_DAEMON_PORT}$'.\n\n'
+        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"', and SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\n\n'
+        if ${SHOULD_WAIT}; then
+            message "${MESSAGE_STRING}"
+            trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
+                                       # SIGINT (CTRL+C) / SIGTERM signal.
+            wait -n
+            stop
+        else
+            disown
+            message "${MESSAGE_STRING}"
+        fi
     fi
 }
 
+start() {
+    checkParamNum 0 $# || exit 1
+    lanunchEverything false
+}
+
+run() {
+    checkParamNum 0 $# || exit 1
+    lanunchEverything true
+}
+
 stop() {
+    checkParamNum 0 $# || exit 1
     if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
         kill -TERM $(pgrep -x "${HTTP_SERVER_NAME}")
         sleep 0.5
@@ -97,67 +117,7 @@ stop() {
     fi
 }
 
-testDaemon() {
-    message $'\nTesting SSL Daemon...\n'
-    cd "${DAEMON_TEST_DIR}"
-    ctest --output-on-failure
+stopBySignal() {
+    message $'\nDoing last-minute cleanup of the elevation server...'
+    stop && message $'Done.'
 }
-
-testHttpServer() {
-    message $'\nTesting HTTP Server...\n'
-    cd "${HTTP_SERVER_TEST_DIR}"
-    ctest --output-on-failure
-}
-
-test() {
-    HTTP_SERVER_TEST_DIR="${SERVER_DIR}/build/${HTTP_SERVER_NAME}/test"
-    DAEMON_TEST_DIR="${SERVER_DIR}/build/${SSL_DAEMON_NAME}/test"
-
-    testHttpServer
-    testDaemon
-}
-
-usage() {
-    echo "USAGE"
-    echo "    $0 <OPTION>"
-    echo
-    echo "OPTIONS"
-    echo "    --help | -h  Print this help menu and exit"
-    echo "    --start      Start the Elevation server"
-    echo "    --stop       Stop the Elevation server"
-    echo "    --test | -t  Run all automated tests"
-}
-
-runScript() {
-    if [ $# != 1 ]; then
-        usage
-    else
-        case $1 in
-
-        -h | --help)
-            usage
-            ;;
-
-        --start)
-            start
-            ;;
-
-        --stop)
-            stop
-            ;;
-
-        --test | -t)
-            test
-            ;;
-
-        *)
-            echo "Invalid option '$1'"
-            echo
-            usage
-            ;;
-
-        esac
-    fi
-}
-
-runScript "$@"
