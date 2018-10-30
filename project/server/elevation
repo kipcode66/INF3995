@@ -20,7 +20,7 @@ usage() {
     echo "     -r | --run      Start the Elevation server and wait until it terminates"
     echo "     -o | --stop     Stop the Elevation server"
     echo "     -b | --build    Build the Elevation server"
-    echo "     -c | --clean    Clean the Elevation server and its dependencies"
+    echo "     -c | --clean    Clean the Elevation server, its logs and its dependencies"
     echo "     -t | --test     Run all automated tests"
     echo "     -d | --database Initialize database"
     echo
