@@ -103,10 +103,11 @@ void FileCache::getFileContent(const std::string& fileName, std::ostream& data) 
 }
 
 void FileCache::deleteFile(const std::string& fileName) {
+    fs::remove_all(m_path / fileName);
 }
 
 bool FileCache::isFileCached(const std::string& fileName) {
-    return false;
+    return fs::exists(m_path / fileName);
 }
 
 fs::directory_entry FileCache::getFile(const std::string& fileName) const {
