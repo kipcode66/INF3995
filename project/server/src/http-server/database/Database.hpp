@@ -13,19 +13,23 @@ struct User_t {
     static const size_t MAC_LENGTH = 18;
     static const size_t NAME_LENGTH = 256;
     static const size_t ID_LENGTH = 64;
+    static const size_t TOKEN_LENGTH = 32;
 
     char id[ID_LENGTH];
     char ip[IP_LENGTH];
     char mac[MAC_LENGTH];
     char name[NAME_LENGTH];
+    char token[TOKEN_LENGTH];
 };
 
 
 class Database {
 public:
     static Database* instance();
-    void getUserByMac(const char*, User_t* __restrict__) const;
-    int createUser(const User_t*);
+    void getUserByMac(const char* mac, User_t* __restrict__ user) const;
+    int createUser(const User_t* user);
+    int updateTimestamp(const User_t* user);
+    int connectUser(const struct User_t* user);
 
 private:
     Database();

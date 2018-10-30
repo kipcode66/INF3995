@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdexcept>
-#include <iostream>
 
 using namespace elevation;
 
@@ -25,7 +24,7 @@ void Database::getUserByMac(const char* mac,
                             User_t* __restrict__ user) const {
     int errcode = 0;
     const char* query = sqlite3_mprintf(
-            "SELECT rowid, ip, mac, name FROM user WHERE (mac = '%q');", mac);
+            "SELECT rowid, ip, mac, name, token FROM user WHERE (mac = '%q');", mac);
 
     sqlite3_stmt *statement = nullptr;
     errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
@@ -37,6 +36,7 @@ void Database::getUserByMac(const char* mac,
         strcpy(user->id, (char *)sqlite3_column_text(statement, 0));
         strcpy(user->ip, (char *)sqlite3_column_text(statement, 1));
         strcpy(user->name, (char *)sqlite3_column_text(statement, 3));
+        strcpy(user->token, (char *)sqlite3_column_text(statement, 4));
         strcpy(user->mac, (char *)sqlite3_column_text(statement, 2)); // do last as a coherence check
     } else {
         *user = { 0 };
@@ -48,10 +48,53 @@ int Database::createUser(const User_t* user) {
     int errcode = 0;
     char* errmsg = nullptr;
     const char* query = sqlite3_mprintf(
-                "INSERT OR REPLACE INTO user VALUES ('%q', '%q', '%q');",
+                "INSERT OR REPLACE INTO user VALUES ('%q', '%q', '%q', '%q');",
                 user->ip,
                 user->mac,
-                user->name);
+                user->name,
+                user->token);
+
+    errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
+    if (errcode != SQLITE_OK) {
+        std::string message;
+        if (errmsg) {
+            message = errmsg;
+            free(errmsg);
+        } else {
+            message = "unknown database error";
+        }
+        throw std::runtime_error(message);
+    }
+    return errcode;
+} 
+
+int Database::connectUser(const struct User_t* user) {
+    uint32_t userIsConnected = 1;
+    int errcode = 0;
+    char* errmsg = nullptr;
+    const char* query = sqlite3_mprintf(
+                "INSERT INTO userConnection VALUES ('%q', %u, julianday('now'));",
+                user->token,
+                userIsConnected);
+    errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
+    if (errcode != SQLITE_OK) {
+        std::string message;
+        if (errmsg) {
+            message = errmsg;
+            free(errmsg);
+        } else {
+            message = "unknown database error";
+        }
+        throw std::runtime_error(message);
+    }
+    return errcode;
+}
+
+int Database::updateTimestamp(const User_t* user) {
+    int errcode = 0;
+    char* errmsg = nullptr;
+    const char* query = sqlite3_mprintf(
+            "UPDATE userConnection SET timeStamp = julianday('now') WHERE token = (SELECT token from user where mac = '%q');", user->mac);
 
     errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
     if (errcode != SQLITE_OK) {
@@ -66,6 +109,7 @@ int Database::createUser(const User_t* user) {
     }
     return errcode;
 }
+
 
 Database::Database() {
     int errcode = sqlite3_open(Database::DB_NAME, &m_db);

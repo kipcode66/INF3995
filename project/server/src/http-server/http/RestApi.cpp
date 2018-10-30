@@ -3,6 +3,7 @@
 #include "RestApi.hpp"
 #include "database/Database.hpp"
 #include "rapidjson/document.h"
+#include <iostream>
 
 using namespace elevation;
 
@@ -80,11 +81,9 @@ std::string generateBody(std::string id, std::string message) {
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
-
     auto body = request.body();
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
-
     if (!request_json.HasMember("mac")
             || !request_json.HasMember("ip")
             || !request_json.HasMember("name")
@@ -97,24 +96,26 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     strcpy(requestUser.mac, request_json["mac"].GetString());
     strcpy(requestUser.ip, request_json["ip"].GetString());
     strcpy(requestUser.name, request_json["name"].GetString());
+    strcpy(requestUser.token, restApiUtils::generateToken(requestUser.mac).c_str());
 
     User_t existingUser = { 0 };
     Database* db = Database::instance();
     db->getUserByMac(requestUser.mac, &existingUser);
     if (*existingUser.mac == 0) {
-        db->createUser(&requestUser);
 
-        // MOCK id TODO generate and insert in db
-        char id[]= "asKJd8hq*l#Dcdac_&Hgfasdf896gq34";
-        std::string body = generateBody(id, "connection successful");
+        db->createUser(&requestUser);
+        db->connectUser(&requestUser);
+
+        std::string body = generateBody(requestUser.token, "connection successful");
         response.send(Http::Code::Ok, body);
     } else {
-        /* requestUser.id = existingUser.id; */
+        //&requestUser.id = &existingUser.id; 
+        strcpy(requestUser.token, existingUser.token);
         if (db->createUser(&requestUser)) {
             response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
         } else {
-            char id[]= "asKJd8hq*l#Dcdac_&Hgfasdf896gq34";
-            std::string body = generateBody(id, "connection successful");
+            db->updateTimestamp(&requestUser);
+            std::string body = generateBody(requestUser.token, "connection successful");
             response.send(Http::Code::Ok, body);
         }
     }

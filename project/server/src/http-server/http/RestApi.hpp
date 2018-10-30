@@ -5,6 +5,7 @@
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
 #include <pistache/description.h>
+#include "RestApiUtils.hpp"
 
 using namespace Pistache;
 namespace elevation {

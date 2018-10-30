@@ -16,6 +16,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTP_SERVER_CPP_SOURCES
     http/RestApi.cpp
+    http/RestApiUtils.cpp
     mp3-header/Mp3Duration.cpp
     mp3-header/Mp3Header.cpp
     database/Database.cpp
@@ -29,6 +30,7 @@ set(HTTP_SERVER_CPP_SOURCES
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTP_SERVER_HEADER_SOURCES
     http/RestApi.hpp
+    http/RestApiUtils.hpp
     mp3-header/Mp3Duration.hpp
     mp3-header/Mp3Header.hpp
     database/Database.hpp
