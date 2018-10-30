@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <unordered_map>
 
 namespace elevation {
 
@@ -17,18 +18,27 @@ protected:
     static std::string getTime_(const char* format);
 
 public:
-    explicit Logger(const std::string& prefix);
+    static Logger& getLogger(const std::string& prefix);
+
+public:
+    explicit Logger(Logger&&) = default;
     virtual ~Logger();
+
+    Logger& operator=(Logger&&) = default;
 
     void log(const std::string& data);
 
 protected:
+    explicit Logger(const std::string& prefix);
     void createDirectory_();
     void openLogFile_();
 
 protected:
     std::string m_prefix;
     std::ofstream m_logFile;
+
+private:
+    static std::unordered_map<std::string, Logger> s_loggers;
 };
 
 } // namespace elevation
