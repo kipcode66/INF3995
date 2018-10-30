@@ -64,6 +64,7 @@ cleanServer() {
     local NAME="the elevation server"
     local BINARY_DIR="${SERVER_DIR}/build"
     cleanProject "${NAME}" "${BINARY_DIR}"
+    rm -rf "${SERVER_DIR}/logs"
 }
 
 cleanDependencies() {
