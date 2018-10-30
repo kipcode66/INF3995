@@ -91,7 +91,7 @@ startSslDaemon() {
 # EXPECTED PARAMS :
 # 1 : Expression which, if true, makes us wait until any of the processes is finished.
 lanunchEverything() {
-    checkParamNum 1 $# || exit 1 
+    checkParamNum 1 $# || exit 1
     local SHOULD_WAIT="${1}"
 
     if processesNotAlreadyStarted; then
@@ -117,17 +117,17 @@ lanunchEverything() {
 }
 
 start() {
-    checkParamNum 0 $# || exit 1 
+    checkParamNum 0 $# || exit 1
     lanunchEverything false
 }
 
 run() {
-    checkParamNum 0 $# || exit 1 
+    checkParamNum 0 $# || exit 1
     lanunchEverything true
 }
 
 stop() {
-    checkParamNum 0 $# || exit 1 
+    checkParamNum 0 $# || exit 1
     if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
         kill -TERM $(pgrep -x "${HTTP_SERVER_NAME}")
         sleep 0.5
