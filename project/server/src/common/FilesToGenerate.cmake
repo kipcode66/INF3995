@@ -15,4 +15,4 @@ set(SERVER_LOG_DIR "${CMAKE_BINARY_DIR}/../logs")
 
 set(COMMON_GENERATED_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
 
-configure_file(config/Config.hpp.in "${COMMON_GENERATED_INCLUDE_DIR}/elevation/common/Config.hpp")
+configure_file(config/Config.hpp.in "${COMMON_GENERATED_INCLUDE_DIR}/elevation/common/Config.hpp" @ONLY)
