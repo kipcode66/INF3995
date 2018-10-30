@@ -1,10 +1,13 @@
 #include "SecureRestApi.hpp"
 #include "http-server/database/Database.hpp"
 
+#include <common/logger/Logger.hpp>
+
 using namespace elevation;
 
 SecureRestApi::SecureRestApi(Address addr)
 : RestApi(addr)
+, m_logger(Logger::getLogger("https-server"))
 { }
 
 void SecureRestApi::init() {
