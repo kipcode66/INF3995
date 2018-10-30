@@ -6,6 +6,8 @@
 #include <pistache/router.h>
 #include <pistache/description.h>
 
+#include <common/logger/Logger.hpp>
+
 using namespace Pistache;
 namespace elevation {
 
@@ -26,6 +28,7 @@ protected:
     std::shared_ptr<Http::Endpoint> m_httpEndpoint;
     Rest::Description m_desc;
     Rest::Router m_router;
+    Logger& m_logger;
 };
 
 } // namespace elevation

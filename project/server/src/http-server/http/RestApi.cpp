@@ -4,11 +4,14 @@
 #include "database/Database.hpp"
 #include "rapidjson/document.h"
 
+#include <sstream>
+
 using namespace elevation;
 
 RestApi::RestApi(Address addr)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
+, m_logger(Logger::getLogger("http-server"))
 { }
 
 RestApi::~RestApi() {
@@ -118,6 +121,11 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             response.send(Http::Code::Ok, body);
         }
     }
+
+    std::ostringstream osStream;
+    osStream << '{' << requestUser.mac << '}' << " Assigned ID \"" << "ID TODO" << "\" to user \"" << requestUser.name;
+    m_logger.log(osStream.str());
+
     response.send(Http::Code::Ok, "getIdentification called");
     return;
 }
@@ -131,10 +139,22 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "postFile");
+    
+    User_t requestUser; // TODO
+    std::ostringstream osStream;
+    osStream << '{' << requestUser.mac << '}' << " Sent MP3 \"" << "TITLE TODO" << "\" of length " << "SONG LENGTH TODO";
+    m_logger.log(osStream.str());
+
     std::cout << "postFile function called" << std::endl;
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "deleteFile");
+
+    User_t requestUser; // TODO
+    std::ostringstream osStream;
+    osStream << '{' << requestUser.mac << '}' << " Removed MP3 \"" << "TITLE TODO" << "\" of length " << "SONG LENGTH TODO";
+    m_logger.log(osStream.str());
+
     std::cout << "deleteFile function called" << std::endl;
 }
