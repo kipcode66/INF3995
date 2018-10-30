@@ -24,6 +24,8 @@
 #define BASE64_H
 
 #include <string>
+#include <iostream>
+#include <sstream>
 
 const char kBase64Alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "abcdefghijklmnopqrstuvwxyz"
@@ -72,6 +74,43 @@ class Base64 {
     }
 
     return (enc_len == out->size());
+  }
+
+  static bool Encode(std::istream& in, std::ostream& out) {
+    int i = 0, j = 0;
+    unsigned char a3[3];
+    unsigned char a4[4];
+
+    while(!in.eof()) {
+      in >> a3[i++];
+      if (i == 3) {
+        a3_to_a4(a4, a3);
+
+        for (i = 0; i < 4; i++) {
+          out << kBase64Alphabet[a4[i]];
+        }
+
+        i = 0;
+      }
+    }
+
+    if (i) {
+      for (j = i; j < 3; j++) {
+        a3[j] = '\0';
+      }
+
+      a3_to_a4(a4, a3);
+
+      for (j = 0; j < i + 1; j++) {
+        out << kBase64Alphabet[a4[j]];
+      }
+
+      while ((i++ < 3)) {
+        out << '=';
+      }
+    }
+
+    return true;
   }
 
   static bool Encode(const char *input, size_t input_length, char *out, size_t out_length) {
@@ -165,6 +204,51 @@ class Base64 {
     }
 
     return (dec_len == out->size());
+  }
+
+  static bool Decode(std::istream& in, std::ostream& out) {
+    int i = 0, j = 0;
+    unsigned char a3[3];
+    unsigned char a4[4];
+
+    while (!in.eof()) {
+      if (in.peek() == '=') {
+        break;
+      }
+
+      in >> a4[i++];
+      if (i == 4) {
+        for (i = 0; i <4; i++) {
+          a4[i] = b64_lookup(a4[i]);
+        }
+
+        a4_to_a3(a3,a4);
+
+        for (i = 0; i < 3; i++) {
+          out << a3[i];
+        }
+
+        i = 0;
+      }
+    }
+
+    if (i) {
+      for (j = i; j < 4; j++) {
+        a4[j] = '\0';
+      }
+
+      for (j = 0; j < 4; j++) {
+        a4[j] = b64_lookup(a4[j]);
+      }
+
+      a4_to_a3(a3,a4);
+
+      for (j = 0; j < i - 1; j++) {
+        out << a3[j];
+      }
+    }
+
+    return true;
   }
 
   static bool Decode(const char *input, size_t input_length, char *out, size_t out_length) {

@@ -1,7 +1,14 @@
 #include "RestApi.hpp"
 #include "database/Database.hpp"
+#include "misc/Base64.hpp"
+#include <taglib/mpegfile.h>
+#include <taglib/id3v2tag.h>
 
 using namespace elevation;
+
+StringID3v2Tag::StringID3v2Tag(const std::string& data) {
+    parse(TagLib::String(data).data(TagLib::String::Type::UTF8));
+}
 
 RestApi::RestApi(Address addr)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
@@ -118,7 +125,29 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "postFile");
+    if (!request.headers().has("X-Auth-Token")) {
+        response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" missing");
+    }
+    else {
+        uint32_t token = 0;
+        try {
+            token = std::stoi(request.headers().getRaw("X-Auth-Token").value());
+
+            Database& db = *Database::instance();
+
+            std::stringstream encoded(request.body());
+            std::stringstream decoded;
+            Base64::Decode(encoded, decoded);
+            StringID3v2Tag tag(decoded.str());
+            if (!tag.isEmpty()) {
+                std::cout << "It's tag id3v2 !!!" << std::endl;
+                std::cout << "Title: " << tag.title() << std::endl;
+            }
+        }
+        catch (std::logic_error &e) {
+            response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" must be a 32 bits integer");
+        }
+    }
     std::cout << "postFile function called" << std::endl;
 }
 

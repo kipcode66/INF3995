@@ -5,9 +5,15 @@
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
 #include <pistache/description.h>
+#include <taglib/id3v2tag.h>
 
 using namespace Pistache;
 namespace elevation {
+
+class StringID3v2Tag : public TagLib::ID3v2::Tag {
+public:
+    StringID3v2Tag(const std::string& data);
+};
 
 class RestApi {
 public:
