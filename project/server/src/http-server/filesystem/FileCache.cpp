@@ -1,5 +1,7 @@
 #include "FileCache.hpp"
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <numeric>
 
@@ -69,7 +71,35 @@ std::vector<fs::path> FileCache::getFileList() const {
     return paths;
 }
 
-void FileCache::setFileContent(const std::string& fileName, const std::string& data) {
+void FileCache::setFileContent(const std::string& fileName, std::string& data) {
+    std::stringstream ss(data);
+    setFileContent(fileName, ss);
+}
+
+void FileCache::setFileContent(const std::string& fileName, std::istream& data) {
+    std::ofstream file((m_path / fileName).string());
+    std::istreambuf_iterator<char> begin(data);
+    std::istreambuf_iterator<char> end;
+    std::copy(begin, end, std::ostreambuf_iterator(file));
+}
+
+std::string FileCache::getFileContent(const std::string& fileName) const {
+    std::string data;
+    getFileContent(fileName, data);
+    return data;
+}
+
+void FileCache::getFileContent(const std::string& fileName, std::string& data) const {
+    std::stringstream ss;
+    getFileContent(fileName, ss);
+    data = ss.str();
+}
+
+void FileCache::getFileContent(const std::string& fileName, std::ostream& data) const {
+    std::ifstream file((m_path / fileName).string());
+    std::istreambuf_iterator<char> begin(file);
+    std::istreambuf_iterator<char> end;
+    std::copy(begin, end, std::ostreambuf_iterator(data));
 }
 
 void FileCache::deleteFile(const std::string& fileName) {
@@ -80,6 +110,7 @@ bool FileCache::isFileCached(const std::string& fileName) {
 }
 
 fs::directory_entry FileCache::getFile(const std::string& fileName) const {
+    return fs::directory_entry(m_path / fileName);
 }
 
 void FileCache::ensureCacheDirCreated_() noexcept {

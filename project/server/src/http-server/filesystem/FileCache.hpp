@@ -2,6 +2,7 @@
 #define SRC_HTTP_FS_FILECACHE_HPP
 
 #include <string>
+#include <iostream>
 #include <experimental/filesystem>
 
 namespace elevation {
@@ -9,6 +10,7 @@ namespace elevation {
 class FileCache {
 public:
     explicit FileCache(const std::string& cachePath);
+    FileCache(const char *cachePath) : FileCache(std::string(cachePath)) {} // Explicit conversion to string.
     FileCache(const std::experimental::filesystem::path& cachePath);
     FileCache(const FileCache&) = delete;
     FileCache();
@@ -21,7 +23,11 @@ public:
     size_t fileCount() const;
     size_t cacheSize() const;
     std::vector<std::experimental::filesystem::path> getFileList() const;
-    void setFileContent(const std::string& fileName, const std::string& data);
+    void setFileContent(const std::string& fileName, std::string& data);
+    void setFileContent(const std::string& fileName, std::istream& data);
+    std::string getFileContent(const std::string& fileName) const;
+    void getFileContent(const std::string& fileName, std::string& data) const;
+    void getFileContent(const std::string& fileName, std::ostream& data) const;
     void deleteFile(const std::string& fileName);
     bool isFileCached(const std::string& fileName);
     std::experimental::filesystem::directory_entry getFile(const std::string& fileName) const;
