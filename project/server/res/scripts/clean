@@ -26,8 +26,8 @@ cleanPistache() {
 
 cleanOpenSsl() {
     local NAME="openssl"
-    local MAKEFILE_DIR="${DEPS_DIR}/openssl/build"
-    cleanProject "${NAME}" "${MAKEFILE_DIR}"
+    local BINARY_DIR="${DEPS_DIR}/openssl/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
 }
 
 cleanTagLib() {
@@ -44,14 +44,20 @@ cleanZLib() {
 
 cleanSqlite3() {
     local NAME="sqlite3"
-    local MAKEFILE_DIR="${DEPS_DIR}/sqlite3/build"
-    cleanProject "${NAME}" "${MAKEFILE_DIR}"
+    local BINARY_DIR="${DEPS_DIR}/sqlite3/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
 }
 
 cleanLibmad() {
     local NAME="libmad"
-    local MAKEFILE_DIR="${DEPS_DIR}/libmad/build"
-    cleanProject "${NAME}" "${MAKEFILE_DIR}"
+    local BINARY_DIR="${DEPS_DIR}/libmad/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
+}
+
+cleanRapidjson() {
+    local NAME="rapidjson"
+    local BINARY_DIR="${DEPS_DIR}/rapidjson/rapidjson/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
 }
 
 cleanServer() {
@@ -67,6 +73,7 @@ cleanDependencies() {
     cleanZLib
     cleanSqlite3
     cleanLibmad
+    cleanRapidjson
 }
 
 clean() {
