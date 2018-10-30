@@ -17,15 +17,19 @@ Logger::~Logger() { }
 
 std::string Logger::getFileName_(const std::string& prefix) {
     std::ostringstream osStream;
-    osStream << SERVER_LOG_DIR << '/' << prefix << '-' << getTime_() << '.' << FILENAME_EXTENSION;
+    osStream << SERVER_LOG_DIR << '/' << prefix << '-' << getTime_(TIME_FORMAT_FILE_NAME) << '.' << FILENAME_EXTENSION;
     return osStream.str();
 }
 
-std::string Logger::getTime_() {
+std::string Logger::getTime_(const char* format) {
     std::time_t now = std::time(nullptr);
     std::ostringstream osStream;
-    osStream << std::put_time<char>(std::localtime(&now), TIME_FORMAT);
+    osStream << std::put_time<char>(std::localtime(&now), format);
     return osStream.str();
+}
+
+void Logger::log(const std::string& data) {
+    m_logFile << '[' << m_prefix << ' ' << getTime_(TIME_FORMAT_LOG_LINE) << "] " << data << std::endl; // std::endl will flush the file stream ; this is done on purpose.
 }
 
 } // namespace elevation
