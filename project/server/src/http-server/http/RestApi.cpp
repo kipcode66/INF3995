@@ -15,7 +15,10 @@ RestApi::RestApi(Address addr)
 { }
 
 RestApi::~RestApi() {
-    m_httpEndpoint->shutdown();
+    try {
+        m_httpEndpoint->shutdown();
+    }
+    catch (std::runtime_error& e) { } // Pistache seems to have an issue where calling shutdown throws an exception.
 }
 
 void RestApi::init() {
