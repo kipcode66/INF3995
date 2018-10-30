@@ -2,6 +2,7 @@
 #define LOGGER_LOGGER_HPP
 
 #include <string>
+#include <fstream>
 
 namespace elevation {
 
@@ -11,7 +12,12 @@ public:
     virtual ~Logger();
 
 protected:
+    std::string getFileName_() const;
+    std::string getTime_() const;
+
+protected:
     std::string m_prefix;
+    std::ofstream m_logFile;
 };
 
 } // namespace elevation
