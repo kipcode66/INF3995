@@ -7,13 +7,17 @@
 namespace elevation {
 
 class Logger {
+protected:
+    static constexpr const char* FILENAME_EXTENSION = "log";
+    static constexpr const char* TIME_FORMAT = "%F-%H%M%S";
+
+protected:
+    static std::string getFileName_(const std::string& prefix);
+    static std::string getTime_();
+
 public:
     explicit Logger(const std::string& prefix);
     virtual ~Logger();
-
-protected:
-    std::string getFileName_() const;
-    std::string getTime_() const;
 
 protected:
     std::string m_prefix;
