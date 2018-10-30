@@ -17,6 +17,7 @@ include_directories(                       # Equivalent to the -I flag in g++
 )
 link_directories("${DEPS_DIR}/lib")        # Equivalent to the -L flag in g++
 link_libraries(                            # Equivalent to the -l flag in g++
+    common
     pistache
     sqlite3
     tag
