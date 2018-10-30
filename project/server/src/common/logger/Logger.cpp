@@ -9,6 +9,8 @@
 
 namespace elevation {
 
+std::unordered_map<std::string, Logger> Logger::s_loggers;
+
 Logger::Logger(const std::string& prefix)
     : m_prefix(prefix)
 {
@@ -18,6 +20,17 @@ Logger::Logger(const std::string& prefix)
 
 Logger::~Logger() {
     log(m_prefix + " cleanly stopped.");
+}
+
+Logger& Logger::getLogger(const std::string& prefix) {
+    try {
+        return s_loggers.at(prefix);
+    }
+    catch (const std::out_of_range& e) {
+        auto pair = std::make_pair(prefix, Logger(prefix));
+        s_loggers.insert(std::move(pair));
+        return s_loggers.at(prefix);
+    }
 }
 
 std::string Logger::getFileName_(const std::string& prefix) {
