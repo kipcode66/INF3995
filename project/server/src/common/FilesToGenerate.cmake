@@ -7,7 +7,7 @@
 # the CMake variable MY_VAR to "hello", then the generated file will contain
 # "hello" where there was the @MY_VAR@ in the template file.
 
-# TODO
+set(SERVER_LOG_DIR "${CMAKE_BINARY_DIR}/../logs")
 
 ###############################################################################
 #                        GENERATE FILES FROM TEMPLATES                        #

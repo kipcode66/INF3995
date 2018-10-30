@@ -5,7 +5,7 @@
 
 namespace elevation {
 
-// TODO
+static constexpr const char* SERVER_LOG_DIR = "@SERVER_LOG_DIR@"; ///< Directory where the server's logs will be placed.
 
 } // namespace elevation
 
