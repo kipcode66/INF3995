@@ -4,6 +4,8 @@
 #include <string>
 #include <fstream>
 #include <unordered_map>
+#include <mutex>
+#include <memory>
 
 namespace elevation {
 
@@ -36,6 +38,7 @@ protected:
 protected:
     std::string m_prefix;
     std::ofstream m_logFile;
+    std::unique_ptr<std::mutex> m_mutex;
 
 private:
     static std::unordered_map<std::string, Logger> s_loggers;

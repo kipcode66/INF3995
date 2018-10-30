@@ -13,13 +13,17 @@ std::unordered_map<std::string, Logger> Logger::s_loggers;
 
 Logger::Logger(const std::string& prefix)
     : m_prefix(prefix)
+    , m_mutex(new std::mutex())
 {
     createDirectory_();
     openLogFile_();
 }
 
 Logger::~Logger() {
-    log(m_prefix + " cleanly stopped.");
+    bool isEmpty = (m_mutex == nullptr);
+    if (!isEmpty) {
+        log(m_prefix + " cleanly stopped.");
+    }
 }
 
 Logger& Logger::getLogger(const std::string& prefix) {
@@ -27,7 +31,7 @@ Logger& Logger::getLogger(const std::string& prefix) {
         return s_loggers.at(prefix);
     }
     catch (const std::out_of_range& e) {
-        auto pair = std::make_pair(prefix, Logger(prefix));
+        std::pair<const std::string, Logger> pair(prefix, Logger(prefix));
         s_loggers.insert(std::move(pair));
         return s_loggers.at(prefix);
     }
@@ -47,7 +51,8 @@ std::string Logger::getTime_(const char* format) {
 }
 
 void Logger::log(const std::string& data) {
-    m_logFile << '[' << m_prefix << ' ' << getTime_(TIME_FORMAT_LOG_LINE) << "] " << data << std::endl; // std::endl will flush the file stream ; this is done on purpose.
+    std::lock_guard<std::mutex> lock(*m_mutex);
+    m_logFile << '[' << m_prefix << ' ' << getTime_(TIME_FORMAT_LOG_LINE) << "] " << data << std::endl; // std::endl will flush the file stream ; this is intentional.
 }
 
 void Logger::createDirectory_() {
