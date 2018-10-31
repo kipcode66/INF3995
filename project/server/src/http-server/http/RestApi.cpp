@@ -1,16 +1,13 @@
 #include "RestApi.hpp"
 #include "database/Database.hpp"
 #include "misc/Base64.hpp"
-#include <taglib/mpegfile.h>
-#include <taglib/id3v2tag.h>
 #include <thread>
 #include <future>
+#include <ctime>
+#include <iomanip>
+#include "mp3/header/Mp3Header.hpp"
 
 using namespace elevation;
-
-StringID3v2Tag::StringID3v2Tag(const std::string& data) {
-    parse(TagLib::String(data).data(TagLib::String::Type::UTF8));
-}
 
 RestApi::RestApi(Address addr)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
@@ -138,28 +135,63 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
         return;
     }
 
-    std::async([&](){
-        uint32_t token = 0;
-        try {
-            token = std::stoi(t.value());
+    if (!m_cache.isInitialized()) {
+        response.send(Http::Code::Internal_Server_Error, "Cache not initialized");
+        return;
+    }
 
+    std::async([&](){
+        try {
+            uint32_t token = std::stoi(t.value());
+
+            // TODO : Check if the user has a valid token.
+
+            // Decode the string.
             std::stringstream encoded(request.body());
             std::stringstream decoded;
-            std::cerr << "encoded : " << encoded.str() << std::endl;
             Base64::Decode(encoded, decoded);
-            std::cerr << "decoded : " << decoded.str() << std::endl;
-            StringID3v2Tag tag(decoded.str());
-            if (!tag.isEmpty()) {
-                std::cout << "It's tag id3v2 !!!" << std::endl;
-                std::cout << "Title: " << tag.title() << std::endl;
-                response.send(Http::Code::Ok, "Ok");
-                return;
+
+            // +=-=-=-= Save in a file =-=-=-=+
+            // Generate
+            std::time_t now = std::time(nullptr);
+            std::tm* nowTm = std::localtime(&now);
+            std::stringstream fileName;
+            // Generate a new name 
+            fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S") << std::hash<std::string>()(decoded.str());
+            std::experimental::filesystem::path filePath(fileName.str());
+            std::experimental::filesystem::path tmpPath = filePath;
+            // Try a new file name until we find on that is not used.
+            size_t counter = 0;
+            while (m_cache.isFileCached(tmpPath)) {
+                tmpPath = filePath;
+                tmpPath += "_" + std::to_string(++counter);
             }
-            else {
+            tmpPath += ".mp3";
+            filePath = tmpPath;
+
+            m_cache.setFileContent(filePath, decoded);
+
+            // Fetch MP3 header
+            Mp3Header* header;
+            try {
+                header = new Mp3Header(filePath.string());
+            }
+            catch (std::invalid_argument& e) {
                 std::cout << "It's NOT tag id3v2 ..." << std::endl;
                 response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
+                m_cache.deleteFile(filePath.filename());
                 return;
             }
+
+            std::cout << "It's tag id3v2 !!!" << std::endl;
+            std::cout << "Title: " << header->getTitle() << std::endl;
+
+            // TODO : Put the song's path in the DB.
+
+            response.send(Http::Code::Ok, "Ok"); // We send the response at the end in the case there is an error in the process.
+
+            delete header;
+            return;
         }
         catch (std::logic_error &e) {
             std::cout << "Token not valid; got \"" << t.value() << "\"" << std::endl;

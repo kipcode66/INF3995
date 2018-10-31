@@ -5,15 +5,11 @@
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
 #include <pistache/description.h>
-#include <taglib/id3v2tag.h>
+
+#include "filesystem/FileCache.hpp"
 
 using namespace Pistache;
 namespace elevation {
-
-class StringID3v2Tag : public TagLib::ID3v2::Tag {
-public:
-    StringID3v2Tag(const std::string& data);
-};
 
 class RestApi {
 public:
@@ -32,6 +28,7 @@ private:
     std::shared_ptr<Http::Endpoint> m_httpEndpoint;
     Rest::Description m_desc;
     Rest::Router m_router;
+    FileCache m_cache;
 };
 
 } // namespace elevation
