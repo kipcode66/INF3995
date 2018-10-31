@@ -2,6 +2,7 @@ package ca.polymtl.inf3990_01.client.controller.rest
 
 import android.content.Context
 import android.os.Handler
+import android.util.Log
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.InitializationManager
@@ -13,6 +14,7 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
 import java.io.File
+import java.nio.charset.Charset
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
@@ -79,7 +81,7 @@ class RestRequestService(
         val resp: ResponseData<String> = suspendCoroutine { continuation ->
             val request = RESTRequest(
                     Request.Method.POST,
-                    httpClient.getBaseURL() + "/usager/file/$token",
+                    httpClient.getBaseURL() + "/usager/chanson/$token",
                     songToSend,
                     String::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),

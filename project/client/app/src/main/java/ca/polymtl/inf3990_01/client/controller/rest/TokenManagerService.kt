@@ -142,7 +142,7 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
             return suspendCoroutine { continuation ->
                 val request = RESTRequest(
                         Request.Method.GET,
-                        httpClient.getBaseURL() + RESOURCE_URI,
+                        httpClient.getBaseURL() + RESOURCE_URI + "?mac=$mac&ip=$ip",
                         Gson().toJson(GetTokenRequestData(
                                 ip,
                                 mac,

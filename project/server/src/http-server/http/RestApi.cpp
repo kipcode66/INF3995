@@ -125,7 +125,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
-    if (!request.headers().has("X-Auth-Token")) {
+    if (!request.headers().getRaw("X-Auth-Token").value().empty()) {
         response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" missing");
     }
     else {
