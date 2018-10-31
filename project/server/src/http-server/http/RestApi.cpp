@@ -131,11 +131,13 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
     auto t = request.headers().getRaw("X-Auth-Token");
     if (t.value().empty()) {
+        std::cout << "Header \"X-Auth-Token\" missing" << std::endl;
         response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" missing");
         return;
     }
 
     if (!m_cache.isInitialized()) {
+        std::cout << "Cache not initialized" << std::endl;
         response.send(Http::Code::Internal_Server_Error, "Cache not initialized");
         return;
     }
@@ -157,7 +159,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             std::tm* nowTm = std::localtime(&now);
             std::stringstream fileName;
             // Generate a new name 
-            fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S") << std::hash<std::string>()(decoded.str());
+            fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S_") << std::hash<std::string>()(decoded.str());
             std::experimental::filesystem::path filePath(fileName.str());
             std::experimental::filesystem::path tmpPath = filePath;
             // Try a new file name until we find on that is not used.
@@ -170,6 +172,9 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             filePath = tmpPath;
 
             m_cache.setFileContent(filePath, decoded);
+            filePath = m_cache.getFile(filePath).path(); // resolve the filename into a real path
+
+            std::cout << "decoded : " << decoded.str().substr(0, 30) << std::endl;
 
             // Fetch MP3 header
             Mp3Header* header;

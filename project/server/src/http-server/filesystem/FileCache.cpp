@@ -25,7 +25,7 @@ FileCache::FileCache()
     :m_path(""), m_isInitialized(false)
 {
     try {
-        m_path = fs::temp_directory_path();
+        m_path = fs::temp_directory_path() / "elevation" / "FileCache";
         ensureCacheDirCreated_();
     }
     catch (fs::filesystem_error& e) {
@@ -122,6 +122,7 @@ void FileCache::ensureCacheDirCreated_() noexcept {
                 fs::remove_all(entry.path());
             }
             m_isInitialized = true;
+            std::cout << "File Cache path : " << m_path.string() << std::endl;
         }
     }
     catch (fs::filesystem_error& e) {
