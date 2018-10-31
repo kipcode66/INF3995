@@ -125,34 +125,42 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
-    if (request.headers().getRaw("X-Auth-Token").value().empty()) {
-        response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" missing");
-    }
-    else {
-        uint32_t token = 0;
-        try {
-            token = std::stoi(request.headers().getRaw("X-Auth-Token").value());
-
-            Database& db = *Database::instance();
-
-            std::string encoded = request.body();
-            std::string decoded;
-            Base64::Decode(encoded, &decoded);
-            StringID3v2Tag tag(decoded);
-            if (!tag.isEmpty()) {
-                std::cout << "It's tag id3v2 !!!" << std::endl;
-                std::cout << "Title: " << tag.title() << std::endl;
-                response.send(Http::Code::Ok, "Ok");
-            }
-            else {
-                response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
-            }
-        }
-        catch (std::logic_error &e) {
-            response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" must be a 32 bits integer");
-        }
-    }
     std::cout << "postFile function called" << std::endl;
+
+    auto t = request.headers().getRaw("X-Auth-Token");
+    if (t.value().empty()) {
+        response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" missing");
+        return;
+    }
+
+    uint32_t token = 0;
+    try {
+        token = std::stoi(t.value());
+
+        Database& db = *Database::instance();
+
+        std::string encoded = request.body();
+        std::string decoded;
+        Base64::Decode(encoded, &decoded);
+        StringID3v2Tag tag(decoded);
+        if (!tag.isEmpty()) {
+            std::cout << "It's tag id3v2 !!!" << std::endl;
+            std::cout << "Title: " << tag.title() << std::endl;
+            response.send(Http::Code::Ok, "Ok");
+            return;
+        }
+        else {
+            std::cout << "It's NOT tag id3v2 ..." << std::endl;
+            response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
+            return;
+        }
+    }
+    catch (std::logic_error &e) {
+        std::cout << "Token not valid; got \"" << t.value() << "\"" << std::endl;
+        response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" must be a 32 bits integer");
+        return;
+    }
+    response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
