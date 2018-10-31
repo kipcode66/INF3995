@@ -83,47 +83,50 @@ void buildUserFromQuery_(struct User* __restrict__ newUser,
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
     puts("getIdentification function called");
-    auto token = request.headers().getRaw("X-Auth-Token");
-    uint32_t t = std::stoi(token.value());
+    std::async([&](){
+        auto token = request.headers().getRaw("X-Auth-Token");
+        uint32_t t = std::stoi(token.value());
 
-    auto query = request.query();
-    if (!query.has("mac")) {
-        response.send(Http::Code::Bad_Request, "Malformed request");
-    } else {
-        std::string mac(query.get("mac").get());
-
-        struct User newUser = { 0 };
-        struct User oldUser = { 0 };
-
-        Database* db = Database::instance();
-        db->getUserByMac(mac.c_str(), &oldUser);
-        if (*oldUser.mac == 0) {
-            buildUserFromQuery_(&newUser, &query);
-            db->createUser(&newUser);
-            response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au café-bistro Élévation!\"}");
+        auto query = request.query();
+        if (!query.has("mac")) {
+            response.send(Http::Code::Bad_Request, "Malformed request");
         } else {
-            buildUserFromQuery_(&newUser, &query);
-            newUser.id = oldUser.id;
-            if (db->createUser(&newUser)) {
-                response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
-            } else {
-                response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au cafe-bistro Elevation!\"}");
-            }
-        }
-        response.send(Http::Code::Ok, "getIdentification called");
-    }
+            std::string mac(query.get("mac").get());
 
+            struct User newUser = { 0 };
+            struct User oldUser = { 0 };
+
+            Database* db = Database::instance();
+            db->getUserByMac(mac.c_str(), &oldUser);
+            if (*oldUser.mac == 0) {
+                buildUserFromQuery_(&newUser, &query);
+                db->createUser(&newUser);
+                response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au café-bistro Élévation!\"}");
+            } else {
+                buildUserFromQuery_(&newUser, &query);
+                newUser.id = oldUser.id;
+                if (db->createUser(&newUser)) {
+                    response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
+                } else {
+                    response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au cafe-bistro Elevation!\"}");
+                }
+            }
+            response.send(Http::Code::Ok, "getIdentification called");
+        }
+    });
     return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
-    std::string param = request.param(":id").as<std::string>();
-    response.send(Http::Code::Ok, "{\n\"chansons\":[\n"
-        "{\n\"titre\":\"Never Gonna Give You Up\",\n\"artiste\":\"Foo\",\n\"duree\":\"4:20\",\n\"proposeePar\":\"Chuck Norris\",\n\"proprietaire\":false,\n\"no\":42},\n"
-        "{\n\"titre\":\"Hey Jude\",\n\"artiste\":\"Beatles\",\n\"duree\":\"7:05\",\n\"proposeePar\":\"Claude\",\n\"proprietaire\":true,\n\"no\":25}\n"
-    "]\n}\n");
-    std::cout << "getFileList function called, param is " << param << std::endl;
+    std::async([&](){
+        std::string param = request.param(":id").as<std::string>();
+        response.send(Http::Code::Ok, "{\n\"chansons\":[\n"
+            "{\n\"titre\":\"Never Gonna Give You Up\",\n\"artiste\":\"Foo\",\n\"duree\":\"4:20\",\n\"proposeePar\":\"Chuck Norris\",\n\"proprietaire\":false,\n\"no\":42},\n"
+            "{\n\"titre\":\"Hey Jude\",\n\"artiste\":\"Beatles\",\n\"duree\":\"7:05\",\n\"proposeePar\":\"Claude\",\n\"proprietaire\":true,\n\"no\":25}\n"
+        "]\n}\n");
+        std::cout << "getFileList function called, param is " << param << std::endl;
+    });
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
