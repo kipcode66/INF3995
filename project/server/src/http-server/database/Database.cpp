@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdexcept>
+#include <iostream>
 
 using namespace elevation;
 
