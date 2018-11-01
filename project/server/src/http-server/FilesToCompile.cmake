@@ -12,6 +12,8 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTP_SERVER_CPP_SOURCES
     http/RestApi.cpp
+    mp3/list/PendingSongs.cpp
+    mp3/list/SongList.cpp
 )
 
 ###############################################################################
@@ -22,6 +24,8 @@ set(HTTP_SERVER_CPP_SOURCES
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTP_SERVER_HEADER_SOURCES
     http/RestApi.hpp
+    mp3/list/PendingSongs.hpp
+    mp3/list/SongList.hpp
 )
 
 makeAbsolute(HTTP_SERVER_CPP_SOURCES)
