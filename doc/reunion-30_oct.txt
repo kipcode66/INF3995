@@ -1,0 +1,34 @@
+Retour sur le travail de chacun:
+  - Anthony:
+    - A terminé ses tâche du livrable 1
+    - Le MP3 Player fonciton et est testé
+    - A travaillé sur le docker (bien que pas nécessaire maintenant) [! ne fonctionne pas]
+    - A commencé une tâche à Adam, le Logger.
+    - A ajouté des options dans le script pour créer le docker.
+
+  - Ottman:
+    - A avancé sur la connexion des utilisateurs. (À tester)
+    - "Migrer" le code pour qu'il fonctionne avec les changement d'Adam.
+    - Compte travailler sur la connexion de l'Administrateur. (et déconnexion)
+
+  - Soukaina:
+    - Était malade et a donc été ralentit dans l'avancement.
+    - ! A besoin de tester la solution implémenté.
+    - Doit travailler sur le UI.
+    - Compte faire des tests fonctionnels.
+    - ! Besoin d'un bouton pour retourner?
+
+  - Emir:
+    - A dû mettre en place une VM pour pouvoir exécuter les tests.
+    - A commencé la tache de récupération et stockage des chansons.
+    - Compte finir sa tâche au maximum pour le début de la semaine prochaine.
+
+  - Adam:
+    - L'api communique avec le SSLdaemon (donc le reste est juste d'écrire les Endpoints manquants)
+    - La communication par JSON est faite.
+
+Problèmes à discuter:
+  - Docker: Demander aux chargés et à Jérôme. (c'est supposé marcher, ça à fonctionner pour d'autres personnes)
+  - On testera la solution de soukaina plutard avec Emir.
+  - Le bouton de retour n'est pas nécessaire puisque toutes les pages sont déjà disponibles.
+

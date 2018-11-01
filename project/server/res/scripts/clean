@@ -1,0 +1,76 @@
+#!/usr/env/bin bash
+
+THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+SERVER_DIR="${SCRIPTS_DIR}/../.."
+source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
+
+# EXPECTED PARAMS :
+# 1 : Name of the dependency.
+# 2 : The build directory.
+cleanProject() {
+    checkParamNum 2 $# || exit 1
+    local DEPENDENCY_NAME="${1}"
+    local DEPENDENCY_DIR="${2}"
+
+    message $'\nCleaning '"${DEPENDENCY_NAME}"'...'
+    rm -rf "${DEPENDENCY_DIR}"
+    message $'Done.\n'
+}
+
+cleanPistache() {
+    local NAME="pistache"
+    local BINARY_DIR="${DEPS_DIR}/pistache/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
+}
+
+cleanOpenSsl() {
+    local NAME="openssl"
+    local MAKEFILE_DIR="${DEPS_DIR}/openssl/build"
+    cleanProject "${NAME}" "${MAKEFILE_DIR}"
+}
+
+cleanTagLib() {
+    local NAME="taglib"
+    local BINARY_DIR="${DEPS_DIR}/taglib/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
+}
+
+cleanZLib() {
+    local NAME="zlib"
+    local BINARY_DIR="${DEPS_DIR}/zlib/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
+}
+
+cleanSqlite3() {
+    local NAME="sqlite3"
+    local MAKEFILE_DIR="${DEPS_DIR}/sqlite3/build"
+    cleanProject "${NAME}" "${MAKEFILE_DIR}"
+}
+
+cleanLibmad() {
+    local NAME="libmad"
+    local MAKEFILE_DIR="${DEPS_DIR}/libmad/build"
+    cleanProject "${NAME}" "${MAKEFILE_DIR}"
+}
+
+cleanServer() {
+    local NAME="the elevation server"
+    local BINARY_DIR="${SERVER_DIR}/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
+}
+
+cleanDependencies() {
+    cleanPistache
+    cleanOpenSsl
+    cleanTagLib
+    cleanZLib
+    cleanSqlite3
+    cleanLibmad
+}
+
+clean() {
+    local DEPS_DIR="${SERVER_DIR}/lib"
+    cleanServer
+    cleanDependencies
+}

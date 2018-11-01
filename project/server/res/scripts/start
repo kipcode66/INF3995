@@ -88,7 +88,12 @@ startSslDaemon() {
     done
 }
 
-start() {
+# EXPECTED PARAMS :
+# 1 : Expression which, if true, makes us wait until any of the processes is finished.
+lanunchEverything() {
+    checkParamNum 1 $# || exit 1
+    local SHOULD_WAIT="${1}"
+
     if processesNotAlreadyStarted; then
         cd "${SERVER_DIR}"
         assignHttpServerPortRange
@@ -97,14 +102,32 @@ start() {
         startHttpsServer
         assignSslDaemonPortRange
         startSslDaemon
-        disown
-        message $'\nHTTP Server started on port '${HTTP_SERVER_PORT}',' \
-                $'\nHTTPS Server started on port '${HTTPS_SERVER_PORT}',' \
-                $'\nand SSL Daemon started on port '${SSL_DAEMON_PORT}$'.\n\n'
+        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"', and SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\n\n'
+        if ${SHOULD_WAIT}; then
+            message "${MESSAGE_STRING}"
+            trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
+                                       # SIGINT (CTRL+C) / SIGTERM signal.
+            wait -n
+            stop
+        else
+            disown
+            message "${MESSAGE_STRING}"
+        fi
     fi
 }
 
+start() {
+    checkParamNum 0 $# || exit 1
+    lanunchEverything false
+}
+
+run() {
+    checkParamNum 0 $# || exit 1
+    lanunchEverything true
+}
+
 stop() {
+    checkParamNum 0 $# || exit 1
     if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
         kill -TERM $(pgrep -x "${HTTP_SERVER_NAME}")
         sleep 0.5
@@ -115,4 +138,9 @@ stop() {
         sleep 0.5
         kill -KILL $(pgrep -x "${SSL_DAEMON_NAME}") 2>/dev/null
     fi
+}
+
+stopBySignal() {
+    message $'\nDoing last-minute cleanup of the elevation server...'
+    stop && message $'Done.'
 }

@@ -1,5 +1,7 @@
 package ca.polymtl.inf3990_01.client.utils
 
+import android.content.Context
+import ca.polymtl.inf3990_01.client.model.LocalSong
 import java.nio.ByteBuffer
 import java.net.NetworkInterface
 import java.util.*
@@ -35,6 +37,7 @@ object NetUtils {
         // for now eat exceptions
         return ""
     }
+
 }
 
 fun Byte.toPositiveInt() = toInt() and 0xFF

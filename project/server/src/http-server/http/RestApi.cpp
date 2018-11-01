@@ -1,4 +1,5 @@
 #include <pistache/serializer/rapidjson.h>
+#include <math.h>
 
 #include "RestApi.hpp"
 #include "database/Database.hpp"
@@ -13,7 +14,10 @@ RestApi::RestApi(Address addr)
 { }
 
 RestApi::~RestApi() {
-    m_httpEndpoint->shutdown();
+    try {
+        m_httpEndpoint->shutdown();
+    }
+    catch (std::runtime_error& e) { } // Pistache seems to have an issue where calling shutdown throws an exception.
 }
 
 void RestApi::init() {
@@ -70,11 +74,13 @@ void RestApi::createDescription_() {
 }
 
 
-std::string generateBody(std::string id, std::string message) {
-    char jsonString[] = "{\"id\": \"%s\", \"message\": \"connection successful\"}";
-    size_t stringSize = sizeof(jsonString) + sizeof(id);
+std::string generateBody(uint32_t id, std::string message) {
+    char jsonString[] = "{\"id\": %d, \"message\": \"connection successful\"}";
+    uint16_t idMaxNumberOfChar = sizeof(floor(log10(UINT32_MAX)) + 1);
+    size_t stringSize = sizeof(jsonString) + idMaxNumberOfChar;
     char* buffer = (char *)calloc(1, stringSize);
-    snprintf(buffer, stringSize, jsonString, id.c_str());
+
+    snprintf(buffer, stringSize, jsonString, id);
     std::string body(buffer);
     free(buffer);
     return body;
@@ -112,6 +118,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         //&requestUser.id = &existingUser.id; 
         strcpy(requestUser.token, existingUser.token);
         if (db->createUser(&requestUser)) {
+            std::cerr << "problem writing to database" << std::endl;
             response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
         } else {
             db->updateTimestamp(&requestUser);

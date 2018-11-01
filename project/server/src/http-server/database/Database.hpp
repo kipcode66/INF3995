@@ -1,27 +1,12 @@
 #include <sqlite3/sqlite3.h>
 #include <stdint.h>
 #include <cstddef>
+#include "User.hpp"
 
 #ifndef DATABASE_DATABASE_HPP
 #define DATABASE_DATABASE_HPP
 
 namespace elevation {
-
-
-struct User_t {
-    static const size_t IP_LENGTH = 16;
-    static const size_t MAC_LENGTH = 18;
-    static const size_t NAME_LENGTH = 256;
-    static const size_t ID_LENGTH = 64;
-    static const size_t TOKEN_LENGTH = 32;
-
-    char id[ID_LENGTH];
-    char ip[IP_LENGTH];
-    char mac[MAC_LENGTH];
-    char name[NAME_LENGTH];
-    char token[TOKEN_LENGTH];
-};
-
 
 class Database {
 public:
