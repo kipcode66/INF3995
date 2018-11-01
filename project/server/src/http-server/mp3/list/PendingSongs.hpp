@@ -1,6 +1,8 @@
 #ifndef MP3_PLAYER_PENDINGSONGS_HPP
 #define MP3_PLAYER_PENDINGSONGS_HPP
 
+#include <experimental/filesystem>
+
 #include "mp3/player/Mp3Player.hpp"
 
 namespace elevation {
@@ -11,6 +13,8 @@ namespace elevation {
  * one when the first one is finished.
  */
 class PendingSongs {
+public:
+    static const std::experimental::filesystem::path SONGS_DIR; ///< @todo Mock value ; remove
 public:
     explicit PendingSongs();
     virtual ~PendingSongs();

@@ -2,6 +2,8 @@
 
 namespace elevation {
 
+const std::experimental::filesystem::path PendingSongs::SONGS_DIR = ".";
+
 PendingSongs::PendingSongs() { }
 
 PendingSongs::~PendingSongs() { }
