@@ -16,9 +16,6 @@ namespace elevation {
  */
 class PendingSongs {
 public:
-    static const std::experimental::filesystem::path SONGS_DIR; ///< @todo Mock value ; remove
-
-public:
     explicit PendingSongs(std::size_t maxSongs);
     PendingSongs(const PendingSongs&) = delete;
     PendingSongs(PendingSongs&&) = delete;
@@ -27,9 +24,12 @@ public:
     PendingSongs& operator= (const PendingSongs&) = delete;
     PendingSongs& operator= (PendingSongs&&) = delete;
 
-    void addSong    (const std::string& songName);
-    void removeSong (const std::string& songName);
+    void addSong    (const std::experimental::filesystem::path& songPath);
+    void removeSong (const std::experimental::filesystem::path& songPath);
     void reorderSong(std::size_t songAPosition, std::size_t songBPosition);
+    std::list<std::experimental::filesystem::path> getPendingSongs() const { ///< @note This method is not thread-safe.
+        return m_pendingSongs;
+    }
 
 protected:
     Mp3Player m_player;

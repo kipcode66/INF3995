@@ -2,27 +2,25 @@
 
 namespace elevation {
 
-const std::experimental::filesystem::path PendingSongs::SONGS_DIR = ".";
-
 PendingSongs::PendingSongs(std::size_t maxSongs) {
     m_maxSongs = maxSongs;
 }
 
 PendingSongs::~PendingSongs() { }
 
-void PendingSongs::addSong(const std::string& songName) {
+void PendingSongs::addSong(const std::experimental::filesystem::path& songPath) {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (m_pendingSongs.size() < m_maxSongs) {
-        m_pendingSongs.push_back(SONGS_DIR / songName);
+        m_pendingSongs.push_back(songPath);
     }
     else {
         throw std::out_of_range("Cannot add a new song : Already at full capacity.");
     }
 }
 
-void PendingSongs::removeSong(const std::string& songName) {
+void PendingSongs::removeSong(const std::experimental::filesystem::path& songPath) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_pendingSongs.remove(SONGS_DIR / songName);
+    m_pendingSongs.remove(songPath);
 }
 
 void PendingSongs::reorderSong(std::size_t songAPosition, std::size_t songBPosition) {
