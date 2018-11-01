@@ -24,9 +24,9 @@ public:
     PendingSongs& operator= (const PendingSongs&) = delete;
     PendingSongs& operator= (PendingSongs&&) = delete;
 
-    void addSong    (const std::experimental::filesystem::path& songPath);
-    void removeSong (const std::experimental::filesystem::path& songPath);
-    void reorderSong(std::size_t songAPosition, std::size_t songBPosition);
+    void addSong     (const std::experimental::filesystem::path& songPath);
+    void removeSong  (const std::experimental::filesystem::path& songPath);
+    void reorderSongs(std::size_t songAPosition, std::size_t songBPosition);
     std::list<std::experimental::filesystem::path> getPendingSongs() const { ///< @note This method is not thread-safe.
         return m_pendingSongs;
     }
