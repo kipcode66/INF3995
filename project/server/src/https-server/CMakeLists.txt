@@ -13,6 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall")
 include_directories(                       # Equivalent to the -I flag in g++
     "${DEPS_DIR}/include"
     "${COMMON_INCLUDE_DIR}"
+    "${COMMON_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 link_directories("${DEPS_DIR}/lib")        # Equivalent to the -L flag in g++

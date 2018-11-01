@@ -1,5 +1,5 @@
 #include "SecureRestApi.hpp"
-#include "http-server/database/Database.hpp"
+#include "database/Database.hpp"
 
 #include <common/logger/Logger.hpp>
 

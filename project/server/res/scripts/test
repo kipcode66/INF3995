@@ -11,13 +11,13 @@ testDaemon() {
 }
 
 testHttpServer() {
-    message $'\nTesting HTTP Server...\n'
-    cd "${HTTP_SERVER_TEST_DIR}"
+    message $'\nTesting Common library...\n'
+    cd "${COMMON_TEST_DIR}"
     ctest --output-on-failure
 }
 
 test() {
-    HTTP_SERVER_TEST_DIR="${SERVER_DIR}/build/${HTTP_SERVER_NAME}/test"
+    COMMON_TEST_DIR="${SERVER_DIR}/build/${COMMON_LIB_NAME}/test"
     DAEMON_TEST_DIR="${SERVER_DIR}/build/${SSL_DAEMON_NAME}/test"
 
     testHttpServer
