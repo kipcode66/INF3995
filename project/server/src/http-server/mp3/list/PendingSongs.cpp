@@ -45,4 +45,8 @@ void PendingSongs::reorderSongs(std::size_t songAPosition, std::size_t songBPosi
     }
 }
 
+void PendingSongs::run_() {
+
+}
+
 } // namespace elevation
