@@ -5,17 +5,19 @@ SCRIPTS_DIR="${THIS_SCRIPT_DIR}/res/scripts"
 source "${SCRIPTS_DIR}/build" # Add the functions in 'build'
 source "${SCRIPTS_DIR}/start" # Add the functions in 'start'
 source "${SCRIPTS_DIR}/test" # Add the functions in 'test'
+source "${SCRIPTS_DIR}/database" # Add the functions in 'test'
 
 usage() {
     echo "USAGE"
     echo "    $0 <OPTION>"
     echo
     echo "OPTIONS"
-    echo "    --help  | -h  Print this help menu and exit"
-    echo "    --start | -a  Start the Elevation server"
-    echo "    --stop  | -o  Stop the Elevation server"
-    echo "    --build | -b  Build the Elevation server"
-    echo "    --test  | -t  Run all automated tests"
+    echo "    --help      | -h  Print this help menu and exit"
+    echo "    --start     | -a  Start the Elevation server"
+    echo "    --stop      | -o  Stop the Elevation server"
+    echo "    --build     | -b  Build the Elevation server"
+    echo "    --test      | -t  Run all automated tests"
+    echo "    --database  | -d  Initialize database"
 }
 
 runScript() {
@@ -42,6 +44,10 @@ runScript() {
 
         -t | --test)
             test
+            ;;
+
+        -d | --database)
+            database
             ;;
 
         *)

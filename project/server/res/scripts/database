@@ -23,7 +23,7 @@ write_db() {
         fi
 }
 
-create_db() {
+database() {
         if [ -f $EXISTING_DB ]; then
                 echo -ne "$DB_NAME exist, [O]verwrite, [B]ackup and create, [C]ancel : "
                 read -n 1 choice
@@ -46,6 +46,4 @@ create_db() {
                 write_db
         fi
 }
-
-create_db
 
