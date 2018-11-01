@@ -26,6 +26,7 @@ set(HTTP_SERVER_HEADER_SOURCES
     http/RestApi.hpp
     mp3/list/PendingSongs.hpp
     mp3/list/SongList.hpp
+    mp3/list/exception/Terminate.hpp
 )
 
 makeAbsolute(HTTP_SERVER_CPP_SOURCES)
