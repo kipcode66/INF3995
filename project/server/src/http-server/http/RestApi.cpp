@@ -129,10 +129,9 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
-    // querying a param from the request object, by name
-    std::string param = request.param(":id").as<std::string>();
-    response.send(Http::Code::Ok, "getFileList, param is : " + param);
-    std::cout << "getFileList function called, param is " << param << std::endl;
+    uint32_t id = request.param(":id").as<uint32_t>();
+    std::cout << "getFileList function called, param is " << id << std::endl;
+    response.send(Http::Code::Ok, "{}");
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -141,6 +140,22 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "deleteFile");
-    std::cout << "deleteFile function called" << std::endl;
+    uint32_t id = request.param(":id").as<uint32_t>();
+    uint32_t no = request.param(":no").as<uint32_t>();
+
+    Pistache::Http::Code httpCode;
+    // search id/no in database
+    if (/* found */ 1 ) {
+        if (/* allowed to delete */ 1) {
+            httpCode = Http::Code::Ok;
+        } else {
+            // requester is not the owner of the song
+            httpCode = Http::Code::Forbidden;
+        }
+    } else {
+        // song doesn't exist
+        httpCode = Http::Code::Method_Not_Allowed;
+    }
+    response.send(httpCode);
 }
+
