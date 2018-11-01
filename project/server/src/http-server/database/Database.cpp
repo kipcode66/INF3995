@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <iostream>
 
+
 using namespace elevation;
 
 Database* Database::s_instance = nullptr;
