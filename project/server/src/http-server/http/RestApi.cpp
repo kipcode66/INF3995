@@ -1,4 +1,5 @@
 #include <pistache/serializer/rapidjson.h>
+#include <math.h>
 
 #include "RestApi.hpp"
 #include "database/Database.hpp"
@@ -69,11 +70,13 @@ void RestApi::createDescription_() {
 }
 
 
-std::string generateBody(std::string id, std::string message) {
-    char jsonString[] = "{\"id\": \"%s\", \"message\": \"connection successful\"}";
-    size_t stringSize = sizeof(jsonString) + sizeof(id);
+std::string generateBody(uint32_t id, std::string message) {
+    char jsonString[] = "{\"id\": %d, \"message\": \"connection successful\"}";
+    uint16_t idMaxNumberOfChar = sizeof(floor(log10(UINT32_MAX)) + 1);
+    size_t stringSize = sizeof(jsonString) + idMaxNumberOfChar;
     char* buffer = (char *)calloc(1, stringSize);
-    snprintf(buffer, stringSize, jsonString, id.c_str());
+
+    snprintf(buffer, stringSize, jsonString, id);
     std::string body(buffer);
     free(buffer);
     return body;
@@ -105,15 +108,15 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         db->createUser(&requestUser);
 
         // MOCK id TODO generate and insert in db
-        char id[]= "asKJd8hq*l#Dcdac_&Hgfasdf896gq34";
+        uint32_t id = 32093422;
         std::string body = generateBody(id, "connection successful");
         response.send(Http::Code::Ok, body);
     } else {
-        /* requestUser.id = existingUser.id; */
         if (db->createUser(&requestUser)) {
+            std::cerr << "problem writing to database" << std::endl;
             response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
         } else {
-            char id[]= "asKJd8hq*l#Dcdac_&Hgfasdf896gq34";
+            uint32_t id = 32093422;
             std::string body = generateBody(id, "connection successful");
             response.send(Http::Code::Ok, body);
         }

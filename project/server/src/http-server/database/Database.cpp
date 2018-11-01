@@ -35,7 +35,7 @@ void Database::getUserByMac(const char* mac,
 
     errcode = sqlite3_step(statement);
     if (errcode == SQLITE_ROW) {
-        strcpy(user->id, (char *)sqlite3_column_text(statement, 0));
+        user->id = sqlite3_column_int(statement, 0);
         strcpy(user->ip, (char *)sqlite3_column_text(statement, 1));
         strcpy(user->name, (char *)sqlite3_column_text(statement, 3));
         strcpy(user->mac, (char *)sqlite3_column_text(statement, 2)); // do last as a coherence check
