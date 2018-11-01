@@ -23,6 +23,9 @@ public:
     void push(const std::experimental::filesystem::path& songPath);
     void remove(const std::experimental::filesystem::path& songPath);
     void swap(std::size_t songAPosition, std::size_t songBPosition);
+    std::experimental::filesystem::path popNext();
+
+    std::size_t size() const { return m_songs.size(); }
     std::list<std::experimental::filesystem::path> getSongList() const { ///< @note This method is not thread-safe.
         return m_songs;
     }
