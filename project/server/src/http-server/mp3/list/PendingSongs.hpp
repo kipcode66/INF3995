@@ -4,6 +4,9 @@
 #include <experimental/filesystem>
 #include <list>
 #include <mutex>
+#include <thread>
+#include <memory>
+#include <future>
 
 #include "mp3/player/Mp3Player.hpp"
 
@@ -18,11 +21,11 @@ class PendingSongs {
 public:
     explicit PendingSongs(std::size_t maxSongs);
     PendingSongs(const PendingSongs&) = delete;
-    PendingSongs(PendingSongs&&) = delete;
+    PendingSongs(PendingSongs&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
     virtual ~PendingSongs();
 
     PendingSongs& operator= (const PendingSongs&) = delete;
-    PendingSongs& operator= (PendingSongs&&) = delete;
+    PendingSongs& operator= (PendingSongs&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
 
     void addSong     (const std::experimental::filesystem::path& songPath);
     void removeSong  (const std::experimental::filesystem::path& songPath);
@@ -32,10 +35,21 @@ public:
     }
 
 protected:
-    Mp3Player m_player;
+    /**
+     * @brief Thread method which controls an #Mp3Player.
+     * Asynchronously waits until a song is added to start playing,
+     * and stops the song when the currently playing song is removed.
+     */
+    void run_();
+
+protected:
     std::list<std::experimental::filesystem::path> m_pendingSongs;
     std::size_t m_maxSongs;
     std::mutex m_mutex;
+    std::thread m_playerThread;
+    std::shared_future<void> m_start;
+    std::shared_future<void> m_stop;
+    std::atomic<bool> m_terminateRequested;
 };
 
 } // namespace elevation
