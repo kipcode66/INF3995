@@ -19,9 +19,9 @@ public:
     explicit PendingSongs();
     virtual ~PendingSongs();
 
-    void addSong    (/* TODO */);
-    void removeSong (/* TODO */);
-    void reorderSong(/* TODO */);
+    void addSong    (const std::string& songName);
+    void removeSong (const std::string& songName);
+    void reorderSong(const std::string& songName, std::size_t newPosition);
 
 protected:
     Mp3Player m_player;
