@@ -199,6 +199,16 @@ buildLibmad() {
     buildWithConfigure "libmad" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
 }
 
+buildRapidjson() {
+    local SOURCE_DIR="${DEPS_DIR}/rapidjson/rapidjson"
+    local BINARY_DIR="${SOURCE_DIR}/build"
+    local INSTALL_DIR="${DEPS_INSTALL_DIR}"
+    local BUILT_FLAG="${DEPS_INSTALL_DIR}/include/rapidjson/rapidjson.h"
+    local BUILD_TYPE=Release
+
+    buildWithCMake "rapidjson" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${BUILD_TYPE}"
+}
+
 buildDependencies() {
     local DEPS_DIR="${SERVER_DIR}/lib"
     local DEPS_INSTALL_DIR="${SERVER_DIR}/build/dependencies"
@@ -211,6 +221,7 @@ buildDependencies() {
     buildTagLib
     buildSqlite3
     buildLibmad
+    buildRapidjson
 }
 
 buildServer() {

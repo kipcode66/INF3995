@@ -1,11 +1,14 @@
-#include "RestApi.hpp"
-#include "database/Database.hpp"
-#include "misc/Base64.hpp"
+#include <math.h>
 #include <thread>
 #include <future>
 #include <ctime>
 #include <iomanip>
+
+#include "RestApi.hpp"
+#include "database/Database.hpp"
+#include "misc/Base64.hpp"
 #include "mp3/header/Mp3Header.hpp"
+#include "rapidjson/document.h"
 
 using namespace elevation;
 
@@ -15,7 +18,10 @@ RestApi::RestApi(Address addr)
 { }
 
 RestApi::~RestApi() {
-    m_httpEndpoint->shutdown();
+    try {
+        m_httpEndpoint->shutdown();
+    }
+    catch (std::runtime_error& e) { } // Pistache seems to have an issue where calling shutdown throws an exception.
 }
 
 void RestApi::init() {
@@ -71,45 +77,59 @@ void RestApi::createDescription_() {
             .hide();
 }
 
-void buildUserFromQuery_(struct User* __restrict__ newUser,
-                         Pistache::Http::Uri::Query* __restrict__ query) {
-    strcpy(newUser->mac, query->get("mac").get().c_str());
-    strcpy(newUser->ip, query->get("ip").get().c_str());
-    strcpy(newUser->name, query->get("name").get().c_str());
+
+std::string generateBody(uint32_t id, std::string message) {
+    char jsonString[] = "{\"id\": %d, \"message\": \"connection successful\"}";
+    uint16_t idMaxNumberOfChar = sizeof(floor(log10(UINT32_MAX)) + 1);
+    size_t stringSize = sizeof(jsonString) + idMaxNumberOfChar;
+    char* buffer = (char *)calloc(1, stringSize);
+
+    snprintf(buffer, stringSize, jsonString, id);
+    std::string body(buffer);
+    free(buffer);
+    return body;
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
-    puts("getIdentification function called");
     std::async([&](){
-        auto token = request.headers().getRaw("X-Auth-Token");
-        uint32_t t = std::stoi(token.value());
+        auto body = request.body();
+        rapidjson::Document request_json;
+        request_json.Parse(body.c_str());
 
-        auto query = request.query();
-        if (!query.has("mac")) {
+        if (!request_json.HasMember("mac")
+                || !request_json.HasMember("ip")
+                || !request_json.HasMember("name")
+                || request_json["mac"] == '\n'
+                || request_json["ip"] == '\n') {
             response.send(Http::Code::Bad_Request, "Malformed request");
-        } else {
-            std::string mac(query.get("mac").get());
-
-            struct User newUser = { 0 };
-            struct User oldUser = { 0 };
-
-            Database* db = Database::instance();
-            db->getUserByMac(mac.c_str(), &oldUser);
-            if (*oldUser.mac == 0) {
-                buildUserFromQuery_(&newUser, &query);
-                db->createUser(&newUser);
-                response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au café-bistro Élévation!\"}");
-            } else {
-                buildUserFromQuery_(&newUser, &query);
-                newUser.id = oldUser.id;
-                if (db->createUser(&newUser)) {
-                    response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
-                } else {
-                    response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au cafe-bistro Elevation!\"}");
-                }
-            }
-            response.send(Http::Code::Ok, "getIdentification called");
+            return;
         }
+        User_t requestUser = { 0 };
+        strcpy(requestUser.mac, request_json["mac"].GetString());
+        strcpy(requestUser.ip, request_json["ip"].GetString());
+        strcpy(requestUser.name, request_json["name"].GetString());
+
+        User_t existingUser = { 0 };
+        Database* db = Database::instance();
+        db->getUserByMac(requestUser.mac, &existingUser);
+        if (*existingUser.mac == 0) {
+            db->createUser(&requestUser);
+
+            // MOCK id TODO generate and insert in db
+            uint32_t id = 32093422;
+            std::string body = generateBody(id, "connection successful");
+            response.send(Http::Code::Ok, body);
+        } else {
+            if (db->createUser(&requestUser)) {
+                std::cerr << "problem writing to database" << std::endl;
+                response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
+            } else {
+                uint32_t id = 32093422;
+                std::string body = generateBody(id, "connection successful");
+                response.send(Http::Code::Ok, body);
+            }
+        }
+        response.send(Http::Code::Ok, "getIdentification called");
     });
     return;
 }
