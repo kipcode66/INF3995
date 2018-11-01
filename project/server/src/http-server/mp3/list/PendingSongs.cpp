@@ -8,15 +8,15 @@ PendingSongs::PendingSongs() { }
 
 PendingSongs::~PendingSongs() { }
 
-void PendingSongs::addSong(/* TODO */) {
+void PendingSongs::addSong(const std::string& songName) {
 
 }
 
-void PendingSongs::removeSong(/* TODO */) {
+void PendingSongs::removeSong(const std::string& songName) {
 
 }
 
-void PendingSongs::reorderSong(/* TODO */) {
+void PendingSongs::reorderSong(const std::string& songName, std::size_t newPosition) {
 
 }
 
