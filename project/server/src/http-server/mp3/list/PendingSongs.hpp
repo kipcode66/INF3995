@@ -36,19 +36,24 @@ public:
 
 protected:
     /**
-     * @brief Thread method which controls an #Mp3Player.
+     * @brief Thread method which starts the songs on the #Mp3Player.
      * Asynchronously waits until a song is added to start playing,
-     * and stops the song when the currently playing song is removed.
+     * and waits until the song finishes.
      */
-    void run_();
+    void songStarter_();
+    void stopSong_();
 
 protected:
+    static std::future<void> defaultFuture_();
+
+protected:
+    Mp3Player m_player;
     std::list<std::experimental::filesystem::path> m_pendingSongs;
     std::size_t m_maxSongs;
-    std::mutex m_mutex;
+    std::mutex m_songListMutex;
     std::thread m_playerThread;
-    std::shared_future<void> m_start;
-    std::shared_future<void> m_stop;
+    std::future<void> m_start;
+    std::future<void> m_stop;
     std::atomic<bool> m_terminateRequested;
 };
 

@@ -1,6 +1,7 @@
 #include "PendingSongs.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 namespace elevation {
 
@@ -45,7 +46,40 @@ void PendingSongs::reorderSongs(std::size_t songAPosition, std::size_t songBPosi
     }
 }
 
-void PendingSongs::run_() {
+void PendingSongs::songStarter_() {
+    while (!m_terminateRequested.load()) {
+        try {
+            m_songListMutex.lock();
+            // Using while() prevents the race condition where the only song is deleted
+            // before we could lock the mutex again, but after the wakeup signal has been
+            // sent.
+            while (m_pendingSongs.size() == 0 && !m_terminateRequested.load()) {
+                m_songListMutex.unlock();
+                m_start.get();
+                m_start = defaultFuture_();
+                m_songListMutex.lock();
+            }
+
+            if (!m_terminateRequested.load()) {
+                std::experimental::filesystem::path nextSongPath = m_pendingSongs.front();
+                m_songListMutex.unlock();
+                m_player.startPlaying(nextSongPath.string());
+                m_player.waitUntilSongFinished();
+            }
+            else {
+                m_songListMutex.unlock();
+            }
+        }
+        catch (std::exception& e) {
+            std::cerr << "SongList got C++ exeption : " << e.what() << std::endl;
+        }
+    }
+}
+
+void PendingSongs::stopSong_() {
+    m_player.stopPlaying();
+    m_player.waitUntilSongFinished();
+}
 
 }
 
