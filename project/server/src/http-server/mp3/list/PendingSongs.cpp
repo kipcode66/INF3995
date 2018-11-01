@@ -31,7 +31,12 @@ void PendingSongs::reorderSong(std::size_t songAPosition, std::size_t songBPosit
     auto songB = m_pendingSongs.begin();
     std::advance(songA, songAPosition);
     std::advance(songB, songBPosition);
-    std::swap(songA, songB);
+    if (songA != m_pendingSongs.end() && songB != m_pendingSongs.end()) {
+        std::swap(songA, songB);
+    }
+    else {
+        throw std::out_of_range("Cannot swap songs : out of bounds.");
+    }
 }
 
 } // namespace elevation
