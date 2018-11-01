@@ -45,6 +45,10 @@ void SongList::swap(std::size_t songAPosition, std::size_t songBPosition) {
     }
 }
 
+std::size_t SongList::indexOf(const std::experimental::filesystem::path& songPath) const {
+    return std::distance(songPath.begin(), std::find(songPath.begin(), songPath.end(), songPath));
+}
+
 std::experimental::filesystem::path SongList::popNext() {
     std::lock_guard<std::mutex> lock(m_songListMutex);
     std::experimental::filesystem::path nextSong;

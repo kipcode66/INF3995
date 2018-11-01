@@ -23,6 +23,12 @@ public:
     void push(const std::experimental::filesystem::path& songPath);
     void remove(const std::experimental::filesystem::path& songPath);
     void swap(std::size_t songAPosition, std::size_t songBPosition);
+
+    /**
+     * @brief Returns the index of a song, or the list's current size
+     * if not found.
+     */
+    std::size_t indexOf(const std::experimental::filesystem::path& songPath) const;
     std::experimental::filesystem::path popNext();
 
     std::size_t size() const { return m_songs.size(); }
