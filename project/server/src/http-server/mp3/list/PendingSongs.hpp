@@ -3,6 +3,7 @@
 
 #include <experimental/filesystem>
 #include <list>
+#include <mutex>
 
 #include "mp3/player/Mp3Player.hpp"
 
@@ -29,6 +30,7 @@ protected:
     Mp3Player m_player;
     std::list<std::experimental::filesystem::path> m_pendingSongs;
     std::size_t m_maxSongs;
+    std::mutex m_mutex;
 };
 
 } // namespace elevation
