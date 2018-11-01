@@ -2,22 +2,32 @@
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}/res/scripts"
-source "${SCRIPTS_DIR}/build" # Add the functions in 'build'
-source "${SCRIPTS_DIR}/start" # Add the functions in 'start'
-source "${SCRIPTS_DIR}/test" # Add the functions in 'test'
+source "${SCRIPTS_DIR}/build"  # Add the functions in 'build'
+source "${SCRIPTS_DIR}/start"  # Add the functions in 'start'
+source "${SCRIPTS_DIR}/clean"  # Add the functions in 'clean'
+source "${SCRIPTS_DIR}/test"   # Add the functions in 'test'
+source "${SCRIPTS_DIR}/docker" # Add the functions in 'docker'
 source "${SCRIPTS_DIR}/database" # Add the functions in 'test'
 
 usage() {
     echo "USAGE"
-    echo "    $0 <OPTION>"
+    echo "    $0 <OPTION | DOCKER OPTION>"
     echo
     echo "OPTIONS"
-    echo "    --help      | -h  Print this help menu and exit"
-    echo "    --start     | -a  Start the Elevation server"
-    echo "    --stop      | -o  Stop the Elevation server"
-    echo "    --build     | -b  Build the Elevation server"
-    echo "    --test      | -t  Run all automated tests"
-    echo "    --database  | -d  Initialize database"
+
+    echo "     -h | --help     Print this help menu and exit"
+    echo "     -a | --start    Start the Elevation server"
+    echo "     -r | --run      Start the Elevation server and wait until it terminates"
+    echo "     -o | --stop     Stop the Elevation server"
+    echo "     -b | --build    Build the Elevation server"
+    echo "     -c | --clean    Clean the Elevation server and its dependencies"
+    echo "     -t | --test     Run all automated tests"
+    echo "     -d | --database Initialize database"
+    echo
+    echo "DOCKER OPTIONS"
+    echo "     -i | --create-image     Build docker image"
+    echo "     -m | --remove-image     Remove docker image"
+    echo "     -n | --run-container    Run docker container"
 }
 
 runScript() {
@@ -34,6 +44,10 @@ runScript() {
             start
             ;;
 
+        -r |--run)
+            run
+            ;;
+
         -o | --stop)
             stop
             ;;
@@ -42,12 +56,28 @@ runScript() {
             build
             ;;
 
+        -c | --clean)
+            clean
+            ;;
+
         -t | --test)
             test
             ;;
 
         -d | --database)
             database
+            ;;
+
+        -i | --build-image)
+            createImage
+            ;;
+
+        -m | --remove-image)
+            removeImage
+            ;;
+
+        -n | --run-container)
+            runContainer
             ;;
 
         *)

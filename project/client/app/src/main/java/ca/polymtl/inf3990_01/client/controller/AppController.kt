@@ -9,6 +9,7 @@ import ca.polymtl.inf3990_01.client.presentation.Presenter
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.cancelAndJoin
+import kotlinx.coroutines.experimental.launch
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -18,6 +19,7 @@ class AppController(
         private val restService: RestRequestService,
         private val presenter: Presenter,
         private val preferences: SharedPreferences,
+        private val localSongController: LocalSongController,
         private val appCtx: Context
 ) {
     companion object {
@@ -42,6 +44,8 @@ class AppController(
         eventMgr.addEventListener(this::onAppStart)
         eventMgr.addEventListener(this::onAppStop)
         eventMgr.addEventListener(this::reloadQueue)
+        eventMgr.addEventListener(this::onSendSong)
+        eventMgr.addEventListener(this::onReloadLocalSong)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -77,6 +81,7 @@ class AppController(
             reloadQueueJob = async {
                 jobTmp?.join()
                 val list = restService.getSongList()
+                // now, we update the model
                 presenter.setQueue(list)
             }
         }
@@ -86,5 +91,15 @@ class AppController(
         return executor.scheduleAtFixedRate({
             eventMgr.dispatchEvent(RequestQueueReloadEvent())
         }, 0, prefs.getString(QUEUE_PERIOD_KEY, "$QUEUE_PERIOD_DEFAULT")?.toLong() ?: QUEUE_PERIOD_DEFAULT, TimeUnit.MILLISECONDS)
+    }
+
+    private fun onSendSong(event: SendSongEvent) {
+        launch {
+            restService.sendSong(event.song)
+        }
+    }
+
+    private fun onReloadLocalSong(event: LocalSongLoadEvent) {
+        localSongController.reloadLocalSong()
     }
 }

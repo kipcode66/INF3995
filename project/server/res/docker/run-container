@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd elevation-git/project/server
+./elevation --run
