@@ -5,14 +5,23 @@
 
 namespace elevation {
 
-PendingSongs::PendingSongs(std::size_t maxSongs) {
+PendingSongs::PendingSongs(std::size_t maxSongs)
+    : m_start(defaultFuture_())
+    , m_terminateRequested(false)
+{
     m_maxSongs = maxSongs;
 }
 
-PendingSongs::~PendingSongs() { }
+PendingSongs::~PendingSongs() {
+    m_terminateRequested.store(true);
+    try {
+        m_playerThread.join();
+    }
+    catch (std::system_error& e) { }
+}
 
 void PendingSongs::addSong(const std::experimental::filesystem::path& songPath) {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_songListMutex);
     if (m_pendingSongs.size() < m_maxSongs) {
         m_pendingSongs.push_back(songPath);
     }
@@ -22,7 +31,7 @@ void PendingSongs::addSong(const std::experimental::filesystem::path& songPath) 
 }
 
 void PendingSongs::removeSong(const std::experimental::filesystem::path& songPath) {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_songListMutex);
     auto it = std::find(m_pendingSongs.begin(), m_pendingSongs.end(), songPath);
     if (it != m_pendingSongs.end()) {
         m_pendingSongs.remove(songPath);
@@ -33,7 +42,7 @@ void PendingSongs::removeSong(const std::experimental::filesystem::path& songPat
 }
 
 void PendingSongs::reorderSongs(std::size_t songAPosition, std::size_t songBPosition) {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_songListMutex);
     if (songAPosition < m_pendingSongs.size() && songBPosition < m_pendingSongs.size()) {
         auto songA = m_pendingSongs.begin();
         auto songB = m_pendingSongs.begin();
@@ -81,6 +90,8 @@ void PendingSongs::stopSong_() {
     m_player.waitUntilSongFinished();
 }
 
+std::future<void> PendingSongs::defaultFuture_() {
+    return std::async([](){});
 }
 
 } // namespace elevation
