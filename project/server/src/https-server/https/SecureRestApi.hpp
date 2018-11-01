@@ -8,6 +8,8 @@
 
 #include "http-server/http/RestApi.hpp"
 
+#include <common/logger/Logger.hpp>
+
 using namespace Pistache;
 namespace elevation {
 
@@ -18,6 +20,9 @@ public:
 private:
     void createSecureDescription_();
     void getSuperviseurFile_(const Rest::Request&, Http::ResponseWriter);
+
+private:
+    Logger& m_logger;
 };
 
 } // namespace elevation

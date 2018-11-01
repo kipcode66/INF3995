@@ -5,6 +5,7 @@
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
 #include <pistache/description.h>
+#include <common/logger/Logger.hpp>
 
 #include "filesystem/FileCache.hpp"
 
@@ -29,6 +30,7 @@ protected:
     Rest::Description m_desc;
     Rest::Router m_router;
     FileCache m_cache;
+    Logger& m_logger;
 };
 
 } // namespace elevation
