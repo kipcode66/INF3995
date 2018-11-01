@@ -30,7 +30,7 @@ void PendingSongs::reorderSong(std::size_t songAPosition, std::size_t songBPosit
     std::advance(songA, songAPosition);
     std::advance(songB, songBPosition);
     if (songA != m_pendingSongs.end() && songB != m_pendingSongs.end()) {
-        std::swap(songA, songB);
+        std::iter_swap(songA, songB);
     }
     else {
         throw std::out_of_range("Cannot swap songs : out of bounds.");
