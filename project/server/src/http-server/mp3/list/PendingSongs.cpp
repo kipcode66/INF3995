@@ -23,7 +23,7 @@ void PendingSongs::removeSong(const std::experimental::filesystem::path& songPat
     m_pendingSongs.remove(songPath);
 }
 
-void PendingSongs::reorderSong(std::size_t songAPosition, std::size_t songBPosition) {
+void PendingSongs::reorderSongs(std::size_t songAPosition, std::size_t songBPosition) {
     std::lock_guard<std::mutex> lock(m_mutex);
     auto songA = m_pendingSongs.begin();
     auto songB = m_pendingSongs.begin();
