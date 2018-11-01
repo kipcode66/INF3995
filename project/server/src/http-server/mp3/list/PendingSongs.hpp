@@ -20,7 +20,12 @@ public:
 
 public:
     explicit PendingSongs(std::size_t maxSongs);
+    PendingSongs(const PendingSongs&) = delete;
+    PendingSongs(PendingSongs&&) = delete;
     virtual ~PendingSongs();
+
+    PendingSongs& operator= (const PendingSongs&) = delete;
+    PendingSongs& operator= (PendingSongs&&) = delete;
 
     void addSong    (const std::string& songName);
     void removeSong (const std::string& songName);
