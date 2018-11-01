@@ -9,6 +9,7 @@
 #include <future>
 
 #include "mp3/player/Mp3Player.hpp"
+#include "SongList.hpp"
 
 namespace elevation {
 
@@ -30,9 +31,6 @@ public:
     void addSong     (const std::experimental::filesystem::path& songPath);
     void removeSong  (const std::experimental::filesystem::path& songPath);
     void reorderSongs(std::size_t songAPosition, std::size_t songBPosition);
-    std::list<std::experimental::filesystem::path> getPendingSongs() const { ///< @note This method is not thread-safe.
-        return m_pendingSongs;
-    }
 
 protected:
     /**
@@ -42,18 +40,15 @@ protected:
      */
     void songStarter_();
     void stopSong_();
-
-protected:
-    static std::future<void> defaultFuture_();
+    void sendTerminate_();
 
 protected:
     Mp3Player m_player;
-    std::list<std::experimental::filesystem::path> m_pendingSongs;
-    std::size_t m_maxSongs;
+    SongList m_songList;
     std::mutex m_songListMutex;
     std::thread m_playerThread;
-    std::future<void> m_start;
-    std::future<void> m_stop;
+    std::promise<void> m_startPromise;
+    std::future<void> m_startFuture;
     std::atomic<bool> m_terminateRequested;
 };
 
