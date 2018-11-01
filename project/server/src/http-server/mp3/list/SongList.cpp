@@ -45,4 +45,17 @@ void SongList::swap(std::size_t songAPosition, std::size_t songBPosition) {
     }
 }
 
+std::experimental::filesystem::path SongList::popNext() {
+    std::lock_guard<std::mutex> lock(m_songListMutex);
+    std::experimental::filesystem::path nextSong;
+    if (m_songs.size() > 0) {
+        nextSong = m_songs.front();
+        m_songs.pop_front();
+    }
+    else {
+        throw std::out_of_range("Cannot get next song : Song list is empty.");
+    }
+    return nextSong;
+}
+
 } // namespace elevation
