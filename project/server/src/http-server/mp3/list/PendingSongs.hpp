@@ -2,6 +2,7 @@
 #define MP3_PLAYER_PENDINGSONGS_HPP
 
 #include <experimental/filesystem>
+#include <list>
 
 #include "mp3/player/Mp3Player.hpp"
 
@@ -15,16 +16,19 @@ namespace elevation {
 class PendingSongs {
 public:
     static const std::experimental::filesystem::path SONGS_DIR; ///< @todo Mock value ; remove
+
 public:
-    explicit PendingSongs();
+    explicit PendingSongs(std::size_t maxSongs);
     virtual ~PendingSongs();
 
     void addSong    (const std::string& songName);
     void removeSong (const std::string& songName);
-    void reorderSong(const std::string& songName, std::size_t newPosition);
+    void reorderSong(std::size_t songAPosition, std::size_t songBPosition);
 
 protected:
     Mp3Player m_player;
+    std::list<std::experimental::filesystem::path> m_pendingSongs;
+    std::size_t m_maxSongs;
 };
 
 } // namespace elevation
