@@ -3,18 +3,23 @@
 #include <algorithm>
 #include <iostream>
 
+#include "exception/Terminate.hpp"
+
 namespace elevation {
 
 PendingSongs::PendingSongs(std::size_t maxSongs)
-    : m_start(defaultFuture_())
+    : m_songList(maxSongs)
+    , m_startFuture(m_startPromise.get_future())
     , m_terminateRequested(false)
 {
-    m_maxSongs = maxSongs;
+    m_playerThread = std::thread(&PendingSongs::songStarter_, this);
 }
 
 PendingSongs::~PendingSongs() {
     m_terminateRequested.store(true);
     try {
+        sendTerminate_();
+        stopSong_();
         m_playerThread.join();
     }
     catch (std::system_error& e) { }
@@ -22,37 +27,21 @@ PendingSongs::~PendingSongs() {
 
 void PendingSongs::addSong(const std::experimental::filesystem::path& songPath) {
     std::lock_guard<std::mutex> lock(m_songListMutex);
-    if (m_pendingSongs.size() < m_maxSongs) {
-        m_pendingSongs.push_back(songPath);
-    }
-    else {
-        throw std::out_of_range("Cannot add a new song : Already at full capacity.");
+    m_songList.push(songPath);
+    if (m_songList.size() == 1) {
+        m_startPromise.set_value();
     }
 }
 
 void PendingSongs::removeSong(const std::experimental::filesystem::path& songPath) {
-    std::lock_guard<std::mutex> lock(m_songListMutex);
-    auto it = std::find(m_pendingSongs.begin(), m_pendingSongs.end(), songPath);
-    if (it != m_pendingSongs.end()) {
-        m_pendingSongs.remove(songPath);
+    if (m_songList.indexOf(songPath) == 0) {
+        m_startPromise.set_value();
     }
-    else {
-        throw std::out_of_range("Cannot remove song : No song under path " + songPath.string());
-    }
+    m_songList.remove(songPath);
 }
 
 void PendingSongs::reorderSongs(std::size_t songAPosition, std::size_t songBPosition) {
-    std::lock_guard<std::mutex> lock(m_songListMutex);
-    if (songAPosition < m_pendingSongs.size() && songBPosition < m_pendingSongs.size()) {
-        auto songA = m_pendingSongs.begin();
-        auto songB = m_pendingSongs.begin();
-        std::advance(songA, songAPosition);
-        std::advance(songB, songBPosition);
-        std::iter_swap(songA, songB);
-    }
-    else {
-        throw std::out_of_range("Cannot swap songs : out of bounds.");
-    }
+    m_songList.swap(songAPosition, songBPosition);
 }
 
 void PendingSongs::songStarter_() {
@@ -62,15 +51,16 @@ void PendingSongs::songStarter_() {
             // Using while() prevents the race condition where the only song is deleted
             // before we could lock the mutex again, but after the wakeup signal has been
             // sent.
-            while (m_pendingSongs.size() == 0 && !m_terminateRequested.load()) {
+            while (m_songList.size() == 0 && !m_terminateRequested.load()) {
                 m_songListMutex.unlock();
-                m_start.get();
-                m_start = defaultFuture_();
+                m_startFuture.get(); // May throw Terminate.
+                m_startPromise = std::promise<void>();
+                m_startFuture = m_startPromise.get_future();
                 m_songListMutex.lock();
             }
 
             if (!m_terminateRequested.load()) {
-                std::experimental::filesystem::path nextSongPath = m_pendingSongs.front();
+                std::experimental::filesystem::path nextSongPath = m_songList.popNext();
                 m_songListMutex.unlock();
                 m_player.startPlaying(nextSongPath.string());
                 m_player.waitUntilSongFinished();
@@ -79,6 +69,7 @@ void PendingSongs::songStarter_() {
                 m_songListMutex.unlock();
             }
         }
+        catch (Terminate& e) { }
         catch (std::exception& e) {
             std::cerr << "SongList got C++ exeption : " << e.what() << std::endl;
         }
@@ -90,8 +81,9 @@ void PendingSongs::stopSong_() {
     m_player.waitUntilSongFinished();
 }
 
-std::future<void> PendingSongs::defaultFuture_() {
-    return std::async([](){});
+void PendingSongs::sendTerminate_() {
+    m_terminateRequested.store(true);
+    m_startPromise.set_exception(std::make_exception_ptr(Terminate()));
 }
 
 } // namespace elevation
