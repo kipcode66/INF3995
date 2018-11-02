@@ -232,7 +232,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             Song_t song;
             strcpy(song.title, header->getTitle().c_str());
             strcpy(song.artist, header->getArtist().c_str());
-            song.user_id = 0; // TODO Get the user from the token and get the id from the user.
+            song.user_id = 32093422; // TODO Get the user from the token and get the id from the user.
             strcpy(song.path, filePath.string().c_str());
 
             Database* db = Database::instance();
