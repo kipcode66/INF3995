@@ -29,13 +29,13 @@ void PendingSongs::addSong(const std::experimental::filesystem::path& songPath) 
     std::lock_guard<std::mutex> lock(m_songListMutex);
     m_songList.push(songPath);
     if (m_songList.size() == 1) {
-        m_startPromise.set_value();
+        sendStartSignal();
     }
 }
 
 void PendingSongs::removeSong(const std::experimental::filesystem::path& songPath) {
     if (m_songList.indexOf(songPath) == 0) {
-        m_startPromise.set_value();
+        sendStartSignal();
     }
     m_songList.remove(songPath);
 }
@@ -54,8 +54,11 @@ void PendingSongs::songStarter_() {
             while (m_songList.size() == 0 && !m_terminateRequested.load()) {
                 m_songListMutex.unlock();
                 m_startFuture.get(); // May throw Terminate.
-                m_startPromise = std::promise<void>();
-                m_startFuture = m_startPromise.get_future();
+                {
+                    std::lock_guard<std::mutex> lock(m_startMutex);
+                    m_startPromise = std::promise<void>();
+                    m_startFuture = m_startPromise.get_future();
+                } // m_startMutex gets unlocked here
                 m_songListMutex.lock();
             }
 
@@ -71,7 +74,7 @@ void PendingSongs::songStarter_() {
         }
         catch (Terminate& e) { }
         catch (std::exception& e) {
-            std::cerr << "SongList got C++ exeption : " << e.what() << std::endl;
+            std::cerr << "PendingSongs got C++ exeption : " << e.what() << std::endl;
         }
     }
 }
@@ -83,7 +86,18 @@ void PendingSongs::stopSong_() {
 
 void PendingSongs::sendTerminate_() {
     m_terminateRequested.store(true);
-    m_startPromise.set_exception(std::make_exception_ptr(Terminate()));
+    try {
+        std::lock_guard<std::mutex> lock(m_startMutex);
+        m_startPromise.set_exception(std::make_exception_ptr(Terminate()));
+    }
+    catch (const std::future_error& e) { }
+}
+
+void PendingSongs::sendStartSignal() {
+    try {
+        std::lock_guard<std::mutex> lock(m_startMutex);
+        m_startPromise.set_value();
+    } catch (std::future_error& e) { }
 }
 
 } // namespace elevation

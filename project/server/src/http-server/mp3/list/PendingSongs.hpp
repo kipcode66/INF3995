@@ -17,6 +17,9 @@ namespace elevation {
  * @brief A class to which we simply add or remove songs.
  * It automagically starts playing a song when we add one, and plays the next
  * one when the first one is finished.
+ *
+ * @note Unlike #Mp3Player, destruction does (should) not wait until
+ * the song is finished playing ; it should just stop the current song.
  */
 class PendingSongs {
 public:
@@ -41,14 +44,18 @@ protected:
     void songStarter_();
     void stopSong_();
     void sendTerminate_();
+    void sendStartSignal();
 
 protected:
     Mp3Player m_player;
     SongList m_songList;
     std::mutex m_songListMutex;
     std::thread m_playerThread;
+
     std::promise<void> m_startPromise;
     std::future<void> m_startFuture;
+    std::mutex m_startMutex;
+
     std::atomic<bool> m_terminateRequested;
 };
 
