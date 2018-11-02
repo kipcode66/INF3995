@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <cstddef>
 #include "User.hpp"
+#include <string>
 
 #ifndef DATABASE_DATABASE_HPP
 #define DATABASE_DATABASE_HPP
@@ -12,9 +13,11 @@ class Database {
 public:
     static Database* instance();
     void getUserByMac(const char* mac, User_t* __restrict__ user) const;
-    int createUser(const User_t* user);
-    int updateTimestamp(const User_t* user);
-    int connectUser(const struct User_t* user);
+    int createUser(const User_t* user) const;
+    int updateTimestamp(const User_t* user) const;
+    int connectUser(const struct User_t* user) const;
+    //int connectAdmin(const std::string& login, const std::string& password) const;
+    char* getSaltByLogin(const char* login) const;
 
 private:
     Database();
