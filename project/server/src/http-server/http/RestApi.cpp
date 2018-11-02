@@ -121,7 +121,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         if (!request_json.IsObject()
                 || !request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
-                || !request_json.HasMember("name")
+                || !request_json.HasMember("nom")
                 || request_json["mac"] == '\n'
                 || request_json["ip"] == '\n') {
             response.send(Http::Code::Bad_Request, "Malformed request");
