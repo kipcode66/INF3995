@@ -8,7 +8,8 @@ namespace elevation {
 namespace restApiUtils{
 
 std::string generateSalt(int length);
-std::string generateToken(const std::string& macAdress);
+std::string generateMd5Hash(const std::string& macAdress);
+uint32_t generateId(const std::string& str);
 
 } // namespace restApiUtils
 } // namespace elevation

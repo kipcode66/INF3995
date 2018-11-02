@@ -1,6 +1,7 @@
 #include "RestApiUtils.hpp"
 #include <random>
 #include <openssl/md5.h>
+#include <functional>
 
 namespace elevation {
 namespace restApiUtils{
@@ -23,7 +24,7 @@ std::string generateSalt(int length) {
     return salt;
 }
 
-std::string generateToken(const std::string& macAdress) {
+std::string generateMd5Hash(const std::string& macAdress) {
     uint32_t lengthOfMd5Hash = 32;
     std::string salt = generateSalt(macAdress.length());
     std::string macAdressTemp = macAdress + salt;
@@ -37,6 +38,11 @@ std::string generateToken(const std::string& macAdress) {
     return token;
 }
 
+uint32_t generateId(const std::string& macAdress) {
+    std::hash<std::string> stringToIntegerHasher;
+    return (uint32_t)stringToIntegerHasher(generateMd5Hash(macAdress));
+
+}
 
 }
 }

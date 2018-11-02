@@ -26,7 +26,7 @@ void Database::getUserByMac(const char* mac,
                             User_t* __restrict__ user) const {
     int errcode = 0;
     const char* query = sqlite3_mprintf(
-            "SELECT rowid, ip, mac, name, token FROM user WHERE (mac = '%q');", mac);
+            "SELECT rowid, ip, mac, name, user_id FROM user WHERE (mac = '%q');", mac);
 
     sqlite3_stmt *statement = nullptr;
     errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
@@ -35,11 +35,10 @@ void Database::getUserByMac(const char* mac,
 
     errcode = sqlite3_step(statement);
     if (errcode == SQLITE_ROW) {
-        user->id = sqlite3_column_int(statement, 0);
         strcpy(user->ip, (char *)sqlite3_column_text(statement, 1));
-        strcpy(user->name, (char *)sqlite3_column_text(statement, 3));
-        strcpy(user->token, (char *)sqlite3_column_text(statement, 4));
         strcpy(user->mac, (char *)sqlite3_column_text(statement, 2)); // do last as a coherence check
+        strcpy(user->name, (char *)sqlite3_column_text(statement, 3));
+        user->user_id = sqlite3_column_int(statement, 4);
     } else {
         *user = { 0 };
     }
@@ -50,11 +49,11 @@ int Database::createUser(const User_t* user) {
     int errcode = 0;
     char* errmsg = nullptr;
     const char* query = sqlite3_mprintf(
-                "INSERT OR REPLACE INTO user VALUES ('%q', '%q', '%q', '%q');",
+                "INSERT OR REPLACE INTO user VALUES ('%q', '%q', '%q', %u);",
                 user->ip,
                 user->mac,
                 user->name,
-                user->token);
+                user->user_id);
 
     errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
     if (errcode != SQLITE_OK) {
@@ -75,8 +74,8 @@ int Database::connectUser(const struct User_t* user) {
     int errcode = 0;
     char* errmsg = nullptr;
     const char* query = sqlite3_mprintf(
-                "INSERT INTO userConnection VALUES ('%q', %u, julianday('now'));",
-                user->token,
+                "INSERT INTO userConnection VALUES (%u, %u, julianday('now'));",
+                user->user_id,
                 userIsConnected);
     errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
     if (errcode != SQLITE_OK) {
@@ -96,7 +95,7 @@ int Database::updateTimestamp(const User_t* user) {
     int errcode = 0;
     char* errmsg = nullptr;
     const char* query = sqlite3_mprintf(
-            "UPDATE userConnection SET timeStamp = julianday('now') WHERE token = (SELECT token from user where mac = '%q');", user->mac);
+            "UPDATE userConnection SET timeStamp = julianday('now') WHERE user_id = (SELECT user_id from user where mac = '%q');", user->mac);
 
     errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
     if (errcode != SQLITE_OK) {

@@ -102,7 +102,8 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     strcpy(requestUser.mac, request_json["mac"].GetString());
     strcpy(requestUser.ip, request_json["ip"].GetString());
     strcpy(requestUser.name, request_json["name"].GetString());
-    strcpy(requestUser.token, restApiUtils::generateToken(requestUser.mac).c_str());
+    requestUser.user_id = restApiUtils::generateId(requestUser.mac);
+    std::cout << "le user id est  " << requestUser.user_id << std::endl;
 
     User_t existingUser = { 0 };
     Database* db = Database::instance();
@@ -112,17 +113,16 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         db->createUser(&requestUser);
         db->connectUser(&requestUser);
 
-        std::string body = generateBody(requestUser.token, "connection successful");
+        std::string body = generateBody(requestUser.user_id, "connection successful");
         response.send(Http::Code::Ok, body);
     } else {
-        //&requestUser.id = &existingUser.id; 
-        strcpy(requestUser.token, existingUser.token);
+        requestUser.user_id = existingUser.user_id;
         if (db->createUser(&requestUser)) {
             std::cerr << "problem writing to database" << std::endl;
             response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
         } else {
             db->updateTimestamp(&requestUser);
-            std::string body = generateBody(requestUser.token, "connection successful");
+            std::string body = generateBody(requestUser.user_id, "connection successful");
             response.send(Http::Code::Ok, body);
         }
     }
