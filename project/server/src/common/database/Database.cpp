@@ -167,6 +167,15 @@ int enable_foreign_keys(sqlite3* m_db, char **errmsg) {
     return errcode;
 }
 
+int wipeDbSongs(sqlite3* m_db, char **errmsg) {
+    int errcode = 0;
+    const char* query = sqlite3_mprintf("DELETE FROM songs;");
+
+    errcode = sqlite3_exec(m_db, query, NULL, NULL, errmsg);
+
+    return errcode;
+}
+
 Database::Database() {
     int errcode = sqlite3_open(Database::DB_NAME, &m_db);
     if (errcode) {
@@ -182,6 +191,13 @@ Database::Database() {
 
         sqlite3_close(m_db);
         throw std::runtime_error("Cannot enable foreign keys");
+    }
+    errcode = wipeDbSongs(m_db, &errmsg);
+    if (errcode) {
+        std::cerr << "Can't wipe all songs: " << errmsg << std::endl;
+
+        sqlite3_close(m_db);
+        throw std::runtime_error("Cannot wipe all songs");
     }
 }
 
