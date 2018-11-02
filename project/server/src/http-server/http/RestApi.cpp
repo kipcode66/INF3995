@@ -244,6 +244,12 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" must be a 32 bits integer");
             return;
         }
+        catch (std::runtime_error &e) {
+            std::ostringstream osStream;
+            osStream << "An error occured while saving the song : " << e.what();
+            m_logger.log(osStream.str());
+            std::cerr << osStream.str();
+        }
         response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
     });
 }
