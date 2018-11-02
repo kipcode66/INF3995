@@ -169,7 +169,7 @@ int enable_foreign_keys(sqlite3* m_db, char **errmsg) {
 
 int wipeDbSongs(sqlite3* m_db, char **errmsg) {
     int errcode = 0;
-    const char* query = sqlite3_mprintf("DELETE FROM songs;");
+    const char* query = sqlite3_mprintf("DELETE FROM song;");
 
     errcode = sqlite3_exec(m_db, query, NULL, NULL, errmsg);
 
