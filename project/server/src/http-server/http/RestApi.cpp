@@ -166,6 +166,10 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
     // querying a param from the request object, by name
     std::async([&](){
         std::string param = request.param(":id").as<std::string>();
+        if (std::stoi(param) == 0) {
+            response.send(Http::Code::Forbidden, "Invalid token");
+            return;
+        }
         Database* db = Database::instance();
         std::vector<Song_t> songs = db->getAllSongs();
         std::stringstream resp;
