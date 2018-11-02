@@ -130,7 +130,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         User_t requestUser = { 0 };
         strcpy(requestUser.mac, request_json["mac"].GetString());
         strcpy(requestUser.ip, request_json["ip"].GetString());
-        strcpy(requestUser.name, request_json["name"].GetString());
+        strcpy(requestUser.name, request_json["nom"].GetString());
 
         User_t existingUser = { 0 };
         Database* db = Database::instance();
