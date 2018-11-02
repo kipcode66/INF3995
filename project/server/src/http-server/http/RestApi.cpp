@@ -9,6 +9,8 @@
 #include "misc/Base64.hpp"
 #include "mp3/header/Mp3Header.hpp"
 #include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -93,13 +95,31 @@ std::string generateBody(uint32_t id, std::string message) {
     return body;
 }
 
+std::string generateSong(const Song_t& song, int token) {
+    rapidjson::Document songDoc;
+    songDoc.SetObject();
+    songDoc.AddMember("titre", song.title, songDoc.GetAllocator());
+    songDoc.AddMember("artiste", song.artist, songDoc.GetAllocator());
+    songDoc.AddMember("duree", "04:20", songDoc.GetAllocator());
+    songDoc.AddMember("proposeePar", "", songDoc.GetAllocator());
+    songDoc.AddMember("proprietaire", token == song.user_id ? "true " : "false", songDoc.GetAllocator());
+    songDoc.AddMember("no", song.id, songDoc.GetAllocator());
+
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    songDoc.Accept(writer);
+
+    return buf.GetString();
+}
+
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
     std::async([&](){
         auto body = request.body();
         rapidjson::Document request_json;
         request_json.Parse(body.c_str());
 
-        if (!request_json.HasMember("mac")
+        if (!request_json.IsObject()
+                || !request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
                 || !request_json.HasMember("name")
                 || request_json["mac"] == '\n'
@@ -146,10 +166,19 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
     // querying a param from the request object, by name
     std::async([&](){
         std::string param = request.param(":id").as<std::string>();
-        response.send(Http::Code::Ok, "{\n\"chansons\":[\n"
+        Database* db = Database::instance();
+        std::vector<Song_t> songs = db->getAllSongs();
+        std::stringstream resp;
+        resp << "{\n\"chansons\":[\n";
+        for (auto& song : songs) {
+            resp << generateSong(song, std::stoi(param)) << (&songs.back() != &song ? ",\n" : "\n");
+        }
+        resp << "]\n}\n";
+        response.send(Http::Code::Ok, resp.str());
+        /*"{\n\"chansons\":[\n"
             "{\n\"titre\":\"Never Gonna Give You Up\",\n\"artiste\":\"Foo\",\n\"duree\":\"4:20\",\n\"proposeePar\":\"Chuck Norris\",\n\"proprietaire\":false,\n\"no\":42},\n"
             "{\n\"titre\":\"Hey Jude\",\n\"artiste\":\"Beatles\",\n\"duree\":\"7:05\",\n\"proposeePar\":\"Claude\",\n\"proprietaire\":true,\n\"no\":25}\n"
-        "]\n}\n");
+        "]\n}\n"*/
         std::cout << "getFileList function called, param is " << param << std::endl;
     });
 }
