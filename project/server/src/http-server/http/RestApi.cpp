@@ -179,7 +179,11 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
         try {
             uint32_t token = std::stoi(t.value());
 
-            // TODO : Check if the user has a valid token.
+            // TODO : Check in the DB if the user has a valid token.
+            if (token == 0) {
+                response.send(Http::Code::Forbidden, "Invalid token");
+                return;
+            }
 
             // Decode the string.
             std::stringstream encoded(request.body());
@@ -249,6 +253,8 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             osStream << "An error occured while saving the song : " << e.what();
             m_logger.log(osStream.str());
             std::cerr << osStream.str();
+            response.send(Http::Code::Internal_Server_Error, e.what());
+            return;
         }
         response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
     });
