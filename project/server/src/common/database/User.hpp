@@ -1,3 +1,6 @@
+#include <stdint.h>
+#include <cstddef>
+
 struct User_t {
     static const size_t IP_LENGTH = 16;
     static const size_t MAC_LENGTH = 18;

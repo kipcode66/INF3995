@@ -68,6 +68,78 @@ int Database::createUser(const User_t* user) {
     return errcode;
 }
 
+void Database::getSongByQuery_(const char* query, Song_t* __restrict__ song) const {
+    int errcode = 0;
+
+    sqlite3_stmt *statement = nullptr;
+    errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
+    if (errcode)
+        throw std::runtime_error(sqlite3_errstr(errcode));
+
+    errcode = sqlite3_step(statement);
+    if (errcode == SQLITE_ROW) {
+        song->id = sqlite3_column_int(statement, 0);
+        strcpy(song->title, (char *)sqlite3_column_text(statement, 1));
+        strcpy(song->artist, (char *)sqlite3_column_text(statement, 2));
+        song->user_id = sqlite3_column_int(statement, 3);
+        strcpy(song->path, (char *)sqlite3_column_text(statement, 4));
+    } else {
+        *song = { 0 };
+    }
+    return;
+}
+
+void Database::getSongById(int id, Song_t* __restrict__ song) const {
+    const char* query = sqlite3_mprintf(
+            "SELECT rowid, title, artist, user_id, path FROM song WHERE (rowid = %i);", id);
+    getSongByQuery_(query, song);
+}
+
+void Database::getSongByTitle(const char* title, Song_t* __restrict__ song) const {
+    const char* query = sqlite3_mprintf(
+            "SELECT rowid, title, artist, user_id, path FROM song WHERE (rowid = '%q');", title);
+    getSongByQuery_(query, song);
+}
+
+void Database::getSongByPath(const char* path, Song_t* __restrict__ song) const {
+    const char* query = sqlite3_mprintf(
+            "SELECT rowid, title, artist, user_id, path FROM song WHERE (rowid = '%q');", path);
+    getSongByQuery_(query, song);
+}
+
+int Database::createSong(const Song_t* song) {
+    int errcode = 0;
+    char* errmsg = nullptr;
+    const char* query = sqlite3_mprintf(
+                "INSERT OR REPLACE INTO song VALUES ('%q', '%q', %i, '%q');",
+                song->title,
+                song->artist,
+                song->user_id,
+                song->path);
+
+    errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
+    if (errcode != SQLITE_OK) {
+        std::string message;
+        if (errmsg) {
+            message = errmsg;
+            free(errmsg);
+        } else {
+            message = "unknown database error";
+        }
+        throw std::runtime_error(message);
+    }
+    return errcode;
+}
+
+int enable_foreign_keys(sqlite3* m_db, char **errmsg) {
+    int errcode = 0;
+    const char* query = sqlite3_mprintf("PRAGMA foreign_keys = ON;");
+
+    errcode = sqlite3_exec(m_db, query, NULL, NULL, errmsg);
+
+    return errcode;
+}
+
 Database::Database() {
     int errcode = sqlite3_open(Database::DB_NAME, &m_db);
     if (errcode) {
@@ -75,6 +147,14 @@ Database::Database() {
 
         sqlite3_close(m_db);
         throw std::runtime_error("Cannot connect to database");
+    }
+    char* errmsg = nullptr;
+    errcode = enable_foreign_keys(m_db, &errmsg);
+    if (errcode) {
+        std::cerr << "Can't enable foreign keys: " << errmsg << std::endl;
+
+        sqlite3_close(m_db);
+        throw std::runtime_error("Cannot enable foreign keys");
     }
 }
 
