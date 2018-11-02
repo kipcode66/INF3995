@@ -224,7 +224,15 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             std::cout << "It's tag id3v2 !!!" << std::endl;
             std::cout << "Title: " << header->getTitle() << std::endl;
 
-            // TODO : Put the song's path in the DB.
+            // Put the song's path in the DB.
+            Song_t song;
+            strcpy(song.title, header->getTitle().c_str());
+            strcpy(song.artist, header->getArtist().c_str());
+            song.user_id = 0; // TODO Get the user from the token and get the id from the user.
+            strcpy(song.path, filePath.string().c_str());
+
+            Database* db = Database::instance();
+            db->createSong(&song);
 
             response.send(Http::Code::Ok, "Ok"); // We send the response at the end in the case there is an error in the process.
 
