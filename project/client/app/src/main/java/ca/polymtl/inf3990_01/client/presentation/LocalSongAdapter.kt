@@ -15,7 +15,10 @@ import ca.polymtl.inf3990_01.client.model.SongQueue
 import kotlinx.android.synthetic.main.local_song.view.*
 import kotlinx.android.synthetic.main.local_song.view.send
 import java.util.*
+import java.util.concurrent.TimeUnit
 
+import android.util.Log
+import ca.polymtl.inf3990_01.client.utils.NetUtils
 
 class LocalSongAdapter(
         private val localSongs: LocalSongs,
@@ -52,7 +55,8 @@ class LocalSongAdapter(
         val song = this.localSongs[postion]
         view.songName.text = song.title
         view.author.text = song.authorName
-
+        val duration : String = NetUtils.formatTime(song.durationSec.toLong())
+        view.duration.text = duration
         val isAdmin = stateService.getState().type == AppStateService.State.Admin
         val isSongInQueue = ownedSongs.any { s -> s.title == song.title && s.authorName == s.authorName }
         view.send.isEnabled = !(ownedSongs.size >= 5) && !isSongInQueue && !isAdmin
