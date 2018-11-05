@@ -18,6 +18,8 @@ public:
 private:
     void createSecureDescription_();
     void getSuperviseurFile_(const Rest::Request&, Http::ResponseWriter);
+    void superviseurLogin_(const Rest::Request&, Http::ResponseWriter);
+    void superviseurLogout_(const Rest::Request&, Http::ResponseWriter);
 };
 
 } // namespace elevation

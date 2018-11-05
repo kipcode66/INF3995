@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <iostream>
 
+#include "http/RestApiUtils.hpp"
+
 
 using namespace elevation;
 
@@ -91,44 +93,45 @@ int Database::connectUser(const struct User_t* user) const {
     return errcode;
 }
 
-// int Database::connectAdmin(const std::string& login, const std::string& password) const {
-
-// }
-
-char* Database::getSaltByLogin(const char* login) const {
+int Database::connectAdmin(const char* login) const {
+    uint32_t adminIsConnected = 1;
     int errcode = 0;
+    char* errmsg = nullptr;
     const char* query = sqlite3_mprintf(
-            "SELECT salt FROM adminLogin WHERE (login = '%q');", login);
-    sqlite3_stmt *statement = nullptr;
-    errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
-    if (errcode)
-        throw std::runtime_error(sqlite3_errstr(errcode));        
-    errcode = sqlite3_step(statement);
-    char* salt;
-    if (errcode == SQLITE_ROW) {
-        salt = (char *)sqlite3_column_text(statement, 0);
-    } else {
-        throw std::runtime_error(sqlite3_errstr(errcode));
+                "INSERT or REPLACE INTO adminConnection VALUES ('%q', %u, julianday('now'));",
+                login,
+                adminIsConnected);
+    errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
+    if (errcode != SQLITE_OK) {
+        std::string message;
+        if (errmsg) {
+            message = errmsg;
+            free(errmsg);
+        } else {
+            message = "unknown database error";
+        }
+        throw std::runtime_error(message);
     }
-    return salt;
+    return errcode;
 }
 
-char* Database::getHashedPasswordByLogin(const char*) const {
+std::vector<char*> Database::getSaltAndHashedPasswordByLogin(const char* login) const {
     int errcode = 0;
     const char* query = sqlite3_mprintf(
-            "SELECT hashedPassword FROM adminLogin WHERE (login = '%q');", login);
+            "SELECT salt, hashed_password FROM adminLogin WHERE (login = '%q');", login);
     sqlite3_stmt *statement = nullptr;
     errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
     if (errcode)
         throw std::runtime_error(sqlite3_errstr(errcode));        
     errcode = sqlite3_step(statement);
-    char* hashedPassword;
+    std::vector<char*> saltAndHashedPassword;
     if (errcode == SQLITE_ROW) {
-        salt = (char *)sqlite3_column_text(statement, 0);
+        saltAndHashedPassword.push_back((char *)sqlite3_column_text(statement, 0));
+        saltAndHashedPassword.push_back((char *)sqlite3_column_text(statement, 1));
     } else {
         throw std::runtime_error(sqlite3_errstr(errcode));
     }
-    return hashedPassword;
+    return saltAndHashedPassword;
 }
 
 int Database::updateTimestamp(const User_t* user) const {
@@ -151,6 +154,68 @@ int Database::updateTimestamp(const User_t* user) const {
     return errcode;
 }
 
+bool Database::isAdminConnected() const {
+    int errcode = 0;
+    const char* query = sqlite3_mprintf(
+            "SELECT isConnected FROM adminConnection WHERE (login = 'admin');");
+    sqlite3_stmt *statement = nullptr;
+    errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
+    if (errcode)
+        throw std::runtime_error(sqlite3_errstr(errcode));        
+    errcode = sqlite3_step(statement);
+    bool isConnected;
+    if (errcode == SQLITE_ROW) {
+        isConnected = (char *)sqlite3_column_text(statement, 0);
+    } else {
+        throw std::runtime_error(sqlite3_errstr(errcode));
+    }
+    return isConnected;
+}
+
+int Database::disconnectAdmin() const {
+    int errcode = 0;
+    char* errmsg = nullptr;
+    const char* query = sqlite3_mprintf(
+            "UPDATE adminConnection SET timeStamp = 0, isConnected = 0 WHERE (login = 'admin')");
+
+    errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
+    if (errcode != SQLITE_OK) {
+        std::string message;
+        if (errmsg) {
+            message = errmsg;
+            free(errmsg);
+        } else {
+            message = "unknown database error";
+        }
+        throw std::runtime_error(message);
+    }
+    return errcode;
+}
+
+int Database::createAdmin(const char* password) const {
+    int errcode = 0;
+    char* errmsg = nullptr;
+    std::string salt = restApiUtils::generateSalt(strlen(password));
+    std::string passwordStr(password);
+    std::string passwordHash = restApiUtils::generateMd5Hash(passwordStr, salt);
+    const char* query = sqlite3_mprintf(
+                "INSERT INTO adminLogin VALUES ('admin', '%q', '%q');",
+                passwordHash.c_str(),
+                salt.c_str());
+
+    errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
+    if (errcode != SQLITE_OK) {
+        std::string message;
+        if (errmsg) {
+            message = errmsg;
+            free(errmsg);
+        } else {
+            message = "unknown database error";
+        }
+        throw std::runtime_error(message);
+    }
+    return errcode;
+}
 
 Database::Database() {
     int errcode = sqlite3_open(Database::DB_NAME, &m_db);

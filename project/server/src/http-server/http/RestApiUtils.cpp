@@ -24,24 +24,23 @@ std::string generateSalt(int length) {
     return salt;
 }
 
-std::string generateMd5Hash(const std::string& macAdress) {
+std::string generateMd5Hash(const std::string& str, const std::string& salt) {
     uint32_t lengthOfMd5Hash = 32;
-    std::string salt = generateSalt(macAdress.length());
-    std::string macAdressTemp = macAdress + salt;
-    char stringToHash[macAdress.length() + salt.length()];
-    strcpy(stringToHash, macAdressTemp.c_str()); 
+    // std::string salt = generateSalt(macAdress.length());
+    std::string strTemp = str + salt;
+    char stringToHash[strTemp.length()];
+    strcpy(stringToHash, strTemp.c_str()); 
     unsigned char digest[MD5_DIGEST_LENGTH];
     MD5((unsigned char*)&stringToHash, strlen(stringToHash), (unsigned char*)&digest);    
-    char token[lengthOfMd5Hash];
+    char md5Hash[lengthOfMd5Hash];
     for(int i = 0; i < 16; i++)
-         sprintf(&token[i*2], "%02x", (unsigned int)digest[i]);
-    return token;
+         sprintf(&md5Hash[i*2], "%02x", (unsigned int)digest[i]);
+    return md5Hash;
 }
 
-uint32_t generateId(const std::string& macAdress) {
+uint32_t generateId(const std::string& macAdress, const std::string& salt) {
     std::hash<std::string> stringToIntegerHasher;
-    return (uint32_t)stringToIntegerHasher(generateMd5Hash(macAdress));
-
+    return (uint32_t)stringToIntegerHasher(generateMd5Hash(macAdress, salt));
 }
 
 }

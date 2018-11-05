@@ -3,6 +3,7 @@
 #include <cstddef>
 #include "User.hpp"
 #include <string>
+#include <vector>
 
 #ifndef DATABASE_DATABASE_HPP
 #define DATABASE_DATABASE_HPP
@@ -14,10 +15,13 @@ public:
     static Database* instance();
     void getUserByMac(const char* mac, User_t* __restrict__ user) const;
     int createUser(const User_t* user) const;
+    int createAdmin(const char* password) const;
     int updateTimestamp(const User_t* user) const;
     int connectUser(const struct User_t* user) const;
-    //int connectAdmin(const std::string& login, const std::string& password) const;
-    char* getSaltByLogin(const char* login) const;
+    int connectAdmin(const char* login) const;
+    int disconnectAdmin() const;
+    bool isAdminConnected() const;
+    std::vector<char*> getSaltAndHashedPasswordByLogin(const char* login) const;
 
 private:
     Database();

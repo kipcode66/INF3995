@@ -75,11 +75,11 @@ void RestApi::createDescription_() {
 
 
 std::string generateBody(uint32_t id, std::string message) {
-    char jsonString[] = "{\"id\": %d, \"message\": \"connection successful\"}";
+    char jsonString[] = "{\"id\": %u, \"message\": \"connection successful\"}";
     uint16_t idMaxNumberOfChar = sizeof(floor(log10(UINT32_MAX)) + 1);
     size_t stringSize = sizeof(jsonString) + idMaxNumberOfChar;
     char* buffer = (char *)calloc(1, stringSize);
-
+    
     snprintf(buffer, stringSize, jsonString, id);
     std::string body(buffer);
     free(buffer);
@@ -102,8 +102,9 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     strcpy(requestUser.mac, request_json["mac"].GetString());
     strcpy(requestUser.ip, request_json["ip"].GetString());
     strcpy(requestUser.name, request_json["name"].GetString());
-    requestUser.user_id = restApiUtils::generateId(requestUser.mac);
-    std::cout << "le user id est  " << requestUser.user_id << std::endl;
+
+    std::string salt = restApiUtils::generateSalt(strlen(requestUser.mac)); 
+    requestUser.user_id = restApiUtils::generateId(requestUser.mac, salt);
 
     User_t existingUser = { 0 };
     Database* db = Database::instance();
