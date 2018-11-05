@@ -119,15 +119,14 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 
     std::cout << "getIdentification called: body [" << body << "]; " << std::endl;
 
-    if (//!request_json.IsObject() ||
-            (request_json.IsObject()
+    if ((request_json.IsObject()
             && (!request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
                 || request_json["mac"] == '\n'
                 || request_json["ip"] == '\n'))
-            || !(
+            || ( !request_json.IsObject() && !(
                 request.hasParam("mac") && request.hasParam("ip")
-            )) {
+            ))) {
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
@@ -177,6 +176,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::string param = request.param(":id").as<std::string>();
+    std::cout << "getFileList function called, param is " << param << std::endl;
     if (std::stoi(param) == 0) {
         response.send(Http::Code::Forbidden, "Invalid token");
         return;
@@ -194,7 +194,6 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
         "{\n\"titre\":\"Never Gonna Give You Up\",\n\"artiste\":\"Foo\",\n\"duree\":\"4:20\",\n\"proposeePar\":\"Chuck Norris\",\n\"proprietaire\":false,\n\"no\":42},\n"
         "{\n\"titre\":\"Hey Jude\",\n\"artiste\":\"Beatles\",\n\"duree\":\"7:05\",\n\"proposeePar\":\"Claude\",\n\"proprietaire\":true,\n\"no\":25}\n"
     "]\n}\n"*/
-    std::cout << "getFileList function called, param is " << param << std::endl;
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
