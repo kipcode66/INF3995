@@ -84,15 +84,15 @@ void RestApi::createDescription_() {
 
 
 std::string generateBody(uint32_t id, std::string message) {
-    char jsonString[] = "{\"id\": %d, \"message\": \"connection successful\"}";
-    uint16_t idMaxNumberOfChar = sizeof(floor(log10(UINT32_MAX)) + 1);
-    size_t stringSize = sizeof(jsonString) + idMaxNumberOfChar;
-    char* buffer = (char *)calloc(1, stringSize);
+    rapidjson::Document idDoc;
+    idDoc.SetObject();
+    idDoc.AddMember("identificateur", id, idDoc.GetAllocator());
+    idDoc.AddMember("message", message, idDoc.GetAllocator());
 
-    snprintf(buffer, stringSize, jsonString, id);
-    std::string body(buffer);
-    free(buffer);
-    return body;
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    idDoc.Accept(writer);
+    return buf.GetString();
 }
 
 std::string generateSong(const Song_t& song, uint32_t token) {
