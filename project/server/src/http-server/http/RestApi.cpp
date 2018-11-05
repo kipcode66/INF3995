@@ -132,46 +132,48 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
-    User_t requestUser = { 0 };
-    if (request_json.IsObject()) {
-        strcpy(requestUser.mac, request_json["mac"].GetString());
-        strcpy(requestUser.ip, request_json["ip"].GetString());
-        strcpy(requestUser.name, request_json["nom"].GetString());
-    }
-    else if (request.hasParam("mac") && request.hasParam("ip")) {
-        strcpy(requestUser.mac, request.param("mac").as<std::string>().c_str());
-        strcpy(requestUser.ip, request.param("ip").as<std::string>().c_str());
-        if (request.hasParam("nom")) {
-            strcpy(requestUser.name, request.param("nom").as<std::string>().c_str());
+    std::async([&](){
+        User_t requestUser = { 0 };
+        if (request_json.IsObject()) {
+            strcpy(requestUser.mac, request_json["mac"].GetString());
+            strcpy(requestUser.ip, request_json["ip"].GetString());
+            strcpy(requestUser.name, request_json["nom"].GetString());
         }
-    }
+        else if (request.hasParam("mac") && request.hasParam("ip")) {
+            strcpy(requestUser.mac, request.param("mac").as<std::string>().c_str());
+            strcpy(requestUser.ip, request.param("ip").as<std::string>().c_str());
+            if (request.hasParam("nom")) {
+                strcpy(requestUser.name, request.param("nom").as<std::string>().c_str());
+            }
+        }
 
-    std::ostringstream osStream;
-    osStream << '{' << requestUser.mac << '}' << " Assigned ID \"" << "ID TODO" << "\" to user \"" << requestUser.name;
-    m_logger.log(osStream.str());
+        std::ostringstream osStream;
+        osStream << '{' << requestUser.mac << '}' << " Assigned ID \"" << "ID TODO" << "\" to user \"" << requestUser.name;
+        m_logger.log(osStream.str());
 
-    User_t existingUser = { 0 };
-    Database* db = Database::instance();
-    db->getUserByMac(requestUser.mac, &existingUser);
-    if (*existingUser.mac == 0) {
-        db->createUser(&requestUser);
+        User_t existingUser = { 0 };
+        Database* db = Database::instance();
         db->getUserByMac(requestUser.mac, &existingUser);
-
-        // MOCK id TODO generate and insert in db
-        uint32_t id = existingUser.id;
-        std::string body = generateBody(id, "connection successful");
-        response.send(Http::Code::Ok, body);
-    } else {
-        if (db->createUser(&requestUser)) {
-            std::cerr << "problem writing to database" << std::endl;
-            response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
-        } else {
+        if (*existingUser.mac == 0) {
+            db->createUser(&requestUser);
             db->getUserByMac(requestUser.mac, &existingUser);
+
+            // MOCK id TODO generate and insert in db
             uint32_t id = existingUser.id;
             std::string body = generateBody(id, "connection successful");
             response.send(Http::Code::Ok, body);
+        } else {
+            if (db->createUser(&requestUser)) {
+                std::cerr << "problem writing to database" << std::endl;
+                response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
+            } else {
+                db->getUserByMac(requestUser.mac, &existingUser);
+                uint32_t id = existingUser.id;
+                std::string body = generateBody(id, "connection successful");
+                response.send(Http::Code::Ok, body);
+            }
         }
-    }
+    });
 
     // response.send(Http::Code::Ok, "getIdentification called");
     return;
@@ -180,24 +182,26 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::string param = request.param(":id").as<std::string>();
-    std::cout << "getFileList function called, param is " << param << std::endl;
-    if (std::stoi(param) == 0) {
-        response.send(Http::Code::Forbidden, "Invalid token");
-        return;
-    }
-    Database* db = Database::instance();
-    std::vector<Song_t> songs = db->getAllSongs();
-    std::stringstream resp;
-    resp << "{\n\"chansons\":[\n";
-    for (auto& song : songs) {
-        resp << generateSong(song, std::stoi(param)) << (&songs.back() != &song ? ",\n" : "\n");
-    }
-    resp << "]\n}\n";
-    response.send(Http::Code::Ok, resp.str());
-    /*"{\n\"chansons\":[\n"
-        "{\n\"titre\":\"Never Gonna Give You Up\",\n\"artiste\":\"Foo\",\n\"duree\":\"4:20\",\n\"proposeePar\":\"Chuck Norris\",\n\"proprietaire\":false,\n\"no\":42},\n"
-        "{\n\"titre\":\"Hey Jude\",\n\"artiste\":\"Beatles\",\n\"duree\":\"7:05\",\n\"proposeePar\":\"Claude\",\n\"proprietaire\":true,\n\"no\":25}\n"
-    "]\n}\n"*/
+    std::async([&](){
+        std::cout << "getFileList function called, param is " << param << std::endl;
+        if (std::stoi(param) == 0) {
+            response.send(Http::Code::Forbidden, "Invalid token");
+            return;
+        }
+        Database* db = Database::instance();
+        std::vector<Song_t> songs = db->getAllSongs();
+        std::stringstream resp;
+        resp << "{\n\"chansons\":[\n";
+        for (auto& song : songs) {
+            resp << generateSong(song, std::stoi(param)) << (&songs.back() != &song ? ",\n" : "\n");
+        }
+        resp << "]\n}\n";
+        response.send(Http::Code::Ok, resp.str());
+        /*"{\n\"chansons\":[\n"
+            "{\n\"titre\":\"Never Gonna Give You Up\",\n\"artiste\":\"Foo\",\n\"duree\":\"4:20\",\n\"proposeePar\":\"Chuck Norris\",\n\"proprietaire\":false,\n\"no\":42},\n"
+            "{\n\"titre\":\"Hey Jude\",\n\"artiste\":\"Beatles\",\n\"duree\":\"7:05\",\n\"proposeePar\":\"Claude\",\n\"proprietaire\":true,\n\"no\":25}\n"
+        "]\n}\n"*/
+    });
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -285,7 +289,6 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
             Database* db = Database::instance();
 
-            Song_t existingSong = { 0 };
             const auto& songs = db->getSongsByUser(token);
             bool songInQueue = std::any_of(songs.cbegin(), songs.cend(), [&](const Song_t& a) {return strcmp(a.title, song.title) == 0;});
             if (songInQueue || songs.size() >= 5) {
