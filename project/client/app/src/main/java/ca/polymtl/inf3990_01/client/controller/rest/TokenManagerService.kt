@@ -22,7 +22,7 @@ import kotlin.coroutines.experimental.suspendCoroutine
 
 class TokenManagerService private constructor(private val appCtx: Context, private val httpClient: HTTPRestClient, private val preferences: SharedPreferences) {
     companion object { // Static properties
-        private class GetTokenRequestData(val ip: String, val MAC: String, val nom: String)
+        private class GetTokenRequestData(val ip: String, val mac: String, val nom: String)
         private class GetTokenResponseData(val identificateur: Int, val message: String)
 
         const val SOCKET_TIMEOUT_MS = 3 * 1000
@@ -139,14 +139,15 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
             val info = manager.connectionInfo
             val ip = NetUtils.translateIP(info.ipAddress)
             val mac = NetUtils.getMacAddress(appCtx.getString(R.string.interface_name_wifi))
+            val name = preferences.getString(PREFERENCE_KEY_USERNAME, "")!!
             return suspendCoroutine { continuation ->
                 val request = RESTRequest(
                         Request.Method.GET,
-                        httpClient.getBaseURL() + RESOURCE_URI + "?mac=$mac&ip=$ip",
+                        httpClient.getBaseURL() + RESOURCE_URI + "?mac=$mac&ip=$ip" + if (!name.isEmpty()) "&name=$name" else "",
                         Gson().toJson(GetTokenRequestData(
                                 ip,
                                 mac,
-                                preferences.getString(PREFERENCE_KEY_USERNAME, "")!!
+                                name
                         )),
                         GetTokenResponseData::class.java,
                         mutableMapOf(HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()), // Headers

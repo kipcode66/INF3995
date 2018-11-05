@@ -103,7 +103,7 @@ class RestRequestService(
             httpClient.addToRequestQueue(request)
         }
         if (resp.code != 200) {
-            Handler(appCtx.mainLooper).post(Runnable { Toast.makeText(appCtx, resp.value, Toast.LENGTH_LONG) })
+            Handler(appCtx.mainLooper).post(Runnable { Toast.makeText(appCtx, "Post song error: " + resp.value, Toast.LENGTH_LONG).show() })
         }
     }
 

@@ -62,7 +62,7 @@ void RestApi::createDescription_() {
     auto usagerPath = m_desc.path("/usager");
 
     usagerPath
-            .route(m_desc.get("/identification"))
+            .route(m_desc.post("/identification"))
             .bind(&RestApi::getIdentification_, this)
             .hide();
 
