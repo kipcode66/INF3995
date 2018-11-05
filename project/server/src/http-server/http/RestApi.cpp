@@ -43,7 +43,7 @@ void RestApi::start() {
             .install(m_router);
 
     m_httpEndpoint->setHandler(m_router.handler());
-    m_httpEndpoint->serveThreaded();
+    m_httpEndpoint->serve();
 }
 
 void RestApi::createDescription_() {
@@ -98,8 +98,8 @@ std::string generateBody(uint32_t id, std::string message) {
 std::string generateSong(const Song_t& song, uint32_t token) {
     rapidjson::Document songDoc;
     songDoc.SetObject();
-    songDoc.AddMember("titre", song.title, songDoc.GetAllocator());
-    songDoc.AddMember("artiste", song.artist, songDoc.GetAllocator());
+    songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), songDoc.GetAllocator());
+    songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
     songDoc.AddMember("duree", "04:20", songDoc.GetAllocator());
     songDoc.AddMember("proposeePar", "", songDoc.GetAllocator());
     songDoc.AddMember("proprietaire", token == song.user_id ? "true " : "false", songDoc.GetAllocator());
@@ -118,18 +118,30 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     request_json.Parse(body.c_str());
 
     if (!request_json.IsObject()
-            || !request_json.HasMember("mac")
-            || !request_json.HasMember("ip")
-            || !request_json.HasMember("nom")
-            || request_json["mac"] == '\n'
-            || request_json["ip"] == '\n') {
+            || (request_json.IsObject()
+            && (!request_json.HasMember("mac")
+                || !request_json.HasMember("ip")
+                || request_json["mac"] == '\n'
+                || request_json["ip"] == '\n'))
+            || !(
+                request.hasParam("mac") && request.hasParam("ip")
+            )) {
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
     User_t requestUser = { 0 };
-    strcpy(requestUser.mac, request_json["mac"].GetString());
-    strcpy(requestUser.ip, request_json["ip"].GetString());
-    strcpy(requestUser.name, request_json["nom"].GetString());
+    if (request_json.IsObject()) {
+        strcpy(requestUser.mac, request_json["mac"].GetString());
+        strcpy(requestUser.ip, request_json["ip"].GetString());
+        strcpy(requestUser.name, request_json["nom"].GetString());
+    }
+    else if (request.hasParam("mac") && request.hasParam("ip")) {
+        strcpy(requestUser.mac, request.param("mac").as<std::string>().c_str());
+        strcpy(requestUser.ip, request.param("ip").as<std::string>().c_str());
+        if (request.hasParam("nom")) {
+            strcpy(requestUser.name, request.param("nom").as<std::string>().c_str());
+        }
+    }
 
     User_t existingUser = { 0 };
     Database* db = Database::instance();
@@ -163,10 +175,10 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::string param = request.param(":id").as<std::string>();
-    if (std::stoi(param) == 0) {
-        response.send(Http::Code::Forbidden, "Invalid token");
-        return;
-    }
+    // if (std::stoi(param) == 0) {
+    //     response.send(Http::Code::Forbidden, "Invalid token");
+    //     return;
+    // }
     Database* db = Database::instance();
     std::vector<Song_t> songs = db->getAllSongs();
     std::stringstream resp;
@@ -208,10 +220,10 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
         uint32_t token = std::stoi(t.value());
 
         // TODO : Check in the DB if the user has a valid token.
-        if (token == 0) {
-            response.send(Http::Code::Forbidden, "Invalid token");
-            return;
-        }
+        // if (token == 0) {
+        //     response.send(Http::Code::Forbidden, "Invalid token");
+        //     return;
+        // }
 
         // Decode the string.
         std::stringstream encoded(request.body());
