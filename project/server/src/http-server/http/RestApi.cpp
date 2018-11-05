@@ -117,8 +117,10 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
 
-    if (!request_json.IsObject()
-            || (request_json.IsObject()
+    std::cout << "getIdentification called: body [" << body << "]; " << std::endl;
+
+    if (//!request_json.IsObject() ||
+            (request_json.IsObject()
             && (!request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
                 || request_json["mac"] == '\n'
@@ -143,6 +145,10 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         }
     }
 
+    std::ostringstream osStream;
+    osStream << '{' << requestUser.mac << '}' << " Assigned ID \"" << "ID TODO" << "\" to user \"" << requestUser.name;
+    m_logger.log(osStream.str());
+
     User_t existingUser = { 0 };
     Database* db = Database::instance();
     db->getUserByMac(requestUser.mac, &existingUser);
@@ -164,21 +170,17 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         }
     }
 
-    std::ostringstream osStream;
-    osStream << '{' << requestUser.mac << '}' << " Assigned ID \"" << "ID TODO" << "\" to user \"" << requestUser.name;
-    m_logger.log(osStream.str());
-
-    response.send(Http::Code::Ok, "getIdentification called");
+    // response.send(Http::Code::Ok, "getIdentification called");
     return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::string param = request.param(":id").as<std::string>();
-    // if (std::stoi(param) == 0) {
-    //     response.send(Http::Code::Forbidden, "Invalid token");
-    //     return;
-    // }
+    if (std::stoi(param) == 0) {
+        response.send(Http::Code::Forbidden, "Invalid token");
+        return;
+    }
     Database* db = Database::instance();
     std::vector<Song_t> songs = db->getAllSongs();
     std::stringstream resp;
@@ -216,87 +218,91 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
         return;
     }
 
-    try {
-        uint32_t token = std::stoi(t.value());
+    std::string body = request.body();
 
-        // TODO : Check in the DB if the user has a valid token.
-        // if (token == 0) {
-        //     response.send(Http::Code::Forbidden, "Invalid token");
-        //     return;
-        // }
-
-        // Decode the string.
-        std::stringstream encoded(request.body());
-        std::stringstream decoded;
-        Base64::Decode(encoded, decoded);
-
-        // +=-=-=-= Save in a file =-=-=-=+
-        // Generate
-        std::time_t now = std::time(nullptr);
-        std::tm* nowTm = std::localtime(&now);
-        std::stringstream fileName;
-        // Generate a new name 
-        fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S_") << std::hash<std::string>()(decoded.str());
-        std::experimental::filesystem::path filePath(fileName.str());
-        std::experimental::filesystem::path tmpPath = filePath;
-        // Try a new file name until we find on that is not used.
-        size_t counter = 0;
-        while (m_cache.isFileCached(tmpPath)) {
-            tmpPath = filePath;
-            tmpPath += "_" + std::to_string(++counter);
-        }
-        tmpPath += ".mp3";
-        filePath = tmpPath;
-
-        m_cache.setFileContent(filePath, decoded);
-        filePath = m_cache.getFile(filePath).path(); // resolve the filename into a real path
-
-        std::cout << "decoded : " << decoded.str().substr(0, 30) << std::endl;
-
-        // Fetch MP3 header
-        Mp3Header* header;
+    std::async([=, &response](){
         try {
-            header = new Mp3Header(filePath.string());
-        }
-        catch (std::invalid_argument& e) {
-            std::cout << "It's NOT tag id3v2 ..." << std::endl;
-            response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
-            m_cache.deleteFile(filePath.filename());
+            uint32_t token = std::stoi(t.value());
+
+            // TODO : Check in the DB if the user has a valid token.
+            if (token == 0) {
+                response.send(Http::Code::Forbidden, "Invalid token");
+                return;
+            }
+
+            // Decode the string.
+            std::stringstream encoded(body);
+            std::stringstream decoded;
+            Base64::Decode(encoded, decoded);
+
+            // +=-=-=-= Save in a file =-=-=-=+
+            // Generate
+            std::time_t now = std::time(nullptr);
+            std::tm* nowTm = std::localtime(&now);
+            std::stringstream fileName;
+            // Generate a new name 
+            fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S_") << std::hash<std::string>()(decoded.str());
+            std::experimental::filesystem::path filePath(fileName.str());
+            std::experimental::filesystem::path tmpPath = filePath;
+            // Try a new file name until we find on that is not used.
+            size_t counter = 0;
+            while (m_cache.isFileCached(tmpPath)) {
+                tmpPath = filePath;
+                tmpPath += "_" + std::to_string(++counter);
+            }
+            tmpPath += ".mp3";
+            filePath = tmpPath;
+
+            m_cache.setFileContent(filePath, decoded);
+            filePath = m_cache.getFile(filePath).path(); // resolve the filename into a real path
+
+            std::cout << "decoded : " << decoded.str().substr(0, 30) << std::endl;
+
+            // Fetch MP3 header
+            Mp3Header* header;
+            try {
+                header = new Mp3Header(filePath.string());
+            }
+            catch (std::invalid_argument& e) {
+                std::cout << "It's NOT tag id3v2 ..." << std::endl;
+                response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
+                m_cache.deleteFile(filePath.filename());
+                return;
+            }
+
+            std::cout << "It's tag id3v2 !!!" << std::endl;
+            std::cout << "Title: " << header->getTitle() << std::endl;
+
+            // Put the song's path in the DB.
+            Song_t song;
+            strcpy(song.title, header->getTitle().c_str());
+            strcpy(song.artist, header->getArtist().c_str());
+            song.user_id = 32093422; // TODO Get the user from the token and get the id from the user.
+            strcpy(song.path, filePath.string().c_str());
+
+            Database* db = Database::instance();
+            db->createSong(&song);
+
+            response.send(Http::Code::Ok, "Ok"); // We send the response at the end in the case there is an error in the process.
+
+            delete header;
             return;
         }
-
-        std::cout << "It's tag id3v2 !!!" << std::endl;
-        std::cout << "Title: " << header->getTitle() << std::endl;
-
-        // Put the song's path in the DB.
-        Song_t song;
-        strcpy(song.title, header->getTitle().c_str());
-        strcpy(song.artist, header->getArtist().c_str());
-        song.user_id = 32093422; // TODO Get the user from the token and get the id from the user.
-        strcpy(song.path, filePath.string().c_str());
-
-        Database* db = Database::instance();
-        db->createSong(&song);
-
-        response.send(Http::Code::Ok, "Ok"); // We send the response at the end in the case there is an error in the process.
-
-        delete header;
-        return;
-    }
-    catch (std::logic_error &e) {
-        std::cout << "Token not valid; got \"" << t.value() << "\"" << std::endl;
-        response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" must be a 32 bits integer");
-        return;
-    }
-    catch (std::runtime_error &e) {
-        std::ostringstream osStream;
-        osStream << "An error occured while saving the song : " << e.what();
-        m_logger.log(osStream.str());
-        std::cerr << osStream.str();
-        response.send(Http::Code::Internal_Server_Error, e.what());
-        return;
-    }
-    response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
+        catch (std::logic_error &e) {
+            std::cout << "Token not valid; got \"" << t.value() << "\"" << std::endl;
+            response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" must be a 32 bits integer");
+            return;
+        }
+        catch (std::runtime_error &e) {
+            std::ostringstream osStream;
+            osStream << "An error occured while saving the song : " << e.what();
+            m_logger.log(osStream.str());
+            std::cerr << osStream.str();
+            response.send(Http::Code::Internal_Server_Error, e.what());
+            return;
+        }
+        response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
+    });
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
