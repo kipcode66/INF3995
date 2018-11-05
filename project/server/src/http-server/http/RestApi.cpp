@@ -87,7 +87,7 @@ std::string generateBody(uint32_t id, std::string message) {
     rapidjson::Document idDoc;
     idDoc.SetObject();
     idDoc.AddMember("identificateur", id, idDoc.GetAllocator());
-    idDoc.AddMember("message", message, idDoc.GetAllocator());
+    idDoc.AddMember("message", rapidjson::Value(message.c_str(), message.length()), idDoc.GetAllocator());
 
     rapidjson::StringBuffer buf;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
