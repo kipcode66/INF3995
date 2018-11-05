@@ -19,6 +19,7 @@ public:
     void getSongById(int, Song_t* __restrict__) const;
     void getSongByTitle(const char*, Song_t* __restrict__) const;
     void getSongByPath(const char*, Song_t* __restrict__) const;
+    std::vector<Song_t> getSongsByUser(int userId) const;
     std::vector<Song_t> getAllSongs() const;
     int createSong(const Song_t*);
 

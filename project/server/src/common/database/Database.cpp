@@ -97,14 +97,41 @@ void Database::getSongById(int id, Song_t* __restrict__ song) const {
 
 void Database::getSongByTitle(const char* title, Song_t* __restrict__ song) const {
     const char* query = sqlite3_mprintf(
-            "SELECT rowid, title, artist, user_id, path FROM song WHERE (rowid = '%q');", title);
+            "SELECT rowid, title, artist, user_id, path FROM song WHERE (title = '%q');", title);
     getSongByQuery_(query, song);
 }
 
 void Database::getSongByPath(const char* path, Song_t* __restrict__ song) const {
     const char* query = sqlite3_mprintf(
-            "SELECT rowid, title, artist, user_id, path FROM song WHERE (rowid = '%q');", path);
+            "SELECT rowid, title, artist, user_id, path FROM song WHERE (path = '%q');", path);
     getSongByQuery_(query, song);
+}
+
+std::vector<Song_t> Database::getSongsByUser(int userId) const {
+    std::vector<Song_t> songs;
+    Song_t song_buffer;
+    int errcode = 0;
+    const char* query = sqlite3_mprintf(
+            "SELECT rowid, title, artist, user_id, path FROM song WHERE (user_id = %i);", userId);
+
+    sqlite3_stmt *statement = nullptr;
+    errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
+    if (errcode)
+        throw std::runtime_error(sqlite3_errstr(errcode));
+
+    errcode = sqlite3_step(statement);
+    while (errcode == SQLITE_ROW) {
+        song_buffer.id = sqlite3_column_int(statement, 0);
+        strcpy(song_buffer.title, (char *)sqlite3_column_text(statement, 1));
+        strcpy(song_buffer.artist, (char *)sqlite3_column_text(statement, 2));
+        song_buffer.user_id = sqlite3_column_int(statement, 3);
+        strcpy(song_buffer.path, (char *)sqlite3_column_text(statement, 4));
+
+        songs.push_back(song_buffer);
+        errcode = sqlite3_step(statement);
+    }
+
+    return songs;
 }
 
 std::vector<Song_t> Database::getAllSongs() const {

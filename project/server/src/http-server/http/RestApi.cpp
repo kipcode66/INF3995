@@ -20,7 +20,9 @@ RestApi::RestApi(Address addr)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
 , m_logger(Logger::getLogger("http-server"))
-{ }
+{
+    Database::instance();
+}
 
 RestApi::~RestApi() {
     try {
@@ -153,9 +155,10 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     db->getUserByMac(requestUser.mac, &existingUser);
     if (*existingUser.mac == 0) {
         db->createUser(&requestUser);
+        db->getUserByMac(requestUser.mac, &existingUser);
 
         // MOCK id TODO generate and insert in db
-        uint32_t id = 32093422;
+        uint32_t id = existingUser.id;
         std::string body = generateBody(id, "connection successful");
         response.send(Http::Code::Ok, body);
     } else {
@@ -163,7 +166,8 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             std::cerr << "problem writing to database" << std::endl;
             response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
         } else {
-            uint32_t id = 32093422;
+            db->getUserByMac(requestUser.mac, &existingUser);
+            uint32_t id = existingUser.id;
             std::string body = generateBody(id, "connection successful");
             response.send(Http::Code::Ok, body);
         }
@@ -276,10 +280,20 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             Song_t song;
             strcpy(song.title, header->getTitle().c_str());
             strcpy(song.artist, header->getArtist().c_str());
-            song.user_id = 32093422; // TODO Get the user from the token and get the id from the user.
+            song.user_id = token; // TODO Get the user from the token and get the id from the user.
             strcpy(song.path, filePath.string().c_str());
 
             Database* db = Database::instance();
+
+            Song_t existingSong = { 0 };
+            const auto& songs = db->getSongsByUser(token);
+            bool songInQueue = std::any_of(songs.cbegin(), songs.cend(), [&](const Song_t& a) {return strcmp(a.title, song.title) == 0;});
+            if (songInQueue || songs.size() >= 5) {
+                response.send(Http::Code::Request_Entity_Too_Large, "Song already in the queue");
+                m_cache.deleteFile(filePath.filename());
+                return;
+            }
+
             db->createSong(&song);
 
             response.send(Http::Code::Ok, "Ok"); // We send the response at the end in the case there is an error in the process.
