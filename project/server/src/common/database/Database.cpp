@@ -74,7 +74,6 @@ void Database::getUserById(int id, User_t* __restrict__ user) const {
 
 int Database::createUser(const User_t* user) {
     int errcode = 0;
-    char* errmsg = nullptr;
     char* query = sqlite3_mprintf(
                 "INSERT OR REPLACE INTO user (rowid, ip, mac, name) VALUES (%i, '%q', '%q', '%q');",
                 user->id,
@@ -89,17 +88,14 @@ int Database::createUser(const User_t* user) {
         throw std::runtime_error(sqlite3_errstr(errcode));
 
     errcode = sqlite3_blocking_step(statement);
-    if (errcode != SQLITE_OK) {
-        std::string message;
-        if (errmsg) {
-            message = errmsg;
-            free(errmsg);
-        } else {
-            message = "unknown database error";
-        }
-        throw std::runtime_error(message);
+
+    if (errcode != SQLITE_DONE
+        && errcode != SQLITE_OK
+        && errcode != SQLITE_ROW) {
+        throw std::runtime_error(sqlite3_errstr(errcode));
     }
     sqlite3_finalize(statement);
+    errcode = SQLITE_OK;
 
     return errcode;
 }
@@ -229,12 +225,10 @@ int Database::createSong(const Song_t* song) {
         throw std::runtime_error(sqlite3_errstr(errcode));
 
     errcode = sqlite3_blocking_step(statement);
-    do {
-        errcode = sqlite3_blocking_step(statement);
-    } while (errcode == SQLITE_ROW);
 
     if (errcode != SQLITE_DONE
-        && errcode != SQLITE_OK) {
+        && errcode != SQLITE_OK
+        && errcode != SQLITE_ROW) {
         throw std::runtime_error(sqlite3_errstr(errcode));
     }
     sqlite3_finalize(statement);
