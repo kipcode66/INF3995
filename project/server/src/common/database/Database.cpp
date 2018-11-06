@@ -287,7 +287,15 @@ int wipeDbSongs(sqlite3* m_db, char **errmsg) {
 }
 
 Database::Database() {
-    int errcode = sqlite3_open(Database::DB_NAME, &m_db);
+    int errcode = 0;
+    errcode = sqlite3_enable_shared_cache(true);
+    if (errcode != SQLITE_OK) {
+        std::cerr << "Can't enable db shared cache mode: " << sqlite3_errmsg(m_db) << std::endl;
+
+        sqlite3_close(m_db);
+        throw std::runtime_error("Cannot enable db shared cache mode");
+    }
+    errcode = sqlite3_open_v2(Database::DB_NAME, &m_db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_SHAREDCACHE, NULL);
     if (errcode) {
         std::cerr << "Can't open database: " << sqlite3_errmsg(m_db) << std::endl;
 
