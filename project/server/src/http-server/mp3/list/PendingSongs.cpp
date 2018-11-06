@@ -31,7 +31,7 @@ void PendingSongs::songStarter_() {
     while (!m_terminateRequested.load()) {
         try {
             path song(m_nextSongGetter());
-            while (song == "") {
+            while (song == "" && !m_terminateRequested.load()) {
                 std::this_thread::sleep_for(NEXT_SONG_POLLING_DELAY);
                 song = m_nextSongGetter();
             }
