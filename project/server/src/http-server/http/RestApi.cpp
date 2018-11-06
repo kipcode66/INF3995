@@ -104,7 +104,7 @@ std::string generateSong(const Song_t& song, uint32_t token) {
     songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
     songDoc.AddMember("duree", "04:20", songDoc.GetAllocator());
     User_t user;
-    Database::instance()->getUserById(token, &user);
+    Database::instance()->getUserById(song.user_id, &user);
     songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
     songDoc.AddMember("proprietaire", token == song.user_id ? true : false, songDoc.GetAllocator());
     songDoc.AddMember("no", song.id, songDoc.GetAllocator());
