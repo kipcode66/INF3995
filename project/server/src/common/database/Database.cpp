@@ -4,10 +4,13 @@
 #include <string.h>
 #include <stdexcept>
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 #include "thread_safe_sqlite.hpp"
 
 using namespace elevation;
+using namespace std::chrono_literals;
 
 Database* Database::s_instance = nullptr;
 constexpr char Database::DB_NAME[] = "server.db";
@@ -239,48 +242,62 @@ int Database::createSong(const Song_t* song) {
 
 int enable_foreign_keys(sqlite3* m_db, char **errmsg) {
     int errcode = 0;
-    char* query = sqlite3_mprintf("PRAGMA foreign_keys = ON;");
-
-    sqlite3_stmt *statement = nullptr;
-    errcode = sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, NULL);
-    sqlite3_free(query);
-    if (errcode)
-        throw std::runtime_error(sqlite3_errstr(errcode));
-
     do {
-        errcode = sqlite3_blocking_step(statement);
-    } while (errcode == SQLITE_ROW);
+        try {
+            char* query = sqlite3_mprintf("PRAGMA foreign_keys = ON;");
 
-    if (errcode != SQLITE_DONE
-        && errcode != SQLITE_OK) {
-        throw std::runtime_error(sqlite3_errstr(errcode));
-    }
-    sqlite3_finalize(statement);
-    errcode = SQLITE_OK;
+            sqlite3_stmt *statement = nullptr;
+            errcode = sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, NULL);
+            sqlite3_free(query);
+            if (errcode)
+                throw std::runtime_error(sqlite3_errstr(errcode));
+
+            do {
+                errcode = sqlite3_blocking_step(statement);
+            } while (errcode == SQLITE_ROW);
+
+            if (errcode != SQLITE_DONE
+                && errcode != SQLITE_OK) {
+                throw std::runtime_error(sqlite3_errstr(errcode));
+            }
+            sqlite3_finalize(statement);
+            errcode = SQLITE_OK;
+        }
+        catch(std::runtime_error& e) {
+            std::this_thread::sleep_for(100ms);
+        }
+    } while(errcode != SQLITE_OK);
 
     return errcode;
 }
 
 int wipeDbSongs(sqlite3* m_db, char **errmsg) {
     int errcode = 0;
-    char* query = sqlite3_mprintf("DELETE FROM song;");
-
-    sqlite3_stmt *statement = nullptr;
-    errcode = sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, NULL);
-    sqlite3_free(query);
-    if (errcode)
-        throw std::runtime_error(sqlite3_errstr(errcode));
-
     do {
-        errcode = sqlite3_blocking_step(statement);
-    } while (errcode == SQLITE_ROW);
+        try {
+            char* query = sqlite3_mprintf("DELETE FROM song;");
 
-    if (errcode != SQLITE_DONE
-        && errcode != SQLITE_OK) {
-        throw std::runtime_error(sqlite3_errstr(errcode));
-    }
-    sqlite3_finalize(statement);
-    errcode = SQLITE_OK;
+            sqlite3_stmt *statement = nullptr;
+            errcode = sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, NULL);
+            sqlite3_free(query);
+            if (errcode)
+                throw std::runtime_error(sqlite3_errstr(errcode));
+
+            do {
+                errcode = sqlite3_blocking_step(statement);
+            } while (errcode == SQLITE_ROW);
+
+            if (errcode != SQLITE_DONE
+                && errcode != SQLITE_OK) {
+                throw std::runtime_error(sqlite3_errstr(errcode));
+            }
+            sqlite3_finalize(statement);
+            errcode = SQLITE_OK;
+        }
+        catch(std::runtime_error& e) {
+            std::this_thread::sleep_for(100ms);
+        }
+    } while(errcode != SQLITE_OK);
 
     return errcode;
 }
