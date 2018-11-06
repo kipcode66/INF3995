@@ -26,7 +26,7 @@ protected:
     typedef ::std::experimental::filesystem::path path;
 
 protected:
-    static constexpr std::chrono::seconds NEXT_SONG_POLLING_DELAY{2};
+    static constexpr std::chrono::seconds NEXT_SONG_POLLING_DELAY{1};
 
 public:
     /**
