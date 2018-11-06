@@ -23,6 +23,9 @@ namespace elevation {
  */
 class PendingSongs {
 protected:
+    typedef ::std::experimental::filesystem::path path;
+
+protected:
     static constexpr std::chrono::seconds NEXT_SONG_POLLING_DELAY{2};
 
 public:
@@ -34,16 +37,15 @@ public:
      * from the song list.
      */
     explicit PendingSongs(
-        std::size_t maxSongs,
-        std::function<std::experimental::filesystem::path()> nextSongGetter,
-        std::function<void(std::experimental::filesystem::path)> songRemover
+        std::function<path()> nextSongGetter,
+        std::function<void(path)> songRemover
     );
     PendingSongs(const PendingSongs&) = delete;
     PendingSongs(PendingSongs&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
     virtual ~PendingSongs();
 
-    PendingSongs& operator= (const PendingSongs&) = delete;
-    PendingSongs& operator= (PendingSongs&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
+    PendingSongs& operator=(const PendingSongs&) = delete;
+    PendingSongs& operator=(PendingSongs&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
 
     /**
      * @brief Stops the song that is currently playing. If there is none,

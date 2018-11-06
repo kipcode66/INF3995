@@ -8,9 +8,8 @@
 namespace elevation {
 
 PendingSongs::PendingSongs(
-    std::size_t maxSongs,
-    std::function<std::experimental::filesystem::path()> nextSongGetter,
-    std::function<void(std::experimental::filesystem::path)> songRemover
+    std::function<path()> nextSongGetter,
+    std::function<void(path)> songRemover
 )
     : m_nextSongGetter(nextSongGetter)
     , m_songRemover(songRemover)
@@ -32,7 +31,7 @@ PendingSongs::~PendingSongs() {
 void PendingSongs::songStarter_() {
     while (!m_terminateRequested.load()) {
         try {
-            std::experimental::filesystem::path song(m_nextSongGetter());
+            path song(m_nextSongGetter());
             while (song == "") {
                 std::this_thread::sleep_for(NEXT_SONG_POLLING_DELAY);
                 song = m_nextSongGetter();
