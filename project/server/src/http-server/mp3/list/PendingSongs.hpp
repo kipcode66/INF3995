@@ -7,6 +7,7 @@
 #include <thread>
 #include <memory>
 #include <future>
+#include <chrono>
 
 #include "mp3/player/Mp3Player.hpp"
 #include "SongList.hpp"
@@ -22,8 +23,22 @@ namespace elevation {
  * the song is finished playing ; it should just stop the current song.
  */
 class PendingSongs {
+protected:
+    static constexpr std::chrono::seconds NEXT_SONG_POLLING_DELAY{2};
+
 public:
-    explicit PendingSongs(std::size_t maxSongs);
+    /**
+     * @brief Constructor.
+     * @param[in] nextSongGetter Callback which will be called when a new song should be started.
+     * Will be called periodically until the return value is not an empty path.
+     * @param[in] songRemover Callback which will be called when a song finishes and needs to be removed
+     * from the song list.
+     */
+    explicit PendingSongs(
+        std::size_t maxSongs,
+        std::function<std::experimental::filesystem::path()> nextSongGetter,
+        std::function<void(std::experimental::filesystem::path)> songRemover
+    );
     PendingSongs(const PendingSongs&) = delete;
     PendingSongs(PendingSongs&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
     virtual ~PendingSongs();
@@ -31,9 +46,11 @@ public:
     PendingSongs& operator= (const PendingSongs&) = delete;
     PendingSongs& operator= (PendingSongs&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
 
-    void addSong     (const std::experimental::filesystem::path& songPath);
-    void removeSong  (const std::experimental::filesystem::path& songPath);
-    void reorderSongs(std::size_t songAPosition, std::size_t songBPosition);
+    /**
+     * @brief Stops the song that is currently playing. If there is none,
+     * this method does nothing.
+     */
+    void stopSong();
 
 protected:
     /**
@@ -42,19 +59,15 @@ protected:
      * and waits until the song finishes.
      */
     void songStarter_();
-    void stopSong_();
     void sendTerminate_();
     void sendStartSignal();
 
 protected:
     Mp3Player m_player;
-    SongList m_songList;
-    std::mutex m_songListMutex;
     std::thread m_playerThread;
 
-    std::promise<void> m_startPromise;
-    std::future<void> m_startFuture;
-    std::mutex m_startMutex;
+    std::function<std::experimental::filesystem::path()> m_nextSongGetter;
+    std::function<void(std::experimental::filesystem::path)> m_songRemover;
 
     std::atomic<bool> m_terminateRequested;
 };
