@@ -37,7 +37,7 @@ protected:
 
 fs::path TestFixture::nextSongGetter() {
     std::lock_guard<std::mutex> lock(m_mutex);
-    fs::path nextSong = std::move(m_nextSong);
+    fs::path nextSong = m_nextSong;
     m_nextSong = "";
     return nextSong;
 }
@@ -48,6 +48,15 @@ void TestFixture::songRemover(fs::path song) {
 }
 
 BOOST_FIXTURE_TEST_CASE(constructionDestruction, TestFixture) {
+}
+
+BOOST_FIXTURE_TEST_CASE(destructionIsOkEvenIfPlaying, TestFixture) {
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_nextSong = TIPPERARY_PATH;
+    }
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(500ms);
 }
 
 } // namespace elevation
