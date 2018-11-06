@@ -99,7 +99,7 @@ class RestRequestService(
                         continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
                     }
             )
-            //request.setRetryPolicy(DefaultRetryPolicy(10*1000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            request.setRetryPolicy(DefaultRetryPolicy(10*1000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
             httpClient.addToRequestQueue(request)
         }
         if (resp.code != 200) {
