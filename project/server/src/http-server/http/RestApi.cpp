@@ -165,6 +165,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             std::string body = generateBody(id, "connection successful");
             response.send(Http::Code::Ok, body);
         } else {
+            requestUser.id = existingUser.id;
             if (db->createUser(&requestUser)) {
                 std::cerr << "problem writing to database" << std::endl;
                 response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
