@@ -13,6 +13,9 @@ processesNotAlreadyStarted() {
     if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
         message "Cannot start HTTP Server : already started (PID $(pgrep -x "${HTTP_SERVER_NAME}"))"$'\n'
         false
+    if pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
+        message "Cannot start HTTPS Server : already started (PID $(pgrep -x "${HTTPS_SERVER_NAME}"))"$'\n'
+        false
     elif pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
         echo "Cannot start SSL Daemon : already started (PID $(pgrep -x "${SSL_DAEMON_NAME}"))"$'\n'
         false
