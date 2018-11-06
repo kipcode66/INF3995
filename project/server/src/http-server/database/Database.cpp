@@ -93,28 +93,6 @@ int Database::connectUser(const struct User_t* user) const {
     return errcode;
 }
 
-int Database::connectAdmin(const char* login) const {
-    uint32_t adminIsConnected = 1;
-    int errcode = 0;
-    char* errmsg = nullptr;
-    const char* query = sqlite3_mprintf(
-                "INSERT or REPLACE INTO adminConnection VALUES ('%q', %u, julianday('now'));",
-                login,
-                adminIsConnected);
-    errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
-    if (errcode != SQLITE_OK) {
-        std::string message;
-        if (errmsg) {
-            message = errmsg;
-            free(errmsg);
-        } else {
-            message = "unknown database error";
-        }
-        throw std::runtime_error(message);
-    }
-    return errcode;
-}
-
 std::vector<char*> Database::getSaltAndHashedPasswordByLogin(const char* login) const {
     int errcode = 0;
     const char* query = sqlite3_mprintf(
@@ -134,12 +112,15 @@ std::vector<char*> Database::getSaltAndHashedPasswordByLogin(const char* login) 
     return saltAndHashedPassword;
 }
 
-int Database::updateTimestamp(const User_t* user) const {
+int Database::connectAdmin(const char* login, uint32_t admin_id) const {
+    uint32_t adminIsConnected = 1;
     int errcode = 0;
     char* errmsg = nullptr;
     const char* query = sqlite3_mprintf(
-            "UPDATE userConnection SET timeStamp = julianday('now') WHERE user_id = (SELECT user_id from user where mac = '%q');", user->mac);
-
+                "INSERT or REPLACE INTO adminConnection VALUES ('%q', %u, %u, julianday('now'));",
+                login,
+                adminIsConnected,
+                admin_id);
     errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
     if (errcode != SQLITE_OK) {
         std::string message;
@@ -154,29 +135,27 @@ int Database::updateTimestamp(const User_t* user) const {
     return errcode;
 }
 
-bool Database::isAdminConnected() const {
+bool Database::isAdminConnected(uint32_t admin_id) const {
     int errcode = 0;
     const char* query = sqlite3_mprintf(
-            "SELECT isConnected FROM adminConnection WHERE (login = 'admin');");
+            "SELECT isConnected FROM adminConnection WHERE (login = 'admin' and admin_id = %u);", admin_id);
     sqlite3_stmt *statement = nullptr;
     errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
     if (errcode)
         throw std::runtime_error(sqlite3_errstr(errcode));        
     errcode = sqlite3_step(statement);
-    bool isConnected;
     if (errcode == SQLITE_ROW) {
-        isConnected = (char *)sqlite3_column_text(statement, 0);
+        return (bool)sqlite3_column_int(statement, 0);
     } else {
-        throw std::runtime_error(sqlite3_errstr(errcode));
+        return false;
     }
-    return isConnected;
 }
 
-int Database::disconnectAdmin() const {
+int Database::disconnectAdmin(uint32_t admin_id) const {
     int errcode = 0;
     char* errmsg = nullptr;
     const char* query = sqlite3_mprintf(
-            "UPDATE adminConnection SET timeStamp = 0, isConnected = 0 WHERE (login = 'admin')");
+            "UPDATE adminConnection SET timeStamp = 0, isConnected = 0 WHERE (login = 'admin' AND admin_id = %u)", admin_id);
 
     errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
     if (errcode != SQLITE_OK) {
@@ -202,6 +181,26 @@ int Database::createAdmin(const char* password) const {
                 "INSERT INTO adminLogin VALUES ('admin', '%q', '%q');",
                 passwordHash.c_str(),
                 salt.c_str());
+
+    errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
+    if (errcode != SQLITE_OK) {
+        std::string message;
+        if (errmsg) {
+            message = errmsg;
+            free(errmsg);
+        } else {
+            message = "unknown database error";
+        }
+        throw std::runtime_error(message);
+    }
+    return errcode;
+}
+
+int Database::updateTimestamp(const User_t* user) const {
+    int errcode = 0;
+    char* errmsg = nullptr;
+    const char* query = sqlite3_mprintf(
+            "UPDATE userConnection SET timeStamp = julianday('now') WHERE user_id = (SELECT user_id from user where mac = '%q');", user->mac);
 
     errcode = sqlite3_exec(m_db, query, NULL, NULL, &errmsg);
     if (errcode != SQLITE_OK) {

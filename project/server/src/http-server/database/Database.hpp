@@ -18,9 +18,9 @@ public:
     int createAdmin(const char* password) const;
     int updateTimestamp(const User_t* user) const;
     int connectUser(const struct User_t* user) const;
-    int connectAdmin(const char* login) const;
-    int disconnectAdmin() const;
-    bool isAdminConnected() const;
+    int connectAdmin(const char* login, uint32_t admin_id) const;
+    int disconnectAdmin(uint32_t admin_id) const;
+    bool isAdminConnected(uint32_t admin_id) const;
     std::vector<char*> getSaltAndHashedPasswordByLogin(const char* login) const;
 
 private:

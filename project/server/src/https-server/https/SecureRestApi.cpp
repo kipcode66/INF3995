@@ -47,27 +47,33 @@ void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::Respon
     request_json.Parse(body.c_str());
     if (!request_json.HasMember("usager")
             || !request_json.HasMember("mot_de_passe")
+            || !request_json.HasMember("X-Auth-Token")
             || request_json["usager"] == '\n'
-            || request_json["mot_de_passe"] == '\n') {
+            || request_json["mot_de_passe"] == '\n'
+            || request_json["X-Auth-Token"] == '\n') {
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
-    char* login;
-    strcpy(login, request_json["usager"].GetString());
+    std::string login(request_json["usager"].GetString());
     if (login != "admin") {
         response.send(Http::Code::Bad_Request, "Wrong login");
         return;
     }
+    uint32_t admin_id = request_json["X-Auth-Token"].GetUint();
     Database* db = Database::instance();
-    std::vector<char*> saltAndHash = db->getSaltAndHashedPasswordByLogin(login);
-    char* password;
+    if (db->isAdminConnected(admin_id)) {
+        response.send(Http::Code::Bad_Request, "Admin already connected with this token");
+        return;
+    }
+    std::vector<char*> saltAndHash = db->getSaltAndHashedPasswordByLogin(login.c_str());
     char* salt = saltAndHash[0];
     char* hash = saltAndHash[1];
-    strcpy(password, request_json["mot_de_passe"].GetString());
+    std::string password(request_json["mot_de_passe"].GetString());
     std::string passwordHash = elevation::restApiUtils::generateMd5Hash(password, salt);
     if (passwordHash == hash) {
-        db->connectAdmin(login);
+        db->connectAdmin(login.c_str(), admin_id);
         response.send(Http::Code::Ok, "Connexion successful");
+        return;
     } else {
         response.send(Http::Code::Forbidden, "Wrong password");
         return;
@@ -75,13 +81,23 @@ void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::Respon
 }
 
 void SecureRestApi::superviseurLogout_(const Rest::Request& request, Http::ResponseWriter response) {
+    auto body = request.body();
+    rapidjson::Document request_json;
+    request_json.Parse(body.c_str());
+    if (!request_json.HasMember("X-Auth-Token")
+            || request_json["X-Auth-Token"] == '\n') {
+        response.send(Http::Code::Bad_Request, "Malformed request");
+        return;
+    }
+    uint32_t admin_id = request_json["X-Auth-Token"].GetUint();
     Database* db = Database::instance();
-    if (!db->isAdminConnected()) {
+    if (!db->isAdminConnected(admin_id)) {
         response.send(Http::Code::Unauthorized, "Admin not connected");
         return;
     } else {
-        db->disconnectAdmin();
+        db->disconnectAdmin(admin_id);
         response.send(Http::Code::Ok, "Logout successful");
+        return;
     }
 }
 

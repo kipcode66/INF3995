@@ -116,15 +116,18 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 
         std::string body = generateBody(requestUser.user_id, "connection successful");
         response.send(Http::Code::Ok, body);
+        return;
     } else {
         requestUser.user_id = existingUser.user_id;
         if (db->createUser(&requestUser)) {
             std::cerr << "problem writing to database" << std::endl;
             response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
+            return;
         } else {
             db->updateTimestamp(&requestUser);
             std::string body = generateBody(requestUser.user_id, "connection successful");
             response.send(Http::Code::Ok, body);
+            return;
         }
     }
     response.send(Http::Code::Ok, "getIdentification called");

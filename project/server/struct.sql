@@ -3,5 +3,5 @@ BEGIN TRANSACTION;
 CREATE TABLE user (ip VARCHAR(16), mac VARCHAR(18) UNIQUE, name VARCHAR(256), user_id INTEGER UNIQUE);
 CREATE TABLE userConnection (user_id INTEGER UNIQUE NOT NULL PRIMARY KEY, isConnected INTEGER, timeStamp REAL, FOREIGN KEY(user_id) REFERENCES user(user_id));
 CREATE TABLE adminLogin (login VARCHAR(256) UNIQUE NOT NULL, hashed_password VARCHAR(32) NOT NULL, salt VARCHAR(32) NOT NULL);
-CREATE TABLE adminConnection (login VARCHAR(256) UNIQUE NOT NULL, isConnected INTEGER, timeStamp REAL);
+CREATE TABLE adminConnection (login VARCHAR(256) UNIQUE NOT NULL, isConnected INTEGER, admin_id INTEGER, timeStamp REAL);
 COMMIT;

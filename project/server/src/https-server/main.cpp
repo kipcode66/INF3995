@@ -1,6 +1,5 @@
 #include <iostream>
 #include <inttypes.h>
-
 #include "https-server/https/SecureRestApi.hpp"
 
 void usage() {

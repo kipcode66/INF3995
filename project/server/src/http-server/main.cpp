@@ -1,6 +1,5 @@
 #include <iostream>
 #include <inttypes.h>
-#include "http/RestApiUtils.hpp"
 #include "http/RestApi.hpp"
 
 
