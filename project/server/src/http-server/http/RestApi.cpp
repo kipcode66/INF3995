@@ -103,7 +103,9 @@ std::string generateSong(const Song_t& song, uint32_t token) {
     songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), songDoc.GetAllocator());
     songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
     songDoc.AddMember("duree", "04:20", songDoc.GetAllocator());
-    songDoc.AddMember("proposeePar", "", songDoc.GetAllocator());
+    User_t user;
+    Database::instance()->getUserById(token, &user);
+    songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
     songDoc.AddMember("proprietaire", token == song.user_id ? "true " : "false", songDoc.GetAllocator());
     songDoc.AddMember("no", song.id, songDoc.GetAllocator());
 
@@ -291,7 +293,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
             const auto& songs = db->getSongsByUser(token);
             bool songInQueue = std::any_of(songs.cbegin(), songs.cend(), [&](const Song_t& a) {return strcmp(a.title, song.title) == 0;});
-            if (songInQueue || songs.size() >= 5) {
+            if (songInQueue || songs.size() >= MAX_SONG_PER_USER) {
                 response.send(Http::Code::Request_Entity_Too_Large, "Song already in the queue");
                 m_cache.deleteFile(filePath.filename());
                 return;

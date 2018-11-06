@@ -14,6 +14,9 @@ namespace elevation {
 
 class RestApi {
 public:
+    static constexpr const int MAX_SONG_PER_USER = 5;
+
+public:
     RestApi(Address);
     ~RestApi();
     void init();

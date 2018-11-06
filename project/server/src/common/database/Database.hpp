@@ -15,6 +15,7 @@ class Database {
 public:
     static Database* instance();
     void getUserByMac(const char*, User_t* __restrict__) const;
+    void getUserById(int, User_t* __restrict__) const;
     int createUser(const User_t*);
     void getSongById(int, Song_t* __restrict__) const;
     void getSongByTitle(const char*, Song_t* __restrict__) const;

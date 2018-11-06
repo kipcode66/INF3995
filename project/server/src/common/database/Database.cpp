@@ -45,6 +45,29 @@ void Database::getUserByMac(const char* mac,
     return;
 }
 
+void Database::getUserById(int id, User_t* __restrict__ user) const {
+    int errcode = 0;
+    const char* query = sqlite3_mprintf(
+            "SELECT rowid, ip, mac, name FROM user WHERE (rowid = %i);", id);
+
+    sqlite3_stmt *statement = nullptr;
+    errcode = sqlite3_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
+    if (errcode)
+        throw std::runtime_error(sqlite3_errstr(errcode));
+
+    errcode = sqlite3_step(statement);
+    if (errcode == SQLITE_ROW) {
+        user->id = sqlite3_column_int(statement, 0);
+        strcpy(user->ip, (char *)sqlite3_column_text(statement, 1));
+        strcpy(user->name, (char *)sqlite3_column_text(statement, 3));
+        strcpy(user->mac, (char *)sqlite3_column_text(statement, 2)); // do last as a coherence check
+    } else {
+        *user = { 0 };
+    }
+    return;
+
+}
+
 int Database::createUser(const User_t* user) {
     int errcode = 0;
     char* errmsg = nullptr;
