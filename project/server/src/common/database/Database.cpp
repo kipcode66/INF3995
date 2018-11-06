@@ -234,7 +234,7 @@ int Database::createSong(const Song_t* song) {
     } while (errcode == SQLITE_ROW);
 
     if (errcode != SQLITE_DONE
-        || errcode != SQLITE_OK) {
+        && errcode != SQLITE_OK) {
         throw std::runtime_error(sqlite3_errstr(errcode));
     }
     sqlite3_finalize(statement);
@@ -256,7 +256,8 @@ int enable_foreign_keys(sqlite3* m_db, char **errmsg) {
         errcode = sqlite3_blocking_step(statement);
     } while (errcode == SQLITE_ROW);
 
-    if (errcode != SQLITE_DONE) {
+    if (errcode != SQLITE_DONE
+        && errcode != SQLITE_OK) {
         throw std::runtime_error(sqlite3_errstr(errcode));
     }
     sqlite3_finalize(statement);
@@ -278,7 +279,8 @@ int wipeDbSongs(sqlite3* m_db, char **errmsg) {
         errcode = sqlite3_blocking_step(statement);
     } while (errcode == SQLITE_ROW);
 
-    if (errcode != SQLITE_DONE) {
+    if (errcode != SQLITE_DONE
+        && errcode != SQLITE_OK) {
         throw std::runtime_error(sqlite3_errstr(errcode));
     }
     sqlite3_finalize(statement);
