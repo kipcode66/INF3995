@@ -7,9 +7,13 @@
 
 namespace elevation {
 
-PendingSongs::PendingSongs(std::size_t maxSongs)
-    : m_songList(maxSongs)
-    , m_startFuture(m_startPromise.get_future())
+PendingSongs::PendingSongs(
+    std::size_t maxSongs,
+    std::function<std::experimental::filesystem::path()> nextSongGetter,
+    std::function<void(std::experimental::filesystem::path)> songRemover
+)
+    : m_nextSongGetter(nextSongGetter)
+    , m_songRemover(songRemover)
     , m_terminateRequested(false)
 {
     m_playerThread = std::thread(&PendingSongs::songStarter_, this);
@@ -19,58 +23,23 @@ PendingSongs::~PendingSongs() {
     m_terminateRequested.store(true);
     try {
         sendTerminate_();
-        stopSong_();
+        stopSong();
         m_playerThread.join();
     }
     catch (std::system_error& e) { }
 }
 
-void PendingSongs::addSong(const std::experimental::filesystem::path& songPath) {
-    std::lock_guard<std::mutex> lock(m_songListMutex);
-    m_songList.push(songPath);
-    if (m_songList.size() == 1) {
-        sendStartSignal();
-    }
-}
-
-void PendingSongs::removeSong(const std::experimental::filesystem::path& songPath) {
-    if (m_songList.indexOf(songPath) == 0) {
-        sendStartSignal();
-    }
-    m_songList.remove(songPath);
-}
-
-void PendingSongs::reorderSongs(std::size_t songAPosition, std::size_t songBPosition) {
-    m_songList.swap(songAPosition, songBPosition);
-}
-
 void PendingSongs::songStarter_() {
     while (!m_terminateRequested.load()) {
         try {
-            m_songListMutex.lock();
-            // Using while() prevents the race condition where the only song is deleted
-            // before we could lock the mutex again, but after the wakeup signal has been
-            // sent.
-            while (m_songList.size() == 0 && !m_terminateRequested.load()) {
-                m_songListMutex.unlock();
-                m_startFuture.get(); // May throw Terminate.
-                {
-                    std::lock_guard<std::mutex> lock(m_startMutex);
-                    m_startPromise = std::promise<void>();
-                    m_startFuture = m_startPromise.get_future();
-                } // m_startMutex gets unlocked here
-                m_songListMutex.lock();
+            std::experimental::filesystem::path song(m_nextSongGetter());
+            while (song == "") {
+                std::this_thread::sleep_for(NEXT_SONG_POLLING_DELAY);
+                song = m_nextSongGetter();
             }
 
-            if (!m_terminateRequested.load()) {
-                std::experimental::filesystem::path nextSongPath = m_songList.popNext();
-                m_songListMutex.unlock();
-                m_player.startPlaying(nextSongPath.string());
-                m_player.waitUntilSongFinished();
-            }
-            else {
-                m_songListMutex.unlock();
-            }
+            m_player.startPlaying(song);
+            m_player.waitUntilSongFinished();
         }
         catch (Terminate& e) { }
         catch (std::exception& e) {
@@ -79,25 +48,13 @@ void PendingSongs::songStarter_() {
     }
 }
 
-void PendingSongs::stopSong_() {
+void PendingSongs::stopSong() {
     m_player.stopPlaying();
     m_player.waitUntilSongFinished();
 }
 
 void PendingSongs::sendTerminate_() {
     m_terminateRequested.store(true);
-    try {
-        std::lock_guard<std::mutex> lock(m_startMutex);
-        m_startPromise.set_exception(std::make_exception_ptr(Terminate()));
-    }
-    catch (const std::future_error& e) { }
-}
-
-void PendingSongs::sendStartSignal() {
-    try {
-        std::lock_guard<std::mutex> lock(m_startMutex);
-        m_startPromise.set_value();
-    } catch (std::future_error& e) { }
 }
 
 } // namespace elevation
