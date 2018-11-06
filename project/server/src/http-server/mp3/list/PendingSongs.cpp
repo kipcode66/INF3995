@@ -19,7 +19,6 @@ PendingSongs::PendingSongs(
 }
 
 PendingSongs::~PendingSongs() {
-    m_terminateRequested.store(true);
     try {
         sendTerminate_();
         stopSong();
