@@ -10,6 +10,7 @@
 #include "RestApi.hpp"
 #include "database/Database.hpp"
 #include "misc/Base64.hpp"
+#include "misc/id_utils.hpp"
 #include "mp3/header/Mp3Header.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
@@ -153,8 +154,8 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         Database* db = Database::instance();
         db->getUserByMac(requestUser.mac, &existingUser);
         if (*existingUser.mac == 0) {
-            std::string salt = restApiUtils::generateSalt(strlen(requestUser.mac)); 
-            requestUser.user_id = restApiUtils::generateId(requestUser.mac, salt);
+            std::string salt = id_utils::generateSalt(strlen(requestUser.mac)); 
+            requestUser.user_id = id_utils::generateId(requestUser.mac, salt);
 
             db->createUser(&requestUser);
             db->connectUser(&requestUser);

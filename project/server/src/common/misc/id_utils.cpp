@@ -1,10 +1,10 @@
-#include "RestApiUtils.hpp"
+#include "id_utils.hpp"
 #include <random>
 #include <openssl/md5.h>
 #include <functional>
 
 namespace elevation {
-namespace restApiUtils{
+namespace id_utils{
 
 std::string generateSalt(int length) {
     static auto& characters = 

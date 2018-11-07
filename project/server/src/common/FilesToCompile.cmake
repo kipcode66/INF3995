@@ -21,6 +21,7 @@ set(COMMON_CPP_SOURCES
     database/Database.cpp
     os/SharedFileMemory.cpp
     filesystem/FileCache.cpp
+    misc/id_utils.cpp
 )
 
 ###############################################################################
@@ -41,6 +42,7 @@ set(COMMON_HEADER_SOURCES
     os/SharedFileMemory.hpp
     filesystem/FileCache.hpp
     misc/Base64.hpp
+    misc/id_utils.hpp
 )
 
 makeAbsolute(COMMON_CPP_SOURCES)

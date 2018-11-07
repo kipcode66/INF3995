@@ -3,7 +3,7 @@
 
 #include "SecureRestApi.hpp"
 #include "rapidjson/document.h"
-#include "http-server/http/RestApiUtils.hpp"
+#include "misc/id_utils.hpp"
 #include "database/Database.hpp"
 
 
@@ -73,7 +73,7 @@ void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::Respon
     char* salt = saltAndHash[0];
     char* hash = saltAndHash[1];
     std::string password(request_json["mot_de_passe"].GetString());
-    std::string passwordHash = elevation::restApiUtils::generateMd5Hash(password, salt);
+    std::string passwordHash = elevation::id_utils::generateMd5Hash(password, salt);
     if (passwordHash == hash) {
         db->connectAdmin(login.c_str(), admin_id);
         response.send(Http::Code::Ok, "Connexion successful");

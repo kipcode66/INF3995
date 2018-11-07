@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 
+#include "misc/id_utils.hpp"
 #include "thread_safe_sqlite.hpp"
 
 using namespace elevation;
@@ -103,7 +104,7 @@ int Database::createUser(const User_t* user) {
     return errcode;
 }
 
-int Database::connectUser(const struct User_t* user) const {
+int Database::connectUser(const struct User_t* user) {
     uint32_t userIsConnected = 1;
     int errcode = 0;
     char* query = sqlite3_mprintf(
@@ -130,11 +131,11 @@ int Database::connectUser(const struct User_t* user) const {
     return errcode;
 }
 
-int Database::createAdmin(const char* password) const {
+int Database::createAdmin(const char* password) {
     int errcode = 0;
-    std::string salt = restApiUtils::generateSalt(strlen(password));
+    std::string salt = id_utils::generateSalt(strlen(password));
     std::string passwordStr(password);
-    std::string passwordHash = restApiUtils::generateMd5Hash(passwordStr, salt);
+    std::string passwordHash = id_utils::generateMd5Hash(passwordStr, salt);
     char* query = sqlite3_mprintf(
                 "INSERT INTO adminLogin VALUES ('admin', '%q', '%q');",
                 passwordHash.c_str(),
@@ -159,7 +160,7 @@ int Database::createAdmin(const char* password) const {
     return errcode;
 }
 
-int Database::connectAdmin(const char* login, uint32_t admin_id) const {
+int Database::connectAdmin(const char* login, uint32_t admin_id) {
     uint32_t adminIsConnected = 1;
     int errcode = 0;
     char* query = sqlite3_mprintf(
@@ -187,7 +188,7 @@ int Database::connectAdmin(const char* login, uint32_t admin_id) const {
     return errcode;
 }
 
-int Database::disconnectAdmin(uint32_t admin_id) const {
+int Database::disconnectAdmin(uint32_t admin_id) {
     int errcode = 0;
     char* query = sqlite3_mprintf(
             "UPDATE adminConnection SET timeStamp = 0, isConnected = 0 WHERE (login = 'admin' AND admin_id = %u)", admin_id);

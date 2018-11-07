@@ -7,7 +7,6 @@
 #include <pistache/description.h>
 #include <common/logger/Logger.hpp>
 
-#include "RestApiUtils.hpp"
 #include "filesystem/FileCache.hpp"
 
 
