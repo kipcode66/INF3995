@@ -75,7 +75,7 @@ class RestRequestService(
         return list
     }
 
-    suspend fun sendSong(song: LocalSong) {
+    @Synchronized suspend fun sendSong(song: LocalSong) {
         val songToSend = encoder(song)
         val token = tokenMgr.getToken()
         val resp: ResponseData<String> = suspendCoroutine { continuation ->
