@@ -32,7 +32,7 @@ public:
     /**
      * @brief Constructor.
      * @param[in] nextSongGetter Callback which will be called when a new song should be started.
-     * Will be called periodically until the return value is not an empty path.
+     * Will be called periodically until the return value is not an empty path ("").
      * @param[in] songRemover Callback which will be called when a song finishes and needs to be removed
      * from the song list.
      */
