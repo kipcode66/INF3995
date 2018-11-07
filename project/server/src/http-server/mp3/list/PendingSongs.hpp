@@ -53,6 +53,16 @@ public:
      */
     void stopSong();
 
+    /**
+     * @brief Useful for unit tests, but can be used in production too.
+     */
+    void waitUntilSongStarted();
+
+    /**
+     * @brief Useful for unit tests, but can be used in production too.
+     */
+    void waitUntilSongFinished();
+
 protected:
     /**
      * @brief Thread method which starts the songs on the #Mp3Player.
@@ -66,6 +76,9 @@ protected:
 protected:
     Mp3Player m_player;
     std::thread m_playerThread;
+    std::promise<void> m_startPromise;
+    std::shared_future<void> m_startFuture;
+    std::mutex m_startMutex;
 
     std::function<std::experimental::filesystem::path()> m_nextSongGetter;
     std::function<void(std::experimental::filesystem::path)> m_songRemover;

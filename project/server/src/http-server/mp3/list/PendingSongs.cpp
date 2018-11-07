@@ -11,7 +11,9 @@ PendingSongs::PendingSongs(
     std::function<path()> nextSongGetter,
     std::function<void(path)> songRemover
 )
-    : m_nextSongGetter(nextSongGetter)
+    : m_startPromise()
+    , m_startFuture(m_startPromise.get_future())
+    , m_nextSongGetter(nextSongGetter)
     , m_songRemover(songRemover)
     , m_terminateRequested(false)
 {
@@ -36,14 +38,33 @@ void PendingSongs::songStarter_() {
                 song = m_nextSongGetter();
             }
 
-            m_player.startPlaying(song);
-            m_player.waitUntilSongFinished();
+            if (!m_terminateRequested.load()) {
+                m_player.startPlaying(song);
+                m_startPromise.set_value();
+                m_player.waitUntilSongFinished();
+                {
+                    std::lock_guard<std::mutex> lock(m_startMutex);
+                    m_startPromise = std::promise<void>();
+                    m_startFuture = m_startPromise.get_future();
+                } // m_startMutex gets unlocked here.
+            }
+            if (song != "") {
+                m_songRemover(song);
+            }
         }
         catch (Terminate& e) { }
         catch (std::exception& e) {
             std::cerr << "PendingSongs got C++ exeption : " << e.what() << std::endl;
         }
     }
+}
+
+void PendingSongs::waitUntilSongStarted() {
+    m_startFuture.get();
+}
+
+void PendingSongs::waitUntilSongFinished() {
+    m_player.waitUntilSongFinished();
 }
 
 void PendingSongs::stopSong() {
