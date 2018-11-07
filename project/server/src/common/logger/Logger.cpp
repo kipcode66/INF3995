@@ -2,6 +2,7 @@
 
 #include <elevation/common/Config.hpp>
 
+#include <iostream>
 #include <chrono>
 #include <iomanip>
 #include <sstream>
@@ -52,7 +53,21 @@ std::string Logger::getTime_(const char* format) {
 
 void Logger::log(const std::string& data) {
     std::lock_guard<std::mutex> lock(*m_mutex);
-    m_logFile << '[' << m_prefix << ' ' << getTime_(TIME_FORMAT_LOG_LINE) << "] " << data << std::endl; // std::endl will flush the file stream ; this is intentional.
+    std::ostringstream osStrm = makeLogLine_();
+    osStrm << data << std::endl; // std::endl will flush the file stream ; this is intentional.
+    std::string line = osStrm.str();
+    m_logFile << line;
+    std::cout << line;
+}
+
+void Logger::err(const std::string& data) {
+    static const std::string ERROR_PREFIX = "ERROR: ";
+    std::lock_guard<std::mutex> lock(*m_mutex);
+    std::ostringstream osStrm = makeLogLine_();
+    osStrm << ERROR_PREFIX << data << std::endl; // std::endl will flush the file stream ; this is intentional.
+    std::string line = osStrm.str();
+    m_logFile << line;
+    std::cerr << line;
 }
 
 void Logger::createDirectory_() {
@@ -62,6 +77,13 @@ void Logger::createDirectory_() {
 void Logger::openLogFile_() {
     m_logFile.open(getFileName_(m_prefix), std::ios_base::trunc);
     log(m_prefix + " started.");
+}
+
+std::ostringstream Logger::makeLogLine_() const {
+    std::ostringstream osStrm;
+    osStrm << '[' << m_prefix << ' ' << getTime_(TIME_FORMAT_LOG_LINE) << "] ";
+    return osStrm;
+
 }
 
 } // namespace elevation
