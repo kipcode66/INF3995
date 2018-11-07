@@ -1,13 +1,17 @@
-#include "SecureRestApi.hpp"
-#include "http-server/database/Database.hpp"
-#include "rapidjson/document.h"
+#include <common/logger/Logger.hpp>
 #include <pistache/serializer/rapidjson.h>
+
+#include "SecureRestApi.hpp"
+#include "rapidjson/document.h"
 #include "http-server/http/RestApiUtils.hpp"
+#include "database/Database.hpp"
+
 
 using namespace elevation;
 
 SecureRestApi::SecureRestApi(Address addr)
 : RestApi(addr)
+, m_logger(Logger::getLogger("https-server"))
 { }
 
 void SecureRestApi::init() {

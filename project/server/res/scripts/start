@@ -4,6 +4,7 @@ THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
+COMMON_LIB_NAME=common
 HTTP_SERVER_NAME=http-server
 HTTPS_SERVER_NAME=https-server
 SSL_DAEMON_NAME=ssl-daemon
@@ -102,7 +103,7 @@ lanunchEverything() {
         startHttpsServer
         assignSslDaemonPortRange
         startSslDaemon
-        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"', and SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\n\n'
+        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"$',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"$',\nand SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\n\n'
         if ${SHOULD_WAIT}; then
             message "${MESSAGE_STRING}"
             trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
@@ -131,7 +132,12 @@ stop() {
     if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
         kill -TERM $(pgrep -x "${HTTP_SERVER_NAME}")
         sleep 0.5
-        kill -KILL $(pgrep -x "${SSL_DAEMON_NAME}") 2>/dev/null
+        kill -KILL $(pgrep -x "${HTTP_SERVER_NAME}") 2>/dev/null
+    fi
+    if pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
+        kill -TERM $(pgrep -x "${HTTPS_SERVER_NAME}")
+        sleep 0.5
+        kill -KILL $(pgrep -x "${HTTPS_SERVER_NAME}") 2>/dev/null
     fi
     if pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
         kill -TERM $(pgrep -x "${SSL_DAEMON_NAME}")

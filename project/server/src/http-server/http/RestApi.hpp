@@ -5,12 +5,19 @@
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
 #include <pistache/description.h>
+#include <common/logger/Logger.hpp>
+
 #include "RestApiUtils.hpp"
+#include "filesystem/FileCache.hpp"
+
 
 using namespace Pistache;
 namespace elevation {
 
 class RestApi {
+public:
+    static constexpr const int MAX_SONG_PER_USER = 5;
+
 public:
     RestApi(Address);
     ~RestApi();
@@ -27,6 +34,8 @@ protected:
     std::shared_ptr<Http::Endpoint> m_httpEndpoint;
     Rest::Description m_desc;
     Rest::Router m_router;
+    FileCache m_cache;
+    Logger& m_logger;
 };
 
 } // namespace elevation

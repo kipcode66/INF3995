@@ -184,6 +184,8 @@ buildSqlite3() {
     local EXTRA_ARGS="--includedir=${SQLITE3_INCLUDE_DIR} --disable-tcl"
     local INSTALL_TARGET=install
 
+    export CFLAGS='-DSQLITE_ENABLE_UNLOCK_NOTIFY=1'
+
     buildWithConfigure "sqlite3" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
 }
 

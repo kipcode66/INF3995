@@ -2,6 +2,7 @@ package ca.polymtl.inf3990_01.client.controller.rest
 
 import android.content.Context
 import android.os.Handler
+import android.util.Log
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.InitializationManager
@@ -13,6 +14,7 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
 import java.io.File
+import java.nio.charset.Charset
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
@@ -73,13 +75,13 @@ class RestRequestService(
         return list
     }
 
-    suspend fun sendSong(song: LocalSong) {
+    @Synchronized suspend fun sendSong(song: LocalSong) {
         val songToSend = encoder(song)
         val token = tokenMgr.getToken()
         val resp: ResponseData<String> = suspendCoroutine { continuation ->
             val request = RESTRequest(
                     Request.Method.POST,
-                    httpClient.getBaseURL() + "/usager/file/$token",
+                    httpClient.getBaseURL() + "/usager/chanson/$token",
                     songToSend,
                     String::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
@@ -97,11 +99,11 @@ class RestRequestService(
                         continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
                     }
             )
-            //request.setRetryPolicy(DefaultRetryPolicy(10*1000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            request.setRetryPolicy(DefaultRetryPolicy(10*1000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
             httpClient.addToRequestQueue(request)
         }
         if (resp.code != 200) {
-            Handler(appCtx.mainLooper).post(Runnable { Toast.makeText(appCtx, resp.value, Toast.LENGTH_LONG) })
+            Handler(appCtx.mainLooper).post(Runnable { Toast.makeText(appCtx, "Post song error: " + resp.value, Toast.LENGTH_LONG).show() })
         }
     }
 

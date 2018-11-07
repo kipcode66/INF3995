@@ -1,4 +1,4 @@
-#include "mp3-header/Mp3Header.hpp"
+#include "mp3/header/Mp3Header.hpp"
 
 #define BOOST_TEST_MODULE Mp3Header
 #include <boost/test/unit_test.hpp>
@@ -15,6 +15,7 @@ BOOST_AUTO_TEST_CASE(mp3HeaderFailure) {
     testInput.push_back(TEST_TEXT_PATH);
     testInput.push_back("does-not-exist.mp3");
     testInput.push_back(TEST_MP3_AS_TXT_PATH);
+    testInput.push_back(TEST_TXT_AS_MP3_PATH);
 
     for (const auto& testCase : testInput) {
         BOOST_CHECK_THROW(Mp3Header mp3Header(testCase), std::invalid_argument);
