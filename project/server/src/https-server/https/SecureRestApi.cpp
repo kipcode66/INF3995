@@ -1,5 +1,6 @@
 #include <common/logger/Logger.hpp>
 #include <pistache/serializer/rapidjson.h>
+#include <future>
 
 #include "SecureRestApi.hpp"
 #include "rapidjson/document.h"
@@ -49,13 +50,18 @@ void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::Respon
     auto body = request.body();
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
-    if (!request_json.HasMember("usager")
-            || !request_json.HasMember("mot_de_passe")
-            || !request_json.HasMember("X-Auth-Token")
-            || request_json["usager"] == '\n'
-            || request_json["mot_de_passe"] == '\n'
-            || request_json["X-Auth-Token"] == '\n') {
+    if ((!request_json.IsObject()
+            || (!request_json.HasMember("usager")
+                || !request_json.HasMember("mot_de_passe")
+                || request_json["usager"] == '\n'
+                || request_json["mot_de_passe"] == '\n'))) {
         response.send(Http::Code::Bad_Request, "Malformed request");
+        return;
+    }
+    auto t = request.headers().getRaw("X-Auth-Token");
+    if (t.value().empty()) {
+        std::cout << "Header \"X-Auth-Token\" missing" << std::endl;
+        response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" missing");
         return;
     }
     std::string login(request_json["usager"].GetString());
@@ -63,45 +69,64 @@ void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::Respon
         response.send(Http::Code::Bad_Request, "Wrong login");
         return;
     }
-    uint32_t admin_id = request_json["X-Auth-Token"].GetUint();
-    Database* db = Database::instance();
-    if (db->isAdminConnected(admin_id)) {
-        response.send(Http::Code::Bad_Request, "Admin already connected with this token");
+    uint32_t admin_id = std::stoul(t.value());
+    if (admin_id == 0) {
+        response.send(Http::Code::Forbidden, "Invalid token");
         return;
     }
-    std::vector<char*> saltAndHash = db->getSaltAndHashedPasswordByLogin(login.c_str());
-    char* salt = saltAndHash[0];
-    char* hash = saltAndHash[1];
-    std::string password(request_json["mot_de_passe"].GetString());
-    std::string passwordHash = elevation::id_utils::generateMd5Hash(password, salt);
-    if (passwordHash == hash) {
-        db->connectAdmin(login.c_str(), admin_id);
-        response.send(Http::Code::Ok, "Connexion successful");
-        return;
-    } else {
-        response.send(Http::Code::Forbidden, "Wrong password");
-        return;
-    }
+    std::async([&](){
+        Database* db = Database::instance();
+        if (db->isAdminConnected(admin_id)) {
+            response.send(Http::Code::Bad_Request, "Admin already connected with this token");
+            return;
+        }
+        std::vector<std::string> saltAndHash = db->getSaltAndHashedPasswordByLogin(login.c_str());
+        std::string salt = saltAndHash[0];
+        std::string hash = saltAndHash[1];
+        std::string password(request_json["mot_de_passe"].GetString());
+        std::string passwordHash = elevation::id_utils::generateMd5Hash(password, salt);
+        if (passwordHash == hash) {
+            db->connectAdmin(login.c_str(), admin_id);
+            response.send(Http::Code::Ok, "Connexion successful");
+            return;
+        } else {
+            response.send(Http::Code::Forbidden, "Wrong password");
+            return;
+        }
+    });
 }
 
 void SecureRestApi::superviseurLogout_(const Rest::Request& request, Http::ResponseWriter response) {
-    auto body = request.body();
-    rapidjson::Document request_json;
-    request_json.Parse(body.c_str());
-    if (!request_json.HasMember("X-Auth-Token")
-            || request_json["X-Auth-Token"] == '\n') {
-        response.send(Http::Code::Bad_Request, "Malformed request");
+    // auto body = request.body();
+    // rapidjson::Document request_json;
+    // request_json.Parse(body.c_str());
+    // if (!request_json.HasMember("X-Auth-Token")
+    //         || request_json["X-Auth-Token"] == '\n') {
+    //     response.send(Http::Code::Bad_Request, "Malformed request");
+    //     return;
+    // }
+    // uint32_t admin_id = request_json["X-Auth-Token"].GetUint();
+    auto t = request.headers().getRaw("X-Auth-Token");
+    if (t.value().empty()) {
+        std::cout << "Header \"X-Auth-Token\" missing" << std::endl;
+        response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" missing");
         return;
     }
-    uint32_t admin_id = request_json["X-Auth-Token"].GetUint();
-    Database* db = Database::instance();
-    if (!db->isAdminConnected(admin_id)) {
-        response.send(Http::Code::Unauthorized, "Admin not connected");
-        return;
-    } else {
-        db->disconnectAdmin(admin_id);
-        response.send(Http::Code::Ok, "Logout successful");
+    uint32_t admin_id = std::stoul(t.value());
+    if (admin_id == 0) {
+        response.send(Http::Code::Forbidden, "Invalid token");
         return;
     }
+    std::async([&](){
+        Database* db = Database::instance();
+        if (!db->isAdminConnected(admin_id)) {
+            response.send(Http::Code::Unauthorized, "Admin not connected");
+            return;
+        } else {
+            db->disconnectAdmin(admin_id);
+            response.send(Http::Code::Ok, "Logout successful");
+            return;
+        }
+    });
 }
 

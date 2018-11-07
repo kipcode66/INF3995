@@ -123,8 +123,8 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
 
-    if ((request_json.IsObject()
-            && (!request_json.HasMember("mac")
+    if ((!request_json.IsObject()
+            || (!request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
                 || request_json["mac"] == '\n'
                 || request_json["ip"] == '\n'))) {
@@ -136,13 +136,8 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         if (request_json.IsObject()) {
             strcpy(requestUser.mac, request_json["mac"].GetString());
             strcpy(requestUser.ip, request_json["ip"].GetString());
-            strcpy(requestUser.name, request_json["nom"].GetString());
-        }
-        else if (request.hasParam("mac") && request.hasParam("ip")) {
-            strcpy(requestUser.mac, request.param("mac").as<std::string>().c_str());
-            strcpy(requestUser.ip, request.param("ip").as<std::string>().c_str());
-            if (request.hasParam("nom")) {
-                strcpy(requestUser.name, request.param("nom").as<std::string>().c_str());
+            if (request_json.HasMember("nom")) {
+                strcpy(requestUser.name, request_json["nom"].GetString());
             }
         }
         
@@ -184,7 +179,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
     std::string param = request.param(":id").as<std::string>();
     std::async([&](){
         std::cout << "getFileList function called, param is " << param << std::endl;
-        if (std::stoi(param) == 0) {
+        if (std::stoul(param) == 0) {
             response.send(Http::Code::Forbidden, "Invalid token");
             return;
         }
@@ -193,14 +188,10 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
         std::stringstream resp;
         resp << "{\n\"chansons\":[\n";
         for (auto& song : songs) {
-            resp << generateSong(song, std::stoi(param)) << (&songs.back() != &song ? ",\n" : "\n");
+            resp << generateSong(song, std::stoul(param)) << (&songs.back() != &song ? ",\n" : "\n");
         }
         resp << "]\n}\n";
         response.send(Http::Code::Ok, resp.str());
-        /*"{\n\"chansons\":[\n"
-            "{\n\"titre\":\"Never Gonna Give You Up\",\n\"artiste\":\"Foo\",\n\"duree\":\"4:20\",\n\"proposeePar\":\"Chuck Norris\",\n\"proprietaire\":false,\n\"no\":42},\n"
-            "{\n\"titre\":\"Hey Jude\",\n\"artiste\":\"Beatles\",\n\"duree\":\"7:05\",\n\"proposeePar\":\"Claude\",\n\"proprietaire\":true,\n\"no\":25}\n"
-        "]\n}\n"*/
     });
 }
 
@@ -230,7 +221,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
     std::async([=, &response](){
         Mp3Header* header = nullptr;
         try {
-            uint32_t token = std::stoi(t.value());
+            uint32_t token = std::stoul(t.value());
 
             // TODO : Check in the DB if the user has a valid token.
             if (token == 0) {

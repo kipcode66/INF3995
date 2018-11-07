@@ -14,6 +14,8 @@ namespace elevation {
 
 class Database {
 public:
+    static constexpr const char* DEFAULT_PASSWORD = "admin";    
+public:
     static Database* instance();
     void getUserByMac(const char* mac, User_t* __restrict__ user) const;
     void getUserById(int, User_t* __restrict__) const;
@@ -24,7 +26,7 @@ public:
     int connectAdmin(const char* login, uint32_t admin_id);
     int disconnectAdmin(uint32_t admin_id);
     bool isAdminConnected(uint32_t admin_id) const;
-    std::vector<char*> getSaltAndHashedPasswordByLogin(const char* login) const;
+    std::vector<std::string> getSaltAndHashedPasswordByLogin(const char* login) const;
     
     void getSongById(int, Song_t* __restrict__) const;
     void getSongByTitle(const char*, Song_t* __restrict__) const;
@@ -32,6 +34,8 @@ public:
     std::vector<Song_t> getSongsByUser(int userId) const;
     std::vector<Song_t> getAllSongs() const;
     int createSong(const Song_t*);
+
+    int initDefaultAdmin(sqlite3* m_db);
 
 private:
     Database();

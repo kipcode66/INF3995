@@ -230,20 +230,23 @@ bool Database::isAdminConnected(uint32_t admin_id) const {
     return isConnected;
 }
 
-std::vector<char*> Database::getSaltAndHashedPasswordByLogin(const char* login) const {
+std::vector<std::string> Database::getSaltAndHashedPasswordByLogin(const char* login) const {
     int errcode = 0;
     char* query = sqlite3_mprintf(
             "SELECT salt, hashed_password FROM adminLogin WHERE (login = '%q');", login);
     sqlite3_stmt *statement = nullptr;
     errcode = sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
+    sqlite3_free(query);
     if (errcode)
         throw std::runtime_error(sqlite3_errstr(errcode));
 
     errcode = sqlite3_blocking_step(statement);
-    std::vector<char*> saltAndHashedPassword;
+    std::vector<std::string> saltAndHashedPassword;
     if (errcode == SQLITE_ROW) {
-        saltAndHashedPassword.push_back((char *)sqlite3_column_text(statement, 0));
-        saltAndHashedPassword.push_back((char *)sqlite3_column_text(statement, 1));
+        std::string salt((char *)sqlite3_column_text(statement, 0));
+        std::string hash((char *)sqlite3_column_text(statement, 1));
+        saltAndHashedPassword.push_back(salt);
+        saltAndHashedPassword.push_back(hash);
     } else {
         errcode = sqlite3_finalize(statement);
         throw std::runtime_error(sqlite3_errstr(errcode));
@@ -390,7 +393,7 @@ int Database::createSong(const Song_t* song) {
     return errcode;
 }
 
-int enable_foreign_keys(sqlite3* m_db, char **errmsg) {
+int enable_foreign_keys(sqlite3* m_db) {
     int errcode = 0;
     do {
         try {
@@ -421,7 +424,7 @@ int enable_foreign_keys(sqlite3* m_db, char **errmsg) {
     return errcode;
 }
 
-int wipeDbSongs(sqlite3* m_db, char **errmsg) {
+int wipeDbSongs(sqlite3* m_db) {
     int errcode = 0;
     do {
         try {
@@ -452,6 +455,31 @@ int wipeDbSongs(sqlite3* m_db, char **errmsg) {
     return errcode;
 }
 
+int Database::initDefaultAdmin(sqlite3* m_db) {
+    int errcode = 0;
+    do {
+        try {
+            char* query = sqlite3_mprintf(
+                    "SELECT * FROM adminLogin;");
+            sqlite3_stmt *statement = nullptr;
+            errcode = sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
+            if (errcode)
+                throw std::runtime_error(sqlite3_errstr(errcode));
+
+            errcode = sqlite3_blocking_step(statement);
+            if (errcode == SQLITE_DONE) {
+                errcode = createAdmin(DEFAULT_PASSWORD);
+            }
+            errcode = sqlite3_finalize(statement);
+        }
+        catch (std::runtime_error& e) {
+            std::this_thread::sleep_for(100ms);
+        }
+    } while (errcode == SQLITE_LOCKED);
+
+    return errcode;
+}
+
 Database::Database() {
     int errcode = 0;
     errcode = sqlite3_enable_shared_cache(true);
@@ -468,20 +496,26 @@ Database::Database() {
         sqlite3_close(m_db);
         throw std::runtime_error("Cannot connect to database");
     }
-    char* errmsg = nullptr;
-    errcode = enable_foreign_keys(m_db, &errmsg);
+    errcode = enable_foreign_keys(m_db);
     if (errcode) {
-        std::cerr << "Can't enable foreign keys: " << errmsg << std::endl;
+        std::cerr << "Can't enable foreign keys: " << sqlite3_errstr(errcode) << std::endl;
 
         sqlite3_close(m_db);
         throw std::runtime_error("Cannot enable foreign keys");
     }
-    errcode = wipeDbSongs(m_db, &errmsg);
+    errcode = wipeDbSongs(m_db);
     if (errcode) {
-        std::cerr << "Can't wipe all songs: " << errmsg << std::endl;
+        std::cerr << "Can't wipe all songs: " << sqlite3_errstr(errcode) << std::endl;
 
         sqlite3_close(m_db);
         throw std::runtime_error("Cannot wipe all songs");
+    }
+    errcode = initDefaultAdmin(m_db);
+    if (errcode) {
+        std::cerr << "Can't create a default admin: " << sqlite3_errstr(errcode) << std::endl;
+
+        sqlite3_close(m_db);
+        throw std::runtime_error("Cannot create a default admin");
     }
 }
 
