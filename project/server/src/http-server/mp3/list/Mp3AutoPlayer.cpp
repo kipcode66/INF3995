@@ -1,4 +1,4 @@
-#include "PendingSongs.hpp"
+#include "Mp3AutoPlayer.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -7,7 +7,7 @@
 
 namespace elevation {
 
-PendingSongs::PendingSongs(
+Mp3AutoPlayer::Mp3AutoPlayer(
     std::function<path()> nextSongGetter,
     std::function<void(path)> songRemover
 )
@@ -17,10 +17,10 @@ PendingSongs::PendingSongs(
     , m_songRemover(songRemover)
     , m_terminateRequested(false)
 {
-    m_playerThread = std::thread(&PendingSongs::songStarter_, this);
+    m_playerThread = std::thread(&Mp3AutoPlayer::songStarter_, this);
 }
 
-PendingSongs::~PendingSongs() {
+Mp3AutoPlayer::~Mp3AutoPlayer() {
     try {
         sendTerminate_();
         stopSong();
@@ -29,7 +29,7 @@ PendingSongs::~PendingSongs() {
     catch (std::system_error& e) { }
 }
 
-void PendingSongs::songStarter_() {
+void Mp3AutoPlayer::songStarter_() {
     while (!m_terminateRequested.load()) {
         try {
             path song(m_nextSongGetter());
@@ -54,25 +54,25 @@ void PendingSongs::songStarter_() {
         }
         catch (Terminate& e) { }
         catch (std::exception& e) {
-            std::cerr << "PendingSongs got C++ exeption : " << e.what() << std::endl;
+            std::cerr << "Mp3AutoPlayer got C++ exeption : " << e.what() << std::endl;
         }
     }
 }
 
-void PendingSongs::waitUntilSongStarted() {
+void Mp3AutoPlayer::waitUntilSongStarted() {
     m_startFuture.get();
 }
 
-void PendingSongs::waitUntilSongFinished() {
+void Mp3AutoPlayer::waitUntilSongFinished() {
     m_player.waitUntilSongFinished();
 }
 
-void PendingSongs::stopSong() {
+void Mp3AutoPlayer::stopSong() {
     m_player.stopPlaying();
     m_player.waitUntilSongFinished();
 }
 
-void PendingSongs::sendTerminate_() {
+void Mp3AutoPlayer::sendTerminate_() {
     m_terminateRequested.store(true);
 }
 
