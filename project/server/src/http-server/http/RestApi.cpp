@@ -241,7 +241,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
     const std::string body = request.body();
 
-    std::thread([this, t](std::ostringstream logMsg, const std::string body, Http::ResponseWriter response){
+    std::thread([this, t](std::ostringstream logMsg, const std::string body, Http::ResponseWriter response) {
         Mp3Header* header = nullptr;
         try {
             Database* db = Database::instance();
@@ -262,7 +262,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 requestUser = db->getUserById(token);
             } catch (sqlite_error& e) { }
 
-            if (token == 0 || requestUser.mac == nullptr) {
+            if (token == 0 || *requestUser.mac == 0) {
                 logMsg << "Could not post the file. Received invalid token.";
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Forbidden, "Invalid token");
