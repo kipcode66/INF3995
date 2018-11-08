@@ -1,3 +1,6 @@
+#ifndef DATABASE_USER_HPP
+#define DATABASE_USER_HPP
+
 #include <stdint.h>
 #include <cstddef>
 
@@ -11,3 +14,5 @@ struct User_t {
     char mac[MAC_LENGTH];
     char name[NAME_LENGTH];
 };
+
+#endif // !DATABASE_USER_HPP

@@ -19,6 +19,7 @@ set(COMMON_CPP_SOURCES
     mp3/player/mad/MadAudioFormatter.cpp
     mp3/player/pulse/PulseDevice.cpp
     database/Database.cpp
+    database/sqlite_error.cpp
     os/SharedFileMemory.cpp
     filesystem/FileCache.cpp
     misc/id_utils.cpp
@@ -39,6 +40,7 @@ set(COMMON_HEADER_SOURCES
     mp3/player/pulse/PulseDevice.hpp
     mp3/player/mad/MadAudioFormatter.hpp
     database/Database.hpp
+    database/sqlite_error.hpp
     os/SharedFileMemory.hpp
     filesystem/FileCache.hpp
     misc/Base64.hpp

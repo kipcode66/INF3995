@@ -99,18 +99,24 @@ std::string generateBody(uint32_t id, std::string message) {
     return buf.GetString();
 }
 
-std::string generateSong(const Song_t& song, uint32_t token) {
+std::string RestApi::generateSong_(const Song_t& song, uint32_t token) {
     rapidjson::Document songDoc;
     songDoc.SetObject();
-    songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), songDoc.GetAllocator());
-    songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
-    songDoc.AddMember("duree", "04:20", songDoc.GetAllocator());
-    User_t user;
-    Database::instance()->getUserById(song.user_id, &user);
-    songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
-    songDoc.AddMember("proprietaire", token == song.user_id ? true : false, songDoc.GetAllocator());
-    songDoc.AddMember("no", song.id, songDoc.GetAllocator());
-
+    try {
+        User_t user = Database::instance()->getUserById(song.user_id);
+        songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), songDoc.GetAllocator());
+        songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
+        songDoc.AddMember("duree", "04:20", songDoc.GetAllocator());
+        songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
+        songDoc.AddMember("proprietaire", token == song.user_id ? true : false, songDoc.GetAllocator());
+        songDoc.AddMember("no", song.id, songDoc.GetAllocator());
+    }
+    catch (sqlite_error& e) {
+        std::stringstream msg;
+        msg << "An error occured while generating song a song's json: " << e.what();
+        m_logger.log(msg.str());
+        std::cerr << msg.str() << std::endl;
+    }
     rapidjson::StringBuffer buf;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
     songDoc.Accept(writer);
@@ -147,7 +153,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 
         User_t existingUser = { 0 };
         Database* db = Database::instance();
-        db->getUserByMac(requestUser.mac, &existingUser);
+        existingUser = db->getUserByMac(requestUser.mac);
         if (*existingUser.mac == 0) {
             std::string salt = id_utils::generateSalt(strlen(requestUser.mac)); 
             requestUser.user_id = id_utils::generateId(requestUser.mac, salt);
@@ -160,13 +166,16 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             return;
         } else {
             requestUser.user_id = existingUser.user_id;
-            if (db->createUser(&requestUser)) {
-                std::cerr << "problem writing to database" << std::endl;
-                response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
-                return;
-            } else {
+            try {
+                db->createUser(&requestUser);
                 std::string body = generateBody(requestUser.user_id, "connection successful");
                 response.send(Http::Code::Ok, body);
+                return;
+            } catch (sqlite_error& e) {
+                std::stringstream msg;
+                msg << "couldn't create user in db: " << e.what();
+                std::cerr << msg.str() << std::endl;
+                response.send(Http::Code::Internal_Server_Error, msg.str());
                 return;
             }
         }
@@ -188,7 +197,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
         std::stringstream resp;
         resp << "{\n\"chansons\":[\n";
         for (auto& song : songs) {
-            resp << generateSong(song, std::stoul(param)) << (&songs.back() != &song ? ",\n" : "\n");
+            resp << generateSong_(song, std::stoul(param)) << (&songs.back() != &song ? ",\n" : "\n");
         }
         resp << "]\n}\n";
         response.send(Http::Code::Ok, resp.str());

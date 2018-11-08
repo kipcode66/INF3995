@@ -6,6 +6,7 @@
 
 #include "User.hpp"
 #include "Song.hpp"
+#include "sqlite_error.hpp"
 
 #ifndef DATABASE_DATABASE_HPP
 #define DATABASE_DATABASE_HPP
@@ -17,29 +18,29 @@ public:
     static constexpr const char* DEFAULT_PASSWORD = "admin";    
 public:
     static Database* instance();
-    void getUserByMac(const char* mac, User_t* __restrict__ user) const;
-    void getUserById(int, User_t* __restrict__) const;
-    int createUser(const User_t* user);
-    int createAdmin(const char* password);
-    int updateTimestamp(const User_t* user);
-    int connectUser(const struct User_t* user);
-    int connectAdmin(const char* login, uint32_t admin_id);
-    int disconnectAdmin(uint32_t admin_id);
+    User_t getUserByMac(const char*) const;
+    User_t getUserById(uint32_t) const;
+    void createUser(const User_t* user);
+    void createAdmin(const char* password);
+    void updateTimestamp(const User_t* user);
+    void connectUser(const struct User_t* user);
+    void connectAdmin(const char* login, uint32_t admin_id);
+    void disconnectAdmin(uint32_t admin_id);
     bool isAdminConnected(uint32_t admin_id) const;
     std::vector<std::string> getSaltAndHashedPasswordByLogin(const char* login) const;
     
-    void getSongById(int, Song_t* __restrict__) const;
-    void getSongByTitle(const char*, Song_t* __restrict__) const;
-    void getSongByPath(const char*, Song_t* __restrict__) const;
+    Song_t getSongById(int) const;
+    Song_t getSongByTitle(const char*) const;
+    Song_t getSongByPath(const char*) const;
     std::vector<Song_t> getSongsByUser(int userId) const;
     std::vector<Song_t> getAllSongs() const;
-    int createSong(const Song_t*);
+    void createSong(const Song_t*);
 
-    int initDefaultAdmin(sqlite3* m_db);
+    void initDefaultAdmin(sqlite3* m_db);
 
 private:
     Database();
-    void getSongByQuery_(const char*, Song_t* __restrict__) const;
+    Song_t getSongByQuery_(const char*) const;
 
     sqlite3* m_db = 0;
     static Database* s_instance;

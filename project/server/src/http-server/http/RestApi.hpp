@@ -6,9 +6,9 @@
 #include <pistache/router.h>
 #include <pistache/description.h>
 #include <common/logger/Logger.hpp>
+#include <database/Database.hpp>
 
 #include "filesystem/FileCache.hpp"
-
 
 using namespace Pistache;
 namespace elevation {
@@ -29,6 +29,7 @@ protected:
     void getFileList_(const Rest::Request& request, Http::ResponseWriter response);
     void postFile_(const Rest::Request& request, Http::ResponseWriter response);
     void deleteFile_(const Rest::Request& request, Http::ResponseWriter response);
+    std::string generateSong_(const Song_t& song, uint32_t token);
 
     std::shared_ptr<Http::Endpoint> m_httpEndpoint;
     Rest::Description m_desc;
