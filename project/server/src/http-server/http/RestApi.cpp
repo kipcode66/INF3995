@@ -144,7 +144,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
-    std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response, std::ostringstream logMsg) {
+    // std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response, std::ostringstream logMsg) {
         User_t requestUser = { 0 };
         if (request_json.IsObject()) {
             strcpy(requestUser.mac, request_json["mac"].GetString());
@@ -189,7 +189,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 return;
             }
         }
-    }, std::move(request_json), std::move(response), std::move(logMsg)).detach();
+    // }, std::move(request_json), std::move(response), std::move(logMsg)).detach();
     return;
 }
 
