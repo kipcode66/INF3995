@@ -12,6 +12,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.experimental.launch
 import java.io.UnsupportedEncodingException
+import java.math.BigInteger
 import java.nio.charset.Charset
 
 class RESTRequest<T>(
@@ -40,7 +41,7 @@ class RESTRequest<T>(
 
     override fun getHeaders(): MutableMap<String, String> {
         val h = headers ?: super.getHeaders()
-        var token = 0
+        var token: BigInteger = BigInteger.ZERO
         if (TokenManagerService.hasInstance()) {
             token = TokenManagerService.getInstanceOrThrow().getToken()
         }
