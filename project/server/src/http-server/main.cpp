@@ -1,6 +1,7 @@
 #include <iostream>
 #include <inttypes.h>
 #include "http/RestApi.hpp"
+#include "mp3/player/Mp3AutoPlayer.hpp"
 
 
 uint32_t parseArgs(int argc, char** argv) {
