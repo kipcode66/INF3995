@@ -142,7 +142,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
-    std::thread([&](){
+    std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response){
         User_t requestUser = { 0 };
         if (request_json.IsObject()) {
             strcpy(requestUser.mac, request_json["mac"].GetString());
@@ -184,14 +184,14 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 return;
             }
         }
-    });
+    }, std::move(request_json), std::move(response));
     return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::string param = request.headers().getRaw("X-Auth-Token").value();
-    std::thread([&](){
+    std::thread([&](Http::ResponseWriter response){
         std::cout << "getFileList function called, param is " << param << std::endl;
         if (std::stoul(param) == 0) {
             response.send(Http::Code::Forbidden, "Invalid token");
@@ -206,7 +206,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
         }
         resp << "]\n}\n";
         response.send(Http::Code::Ok, resp.str());
-    });
+    }, std::move(response));
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -228,7 +228,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
     const std::string body = request.body();
 
-    std::thread([&](){
+    std::thread([&](const std::string body, Http::ResponseWriter response){
         Mp3Header* header = nullptr;
         try {
             Database* db = Database::instance();
@@ -334,7 +334,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             return;
         }
         response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
-    });
+    }, std::move(body), std::move(response));
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
