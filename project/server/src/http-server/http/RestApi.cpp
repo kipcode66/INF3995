@@ -197,8 +197,8 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
-    std::ostringstream logMsg;
-    std::thread([&](const Rest::Request& request, Http::ResponseWriter response, std::ostringstream logMsg){
+    std::thread([this](const Rest::Request& request, Http::ResponseWriter response) {
+        std::ostringstream logMsg;
         std::string param = request.headers().getRaw("X-Auth-Token").value();
         if (std::stoul(param) == 0) {
             logMsg << "Could not get the file list. Received an invalid token.";
@@ -217,7 +217,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
         logMsg << "The file list for user \"" << param << "\" was successfuly sent.";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
-    }, std::move(request), std::move(response), std::move(logMsg)).detach();
+    }, std::move(request), std::move(response)).detach();
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -241,7 +241,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
     const std::string body = request.body();
 
-    std::thread([&](std::ostringstream logMsg, const std::string body, Http::ResponseWriter response){
+    std::thread([this, t](std::ostringstream logMsg, const std::string body, Http::ResponseWriter response){
         Mp3Header* header = nullptr;
         try {
             Database* db = Database::instance();
