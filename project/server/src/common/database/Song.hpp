@@ -12,7 +12,7 @@ struct Song_t {
     uint32_t id;
     char title[TITLE_LENGTH];
     char artist[ARTIST_LENGTH];
-    uint32_t user_id;
+    uint32_t userId;
     uint32_t duration;
     char path[PATH_LENGTH];
 };

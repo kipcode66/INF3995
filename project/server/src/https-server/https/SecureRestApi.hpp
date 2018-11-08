@@ -14,6 +14,8 @@ using namespace Pistache;
 namespace elevation {
 
 class SecureRestApi : public RestApi {
+private:
+    static constexpr const char* ADMIN_USERNAME = "admin";
 public:
     SecureRestApi(Address);
     void init();

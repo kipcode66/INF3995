@@ -5,7 +5,7 @@
 #include <cstring>
 
 namespace elevation {
-namespace id_utils{
+namespace id_utils {
 
 std::string generateSalt(int length);
 std::string generateMd5Hash(const std::string& str, const std::string& salt);

@@ -104,7 +104,7 @@ std::string RestApi::generateSong_(const Song_t& song, uint32_t token) {
     rapidjson::Document songDoc;
     songDoc.SetObject();
     try {
-        User_t user = Database::instance()->getUserById(song.user_id);
+        User_t user = Database::instance()->getUserById(song.userId);
         Mp3Duration d(song.duration);
         std::stringstream duration;
         duration << std::setfill('0') << std::setw(2);
@@ -113,7 +113,7 @@ std::string RestApi::generateSong_(const Song_t& song, uint32_t token) {
         songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
         songDoc.AddMember("duree", rapidjson::Value(duration.str().c_str(), duration.str().length()), songDoc.GetAllocator());
         songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
-        songDoc.AddMember("proprietaire", token == song.user_id ? true : false, songDoc.GetAllocator());
+        songDoc.AddMember("proprietaire", token == song.userId ? true : false, songDoc.GetAllocator());
         songDoc.AddMember("no", song.id, songDoc.GetAllocator());
     }
     catch (sqlite_error& e) {
@@ -161,19 +161,19 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         existingUser = db->getUserByMac(requestUser.mac);
         if (*existingUser.mac == 0) {
             std::string salt = id_utils::generateSalt(strlen(requestUser.mac)); 
-            requestUser.user_id = id_utils::generateId(requestUser.mac, salt);
+            requestUser.userId = id_utils::generateId(requestUser.mac, salt);
 
             db->createUser(&requestUser);
             db->connectUser(&requestUser);
 
-            std::string body = generateBody(requestUser.user_id, "connection successful");
+            std::string body = generateBody(requestUser.userId, "connection successful");
             response.send(Http::Code::Ok, body);
             return;
         } else {
-            requestUser.user_id = existingUser.user_id;
+            requestUser.userId = existingUser.userId;
             try {
                 db->createUser(&requestUser);
-                std::string body = generateBody(requestUser.user_id, "connection successful");
+                std::string body = generateBody(requestUser.userId, "connection successful");
                 response.send(Http::Code::Ok, body);
                 return;
             } catch (sqlite_error& e) {
@@ -294,7 +294,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             Song_t song;
             strcpy(song.title, header->getTitle().c_str());
             strcpy(song.artist, header->getArtist().c_str());
-            song.user_id = requestUser.user_id;
+            song.userId = requestUser.userId;
             song.duration = header->getDuration().getDurationInSeconds();
             strcpy(song.path, filePath.string().c_str());
 

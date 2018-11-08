@@ -61,7 +61,7 @@ User_t Database::getUserByMac(const char* mac) const {
         strcpy(user.ip, (char *)sqlite3_column_text(statement, 0));
         strcpy(user.mac, (char *)sqlite3_column_text(statement, 1)); // do last as a coherence check
         strcpy(user.name, (char *)sqlite3_column_text(statement, 2));
-        user.user_id = sqlite3_column_int(statement, 3);
+        user.userId = sqlite3_column_int(statement, 3);
     }
     errcode = sqlite3_finalize(statement);
     assertSqliteOk(errcode);
@@ -81,7 +81,7 @@ User_t Database::getUserById(uint32_t id) const {
 
     errcode = sqlite3_blocking_step(statement);
     if (errcode == SQLITE_ROW) {
-        user.user_id = sqlite3_column_int(statement, 0);
+        user.userId = sqlite3_column_int(statement, 0);
         strcpy(user.ip, (char *)sqlite3_column_text(statement, 1));
         strcpy(user.name, (char *)sqlite3_column_text(statement, 3));
         strcpy(user.mac, (char *)sqlite3_column_text(statement, 2)); // do last as a coherence check
@@ -96,7 +96,7 @@ void Database::createUser(const User_t* user) {
     int errcode = 0;
     char* query = sqlite3_mprintf(
                 "INSERT OR REPLACE INTO user (user_id, ip, mac, name) VALUES (%u, '%q', '%q', '%q');",
-                user->user_id,
+                user->userId,
                 user->ip,
                 user->mac,
                 user->name);
@@ -116,7 +116,7 @@ void Database::connectUser(const struct User_t* user) {
     int errcode = 0;
     char* query = sqlite3_mprintf(
                 "INSERT INTO userConnection VALUES (%u, %u, julianday('now'));",
-                user->user_id,
+                user->userId,
                 userIsConnected);
 
     sqlite3_stmt *statement = nullptr;
@@ -149,14 +149,14 @@ void Database::createAdmin(const char* password) {
     assertSqliteOk(errcode);
 }
 
-void Database::connectAdmin(const char* login, uint32_t admin_id) {
+void Database::connectAdmin(const char* login, uint32_t adminId) {
     uint32_t adminIsConnected = 1;
     int errcode = 0;
     char* query = sqlite3_mprintf(
                 "INSERT or REPLACE INTO adminConnection VALUES ('%q', %u, %u, julianday('now'));",
                 login,
                 adminIsConnected,
-                admin_id);
+                adminId);
 
     sqlite3_stmt *statement = nullptr;
     sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, 0);
@@ -168,10 +168,10 @@ void Database::connectAdmin(const char* login, uint32_t admin_id) {
     assertSqliteOk(errcode);
 }
 
-void Database::disconnectAdmin(uint32_t admin_id) {
+void Database::disconnectAdmin(uint32_t adminId) {
     int errcode = 0;
     char* query = sqlite3_mprintf(
-            "UPDATE adminConnection SET timeStamp = 0, isConnected = 0 WHERE (login = 'admin' AND admin_id = %u)", admin_id);
+            "UPDATE adminConnection SET timeStamp = 0, isConnected = 0 WHERE (login = 'admin' AND admin_id = %u)", adminId);
 
     sqlite3_stmt *statement = nullptr;
     sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, 0);
@@ -183,10 +183,10 @@ void Database::disconnectAdmin(uint32_t admin_id) {
     assertSqliteOk(errcode);
 }
 
-bool Database::isAdminConnected(uint32_t admin_id) const {
+bool Database::isAdminConnected(uint32_t adminId) const {
     int errcode = 0;
     char* query = sqlite3_mprintf(
-            "SELECT isConnected FROM adminConnection WHERE (login = 'admin' and admin_id = %u);", admin_id);
+            "SELECT isConnected FROM adminConnection WHERE (login = 'admin' and admin_id = %u);", adminId);
     sqlite3_stmt *statement = nullptr;
     sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
     sqlite3_free(query);
@@ -202,7 +202,7 @@ bool Database::isAdminConnected(uint32_t admin_id) const {
     return isConnected;
 }
 
-std::vector<std::string> Database::getSaltAndHashedPasswordByLogin(const char* login) const {
+std::pair<std::string, std::string> Database::getSaltAndHashedPasswordByLogin(const char* login) const {
     int errcode = 0;
     char* query = sqlite3_mprintf(
             "SELECT salt, hashed_password FROM adminLogin WHERE (login = '%q');", login);
@@ -211,12 +211,11 @@ std::vector<std::string> Database::getSaltAndHashedPasswordByLogin(const char* l
     sqlite3_free(query);
 
     errcode = sqlite3_blocking_step(statement);
-    std::vector<std::string> saltAndHashedPassword;
+    std::pair<std::string, std::string> saltAndHashedPassword;
     if (errcode == SQLITE_ROW) {
         std::string salt((char *)sqlite3_column_text(statement, 0));
         std::string hash((char *)sqlite3_column_text(statement, 1));
-        saltAndHashedPassword.push_back(salt);
-        saltAndHashedPassword.push_back(hash);
+        saltAndHashedPassword = std::make_pair(salt, hash);
     }
     errcode = sqlite3_finalize(statement);
     assertSqliteOk(errcode);
@@ -236,7 +235,7 @@ Song_t Database::getSongByQuery_(const char* query) const {
         song.id = sqlite3_column_int(statement, 0);
         strcpy(song.title, (char *)sqlite3_column_text(statement, 1));
         strcpy(song.artist, (char *)sqlite3_column_text(statement, 2));
-        song.user_id = sqlite3_column_int(statement, 3);
+        song.userId = sqlite3_column_int(statement, 3);
         song.duration = sqlite3_column_int(statement, 4);
         strcpy(song.path, (char *)sqlite3_column_text(statement, 5));
     }
@@ -286,7 +285,7 @@ std::vector<Song_t> Database::getSongsByUser(int userId) const {
         song_buffer.id = sqlite3_column_int(statement, 0);
         strcpy(song_buffer.title, (char *)sqlite3_column_text(statement, 1));
         strcpy(song_buffer.artist, (char *)sqlite3_column_text(statement, 2));
-        song_buffer.user_id = sqlite3_column_int(statement, 3);
+        song_buffer.userId = sqlite3_column_int(statement, 3);
         song_buffer.duration = sqlite3_column_int(statement, 4);
         strcpy(song_buffer.path, (char *)sqlite3_column_text(statement, 5));
 
@@ -315,7 +314,7 @@ std::vector<Song_t> Database::getAllSongs() const {
         song_buffer.id = sqlite3_column_int(statement, 0);
         strcpy(song_buffer.title, (char *)sqlite3_column_text(statement, 1));
         strcpy(song_buffer.artist, (char *)sqlite3_column_text(statement, 2));
-        song_buffer.user_id = sqlite3_column_int(statement, 3);
+        song_buffer.userId = sqlite3_column_int(statement, 3);
         song_buffer.duration = sqlite3_column_int(statement, 4);
         strcpy(song_buffer.path, (char *)sqlite3_column_text(statement, 5));
 
@@ -334,7 +333,7 @@ void Database::createSong(const Song_t* song) {
                 "INSERT OR REPLACE INTO cachedSong VALUES ('%q', '%q', %u, %u, '%q');",
                 song->title,
                 song->artist,
-                song->user_id,
+                song->userId,
                 song->duration,
                 song->path);
 
