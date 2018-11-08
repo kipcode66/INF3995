@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <iostream>
 
-#include "exception/Terminate.hpp"
-
 namespace elevation {
 
 Mp3AutoPlayer::Mp3AutoPlayer(
@@ -52,7 +50,6 @@ void Mp3AutoPlayer::songStarter_() {
                 m_songRemover(song);
             }
         }
-        catch (Terminate& e) { }
         catch (std::exception& e) {
             std::cerr << "Mp3AutoPlayer got C++ exeption : " << e.what() << std::endl;
         }
