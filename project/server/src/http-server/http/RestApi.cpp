@@ -144,7 +144,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
-    std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response) {
+    std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response, std::ostringstream logMsg) {
         User_t requestUser = { 0 };
         if (request_json.IsObject()) {
             strcpy(requestUser.mac, request_json["mac"].GetString());
@@ -189,15 +189,16 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 return;
             }
         }
-    }, std::move(request_json), std::move(response)).detach();
+    }, std::move(request_json), std::move(response), std::move(logMsg)).detach();
     return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
+    //std::string param = request.headers().getRaw("X-Auth-Token").value();
+    std::string param = request.param(":id").as<std::string>();
     std::ostringstream logMsg;
-    std::string param = request.headers().getRaw("X-Auth-Token").value();
-    std::thread([&](Http::ResponseWriter response) {
+    std::thread([&](Http::ResponseWriter response, std::ostringstream logMsg){
         std::cout << "getFileList function called, param is " << param << std::endl;
         if (std::stoul(param) == 0) {
             logMsg << "Could not get the file list. Received an invalid token.";
@@ -216,7 +217,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
         logMsg << "The file list for user \"" << param << "\" was successfuly sent.";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
-    }, std::move(response)).detach();
+    }, std::move(response), std::move(logMsg)).detach();
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -240,13 +241,13 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
     const std::string body = request.body();
 
-    std::thread([&](const std::string body, Http::ResponseWriter response) {
+    std::thread([&](const std::string body, Http::ResponseWriter response){
         Mp3Header* header = nullptr;
         try {
             Database* db = Database::instance();
 
             // Start the decoding immediately
-            auto decodedFuture = std::async(std::launch::async, [&]() {
+            auto decodedFuture = std::async(std::launch::async, [&](){
                 // Decode the string.
                 std::stringstream encoded(body);
                 std::stringstream decoded;
