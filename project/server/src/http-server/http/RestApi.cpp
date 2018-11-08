@@ -104,9 +104,13 @@ std::string RestApi::generateSong_(const Song_t& song, uint32_t token) {
     songDoc.SetObject();
     try {
         User_t user = Database::instance()->getUserById(song.user_id);
+        Mp3Duration d = song.duration;
+        std::stringstream duration;
+        duration << std::setfill('0') << std::setw(2);
+        duration << d.getMinutes() << ':' << d.getSeconds();
         songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), songDoc.GetAllocator());
         songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
-        songDoc.AddMember("duree", "04:20", songDoc.GetAllocator());
+        songDoc.AddMember("duree", duration.str(), songDoc.GetAllocator());
         songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
         songDoc.AddMember("proprietaire", token == song.user_id ? true : false, songDoc.GetAllocator());
         songDoc.AddMember("no", song.id, songDoc.GetAllocator());
@@ -206,11 +210,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
     std::cout << "postFile function called" << std::endl;
-
-    User_t requestUser; // TODO
-    std::ostringstream osStream;
-    osStream << '{' << requestUser.mac << '}' << " Sent MP3 \"" << "TITLE TODO" << "\" of length " << "SONG LENGTH TODO";
-    m_logger.log(osStream.str());
+    std::ostringstream logMsg;
 
     auto t = request.headers().getRaw("X-Auth-Token");
     if (t.value().empty()) {
@@ -227,13 +227,19 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
     std::string body = request.body();
 
-    std::async([=, &response](){
+    std::async([&](){
         Mp3Header* header = nullptr;
         try {
             uint32_t token = std::stoul(t.value());
 
-            // TODO : Check in the DB if the user has a valid token.
-            if (token == 0) {
+            Database* db = Database::instance();
+            User_t requestUser = {0};
+
+            try {
+                requestUser = db->getUserById(token);
+            } catch (sqlite_error& e) { }
+
+            if (token == 0 || requestUser.mac == nullptr) {
                 response.send(Http::Code::Forbidden, "Invalid token");
                 return;
             }
@@ -277,17 +283,13 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 return;
             }
 
-            std::cout << "It's tag id3v2 !!!" << std::endl;
-            std::cout << "Title: " << header->getTitle() << std::endl;
-
             // Put the song's path in the DB.
             Song_t song;
             strcpy(song.title, header->getTitle().c_str());
             strcpy(song.artist, header->getArtist().c_str());
-            song.user_id = token; // TODO Get the user from the token and get the id from the user.
+            song.user_id = requestUser.user_id;
+            song.duration = header->getDuration().getDurationInSeconds();
             strcpy(song.path, filePath.string().c_str());
-
-            Database* db = Database::instance();
 
             const auto& songs = db->getSongsByUser(token);
             bool songInQueue = std::any_of(songs.cbegin(), songs.cend(), [&](const Song_t& a) {return strcmp(a.title, song.title) == 0;});
@@ -298,6 +300,9 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 return;
             }
 
+            logMsg << '{' << requestUser.mac << '}' << " Sent MP3 \"" << "TITLE TODO" << "\" of length " << "SONG LENGTH TODO";
+            m_logger.log(logMsg.str());
+
             db->createSong(&song);
 
             response.send(Http::Code::Ok, "Ok"); // We send the response at the end in the case there is an error in the process.
@@ -306,16 +311,17 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             return;
         }
         catch (std::logic_error &e) {
-            std::cout << "Token not valid; got \"" << t.value() << "\"" << std::endl;
+            logMsg << "Token not valid; got \"" << t.value() << "\"";
+            m_logger.log(logMsg.str());
+            std::cout << logMsg.str() << std::endl;
             response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" must be a 32 bits integer");
             delete header;
             return;
         }
         catch (std::runtime_error &e) {
-            std::ostringstream osStream;
-            osStream << "An error occured while saving the song : " << e.what();
-            m_logger.log(osStream.str());
-            std::cerr << osStream.str();
+            logMsg << "An error occured while saving the song : " << e.what();
+            m_logger.log(logMsg.str());
+            std::cerr << logMsg.str();
             response.send(Http::Code::Internal_Server_Error, e.what());
             delete header;
             return;
