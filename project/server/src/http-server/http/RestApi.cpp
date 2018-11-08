@@ -104,13 +104,13 @@ std::string RestApi::generateSong_(const Song_t& song, uint32_t token) {
     songDoc.SetObject();
     try {
         User_t user = Database::instance()->getUserById(song.user_id);
-        Mp3Duration d = song.duration;
+        Mp3Duration d(song.duration);
         std::stringstream duration;
         duration << std::setfill('0') << std::setw(2);
         duration << d.getMinutes() << ':' << d.getSeconds();
         songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), songDoc.GetAllocator());
         songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
-        songDoc.AddMember("duree", duration.str(), songDoc.GetAllocator());
+        songDoc.AddMember("duree", rapidjson::Value(duration.str().c_str(), duration.str().length()), songDoc.GetAllocator());
         songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
         songDoc.AddMember("proprietaire", token == song.user_id ? true : false, songDoc.GetAllocator());
         songDoc.AddMember("no", song.id, songDoc.GetAllocator());
