@@ -6,7 +6,7 @@
 #include <atomic>
 #include <mutex>
 
-#include <mp3/list/Mp3AutoPlayer.hpp>
+#include <mp3/player/Mp3AutoPlayer.hpp>
 
 #include <TestConfiguration.hpp>
 

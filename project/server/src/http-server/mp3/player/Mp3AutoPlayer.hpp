@@ -14,9 +14,9 @@
 namespace elevation {
 
 /**
- * @brief A class to which we simply add or remove songs.
- * It automagically starts playing a song when we add one, and plays the next
- * one when the first one is finished.
+ * @brief A class which plays songs on its own.
+ * It automagically starts playing the next song when we add it, and plays the next
+ * one when the first one is finished, and so forth.
  *
  * @note Unlike #Mp3Player, destruction does (should) not wait until
  * the song is finished playing ; it should just stop the current song.
