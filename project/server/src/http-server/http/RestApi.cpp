@@ -133,7 +133,9 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
     std::ostringstream logMsg;
-    
+
+    m_logger.log("getIdentification_ called");
+
     if ((!request_json.IsObject()
             || (!request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
@@ -198,7 +200,6 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
     std::ostringstream logMsg;
     std::thread([&](const Rest::Request& request, Http::ResponseWriter response, std::ostringstream logMsg){
         std::string param = request.headers().getRaw("X-Auth-Token").value();
-        std::cout << "getFileList function called, param is " << param << std::endl;
         if (std::stoul(param) == 0) {
             logMsg << "Could not get the file list. Received an invalid token.";
             m_logger.err(logMsg.str());
