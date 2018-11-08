@@ -86,7 +86,7 @@ void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::Respon
         response.send(Http::Code::Forbidden, "Invalid token");
         return;
     }
-    std::async([&](){
+    std::async([&]() {
         Database* db = Database::instance();
         if (db->isAdminConnected(adminId)) {
             logMsg << "Could not Login Admin. Admin with token \"" << adminId << "\" is already connected.";
@@ -130,7 +130,7 @@ void SecureRestApi::superviseurLogout_(const Rest::Request& request, Http::Respo
         response.send(Http::Code::Forbidden, "Invalid token");
         return;
     }
-    std::async([&](){
+    std::async([&]() {
         Database* db = Database::instance();
         if (!db->isAdminConnected(adminId)) {
             logMsg << "Could not logout admin with token \"" << adminId << "\". Admin was not already logged in.";

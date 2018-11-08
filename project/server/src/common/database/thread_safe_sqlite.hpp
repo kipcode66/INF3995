@@ -31,9 +31,9 @@ struct UnlockNotification {
 /*
 ** This function is an unlock-notify callback registered with SQLite.
 */
-static void unlock_notify_cb(void **apArg, int nArg){
+static void unlock_notify_cb(void **apArg, int nArg) {
     int i;
-    for(i=0; i<nArg; i++){
+    for(i=0; i<nArg; i++) {
         UnlockNotification *p = (UnlockNotification *)apArg[i];
         p->mutex->lock();
         p->fired = true;
@@ -82,10 +82,10 @@ static int wait_for_unlock_notify(sqlite3 *db) {
     ** that the current transaction can be rolled back. Otherwise, block
     ** until the unlock-notify callback is invoked, then return SQLITE_OK.
     */
-    if( rc==SQLITE_OK ){
+    if( rc==SQLITE_OK ) {
         std::unique_lock<std::mutex> lock(*un.mutex, std::adopt_lock);
         lock.lock();
-        if( !un.fired ){
+        if( !un.fired ) {
             un.cond->wait(lock);
         }
         lock.unlock();
@@ -107,9 +107,9 @@ static int wait_for_unlock_notify(sqlite3 *db) {
 ** the current transaction (if any) and try again later. Otherwise, the
 ** system may become deadlocked.
 */
-int sqlite3_blocking_step(sqlite3_stmt *pStmt){
+int sqlite3_blocking_step(sqlite3_stmt *pStmt) {
     int rc;
-    while( SQLITE_LOCKED==(rc = sqlite3_step(pStmt)) ){
+    while( SQLITE_LOCKED==(rc = sqlite3_step(pStmt)) ) {
         rc = wait_for_unlock_notify(sqlite3_db_handle(pStmt));
         if( rc!=SQLITE_OK ) break;
         sqlite3_reset(pStmt);
@@ -134,9 +134,9 @@ int sqlite3_blocking_prepare_v2(
     int nSql,                 /* Length of zSql in bytes. */
     sqlite3_stmt **ppStmt,    /* OUT: A pointer to the prepared statement */
     const char **pz           /* OUT: End of parsed string */
-){
+) {
     int rc;
-    while( SQLITE_LOCKED==(rc = sqlite3_prepare_v2(db, zSql, nSql, ppStmt, pz)) ){
+    while( SQLITE_LOCKED==(rc = sqlite3_prepare_v2(db, zSql, nSql, ppStmt, pz)) ) {
         rc = wait_for_unlock_notify(db);
         if( rc!=SQLITE_OK ) break;
     }
