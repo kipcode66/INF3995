@@ -57,6 +57,7 @@ void Logger::log(const std::string& data) {
     osStrm << data << std::endl; // std::endl will flush the file stream ; this is intentional.
     std::string line = osStrm.str();
     m_logFile << line;
+    m_logFile.flush();
     std::cout << line;
 }
 
@@ -67,6 +68,7 @@ void Logger::err(const std::string& data) {
     osStrm << ERROR_PREFIX << data << std::endl; // std::endl will flush the file stream ; this is intentional.
     std::string line = osStrm.str();
     m_logFile << line;
+    m_logFile.flush();
     std::cerr << line;
 }
 

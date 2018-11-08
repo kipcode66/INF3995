@@ -118,8 +118,7 @@ std::string RestApi::generateSong_(const Song_t& song, uint32_t token) {
     catch (sqlite_error& e) {
         std::stringstream msg;
         msg << "An error occured while generating song a song's json: " << e.what();
-        m_logger.log(msg.str());
-        std::cerr << msg.str() << std::endl;
+        m_logger.err(msg.str());
     }
     rapidjson::StringBuffer buf;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
@@ -132,12 +131,15 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     auto body = request.body();
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
-
+    std::ostringstream logMsg;
+    
     if ((!request_json.IsObject()
             || (!request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
                 || request_json["mac"] == '\n'
                 || request_json["ip"] == '\n'))) {
+        logMsg << "Could not login the admin. The request is malformed.";
+        m_logger.err(logMsg.str());
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
@@ -151,10 +153,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             }
         }
         
-        std::ostringstream osStream;
-        osStream << '{' << requestUser.mac << '}' << " Assigned ID \"" << "ID TODO" << "\" to user \"" << requestUser.name;
-        m_logger.log(osStream.str());
-
+        
         User_t existingUser = { 0 };
         Database* db = Database::instance();
         existingUser = db->getUserByMac(requestUser.mac);
@@ -165,6 +164,9 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             db->createUser(&requestUser);
             db->connectUser(&requestUser);
 
+            logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name;
+            m_logger.log(logMsg.str());
+
             std::string body = generateBody(requestUser.userId, "connection successful");
             response.send(Http::Code::Ok, body);
             return;
@@ -172,14 +174,17 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             requestUser.userId = existingUser.userId;
             try {
                 db->createUser(&requestUser);
+
+                logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
+                m_logger.log(logMsg.str());    
+
                 std::string body = generateBody(requestUser.userId, "connection successful");
                 response.send(Http::Code::Ok, body);
                 return;
             } catch (sqlite_error& e) {
-                std::stringstream msg;
-                msg << "couldn't create user in db: " << e.what();
-                std::cerr << msg.str() << std::endl;
-                response.send(Http::Code::Internal_Server_Error, msg.str());
+                logMsg << "couldn't create user in db: " << e.what();
+                m_logger.err(logMsg.str());
+                response.send(Http::Code::Internal_Server_Error, logMsg.str());
                 return;
             }
         }
@@ -190,9 +195,12 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::string param = request.param(":id").as<std::string>();
+    std::ostringstream logMsg;
     std::async([&](){
         std::cout << "getFileList function called, param is " << param << std::endl;
         if (std::stoul(param) == 0) {
+            logMsg << "Could not get the file list. Received an invalid token.";
+            m_logger.err(logMsg.str());
             response.send(Http::Code::Forbidden, "Invalid token");
             return;
         }
@@ -204,6 +212,8 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
             resp << generateSong_(song, std::stoul(param)) << (&songs.back() != &song ? ",\n" : "\n");
         }
         resp << "]\n}\n";
+        logMsg << "The file list for user \"" << param << "\" was successfuly sent.";
+        m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
     });
 }
@@ -214,13 +224,15 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
     auto t = request.headers().getRaw("X-Auth-Token");
     if (t.value().empty()) {
-        std::cout << "Header \"X-Auth-Token\" missing" << std::endl;
+        logMsg << "Could not post the file. Header \"X-Auth-Token\" missing.";
+        m_logger.err(logMsg.str());
         response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" missing");
         return;
     }
 
     if (!m_cache.isInitialized()) {
-        std::cout << "Cache not initialized" << std::endl;
+        logMsg << "Could not post the file. Cache is not initialized";
+        m_logger.err(logMsg.str());
         response.send(Http::Code::Internal_Server_Error, "Cache not initialized");
         return;
     }
@@ -240,6 +252,8 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             } catch (sqlite_error& e) { }
 
             if (token == 0 || requestUser.mac == nullptr) {
+                logMsg << "Could not post the file. Received invalid token.";
+                m_logger.err(logMsg.str());
                 response.send(Http::Code::Forbidden, "Invalid token");
                 return;
             }
@@ -277,7 +291,8 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 header = new Mp3Header(filePath.string());
             }
             catch (std::invalid_argument& e) {
-                std::cout << "It's NOT tag id3v2 ..." << std::endl;
+                logMsg << "Could not post the file. The file does not have an id3v2 tag.";
+                m_logger.err(logMsg.str());
                 response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
                 m_cache.deleteFile(filePath.filename());
                 return;
@@ -294,13 +309,15 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             const auto& songs = db->getSongsByUser(token);
             bool songInQueue = std::any_of(songs.cbegin(), songs.cend(), [&](const Song_t& a) {return strcmp(a.title, song.title) == 0;});
             if (songInQueue || songs.size() >= MAX_SONG_PER_USER) {
+                logMsg << "Could not post the file. The song \"" << song.title << "\" is aleady in the queue";
+                m_logger.err(logMsg.str());
                 response.send(Http::Code::Request_Entity_Too_Large, "Song already in the queue");
                 m_cache.deleteFile(filePath.filename());
                 delete header;
                 return;
             }
 
-            logMsg << '{' << requestUser.mac << '}' << " Sent MP3 \"" << "TITLE TODO" << "\" of length " << "SONG LENGTH TODO";
+            logMsg << '{' << requestUser.mac << '}' << " Sent MP3 \"" << song.title << "\" of length " << song.duration;
             m_logger.log(logMsg.str());
 
             db->createSong(&song);
@@ -312,16 +329,14 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
         }
         catch (std::logic_error &e) {
             logMsg << "Token not valid; got \"" << t.value() << "\"";
-            m_logger.log(logMsg.str());
-            std::cout << logMsg.str() << std::endl;
+            m_logger.err(logMsg.str());
             response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" must be a 32 bits integer");
             delete header;
             return;
         }
         catch (std::runtime_error &e) {
             logMsg << "An error occured while saving the song : " << e.what();
-            m_logger.log(logMsg.str());
-            std::cerr << logMsg.str();
+            m_logger.err(logMsg.str());
             response.send(Http::Code::Internal_Server_Error, e.what());
             delete header;
             return;
