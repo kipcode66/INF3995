@@ -17,6 +17,7 @@
 
 
 using namespace elevation;
+using namespace std::placeholders;
 
 RestApi::RestApi(Address addr)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
@@ -141,7 +142,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
-    std::async([&](){
+    std::thread([&](){
         User_t requestUser = { 0 };
         if (request_json.IsObject()) {
             strcpy(requestUser.mac, request_json["mac"].GetString());
@@ -189,8 +190,8 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
-    std::string param = request.param(":id").as<std::string>();
-    std::async([&](){
+    std::string param = request.headers().getRaw("X-Auth-Token").value();
+    std::thread([&](){
         std::cout << "getFileList function called, param is " << param << std::endl;
         if (std::stoul(param) == 0) {
             response.send(Http::Code::Forbidden, "Invalid token");
@@ -225,16 +226,25 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
         return;
     }
 
-    std::string body = request.body();
+    const std::string body = request.body();
 
-    std::async([&](){
+    std::thread([&](){
         Mp3Header* header = nullptr;
         try {
+            Database* db = Database::instance();
+
+            // Start the decoding immediately
+            auto decodedFuture = std::async(std::launch::async, [&](){
+                // Decode the string.
+                std::stringstream encoded(body);
+                std::stringstream decoded;
+                Base64::Decode(encoded, decoded);
+                return decoded;
+            });
+
             uint32_t token = std::stoul(t.value());
 
-            Database* db = Database::instance();
             User_t requestUser = {0};
-
             try {
                 requestUser = db->getUserById(token);
             } catch (sqlite_error& e) { }
@@ -244,10 +254,8 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 return;
             }
 
-            // Decode the string.
-            std::stringstream encoded(body);
-            std::stringstream decoded;
-            Base64::Decode(encoded, decoded);
+            // Start fetching the user's songs
+            auto songsFuture = std::async(std::launch::async, std::bind(&Database::getSongsByUser, db, _1), token);
 
             // +=-=-=-= Save in a file =-=-=-=+
             // Generate
@@ -255,7 +263,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             std::tm* nowTm = std::localtime(&now);
             std::stringstream fileName;
             // Generate a new name 
-            fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S_") << std::hash<std::string>()(decoded.str());
+            fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S_") << std::hash<std::string>()(t.value());
             std::experimental::filesystem::path filePath(fileName.str());
             std::experimental::filesystem::path tmpPath = filePath;
             // Try a new file name until we find on that is not used.
@@ -267,10 +275,9 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             tmpPath += ".mp3";
             filePath = tmpPath;
 
+            auto decoded = decodedFuture.get();
             m_cache.setFileContent(filePath, decoded);
             filePath = m_cache.getFile(filePath).path(); // resolve the filename into a real path
-
-            std::cout << "decoded : " << decoded.str().substr(0, 30) << std::endl;
 
             // Fetch MP3 header
             try {
@@ -291,7 +298,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             song.duration = header->getDuration().getDurationInSeconds();
             strcpy(song.path, filePath.string().c_str());
 
-            const auto& songs = db->getSongsByUser(token);
+            const auto& songs = songsFuture.get();
             bool songInQueue = std::any_of(songs.cbegin(), songs.cend(), [&](const Song_t& a) {return strcmp(a.title, song.title) == 0;});
             if (songInQueue || songs.size() >= MAX_SONG_PER_USER) {
                 response.send(Http::Code::Request_Entity_Too_Large, "Song already in the queue");
