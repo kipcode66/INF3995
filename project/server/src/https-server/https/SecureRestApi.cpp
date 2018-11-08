@@ -5,9 +5,9 @@
 
 using namespace elevation;
 
-SecureRestApi::SecureRestApi(Address addr)
-: RestApi(addr)
-, m_logger(Logger::getLogger("https-server"))
+SecureRestApi::SecureRestApi(Address addr, Logger& logger)
+: RestApi(addr, logger)
+, m_logger(logger)
 { }
 
 void SecureRestApi::init() {

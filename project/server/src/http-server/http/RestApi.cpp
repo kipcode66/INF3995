@@ -9,10 +9,10 @@
 
 using namespace elevation;
 
-RestApi::RestApi(Address addr)
+RestApi::RestApi(Address addr, Logger& logger)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
-, m_logger(Logger::getLogger("http-server"))
+, m_logger(logger)
 { }
 
 RestApi::~RestApi() {

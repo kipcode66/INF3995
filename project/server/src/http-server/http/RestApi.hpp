@@ -13,7 +13,7 @@ namespace elevation {
 
 class RestApi {
 public:
-    RestApi(Address);
+    RestApi(Address addr, Logger& logger);
     ~RestApi();
     void init();
     void start();

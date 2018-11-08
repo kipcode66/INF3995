@@ -15,8 +15,9 @@ namespace elevation {
 
 class SecureRestApi : public RestApi {
 public:
-    SecureRestApi(Address);
+    SecureRestApi(Address addr, Logger& logger);
     void init();
+
 private:
     void createSecureDescription_();
     void getSuperviseurFile_(const Rest::Request&, Http::ResponseWriter);
