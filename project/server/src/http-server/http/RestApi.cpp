@@ -184,7 +184,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 return;
             }
         }
-    }, std::move(request_json), std::move(response));
+    }, std::move(request_json), std::move(response)).detach();
     return;
 }
 
@@ -206,7 +206,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
         }
         resp << "]\n}\n";
         response.send(Http::Code::Ok, resp.str());
-    }, std::move(response));
+    }, std::move(response)).detach();
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -334,7 +334,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             return;
         }
         response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
-    }, std::move(body), std::move(response));
+    }, std::move(body), std::move(response)).detach();
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
