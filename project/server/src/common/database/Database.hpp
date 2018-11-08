@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "User.hpp"
 #include "Song.hpp"
@@ -24,10 +25,10 @@ public:
     void createAdmin(const char* password);
     void updateTimestamp(const User_t* user);
     void connectUser(const struct User_t* user);
-    void connectAdmin(const char* login, uint32_t admin_id);
-    void disconnectAdmin(uint32_t admin_id);
-    bool isAdminConnected(uint32_t admin_id) const;
-    std::vector<std::string> getSaltAndHashedPasswordByLogin(const char* login) const;
+    void connectAdmin(const char* login, uint32_t adminId);
+    void disconnectAdmin(uint32_t adminId);
+    bool isAdminConnected(uint32_t adminId) const;
+    std::pair<std::string, std::string> getSaltAndHashedPasswordByLogin(const char* login) const;
     
     Song_t getSongById(int) const;
     Song_t getSongByTitle(const char*) const;
