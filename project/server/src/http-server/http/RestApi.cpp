@@ -146,7 +146,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
-    // std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response, std::ostringstream logMsg) {
+    std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response, std::ostringstream logMsg) {
         User_t requestUser = { 0 };
         if (request_json.IsObject()) {
             strcpy(requestUser.mac, request_json["mac"].GetString());
@@ -191,7 +191,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 return;
             }
         }
-    // }, std::move(request_json), std::move(response), std::move(logMsg)).detach();
+    }, std::move(request_json), std::move(response), std::move(logMsg)).detach();
     return;
 }
 
@@ -241,7 +241,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
     const std::string body = request.body();
 
-    std::thread([&](const std::string body, Http::ResponseWriter response){
+    std::thread([&](std::ostringstream logMsg, const std::string body, Http::ResponseWriter response){
         Mp3Header* header = nullptr;
         try {
             Database* db = Database::instance();
@@ -350,7 +350,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             return;
         }
         response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
-    }, std::move(body), std::move(response)).detach();
+    }, std::move(logMsg), std::move(body), std::move(response)).detach();
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
