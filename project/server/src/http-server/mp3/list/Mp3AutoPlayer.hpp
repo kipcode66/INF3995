@@ -1,5 +1,5 @@
-#ifndef MP3_PLAYER_PENDINGSONGS_HPP
-#define MP3_PLAYER_PENDINGSONGS_HPP
+#ifndef MP3_PLAYER_MP3AUTOPLAYER_HPP
+#define MP3_PLAYER_MP3AUTOPLAYER_HPP
 
 #include <experimental/filesystem>
 #include <list>
@@ -21,7 +21,7 @@ namespace elevation {
  * @note Unlike #Mp3Player, destruction does (should) not wait until
  * the song is finished playing ; it should just stop the current song.
  */
-class PendingSongs {
+class Mp3AutoPlayer {
 protected:
     typedef ::std::experimental::filesystem::path path;
 
@@ -36,16 +36,16 @@ public:
      * @param[in] songRemover Callback which will be called when a song finishes and needs to be removed
      * from the song list.
      */
-    explicit PendingSongs(
+    explicit Mp3AutoPlayer(
         std::function<path()> nextSongGetter,
         std::function<void(path)> songRemover
     );
-    PendingSongs(const PendingSongs&) = delete;
-    PendingSongs(PendingSongs&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
-    virtual ~PendingSongs();
+    Mp3AutoPlayer(const Mp3AutoPlayer&) = delete;
+    Mp3AutoPlayer(Mp3AutoPlayer&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
+    virtual ~Mp3AutoPlayer();
 
-    PendingSongs& operator=(const PendingSongs&) = delete;
-    PendingSongs& operator=(PendingSongs&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
+    Mp3AutoPlayer& operator=(const Mp3AutoPlayer&) = delete;
+    Mp3AutoPlayer& operator=(Mp3AutoPlayer&&) = delete; ///< Cannot move() because we own a thread, whose 'this' pointer isn't updated when we move.
 
     /**
      * @brief Stops the song that is currently playing. If there is none,
@@ -88,4 +88,4 @@ protected:
 
 } // namespace elevation
 
-#endif // !MP3_PLAYER_PENDINGSONGS_HPP
+#endif // !MP3_PLAYER_MP3AUTOPLAYER_HPP

@@ -12,7 +12,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTP_SERVER_CPP_SOURCES
     http/RestApi.cpp
-    mp3/list/PendingSongs.cpp
+    mp3/list/Mp3AutoPlayer.cpp
 )
 
 ###############################################################################
@@ -23,7 +23,7 @@ set(HTTP_SERVER_CPP_SOURCES
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTP_SERVER_HEADER_SOURCES
     http/RestApi.hpp
-    mp3/list/PendingSongs.hpp
+    mp3/list/Mp3AutoPlayer.hpp
     mp3/list/exception/Terminate.hpp
 )
 

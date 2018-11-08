@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE PendingSongs
+#define BOOST_TEST_MODULE Mp3AutoPlayer
 #include <boost/test/unit_test.hpp>
 
 #include <chrono>
@@ -6,7 +6,7 @@
 #include <atomic>
 #include <mutex>
 
-#include <mp3/list/PendingSongs.hpp>
+#include <mp3/list/Mp3AutoPlayer.hpp>
 
 #include <TestConfiguration.hpp>
 
@@ -20,7 +20,7 @@ public:
         "/THIS/PATH/IS/AN/INVALID/PATH/IF/IT/APPEARS/THEN/IT/MEANS/A/UNIT/TEST/FAILED";
 public:
     explicit TestFixture()
-        : m_pendingSongs(
+        : m_mp3AutoPlayer(
             std::bind(&TestFixture::nextSongGetter, this),
             std::bind(&TestFixture::songRemover, this, std::placeholders::_1)
           )
@@ -32,7 +32,7 @@ public:
     void songRemover(fs::path song);
 
 public:
-    PendingSongs m_pendingSongs;
+    Mp3AutoPlayer m_mp3AutoPlayer;
     std::mutex m_mutex;
     fs::path m_nextSong;
     fs::path m_lastRemovedSong;
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(destructionIsOkEvenIfPlaying, *boost::unit_test::timeout(TI
         std::lock_guard<std::mutex> lock(fixture.m_mutex);
         fixture.m_nextSong = TIPPERARY_PATH;
     }
-    fixture.m_pendingSongs.waitUntilSongStarted();
+    fixture.m_mp3AutoPlayer.waitUntilSongStarted();
 }
 #undef TIMEOUT_SECONDS
 
@@ -71,10 +71,10 @@ BOOST_AUTO_TEST_CASE(stopPlaying, *boost::unit_test::timeout(TIMEOUT_SECONDS)) {
         std::lock_guard<std::mutex> lock(fixture.m_mutex);
         fixture.m_nextSong = TIPPERARY_PATH;
     }
-    fixture.m_pendingSongs.waitUntilSongStarted();
+    fixture.m_mp3AutoPlayer.waitUntilSongStarted();
     BOOST_TEST(fixture.m_nextSong == "");
     BOOST_TEST(fixture.m_lastRemovedSong == TestFixture::REMOVED_SONG_INITIAL_VALUE);
-    fixture.m_pendingSongs.stopSong();
+    fixture.m_mp3AutoPlayer.stopSong();
     BOOST_TEST(fixture.m_nextSong == "");
     BOOST_TEST(fixture.m_lastRemovedSong == TIPPERARY_PATH);
 }
@@ -87,10 +87,10 @@ BOOST_AUTO_TEST_CASE(callsCallbacksCorrectly, *boost::unit_test::timeout(TIMEOUT
         std::lock_guard<std::mutex> lock(fixture.m_mutex);
         fixture.m_nextSong = TIPPERARY_SHORT_PATH;
     }
-    fixture.m_pendingSongs.waitUntilSongStarted();
+    fixture.m_mp3AutoPlayer.waitUntilSongStarted();
     BOOST_TEST(fixture.m_nextSong == "");
     BOOST_TEST(fixture.m_lastRemovedSong == TestFixture::REMOVED_SONG_INITIAL_VALUE);
-    fixture.m_pendingSongs.waitUntilSongFinished();
+    fixture.m_mp3AutoPlayer.waitUntilSongFinished();
     BOOST_TEST(fixture.m_nextSong == "");
     BOOST_TEST(fixture.m_lastRemovedSong == TIPPERARY_SHORT_PATH);
 }
