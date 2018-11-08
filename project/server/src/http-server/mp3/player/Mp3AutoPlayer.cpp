@@ -57,7 +57,12 @@ void Mp3AutoPlayer::songStarter_() {
 }
 
 void Mp3AutoPlayer::waitUntilSongStarted() {
-    m_startFuture.get();
+    std::shared_future<void> startFuture;
+    {
+        std::lock_guard<std::mutex> lock(m_startMutex);
+        startFuture = m_startFuture;
+    } // m_startMutex gets unlocked here.
+    startFuture.get();
 }
 
 void Mp3AutoPlayer::waitUntilSongFinished() {
