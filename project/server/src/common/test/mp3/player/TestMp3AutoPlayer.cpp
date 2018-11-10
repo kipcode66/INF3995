@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(destructionIsOkEvenIfPlaying, *boost::unit_test::timeout(TI
         std::lock_guard<std::mutex> lock(fixture.m_mutex);
         fixture.m_nextSong = TIPPERARY_PATH;
     }
-    fixture.m_mp3AutoPlayer.waitUntilSongStarted(); // Potential deadlock here if we wait
+    fixture.m_mp3AutoPlayer.waitUntilSongStarted();
 }
 #undef TIMEOUT_SECONDS
 
@@ -71,7 +71,8 @@ BOOST_AUTO_TEST_CASE(stopPlaying, *boost::unit_test::timeout(TIMEOUT_SECONDS)) {
         std::lock_guard<std::mutex> lock(fixture.m_mutex);
         fixture.m_nextSong = TIPPERARY_PATH;
     }
-    fixture.m_mp3AutoPlayer.waitUntilSongStarted();
+    fixture.m_mp3AutoPlayer.waitUntilSongStarted(); // Race condition here ; it's possible that we start waiting after the song started.
+                                                    // In that case, the test will fail.
     BOOST_TEST(fixture.m_nextSong == Mp3AutoPlayer::NO_SONG);
     BOOST_TEST(fixture.m_lastRemovedSong == TestFixture::REMOVED_SONG_INITIAL_VALUE);
     fixture.m_mp3AutoPlayer.stopSong();
@@ -87,7 +88,8 @@ BOOST_AUTO_TEST_CASE(callsCallbacksCorrectly, *boost::unit_test::timeout(TIMEOUT
         std::lock_guard<std::mutex> lock(fixture.m_mutex);
         fixture.m_nextSong = TIPPERARY_SHORT_PATH;
     }
-    fixture.m_mp3AutoPlayer.waitUntilSongStarted();
+    fixture.m_mp3AutoPlayer.waitUntilSongStarted(); // Race condition here ; it's possible that we start waiting after the song started.
+                                                    // In that case, the test will fail.
     BOOST_TEST(fixture.m_nextSong == Mp3AutoPlayer::NO_SONG);
     BOOST_TEST(fixture.m_lastRemovedSong == TestFixture::REMOVED_SONG_INITIAL_VALUE);
     fixture.m_mp3AutoPlayer.waitUntilSongFinished();
