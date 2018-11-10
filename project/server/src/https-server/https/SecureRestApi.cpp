@@ -7,6 +7,8 @@
 #include "misc/id_utils.hpp"
 #include "database/Database.hpp"
 
+#include "http-server/database/Database.hpp"
+#include "rapidjson/document.h"
 
 #include <common/logger/Logger.hpp>
 
@@ -40,6 +42,11 @@ void SecureRestApi::createSecureDescription_() {
     superviseurPath
             .route(m_desc.post("/logout"))
             .bind(&SecureRestApi::superviseurLogout_, this)
+            .hide();
+
+    superviseurPath
+            .route(m_desc.post("/changement_mdp"))
+            .bind(&SecureRestApi::postChangePassword_, this)
             .hide();
 }
 
@@ -149,3 +156,20 @@ void SecureRestApi::superviseurLogout_(const Rest::Request& request, Http::Respo
     });
 }
 
+void SecureRestApi::postChangePassword_(const Rest::Request& request, Http::ResponseWriter response) {
+    try {
+        auto body = request.body();
+        rapidjson::Document request_json;
+        request_json.Parse(body.c_str());
+        if (!request_json.HasMember("ancien") || !request_json.HasMember("nouveau")) {
+            response.send(Http::Code::Bad_Request, "Malformed request");
+            return;
+        }
+        std::string ancien(request_json["ancien"].GetString());
+        std::string nouveau(request_json["nouveau"].GetString());
+        std::cout << "changing " << ancien << " to " << nouveau  << std::endl;
+    } catch(std::exception& e) {
+        std::cerr << "error: " << e.what() << std::endl;
+    }
+    response.send(Http::Code::Ok, "chgm_mdp");
+}
