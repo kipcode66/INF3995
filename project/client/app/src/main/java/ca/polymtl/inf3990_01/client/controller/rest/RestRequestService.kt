@@ -2,17 +2,23 @@ package ca.polymtl.inf3990_01.client.controller.rest
 
 import android.content.Context
 import android.os.Handler
+import android.util.Base64
+import android.util.Base64OutputStream
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.InitializationManager
 import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
 import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
+import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.LocalSong
 import ca.polymtl.inf3990_01.client.model.Song
 import com.android.volley.DefaultRetryPolicy
+import com.android.volley.NetworkResponse
 import com.android.volley.Request
 import com.android.volley.Response
-import java.io.File
+import java.io.*
+import java.net.HttpURLConnection
+import java.net.URL
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
@@ -21,7 +27,8 @@ class RestRequestService(
     private val appCtx: Context,
     private val tokenMgr: TokenManagerService,
     private val httpClient: HTTPRestClient,
-    private val initMgr: InitializationManager
+    private val initMgr: InitializationManager,
+    private val dataProvider: DataProvider
 ) {
     companion object {
         private class SongResponseData(
@@ -73,14 +80,14 @@ class RestRequestService(
         return list
     }
 
-    suspend fun sendSong(song: LocalSong) {
+    @Synchronized suspend fun sendSong(song: LocalSong) {
         val songToSend = encoder(song)
         val token = tokenMgr.getToken()
         val resp: ResponseData<String> = suspendCoroutine { continuation ->
             val request = RESTRequest(
                     Request.Method.POST,
-                    httpClient.getBaseURL() + "/usager/file/$token",
-                    songToSend,
+                    httpClient.getBaseURL() + "/usager/chanson/$token",
+                    songToSend.reader().use(InputStreamReader::readText),
                     String::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
                     Response.Listener { resp ->
@@ -97,11 +104,23 @@ class RestRequestService(
                         continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
                     }
             )
-            //request.setRetryPolicy(DefaultRetryPolicy(10*1000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            request.setRetryPolicy(DefaultRetryPolicy(10*1000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
             httpClient.addToRequestQueue(request)
         }
         if (resp.code != 200) {
-            Handler(appCtx.mainLooper).post(Runnable { Toast.makeText(appCtx, resp.value, Toast.LENGTH_LONG) })
+            synchronized(dataProvider) {
+                if (dataProvider[song] <= DataProvider.LocalSongSendState.SENDING) {
+                    dataProvider[song] = DataProvider.LocalSongSendState.NOT_SENT
+                }
+            }
+            Handler(appCtx.mainLooper).post(Runnable { Toast.makeText(appCtx, "Post song error: " + resp.value, Toast.LENGTH_LONG).show() })
+        }
+        else {
+            synchronized(dataProvider) {
+                if (dataProvider[song] <= DataProvider.LocalSongSendState.SENDING) {
+                    dataProvider[song] = DataProvider.LocalSongSendState.WAITING_FOR_SERVER_QUEUE
+                }
+            }
         }
     }
 
@@ -109,10 +128,19 @@ class RestRequestService(
         TODO("Not Implemented")
     }
 
-    private fun encoder(song: LocalSong): String {
-        val bytes = File(song.file.toString()).readBytes()
-        val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
-        return base64
+    private fun encoder(song: LocalSong): PipedInputStream {
+        val inStream = File(song.file.toString()).inputStream()
+        val pin = PipedInputStream()
+        val pout = PipedOutputStream(pin)
+        val encoder = Base64OutputStream(pout, Base64.NO_WRAP)
+        val t = Thread {
+            inStream.copyTo(encoder)
+            inStream.close()
+            encoder.close()
+        }
+        t.name = "Base64 Encode [${song.file.lastPathSegment}]"
+        t.start()
+        return pin
     }
 
 }

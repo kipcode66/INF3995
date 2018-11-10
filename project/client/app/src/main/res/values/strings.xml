@@ -42,4 +42,7 @@
     <string name="interface_name_wifi" translatable="false">wlan0</string>
     <string name="song_queue_item_sent_by">Sent by: %1$s</string>
     <string name="client_name_default">You</string>
+    <string name="local_song_sendButton_label_send">Send</string>
+    <string name="local_song_sendButton_label_sending">Sending...</string>
+    <string name="local_song_sendButton_label_sent">Sent</string>
 </resources>

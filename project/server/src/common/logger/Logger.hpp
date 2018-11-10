@@ -32,11 +32,12 @@ public:
     Logger& operator=(Logger&&) = default;
 
     void log(const std::string& data);
-
+    void err(const std::string& data);
 protected:
     explicit Logger(const std::string& prefix);
     void createDirectory_();
     void openLogFile_();
+    std::ostringstream makeLogLine_() const;
 
 protected:
     std::string m_prefix;

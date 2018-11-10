@@ -6,7 +6,7 @@
         android:dialogTitle="@string/server_url"
         android:entries="@array/server_url_entries"
         android:entryValues="@array/server_url_entries"
-        android:defaultValue="192.168.2.40:8080"
+        android:defaultValue="192.168.2.52"
         android:icon="@drawable/ic_menu_share"/>
     <EditTextPreference
         android:key="client_name"

@@ -4,6 +4,7 @@ project(elevation_server)
 set(CMAKE_SCRIPTS_DIR "${CMAKE_SOURCE_DIR}/cmake") # NOTE : This variable is not a special CMake variable ;
                                                    # I just decided to call this variable like this.
 set(COMMON_INCLUDE_DIR "${CMAKE_BINARY_DIR}/common/include")
+set(COMMON_SOURCE_DIR "${CMAKE_SOURCE_DIR}/common/")
 set(SSL_RESOURCE_DIR "${CMAKE_SOURCE_DIR}/../res/ssl")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/common/include")

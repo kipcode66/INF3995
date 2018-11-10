@@ -4,7 +4,7 @@
 Mp3Header::Mp3Header(const std::string& fileName)
 {
     TagLib::MPEG::File mp3File(fileName.c_str());
-    if (!mp3File.isOpen() || !isMP3File_(fileName)) {
+    if (!mp3File.isOpen() || !isMP3File_(fileName) || !mp3File.hasID3v2Tag()) {
         throw std::invalid_argument( "MP3 file failed to open" );
     }
     TagLib::ID3v2::Tag* mp3Tag = mp3File.ID3v2Tag(true);

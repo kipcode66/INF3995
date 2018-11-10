@@ -43,7 +43,7 @@ class UsagerIdentification_TestCase(unittest.TestCase):
             self.assertIsNotNone(req, "Connection established")
         json = req.json()
         # print(json)
-        self.assertTrue('id' in json, "field 'id' in response")
+        self.assertTrue('identificateur' in json, "field 'identificateur' in response")
         self.assertTrue('message' in json, "field 'message' in response")
         self.assertTrue('success' in json["message"], "response message indicate 'uccess'")
 

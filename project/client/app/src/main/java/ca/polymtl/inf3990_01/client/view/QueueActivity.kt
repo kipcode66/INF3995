@@ -1,25 +1,17 @@
 package ca.polymtl.inf3990_01.client.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.event.RequestQueueReloadEvent
-import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
-import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
-import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
-import ca.polymtl.inf3990_01.client.model.Song
 import ca.polymtl.inf3990_01.client.model.SongQueue
-import ca.polymtl.inf3990_01.client.presentation.Presenter
 import ca.polymtl.inf3990_01.client.presentation.SongQueueAdapter
 import kotlinx.android.synthetic.main.content_queue.*
-import kotlinx.coroutines.experimental.*
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.ParameterList
-import java.util.*
 
 import kotlinx.coroutines.experimental.javafx.JavaFx as Main
 
