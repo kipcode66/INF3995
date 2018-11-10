@@ -10,6 +10,7 @@ import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.event.SendSongEvent
 import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
+import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.LocalSongs
 import ca.polymtl.inf3990_01.client.model.SongQueue
 import kotlinx.android.synthetic.main.local_song.view.*
@@ -23,29 +24,55 @@ class LocalSongAdapter(
         private val appCtx: Context,
         private val eventMgr: EventManager,
         private val presenter: Presenter,
-        private val stateService: AppStateService
+        private val stateService: AppStateService,
+        private val dataProvider: DataProvider
 ): BaseAdapter() {
     private var ownedSongs = getUpdatedOwnerSongsQueue()
 
     init {
         presenter.addObserver(Observer(this::onPresenter))
+        dataProvider.observeLocalSongSendStates(Observer(this::onLocalSongSendStateChange))
+        dataProvider.observeLocalSongs(Observer(this::onLocalSongsChange))
     }
 
-    private fun onPresenter(o: Observable, arg: Any?) {
+    private fun onLocalSongSendStateChange(o: Observable, arg: Any?) {
+        Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
+    }
+
+    private fun onLocalSongsChange(o: Observable, arg: Any?) {
         if (arg is LocalSongs) {
             localSongs.clear()
             localSongs.addAll(arg)
             Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
         }
-        else if (arg is SongQueue) {
+    }
+
+    private fun onPresenter(o: Observable, arg: Any?) {
+        if (arg is SongQueue) {
             ownedSongs = getUpdatedOwnerSongsQueue()
             Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
+            updateLocalSongSendState(arg)
         }
         else if (arg is AppState) {
             Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
         }
     }
     private fun getUpdatedOwnerSongsQueue () = presenter.getSongs().filter { song -> song.sentBy == null }
+
+    private fun updateLocalSongSendState(songs: SongQueue) {
+        for (s in songs) {
+            val song = localSongs.find { it.title == s.title && it.authorName == s.authorName }
+            if (song !== null) {
+                dataProvider[song] = DataProvider.LocalSongSendState.SENT
+            }
+        }
+        localSongs.forEach { song ->
+            if (dataProvider[song] >= DataProvider.LocalSongSendState.WAITING_FOR_SERVER_QUEUE
+                    && !ownedSongs.any { s -> s.title == song.title && s.authorName == song.authorName }) {
+                dataProvider[song] = DataProvider.LocalSongSendState.NOT_SENT
+            }
+        }
+    }
 
     override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {
         val view = v ?: layoutInflater.inflate(R.layout.local_song, viewGroup, false)
@@ -54,10 +81,17 @@ class LocalSongAdapter(
         view.author.text = song.authorName
 
         val isAdmin = stateService.getState().type == AppStateService.State.Admin
-        val isSongInQueue = ownedSongs.any { s -> s.title == song.title && s.authorName == s.authorName }
-        view.send.isEnabled = !(ownedSongs.size >= 5) && !isSongInQueue && !isAdmin
+        val isSongInQueue = ownedSongs.any { s -> s.title == song.title && s.authorName == song.authorName }
+        view.send.isEnabled = ownedSongs.size < 5 && !isSongInQueue && !isAdmin && (dataProvider[song] <= DataProvider.LocalSongSendState.NOT_SENT)
+        view.send.text = when (dataProvider[song]) {
+            DataProvider.LocalSongSendState.SENDING -> appCtx.getString(R.string.local_song_sendButton_label_sending)
+            DataProvider.LocalSongSendState.WAITING_FOR_SERVER_QUEUE -> appCtx.getString(R.string.local_song_sendButton_label_sending)
+            DataProvider.LocalSongSendState.SENT -> appCtx.getString(R.string.local_song_sendButton_label_sent)
+            else -> appCtx.getString(R.string.local_song_sendButton_label_send)
+        }
 
         view.send.setOnClickListener {
+            dataProvider[song] = DataProvider.LocalSongSendState.SENDING
             eventMgr.dispatchEvent(SendSongEvent(song))
         }
         return view
