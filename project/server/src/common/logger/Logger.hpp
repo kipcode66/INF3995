@@ -33,7 +33,6 @@ public:
 
     void log(const std::string& data);
     void err(const std::string& data);
-
 protected:
     explicit Logger(const std::string& prefix);
     void createDirectory_();

@@ -26,8 +26,8 @@ cleanPistache() {
 
 cleanOpenSsl() {
     local NAME="openssl"
-    local MAKEFILE_DIR="${DEPS_DIR}/openssl/build"
-    cleanProject "${NAME}" "${MAKEFILE_DIR}"
+    local BINARY_DIR="${DEPS_DIR}/openssl/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
 }
 
 cleanTagLib() {

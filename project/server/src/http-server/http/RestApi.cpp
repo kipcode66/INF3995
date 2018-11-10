@@ -16,13 +16,15 @@
 #include "rapidjson/stringbuffer.h"
 
 
+#include <sstream>
+
 using namespace elevation;
 using namespace std::placeholders;
 
-RestApi::RestApi(Address addr)
+RestApi::RestApi(Address addr, Logger& logger)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
-, m_logger(Logger::getLogger("http-server"))
+, m_logger(logger)
 {
     Database::instance();
 }
@@ -167,7 +169,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             db->createUser(&requestUser);
             db->connectUser(&requestUser);
 
-            logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name;
+            logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
             m_logger.log(logMsg.str());
 
             std::string body = generateBody(requestUser.userId, "connection successful");
@@ -192,7 +194,6 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             }
         }
     }, std::move(request_json), std::move(response), std::move(logMsg)).detach();
-    return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -303,6 +304,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
                 m_cache.deleteFile(filePath.filename());
+                delete header;
                 return;
             }
 

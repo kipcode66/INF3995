@@ -73,12 +73,16 @@ void Logger::err(const std::string& data) {
 }
 
 void Logger::createDirectory_() {
-    std::experimental::filesystem::create_directories(SERVER_LOG_DIR);
+    std::error_code error;
+    std::experimental::filesystem::create_directories(SERVER_LOG_DIR, error);
+    if ((bool)error) {
+        throw std::runtime_error(error.message());
+    }
 }
 
 void Logger::openLogFile_() {
     m_logFile.open(getFileName_(m_prefix), std::ios_base::trunc);
-    log(m_prefix + " started.");
+    log(m_prefix + " logger started.");
 }
 
 std::ostringstream Logger::makeLogLine_() const {
