@@ -55,7 +55,21 @@ void Mp3AutoPlayer::songStarter_() {
         catch (std::exception& e) {
             std::cerr << "Mp3AutoPlayer got C++ exeption : " << e.what() << std::endl;
         }
+        catch (...) {
+            // Unlock the threads that are waiting for the song to start.
+            std::lock_guard<std::mutex> lock(m_startMutex);
+            try {
+                m_startPromise.set_exception(std::current_exception());
+            }
+            catch (...) { }
+            throw;
+        }
     }
+    // Unlock the threads that are waiting for the song to start.
+    try {
+        m_startPromise.set_value();
+    }
+    catch (...) { }
 }
 
 void Mp3AutoPlayer::waitUntilSongStarted() {
