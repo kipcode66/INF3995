@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     uint16_t portId = parseArgs(argc, argv);
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
-        elevation::RestApi api(addr);
+        elevation::RestApi api(addr, elevation::Logger::getLogger("http-server"));
         api.init();
         std::cout << "Server is about to start." << std::endl;
         api.start();

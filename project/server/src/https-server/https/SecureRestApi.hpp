@@ -17,9 +17,9 @@ class SecureRestApi : public RestApi {
 private:
     static constexpr const char* ADMIN_USERNAME = "admin";
 public:
-    SecureRestApi(Address);
+    SecureRestApi(Address addr, Logger& logger);
     void init();
-    
+
 private:
     void createSecureDescription_();
     void getSuperviseurFile_(const Rest::Request&, Http::ResponseWriter);

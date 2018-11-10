@@ -16,13 +16,15 @@
 #include "rapidjson/stringbuffer.h"
 
 
+#include <sstream>
+
 using namespace elevation;
 using namespace std::placeholders;
 
-RestApi::RestApi(Address addr)
+RestApi::RestApi(Address addr, Logger& logger)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
-, m_logger(Logger::getLogger("http-server"))
+, m_logger(logger)
 {
     Database::instance();
 }
@@ -192,7 +194,6 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             }
         }
     }, std::move(request_json), std::move(response), std::move(logMsg)).detach();
-    return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {

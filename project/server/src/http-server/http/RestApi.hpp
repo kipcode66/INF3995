@@ -10,6 +10,8 @@
 
 #include "filesystem/FileCache.hpp"
 
+#include <common/logger/Logger.hpp>
+
 using namespace Pistache;
 namespace elevation {
 
@@ -18,7 +20,7 @@ public:
     static constexpr const int MAX_SONG_PER_USER = 5;
 
 public:
-    RestApi(Address);
+    RestApi(Address addr, Logger& logger);
     ~RestApi();
     void init();
     void start();
