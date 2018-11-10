@@ -74,7 +74,7 @@ class RestRequestService(
             httpClient.addToRequestQueue(request)
         }
         for (chanson in resp.value.chansons) {
-            val duration = chanson.duree.split(":").map(String::toInt).reduce { acc, i -> acc * 60 + i }
+            val duration = chanson.duree.split(":").map(String::toInt).reduce { acc, i -> acc * 60 + i } * 1000
             list.add(Song(chanson.titre, chanson.artiste, duration, chanson.no, if (chanson.proprietaire) null else (chanson.proposeePar ?: "")))
         }
         return list
