@@ -304,6 +304,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
                 m_cache.deleteFile(filePath.filename());
+                delete header;
                 return;
             }
 
