@@ -167,7 +167,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
             db->createUser(&requestUser);
             db->connectUser(&requestUser);
 
-            logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name;
+            logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
             m_logger.log(logMsg.str());
 
             std::string body = generateBody(requestUser.userId, "connection successful");
