@@ -13,3 +13,6 @@
 [submodule "project/server/lib/zlib"]
 	path = project/server/lib/zlib
 	url = https://github.com/madler/zlib
+[submodule "project/server/lib/rapidjson/rapidjson"]
+	path = project/server/lib/rapidjson/rapidjson
+	url = https://github.com/Tencent/rapidjson.git

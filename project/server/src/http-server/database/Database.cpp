@@ -5,9 +5,11 @@
 #include <stdexcept>
 #include <iostream>
 
+
 using namespace elevation;
 
 Database* Database::s_instance = nullptr;
+constexpr char Database::DB_NAME[] = "server.db";
 
 Database* Database::instance() {
 
@@ -18,10 +20,10 @@ Database* Database::instance() {
 }
 
 /*
- * Returns an empty user (all 0s) on unsuccesful search
+ * Returns an empty user (all 0s) on unsuccessful search
  */
 void Database::getUserByMac(const char* mac,
-                            struct User* __restrict__ user) const {
+                            User_t* __restrict__ user) const {
     int errcode = 0;
     const char* query = sqlite3_mprintf(
             "SELECT rowid, ip, mac, name FROM user WHERE (mac = '%q');", mac);
@@ -43,7 +45,7 @@ void Database::getUserByMac(const char* mac,
     return;
 }
 
-int Database::createUser(const struct User* user) {
+int Database::createUser(const User_t* user) {
     int errcode = 0;
     char* errmsg = nullptr;
     const char* query = sqlite3_mprintf(
@@ -67,7 +69,7 @@ int Database::createUser(const struct User* user) {
 }
 
 Database::Database() {
-    int errcode = sqlite3_open("server.db", &m_db);
+    int errcode = sqlite3_open(Database::DB_NAME, &m_db);
     if (errcode) {
         std::cerr << "Can't open database: " << sqlite3_errmsg(m_db) << std::endl;
 

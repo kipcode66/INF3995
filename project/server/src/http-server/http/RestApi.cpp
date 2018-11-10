@@ -1,11 +1,18 @@
+#include <pistache/serializer/rapidjson.h>
+#include <math.h>
+
 #include "RestApi.hpp"
 #include "database/Database.hpp"
+#include "rapidjson/document.h"
+
+#include <sstream>
 
 using namespace elevation;
 
-RestApi::RestApi(Address addr)
+RestApi::RestApi(Address addr, Logger& logger)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
+, m_logger(logger)
 { }
 
 RestApi::~RestApi() {
@@ -68,64 +75,92 @@ void RestApi::createDescription_() {
             .hide();
 }
 
-void buildUserFromQuery_(struct User* __restrict__ newUser,
-                         Pistache::Http::Uri::Query* __restrict__ query) {
-    strcpy(newUser->mac, query->get("mac").get().c_str());
-    strcpy(newUser->ip, query->get("ip").get().c_str());
-    strcpy(newUser->name, query->get("name").get().c_str());
+
+std::string generateBody(uint32_t id, std::string message) {
+    char jsonString[] = "{\"id\": %d, \"message\": \"connection successful\"}";
+    uint16_t idMaxNumberOfChar = sizeof(floor(log10(UINT32_MAX)) + 1);
+    size_t stringSize = sizeof(jsonString) + idMaxNumberOfChar;
+    char* buffer = (char *)calloc(1, stringSize);
+
+    snprintf(buffer, stringSize, jsonString, id);
+    std::string body(buffer);
+    free(buffer);
+    return body;
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
-    puts("getIdentification function called");
-    auto token = request.headers().getRaw("X-Auth-Token");
-    uint32_t t = std::stoi(token.value());
 
-    auto query = request.query();
-    if (!query.has("mac")) {
+    auto body = request.body();
+    rapidjson::Document request_json;
+    request_json.Parse(body.c_str());
+
+    if (!request_json.HasMember("mac")
+            || !request_json.HasMember("ip")
+            || !request_json.HasMember("name")
+            || request_json["mac"] == '\n'
+            || request_json["ip"] == '\n') {
         response.send(Http::Code::Bad_Request, "Malformed request");
+        return;
+    }
+    User_t requestUser = { 0 };
+    strcpy(requestUser.mac, request_json["mac"].GetString());
+    strcpy(requestUser.ip, request_json["ip"].GetString());
+    strcpy(requestUser.name, request_json["name"].GetString());
+
+    User_t existingUser = { 0 };
+    Database* db = Database::instance();
+    db->getUserByMac(requestUser.mac, &existingUser);
+    if (*existingUser.mac == 0) {
+        db->createUser(&requestUser);
+
+        // MOCK id TODO generate and insert in db
+        uint32_t id = 32093422;
+        std::string body = generateBody(id, "connection successful");
+        response.send(Http::Code::Ok, body);
     } else {
-        std::string mac(query.get("mac").get());
-
-        struct User newUser = { 0 };
-        struct User oldUser = { 0 };
-
-        Database* db = Database::instance();
-        db->getUserByMac(mac.c_str(), &oldUser);
-        if (*oldUser.mac == 0) {
-            buildUserFromQuery_(&newUser, &query);
-            db->createUser(&newUser);
-            response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au café-bistro Élévation!\"}");
+        if (db->createUser(&requestUser)) {
+            std::cerr << "problem writing to database" << std::endl;
+            response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
         } else {
-            buildUserFromQuery_(&newUser, &query);
-            newUser.id = oldUser.id;
-            if (db->createUser(&newUser)) {
-                response.send(Http::Code::Internal_Server_Error, "couldn't create user in db");
-            } else {
-                response.send(Http::Code::Ok, "{\"identificateur\": " + std::to_string(t) + ", \"message\":\"Bienvenue au cafe-bistro Elevation!\"}");
-            }
+            uint32_t id = 32093422;
+            std::string body = generateBody(id, "connection successful");
+            response.send(Http::Code::Ok, body);
         }
-        response.send(Http::Code::Ok, "getIdentification called");
     }
 
+    std::ostringstream osStream;
+    osStream << '{' << requestUser.mac << '}' << " Assigned ID \"" << "ID TODO" << "\" to user \"" << requestUser.name;
+    m_logger.log(osStream.str());
+
+    response.send(Http::Code::Ok, "getIdentification called");
     return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::string param = request.param(":id").as<std::string>();
-    response.send(Http::Code::Ok, "{\n\"chansons\":[\n"
-        "{\n\"titre\":\"Never Gonna Give You Up\",\n\"artiste\":\"Foo\",\n\"duree\":\"4:20\",\n\"proposeePar\":\"Chuck Norris\",\n\"proprietaire\":false,\n\"no\":42},\n"
-        "{\n\"titre\":\"Hey Jude\",\n\"artiste\":\"Beatles\",\n\"duree\":\"7:05\",\n\"proposeePar\":\"Claude\",\n\"proprietaire\":true,\n\"no\":25}\n"
-    "]\n}\n");
+    response.send(Http::Code::Ok, "getFileList, param is : " + param);
     std::cout << "getFileList function called, param is " << param << std::endl;
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "postFile");
+    
+    User_t requestUser; // TODO
+    std::ostringstream osStream;
+    osStream << '{' << requestUser.mac << '}' << " Sent MP3 \"" << "TITLE TODO" << "\" of length " << "SONG LENGTH TODO";
+    m_logger.log(osStream.str());
+
     std::cout << "postFile function called" << std::endl;
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "deleteFile");
+
+    User_t requestUser; // TODO
+    std::ostringstream osStream;
+    osStream << '{' << requestUser.mac << '}' << " Removed MP3 \"" << "TITLE TODO" << "\" of length " << "SONG LENGTH TODO";
+    m_logger.log(osStream.str());
+
     std::cout << "deleteFile function called" << std::endl;
 }

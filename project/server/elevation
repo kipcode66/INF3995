@@ -7,19 +7,22 @@ source "${SCRIPTS_DIR}/start"  # Add the functions in 'start'
 source "${SCRIPTS_DIR}/clean"  # Add the functions in 'clean'
 source "${SCRIPTS_DIR}/test"   # Add the functions in 'test'
 source "${SCRIPTS_DIR}/docker" # Add the functions in 'docker'
+source "${SCRIPTS_DIR}/database" # Add the functions in 'test'
 
 usage() {
     echo "USAGE"
     echo "    $0 <OPTION | DOCKER OPTION>"
     echo
     echo "OPTIONS"
+
     echo "     -h | --help     Print this help menu and exit"
     echo "     -a | --start    Start the Elevation server"
     echo "     -r | --run      Start the Elevation server and wait until it terminates"
     echo "     -o | --stop     Stop the Elevation server"
     echo "     -b | --build    Build the Elevation server"
-    echo "     -c | --clean    Clean the Elevation server and its dependencies"
+    echo "     -c | --clean    Clean the Elevation server, its logs and its dependencies"
     echo "     -t | --test     Run all automated tests"
+    echo "     -d | --database Initialize database"
     echo
     echo "DOCKER OPTIONS"
     echo "     -i | --create-image     Build docker image"
@@ -59,6 +62,10 @@ runScript() {
 
         -t | --test)
             test
+            ;;
+
+        -d | --database)
+            database
             ;;
 
         -i | --build-image)

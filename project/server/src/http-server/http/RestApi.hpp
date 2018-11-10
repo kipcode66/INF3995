@@ -6,17 +6,19 @@
 #include <pistache/router.h>
 #include <pistache/description.h>
 
+#include <common/logger/Logger.hpp>
+
 using namespace Pistache;
 namespace elevation {
 
 class RestApi {
 public:
-    RestApi(Address);
+    RestApi(Address addr, Logger& logger);
     ~RestApi();
     void init();
     void start();
 
-private:
+protected:
     void createDescription_();
     void getIdentification_(const Rest::Request& request, Http::ResponseWriter response);
     void getFileList_(const Rest::Request& request, Http::ResponseWriter response);
@@ -26,6 +28,7 @@ private:
     std::shared_ptr<Http::Endpoint> m_httpEndpoint;
     Rest::Description m_desc;
     Rest::Router m_router;
+    Logger& m_logger;
 };
 
 } // namespace elevation

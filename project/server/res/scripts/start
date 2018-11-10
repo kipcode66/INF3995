@@ -5,6 +5,7 @@ SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
 HTTP_SERVER_NAME=http-server
+HTTPS_SERVER_NAME=https-server
 SSL_DAEMON_NAME=ssl-daemon
 
 processesNotAlreadyStarted() {
@@ -26,6 +27,11 @@ assignHttpServerPortRange() {
         HTTP_SERVER_MIN_PORT=8080
     fi
     HTTP_SERVER_MAX_PORT=$((${HTTP_SERVER_MIN_PORT} + 20))
+}
+
+assignHttpsServerPortRange() {
+    HTTPS_SERVER_MIN_PORT=7777
+    HTTPS_SERVER_MAX_PORT=$((${HTTPS_SERVER_MIN_PORT} + 20))
 }
 
 assignSslDaemonPortRange() {
@@ -52,12 +58,27 @@ startHttpServer() {
     done
 }
 
+startHttpsServer() {
+    message $'\nStarting HTTPS Server...\n'
+    HTTPS_SERVER_PORT="${HTTPS_SERVER_MIN_PORT}"
+    while [ "${HTTPS_SERVER_PORT}" != "${HTTPS_SERVER_MAX_PORT}" ]; do
+        echo $'\n'"Trying port number ${HTTPS_SERVER_PORT}"
+        "./build/${HTTPS_SERVER_NAME}/${HTTPS_SERVER_NAME}" "${HTTPS_SERVER_PORT}" &
+        sleep 0.5
+        if pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
+            break
+        else
+            HTTPS_SERVER_PORT=$((${HTTPS_SERVER_PORT} + 1))
+        fi
+    done
+}
+
 startSslDaemon() {
     message $'\nStarting SSL Daemon...\n'
     SSL_DAEMON_PORT="${SSL_DAEMON_MIN_PORT}"
     while [ "${SSL_DAEMON_PORT}" != "${SSL_DAEMON_MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${SSL_DAEMON_PORT}"
-        "./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}" -l "${SSL_DAEMON_PORT}" -o "${HTTP_SERVER_PORT}" &
+        "./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}" -l "${SSL_DAEMON_PORT}" -o "${HTTPS_SERVER_PORT}" &
         sleep 0.5
         if pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
             break
@@ -77,9 +98,11 @@ lanunchEverything() {
         cd "${SERVER_DIR}"
         assignHttpServerPortRange
         startHttpServer
+        assignHttpsServerPortRange
+        startHttpsServer
         assignSslDaemonPortRange
         startSslDaemon
-        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"', and SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\n\n'
+        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"$',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"$',\nand SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\n\n'
         if ${SHOULD_WAIT}; then
             message "${MESSAGE_STRING}"
             trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
@@ -108,7 +131,12 @@ stop() {
     if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
         kill -TERM $(pgrep -x "${HTTP_SERVER_NAME}")
         sleep 0.5
-        kill -KILL $(pgrep -x "${SSL_DAEMON_NAME}") 2>/dev/null
+        kill -KILL $(pgrep -x "${HTTP_SERVER_NAME}") 2>/dev/null
+    fi
+    if pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
+        kill -TERM $(pgrep -x "${HTTPS_SERVER_NAME}")
+        sleep 0.5
+        kill -KILL $(pgrep -x "${HTTPS_SERVER_NAME}") 2>/dev/null
     fi
     if pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
         kill -TERM $(pgrep -x "${SSL_DAEMON_NAME}")

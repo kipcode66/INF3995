@@ -91,6 +91,7 @@ openssl req -new -config elevd-csr.conf -out elevd.csr
 # Certificate signature
 
 if [ ! -d CA ]; then
+    mkdir -p CA
     message "Generating CA issuer's private key..."
     openssl genrsa -out CA/ca.key 2048
 

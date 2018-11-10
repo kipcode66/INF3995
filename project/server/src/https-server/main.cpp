@@ -1,8 +1,15 @@
 #include <iostream>
 #include <inttypes.h>
 
-#include "http/RestApi.hpp"
+#include "https-server/https/SecureRestApi.hpp"
 
+void usage() {
+    std::cerr << std::endl << "Usage: tp3 [portNum]" << std::endl <<
+        std::endl <<
+        "    portNum: Port to listen on. Default: 80" << std::endl <<
+        std::endl <<
+        "    NOTE: On Unix systems, opening ports below 1024 requires superuser privileges." << std::endl;
+}
 
 uint32_t parseArgs(int argc, char** argv) {
     uint32_t portId;
@@ -14,12 +21,14 @@ uint32_t parseArgs(int argc, char** argv) {
         iStrStrm >> portId;
     }
     else {
+        usage();
         exit(0);
     }
 
     if (portId == 0 || portId > UINT32_MAX) {
         std::cerr << std::endl <<
             "Cannot bind server to port \"" << argv[1] << "\"" << std::endl;
+        usage();
         exit(254);
     }
     return portId;
@@ -31,7 +40,7 @@ int main(int argc, char** argv) {
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
 
-        elevation::RestApi api(addr, elevation::Logger::getLogger("http-server"));
+        elevation::SecureRestApi api(addr, elevation::Logger::getLogger("https-server"));
         api.init();
         std::cout << "Server is about to start." << std::endl;
         api.start();

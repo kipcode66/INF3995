@@ -20,18 +20,12 @@ link_libraries(                            # Equivalent to the -l flag in g++
     common
     pistache
     sqlite3
-    tag
-    z
-    pulse
-    pulse-simple
-    mad
+    http-server-lib
 )
 
 # Create targets
-add_executable(http-server     main.cpp "${HTTP_SERVER_HEADER_SOURCES}")
-add_library   (http-server-lib          "${HTTP_SERVER_CPP_SOURCES}" "${HTTP_SERVER_HEADER_SOURCES}") # Static library used for unit tests
-set_target_properties(http-server-lib PROPERTIES OUTPUT_NAME http-server)
-target_link_libraries(http-server http-server-lib)
+add_executable(https-server     main.cpp "${HTTPS_SERVER_HEADER_SOURCES}")
+add_library   (https-server-lib          "${HTTPS_SERVER_CPP_SOURCES}" "${HTTPS_SERVER_HEADER_SOURCES}") # Static library used for unit tests
+set_target_properties(https-server-lib PROPERTIES OUTPUT_NAME https-server)
+target_link_libraries(https-server https-server-lib)
 
-# Testing
-add_subdirectory(test)
