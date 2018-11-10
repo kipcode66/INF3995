@@ -6,4 +6,4 @@ include_directories(
     "${HTTP_SERVER_TEST_GENERATED_INCLUDE_DIR}"
 )
 
-setupTests(HTTP_SERVER_TEST_CPP_SOURCES "${CMAKE_SOURCE_DIR}/http-server" http-server-lib)
+setupTests(HTTP_SERVER_TEST_CPP_SOURCES "${CMAKE_SOURCE_DIR}/common" common)

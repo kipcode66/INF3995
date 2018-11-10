@@ -1,6 +1,10 @@
 package ca.polymtl.inf3990_01.client.controller.event
 
 import ca.polymtl.inf3990_01.client.utils.SingletonHolderNoArg
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.joinChildren
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
 
 class EventManager private constructor() {
     private val listeners: MutableMap<Class<out Event>, ArrayList<(Event) -> Unit>> = mutableMapOf()
@@ -26,7 +30,17 @@ class EventManager private constructor() {
     }
 
     @Synchronized fun <T: Event> dispatchEvent(evt: T) {
-        listeners[evt.javaClass]?.forEach { it(evt) }
+        runBlocking {
+            listeners[evt.javaClass]?.forEach {
+                try {
+                    launch { it(evt) }
+                }
+                catch (e: Error) {
+                    e.printStackTrace()
+                }
+            }
+            this.coroutineContext[Job]!!.joinChildren()
+        }
     }
 
     companion object : SingletonHolderNoArg<EventManager>(::EventManager)

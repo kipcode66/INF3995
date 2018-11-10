@@ -16,6 +16,7 @@ class InitializationManager private constructor(
     private val preferences: SharedPreferences
 ) {
     companion object {
+        const val CLIENT_NAME_KEY = "client_name"
         /*
          * Warning, the order matters here.
          */
@@ -63,6 +64,13 @@ class InitializationManager private constructor(
         }
     }
     @Volatile private var initState = InitState.NOT_INITIALIZED
+    private val preferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+        if (key == CLIENT_NAME_KEY) {
+            launch {
+                tokenService.updateToken()
+            }
+        }
+    }
     /**
      * True if the initialization is finished AND not canceled.
      */
@@ -78,21 +86,15 @@ class InitializationManager private constructor(
         initState = InitState.INITIALIZING
         // The list of all initialization jobs
         val initJob = launch {
+            // Register handler for username update
+            launch {
+                preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
+            }
+
             // Send a token request and wait for the answer.
             launch {
                 // We just want to wait for the request to finish. We don't really care if it succeeded or not.
                 tokenService.updateToken()
-            }
-
-            // Register handler for username update
-            launch {
-                preferences.registerOnSharedPreferenceChangeListener { sharedPreferences, key ->
-                    if (key == "client_name") {
-                        launch {
-                            tokenService.updateToken()
-                        }
-                    }
-                }
             }
         }
 

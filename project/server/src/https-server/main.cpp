@@ -1,6 +1,5 @@
 #include <iostream>
 #include <inttypes.h>
-
 #include "https-server/https/SecureRestApi.hpp"
 
 void usage() {
@@ -40,7 +39,7 @@ int main(int argc, char** argv) {
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
 
-        elevation::SecureRestApi api(addr);
+        elevation::SecureRestApi api(addr, elevation::Logger::getLogger("https-server"));
         api.init();
         std::cout << "Server is about to start." << std::endl;
         api.start();

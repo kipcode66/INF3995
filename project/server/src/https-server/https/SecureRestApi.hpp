@@ -14,13 +14,18 @@ using namespace Pistache;
 namespace elevation {
 
 class SecureRestApi : public RestApi {
+private:
+    static constexpr const char* ADMIN_USERNAME = "admin";
 public:
-    SecureRestApi(Address);
+    SecureRestApi(Address addr, Logger& logger);
     void init();
+
 private:
     void createSecureDescription_();
     void getSuperviseurFile_(const Rest::Request&, Http::ResponseWriter);
     void postChangePassword_(const Rest::Request&, Http::ResponseWriter);
+    void superviseurLogin_(const Rest::Request&, Http::ResponseWriter);
+    void superviseurLogout_(const Rest::Request&, Http::ResponseWriter);
 
 private:
     Logger& m_logger;

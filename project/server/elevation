@@ -14,7 +14,6 @@ usage() {
     echo "    $0 <OPTION | DOCKER OPTION>"
     echo
     echo "OPTIONS"
-
     echo "     -h | --help     Print this help menu and exit"
     echo "     -a | --start    Start the Elevation server"
     echo "     -r | --run      Start the Elevation server and wait until it terminates"

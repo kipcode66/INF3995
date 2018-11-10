@@ -16,14 +16,15 @@ import com.android.volley.*
 import com.google.gson.Gson
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
+import java.math.BigInteger
 import kotlin.coroutines.experimental.coroutineContext
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
 class TokenManagerService private constructor(private val appCtx: Context, private val httpClient: HTTPRestClient, private val preferences: SharedPreferences) {
     companion object { // Static properties
-        private class GetTokenRequestData(val ip: String, val MAC: String, val nom: String)
-        private class GetTokenResponseData(val identificateur: Int, val message: String)
+        private class GetTokenRequestData(val ip: String, val mac: String, val nom: String)
+        private class GetTokenResponseData(val identificateur: BigInteger, val message: String)
 
         const val SOCKET_TIMEOUT_MS = 3 * 1000
         const val RESOURCE_URI = "/usager/identification"
@@ -65,7 +66,7 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
         }
     }
 
-    private var token: Int = 0
+    private var token: BigInteger = BigInteger.ZERO
     private var tokenLock = Object()
     private var lastMessage: String? = null
     private var currentUpdateJob: Job? = null
@@ -76,7 +77,7 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
         }
     }
 
-    fun getToken(): Int {
+    fun getToken(): BigInteger {
         return token
     }
 
@@ -93,10 +94,10 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
         synchronized(tokenLock) {
             token = resp.identificateur
         }
-        if ((oldToken != token || resp.identificateur == 0) && lastMessage != resp.message) {
+        if ((oldToken != token || resp.identificateur == BigInteger.ZERO) && lastMessage != resp.message) {
             // TODO Send a signal to the Presenter to show popup with the response message.
             // Temporarly, opening a Toast (a little message at the bottom of the screen)
-            if (canDisplayMessage || resp.identificateur != 0) {
+            if (canDisplayMessage || resp.identificateur != BigInteger.ZERO) {
                 Handler(appCtx.mainLooper).post {
                     Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
                     lastMessage = resp.message // Prevent to continuously show the same message (can be annoying)
@@ -120,10 +121,10 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
                         500 -> appCtx.getString(R.string.error_message_server)
                         else -> appCtx.getString(R.string.error_message_unknown) + ": $e"
                     }
-                    ResponseData(0, GetTokenResponseData(0, msg), null)
+                    ResponseData(0, GetTokenResponseData(BigInteger.ZERO, msg), null)
                 } catch (e: Exception) {
                     val msg = appCtx.getString(R.string.error_message_network)
-                    ResponseData(0, GetTokenResponseData(0, "$msg: ${e.localizedMessage}]"), null)
+                    ResponseData(0, GetTokenResponseData(BigInteger.ZERO, "$msg: ${e.localizedMessage}]"), null)
                 }
                 continuation.resume(resp)
             }
@@ -139,14 +140,15 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
             val info = manager.connectionInfo
             val ip = NetUtils.translateIP(info.ipAddress)
             val mac = NetUtils.getMacAddress(appCtx.getString(R.string.interface_name_wifi))
+            val name = preferences.getString(PREFERENCE_KEY_USERNAME, "")!!
             return suspendCoroutine { continuation ->
                 val request = RESTRequest(
-                        Request.Method.GET,
-                        httpClient.getBaseURL() + RESOURCE_URI,
+                        Request.Method.POST,
+                        httpClient.getBaseURL() + RESOURCE_URI + "?mac=$mac&ip=$ip" + if (!name.isEmpty()) "&name=$name" else "",
                         Gson().toJson(GetTokenRequestData(
                                 ip,
                                 mac,
-                                preferences.getString(PREFERENCE_KEY_USERNAME, "")!!
+                                name
                         )),
                         GetTokenResponseData::class.java,
                         mutableMapOf(HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()), // Headers
