@@ -5,6 +5,8 @@
 
 namespace elevation {
 
+const Mp3AutoPlayer::path Mp3AutoPlayer::NO_SONG{""};
+
 Mp3AutoPlayer::Mp3AutoPlayer(
     std::function<path()> nextSongGetter,
     std::function<void(path)> songRemover

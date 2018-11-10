@@ -25,6 +25,9 @@ class Mp3AutoPlayer {
 protected:
     typedef ::std::experimental::filesystem::path path;
 
+public:
+    static const path NO_SONG;
+
 protected:
     static constexpr std::chrono::seconds NEXT_SONG_POLLING_DELAY{1};
 
