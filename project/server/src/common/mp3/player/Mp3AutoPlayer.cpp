@@ -33,7 +33,7 @@ void Mp3AutoPlayer::songStarter_() {
     while (!m_terminateRequested.load()) {
         try {
             path song(m_nextSongGetter());
-            while (song == "" && !m_terminateRequested.load()) {
+            while (song == NO_SONG && !m_terminateRequested.load()) {
                 std::this_thread::sleep_for(NEXT_SONG_POLLING_DELAY);
                 song = m_nextSongGetter();
             }
@@ -48,7 +48,7 @@ void Mp3AutoPlayer::songStarter_() {
                     m_startFuture = m_startPromise.get_future();
                 } // m_startMutex gets unlocked here.
             }
-            if (song != "") {
+            if (song != NO_SONG) {
                 m_songRemover(song);
             }
         }

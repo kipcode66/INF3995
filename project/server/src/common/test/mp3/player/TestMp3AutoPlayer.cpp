@@ -24,7 +24,7 @@ public:
             std::bind(&TestFixture::nextSongGetter, this),
             std::bind(&TestFixture::songRemover, this, std::placeholders::_1)
           )
-        , m_nextSong("")
+        , m_nextSong(Mp3AutoPlayer::NO_SONG)
         , m_lastRemovedSong(REMOVED_SONG_INITIAL_VALUE)
     { }
 
@@ -41,7 +41,7 @@ public:
 fs::path TestFixture::nextSongGetter() {
     std::lock_guard<std::mutex> lock(m_mutex);
     fs::path nextSong = m_nextSong;
-    m_nextSong = "";
+    m_nextSong = Mp3AutoPlayer::NO_SONG;
     return nextSong;
 }
 
@@ -72,10 +72,10 @@ BOOST_AUTO_TEST_CASE(stopPlaying, *boost::unit_test::timeout(TIMEOUT_SECONDS)) {
         fixture.m_nextSong = TIPPERARY_PATH;
     }
     fixture.m_mp3AutoPlayer.waitUntilSongStarted();
-    BOOST_TEST(fixture.m_nextSong == "");
+    BOOST_TEST(fixture.m_nextSong == Mp3AutoPlayer::NO_SONG);
     BOOST_TEST(fixture.m_lastRemovedSong == TestFixture::REMOVED_SONG_INITIAL_VALUE);
     fixture.m_mp3AutoPlayer.stopSong();
-    BOOST_TEST(fixture.m_nextSong == "");
+    BOOST_TEST(fixture.m_nextSong == Mp3AutoPlayer::NO_SONG);
     BOOST_TEST(fixture.m_lastRemovedSong == TIPPERARY_PATH);
 }
 #undef TIMEOUT_SECONDS
@@ -88,10 +88,10 @@ BOOST_AUTO_TEST_CASE(callsCallbacksCorrectly, *boost::unit_test::timeout(TIMEOUT
         fixture.m_nextSong = TIPPERARY_SHORT_PATH;
     }
     fixture.m_mp3AutoPlayer.waitUntilSongStarted();
-    BOOST_TEST(fixture.m_nextSong == "");
+    BOOST_TEST(fixture.m_nextSong == Mp3AutoPlayer::NO_SONG);
     BOOST_TEST(fixture.m_lastRemovedSong == TestFixture::REMOVED_SONG_INITIAL_VALUE);
     fixture.m_mp3AutoPlayer.waitUntilSongFinished();
-    BOOST_TEST(fixture.m_nextSong == "");
+    BOOST_TEST(fixture.m_nextSong == Mp3AutoPlayer::NO_SONG);
     BOOST_TEST(fixture.m_lastRemovedSong == TIPPERARY_SHORT_PATH);
 }
 #undef TIMEOUT_SECONDS
