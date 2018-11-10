@@ -20,22 +20,22 @@ public:
         "/THIS/PATH/IS/AN/INVALID/PATH/IF/IT/APPEARS/THEN/IT/MEANS/A/UNIT/TEST/FAILED";
 public:
     explicit TestFixture()
-        : m_mp3AutoPlayer(
+        : m_nextSong(Mp3AutoPlayer::NO_SONG)
+        , m_lastRemovedSong(REMOVED_SONG_INITIAL_VALUE)
+        , m_mp3AutoPlayer(
             std::bind(&TestFixture::nextSongGetter, this),
             std::bind(&TestFixture::songRemover, this, std::placeholders::_1)
           )
-        , m_nextSong(Mp3AutoPlayer::NO_SONG)
-        , m_lastRemovedSong(REMOVED_SONG_INITIAL_VALUE)
     { }
 
     fs::path nextSongGetter();
     void songRemover(fs::path song);
 
 public:
-    Mp3AutoPlayer m_mp3AutoPlayer;
     std::mutex m_mutex;
     fs::path m_nextSong;
     fs::path m_lastRemovedSong;
+    Mp3AutoPlayer m_mp3AutoPlayer;
 };
 
 fs::path TestFixture::nextSongGetter() {
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(destructionIsOkEvenIfPlaying, *boost::unit_test::timeout(TI
         std::lock_guard<std::mutex> lock(fixture.m_mutex);
         fixture.m_nextSong = TIPPERARY_PATH;
     }
-    fixture.m_mp3AutoPlayer.waitUntilSongStarted();
+    fixture.m_mp3AutoPlayer.waitUntilSongStarted(); // Potential deadlock here if we wait
 }
 #undef TIMEOUT_SECONDS
 
