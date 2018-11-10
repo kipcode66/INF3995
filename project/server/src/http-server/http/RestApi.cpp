@@ -133,7 +133,9 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
     std::ostringstream logMsg;
-    
+
+    m_logger.log("getIdentification_ called");
+
     if ((!request_json.IsObject()
             || (!request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
@@ -144,7 +146,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
     }
-    // std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response, std::ostringstream logMsg) {
+    std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response, std::ostringstream logMsg) {
         User_t requestUser = { 0 };
         if (request_json.IsObject()) {
             strcpy(requestUser.mac, request_json["mac"].GetString());
@@ -189,16 +191,15 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 return;
             }
         }
-    // }, std::move(request_json), std::move(response), std::move(logMsg)).detach();
+    }, std::move(request_json), std::move(response), std::move(logMsg)).detach();
     return;
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
-    std::ostringstream logMsg;
-    std::thread([&](const Rest::Request& request, Http::ResponseWriter response, std::ostringstream logMsg){
+    std::thread([this](const Rest::Request& request, Http::ResponseWriter response) {
+        std::ostringstream logMsg;
         std::string param = request.headers().getRaw("X-Auth-Token").value();
-        std::cout << "getFileList function called, param is " << param << std::endl;
         if (std::stoul(param) == 0) {
             logMsg << "Could not get the file list. Received an invalid token.";
             m_logger.err(logMsg.str());
@@ -216,7 +217,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
         logMsg << "The file list for user \"" << param << "\" was successfuly sent.";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
-    }, std::move(request), std::move(response), std::move(logMsg)).detach();
+    }, std::move(request), std::move(response)).detach();
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -240,7 +241,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
     const std::string body = request.body();
 
-    std::thread([&](const std::string body, Http::ResponseWriter response){
+    std::thread([this, t](std::ostringstream logMsg, const std::string body, Http::ResponseWriter response) {
         Mp3Header* header = nullptr;
         try {
             Database* db = Database::instance();
@@ -261,7 +262,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 requestUser = db->getUserById(token);
             } catch (sqlite_error& e) { }
 
-            if (token == 0 || requestUser.mac == nullptr) {
+            if (token == 0 || *requestUser.mac == 0) {
                 logMsg << "Could not post the file. Received invalid token.";
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Forbidden, "Invalid token");
@@ -349,7 +350,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             return;
         }
         response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
-    }, std::move(body), std::move(response)).detach();
+    }, std::move(logMsg), std::move(body), std::move(response)).detach();
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
