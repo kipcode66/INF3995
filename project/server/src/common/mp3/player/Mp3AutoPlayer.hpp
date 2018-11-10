@@ -74,7 +74,7 @@ protected:
      */
     void songStarter_();
     void sendTerminate_();
-    void sendStartSignal();
+    void tryToSendSongStartSignal_();
 
 protected:
     Mp3Player m_player;
