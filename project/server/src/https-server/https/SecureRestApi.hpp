@@ -20,6 +20,7 @@ public:
 private:
     void createSecureDescription_();
     void getSuperviseurFile_(const Rest::Request&, Http::ResponseWriter);
+    void postChangePassword_(const Rest::Request&, Http::ResponseWriter);
 
 private:
     Logger& m_logger;
