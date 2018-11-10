@@ -3,22 +3,18 @@ package ca.polymtl.inf3990_01.client.controller
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Handler
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
-import android.support.v4.app.ActivityCompat.requestPermissions
-import android.support.v4.content.ContextCompat
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
-import ca.polymtl.inf3990_01.client.controller.event.LocalSongLoadEvent
+import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.LocalSong
 import ca.polymtl.inf3990_01.client.model.LocalSongs
-import ca.polymtl.inf3990_01.client.presentation.Presenter
 
 
 class LocalSongController(
         private val appCtx: Context,
         private val eventMgr: EventManager,
-        private val presenter: Presenter
+        private val dataProvider: DataProvider
 ) {
 
     fun reloadLocalSong() {
@@ -36,7 +32,7 @@ class LocalSongController(
         val localSongs: LocalSongs = LocalSongs()
         localSongs.addAll(findSong(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI))
         localSongs.addAll(findSong(MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
-        presenter.setLocalSongs(localSongs)
+        dataProvider.setLocalSongs(localSongs)
     }
 
     fun findSong(songsURI: Uri): LocalSongs {
