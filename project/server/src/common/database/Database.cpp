@@ -347,6 +347,20 @@ void Database::createSong(const Song_t* song) {
     assertSqliteOk(errcode);
 }
 
+void Database::removeSong(uint32_t id) {
+    int errcode = 0;
+    char* query = sqlite3_mprintf(
+                "DELETE FROM cachedSong WHERE rowid = %i;", id);
+
+    sqlite3_stmt *statement = nullptr;
+    sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, NULL);
+    sqlite3_free(query);
+
+    errcode = sqlite3_blocking_step(statement);
+    errcode = sqlite3_finalize(statement);
+    assertSqliteOk(errcode);
+}
+
 void enable_foreign_keys(sqlite3* m_db) {
     int errcode = 0;
     do {
