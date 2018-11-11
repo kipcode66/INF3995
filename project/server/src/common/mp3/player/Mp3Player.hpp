@@ -32,6 +32,7 @@ protected:
 
 private:
     std::future<void> m_player;
+    std::unique_ptr<std::mutex> m_playerMutex;
     std::shared_ptr<std::atomic<bool>> m_stopRequested;
 };
 
