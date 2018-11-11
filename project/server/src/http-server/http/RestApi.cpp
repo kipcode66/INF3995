@@ -26,8 +26,9 @@ RestApi::RestApi(Address addr, Logger& logger)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
 , m_logger(logger)
-, m_autoPlayer(std::bind(RestApi::newSongProvider_, this), std::bind(RestApi::songRemover_, this, _1))
+, m_autoPlayer(nullptr)
 {
+    m_autoPlayer = new Mp3AutoPlayer([this](){return this->newSongProvider_();},[this](fs::path p){this->songRemover_(p);});
     Database::instance();
 }
 
@@ -36,6 +37,7 @@ RestApi::~RestApi() {
         m_httpEndpoint->shutdown();
     }
     catch (std::runtime_error& e) { } // Pistache seems to have an issue where calling shutdown throws an exception.
+    delete m_autoPlayer;
 }
 
 void RestApi::init() {
