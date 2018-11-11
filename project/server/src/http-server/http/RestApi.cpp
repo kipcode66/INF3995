@@ -393,7 +393,7 @@ void RestApi::songRemover_(fs::path pathOfSong) {
         Database* db = Database::instance();
         auto song = db->getSongByPath(pathOfSong.c_str());
         if (song.id > 0) {
-            m_cache.deleteFile(pathOfSong);
+            m_cache.deleteFile(pathOfSong.filename());
             db->removeSong(song.id);
         }
     }
