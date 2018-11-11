@@ -56,7 +56,7 @@ void RestApi::start() {
     m_httpEndpoint->serve();
 }
 
-void setUpAutoPlayer() {
+void RestApi::setUpAutoPlayer() {
     m_autoPlayer = new Mp3AutoPlayer([this](){return this->newSongProvider_();},[this](fs::path p){this->songRemover_(p);});
 }
 
