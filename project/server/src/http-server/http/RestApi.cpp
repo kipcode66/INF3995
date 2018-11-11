@@ -22,11 +22,11 @@ using namespace elevation;
 using namespace std::placeholders;
 namespace fs = std::experimental::filesystem;
 
-RestApi::RestApi(Address addr, Logger& logger)
+RestApi::RestApi(Address addr, Logger& logger, FileCache& cache)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
 , m_logger(logger)
-, m_autoPlayer(nullptr)
+, m_cache(cache)
 {
     Database::instance();
 }
@@ -36,7 +36,6 @@ RestApi::~RestApi() {
         m_httpEndpoint->shutdown();
     }
     catch (std::runtime_error& e) { } // Pistache seems to have an issue where calling shutdown throws an exception.
-    delete m_autoPlayer;
 }
 
 void RestApi::init() {
@@ -54,10 +53,6 @@ void RestApi::start() {
 
     m_httpEndpoint->setHandler(m_router.handler());
     m_httpEndpoint->serve();
-}
-
-void RestApi::setUpAutoPlayer() {
-    m_autoPlayer = new Mp3AutoPlayer([this](){return this->newSongProvider_();},[this](fs::path p){this->songRemover_(p);});
 }
 
 void RestApi::createDescription_() {
@@ -371,33 +366,4 @@ void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter res
     m_logger.log(osStream.str());
 
     std::cout << "deleteFile function called" << std::endl;
-}
-
-fs::path RestApi::newSongProvider_() const {
-    fs::path newSong = Mp3AutoPlayer::NO_SONG;
-    try {
-        Database* db = Database::instance();
-        auto songs = db->getAllSongs();
-        if (songs.size() > 0) {
-            newSong = songs[0].path;
-        }
-    }
-    catch (sqlite_error& e) {
-        m_logger.err(e.what());
-    }
-    return newSong;
-}
-
-void RestApi::songRemover_(fs::path pathOfSong) {
-    try {
-        Database* db = Database::instance();
-        auto song = db->getSongByPath(pathOfSong.c_str());
-        if (song.id > 0) {
-            m_cache.deleteFile(pathOfSong.filename());
-            db->removeSong(song.id);
-        }
-    }
-    catch (sqlite_error& e) {
-        m_logger.err(e.what());
-    }
 }

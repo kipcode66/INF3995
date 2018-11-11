@@ -35,10 +35,12 @@ public:
 protected:
     void ensureCacheDirCreated_() noexcept;
     void wipeCachedFiles_() noexcept;
+    void deleteIntermediateFolders_() noexcept;
 
 protected:
     std::experimental::filesystem::path m_path;
-    bool m_isInitialized;
+    bool m_isTemporaryFolder = false;
+    bool m_isInitialized = false;
 };
 
 } // namespace elevation

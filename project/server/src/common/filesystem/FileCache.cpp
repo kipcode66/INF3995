@@ -10,19 +10,20 @@ namespace elevation {
 namespace fs = std::experimental::filesystem;
 
 FileCache::FileCache(const std::string& cachePath)
-    :m_path(cachePath), m_isInitialized(false)
+    : m_path(cachePath)
 {
     ensureCacheDirCreated_();
 }
 
 FileCache::FileCache(const std::experimental::filesystem::path& cachePath)
-    :m_path(cachePath), m_isInitialized(false)
+    : m_path(cachePath)
 {
     ensureCacheDirCreated_();
 }
 
 FileCache::FileCache()
-    :m_path(""), m_isInitialized(false)
+    : m_path("")
+    , m_isTemporaryFolder(true)
 {
     try {
         m_path = fs::temp_directory_path() / "elevation" / "FileCache";
@@ -37,7 +38,9 @@ FileCache::FileCache()
 
 FileCache::~FileCache() {
     wipeCachedFiles_();
+    deleteIntermediateFolders_();
     m_isInitialized = false;
+    m_isTemporaryFolder = false;
 }
 
 bool FileCache::isInitialized() {
@@ -137,6 +140,20 @@ void FileCache::wipeCachedFiles_() noexcept {
     catch (fs::filesystem_error& e) {
         std::clog << e.what();
     }
+}
+
+void FileCache::deleteIntermediateFolders_() noexcept {
+    try {
+        if (m_isTemporaryFolder && m_path.has_parent_path() && m_path.parent_path().has_parent_path()) {
+            try {
+                fs::remove_all(m_path.parent_path());
+            }
+            catch (fs::filesystem_error& e) {
+                std::clog << e.what();
+            }
+        }
+    }
+    catch (...) { }
 }
 
 } // namespace elevation
