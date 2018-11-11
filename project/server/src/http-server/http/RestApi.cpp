@@ -28,7 +28,6 @@ RestApi::RestApi(Address addr, Logger& logger)
 , m_logger(logger)
 , m_autoPlayer(nullptr)
 {
-    m_autoPlayer = new Mp3AutoPlayer([this](){return this->newSongProvider_();},[this](fs::path p){this->songRemover_(p);});
     Database::instance();
 }
 
@@ -55,6 +54,10 @@ void RestApi::start() {
 
     m_httpEndpoint->setHandler(m_router.handler());
     m_httpEndpoint->serve();
+}
+
+void setUpAutoPlayer() {
+    m_autoPlayer = new Mp3AutoPlayer([this](){return this->newSongProvider_();},[this](fs::path p){this->songRemover_(p);});
 }
 
 void RestApi::createDescription_() {
