@@ -7,6 +7,7 @@
 #include <pistache/description.h>
 #include <common/logger/Logger.hpp>
 #include <database/Database.hpp>
+#include <mp3/player/Mp3AutoPlayer.hpp>
 
 #include "filesystem/FileCache.hpp"
 
@@ -32,12 +33,15 @@ protected:
     void postFile_(const Rest::Request& request, Http::ResponseWriter response);
     void deleteFile_(const Rest::Request& request, Http::ResponseWriter response);
     std::string generateSong_(const Song_t& song, uint32_t token);
+    std::experimental::filesystem::path newSongProvider_() const;
+    void songRemover_(std::experimental::filesystem::path);
 
     std::shared_ptr<Http::Endpoint> m_httpEndpoint;
     Rest::Description m_desc;
     Rest::Router m_router;
     FileCache m_cache;
     Logger& m_logger;
+    Mp3AutoPlayer m_autoPlayer;
 };
 
 } // namespace elevation
