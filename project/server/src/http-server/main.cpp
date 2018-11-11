@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
         elevation::RestApi api(addr, elevation::Logger::getLogger("http-server"));
+        api.setUpAutoPlayer();
         api.init();
         std::cout << "Server is about to start." << std::endl;
         api.start();

@@ -26,6 +26,7 @@ public:
     ~RestApi();
     void init();
     void start();
+    void setUpAutoPlayer();
 
 protected:
     void createDescription_();
