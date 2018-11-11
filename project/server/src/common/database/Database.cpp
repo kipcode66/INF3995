@@ -274,7 +274,7 @@ std::vector<Song_t> Database::getSongsByUser(int userId) const {
     Song_t song_buffer;
     int errcode = 0;
     char* query = sqlite3_mprintf(
-            "SELECT rowid, title, artist, user_id, duration, path FROM cachedSong WHERE (user_id = %u);", userId);
+            "SELECT rowid, title, artist, user_id, duration, path, song_order FROM cachedSong WHERE (user_id = %u) ORDER BY song_order ASC;", userId);
 
     sqlite3_stmt *statement = nullptr;
     sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
@@ -303,7 +303,7 @@ std::vector<Song_t> Database::getAllSongs() const {
     Song_t song_buffer;
     int errcode = 0;
     char* query = sqlite3_mprintf(
-            "SELECT rowid, title, artist, user_id, duration, path FROM cachedSong;");
+            "SELECT rowid, title, artist, user_id, duration, path, song_order FROM cachedSong ORDER BY song_order ASC;");
 
     sqlite3_stmt *statement = nullptr;
     sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, NULL); // strlen for perfo
@@ -330,12 +330,13 @@ std::vector<Song_t> Database::getAllSongs() const {
 void Database::createSong(const Song_t* song) {
     int errcode = 0;
     char* query = sqlite3_mprintf(
-                "INSERT OR REPLACE INTO cachedSong VALUES ('%q', '%q', %u, %u, '%q');",
+                "INSERT OR REPLACE INTO cachedSong VALUES ('%q', '%q', %u, %u, '%q', %i);",
                 song->title,
                 song->artist,
                 song->userId,
                 song->duration,
-                song->path);
+                song->path,
+                0 /* default song_order */);
 
     sqlite3_stmt *statement = nullptr;
     sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, NULL);
