@@ -39,8 +39,14 @@ public:
 
     void initDefaultAdmin(sqlite3* m_db);
 
-private:
+protected:
     Database();
+
+    static void assertSqliteOk(int errcode, const std::string& message);
+    static void assertSqliteOk(int errcode);
+    void enable_foreign_keys(sqlite3* m_db);
+    void wipeDbSongs(sqlite3* m_db);
+
     Song_t getSongByQuery_(const char*) const;
 
     sqlite3* m_db = 0;

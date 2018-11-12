@@ -25,7 +25,7 @@ Database* Database::instance() {
     return s_instance;
 }
 
-void assertSqliteOk(int errcode, const std::string& message) {
+void Database::assertSqliteOk(int errcode, const std::string& message) {
     if (errcode != SQLITE_DONE
         && errcode != SQLITE_OK
         && errcode != SQLITE_ROW) {
@@ -35,7 +35,7 @@ void assertSqliteOk(int errcode, const std::string& message) {
     }
 }
 
-void assertSqliteOk(int errcode) {
+void Database::assertSqliteOk(int errcode) {
     if (errcode != SQLITE_DONE
         && errcode != SQLITE_OK
         && errcode != SQLITE_ROW) {
@@ -346,7 +346,7 @@ void Database::createSong(const Song_t* song) {
     assertSqliteOk(errcode);
 }
 
-void enable_foreign_keys(sqlite3* m_db) {
+void Database::enable_foreign_keys(sqlite3* m_db) {
     int errcode = 0;
     do {
         try {
@@ -372,7 +372,7 @@ void enable_foreign_keys(sqlite3* m_db) {
     assertSqliteOk(errcode, "Cannot enable foreign keys");
 }
 
-void wipeDbSongs(sqlite3* m_db) {
+void Database::wipeDbSongs(sqlite3* m_db) {
     int errcode = 0;
     do {
         try {
