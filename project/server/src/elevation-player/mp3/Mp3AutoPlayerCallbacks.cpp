@@ -1,8 +1,12 @@
 #include <database/Database.hpp>
+#include <thread>
+#include <chrono>
+#include <sqlite3/sqlite3.h>
 
 #include "Mp3AutoPlayerCallbacks.hpp"
 
 using namespace elevation;
+using namespace std::chrono_literals;
 namespace fs = std::experimental::filesystem;
 
 Mp3AutoPlayerCallbacks::Mp3AutoPlayerCallbacks(
@@ -25,16 +29,25 @@ Mp3AutoPlayer& Mp3AutoPlayerCallbacks::getReferenceToAutoPlayer() const {
 
 fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
     fs::path newSong = Mp3AutoPlayer::NO_SONG;
-    try {
-        Database* db = Database::instance();
-        auto songs = db->getAllSongs();
-        if (songs.size() > 0) {
-            newSong = songs[0].path;
+    bool retry;
+    do {
+        retry = false;
+        try {
+            Database* db = Database::instance();
+            auto songs = db->getAllSongs();
+            if (songs.size() > 0) {
+                newSong = songs[0].path;
+            }
         }
-    }
-    catch (sqlite_error& e) {
-        m_logger.err(e.what());
-    }
+        catch (sqlite_error& e) {
+            m_logger.err(e.what());
+            if (e.code == SQLITE_LOCKED) {
+                retry = true;
+                newSong = Mp3AutoPlayer::NO_SONG;
+                std::this_thread::sleep_for(100ms);
+            }
+        }
+    } while (retry);
     return newSong;
 }
 
