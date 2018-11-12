@@ -129,6 +129,26 @@ void Database::connectUser(const struct User_t* user) {
     assertSqliteOk(errcode);
 }
 
+int Database::getUserConnectionStatus(uint32_t userId) const {
+    int errcode = 0;
+    int status = 0;
+    char* query = sqlite3_mprintf(
+            "SELECT isConnected FROM userConnection WHERE (user_id = %u);", userId);
+
+    sqlite3_stmt *statement = nullptr;
+    sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
+    sqlite3_free(query);
+
+    errcode = sqlite3_blocking_step(statement);
+    if (errcode == SQLITE_ROW) {
+        status = sqlite3_column_int(statement, 0);
+    }
+    errcode = sqlite3_finalize(statement);
+
+    assertSqliteOk(errcode);
+    return status;
+}
+
 void Database::createAdmin(const char* password) {
     int errcode = 0;
     std::string salt = id_utils::generateSalt(strlen(password));
@@ -439,3 +459,17 @@ Database::Database() {
     }
 }
 
+Database::Database(std::experimental::filesystem::path serverPath) {
+    assertSqliteOk(sqlite3_enable_shared_cache(true), "Cannot enable db shared cache mode");
+    try {
+        assertSqliteOk(
+            sqlite3_open_v2(serverPath.c_str(), &m_db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_SHAREDCACHE, NULL),
+            "Cannot connect to database");
+        enable_foreign_keys(m_db);
+        wipeDbSongs(m_db);
+        //initDefaultAdmin(m_db);
+    } catch (...) {
+        sqlite3_close(m_db);
+        throw;
+    }
+}

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <experimental/filesystem>
 
 #include "User.hpp"
 #include "Song.hpp"
@@ -39,8 +40,11 @@ public:
 
     void initDefaultAdmin(sqlite3* m_db);
 
+    int getUserConnectionStatus(uint32_t userId) const;
+
 protected:
     Database();
+    Database(std::experimental::filesystem::path);
 
     static void assertSqliteOk(int errcode, const std::string& message);
     static void assertSqliteOk(int errcode);

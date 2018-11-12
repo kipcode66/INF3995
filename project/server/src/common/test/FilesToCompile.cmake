@@ -23,6 +23,7 @@ set(HTTP_SERVER_TEST_CPP_SOURCES
     filesystem/TestFileCache.cpp
     database/Testsqlite_error.cpp
     misc/IdUtilsTest.cpp
+    database/DatabaseTestFramework.cpp
 )
 
 makeAbsolute(HTTP_SERVER_TEST_CPP_SOURCES)
