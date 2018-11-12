@@ -9,20 +9,20 @@ COMMON_LIB_NAME=common
 HTTP_SERVER_NAME=http-server
 HTTPS_SERVER_NAME=https-server
 SSL_DAEMON_NAME=ssl-daemon
-ELEVATION_PLAYER=elevation-player
+ELEVATION_PLAYER_NAME=elevation-player
 
 processesNotAlreadyStarted() {
-    if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
-        message "Cannot start HTTP Server : already started (PID $(pgrep -x "${HTTP_SERVER_NAME}"))"$'\n'
+    if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
+        message "Cannot start HTTP Server : already started (PID $(pidof "${HTTP_SERVER_NAME}"))"$'\n'
         false
-    elif pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
-        message "Cannot start HTTPS Server : already started (PID $(pgrep -x "${HTTPS_SERVER_NAME}"))"$'\n'
+    elif pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
+        message "Cannot start HTTPS Server : already started (PID $(pidof "${HTTPS_SERVER_NAME}"))"$'\n'
         false
-    elif pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
-        echo "Cannot start SSL Daemon : already started (PID $(pgrep -x "${SSL_DAEMON_NAME}"))"$'\n'
+    elif pidof "${SSL_DAEMON_NAME}" >/dev/null; then
+        echo "Cannot start SSL Daemon : already started (PID $(pidof "${SSL_DAEMON_NAME}"))"$'\n'
         false
-    elif pgrep -x "${ELEVATION_PLAYER}" >/dev/null; then
-        echo "Cannot start SSL Daemon : already started (PID $(pgrep -x "${ELEVATION_PLAYER}"))"$'\n'
+    elif pidof "${ELEVATION_PLAYER_NAME}" >/dev/null; then
+        echo "Cannot start SSL Daemon : already started (PID $(pidof "${ELEVATION_PLAYER_NAME}"))"$'\n'
         false
     else
         true
@@ -59,7 +59,7 @@ startHttpServer() {
         echo $'\n'"Trying port number ${HTTP_SERVER_PORT}"
         "./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}" --cache-path "${SERVER_CACHE_PATH}" --port "${HTTP_SERVER_PORT}" &
         sleep 0.5
-        if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
+        if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
             break
         else
             HTTP_SERVER_PORT=$((${HTTP_SERVER_PORT} + 1))
@@ -74,7 +74,7 @@ startHttpsServer() {
         echo $'\n'"Trying port number ${HTTPS_SERVER_PORT}"
         "./build/${HTTPS_SERVER_NAME}/${HTTPS_SERVER_NAME}" --cache-path "${SERVER_CACHE_PATH}" --port "${HTTPS_SERVER_PORT}" &
         sleep 0.5
-        if pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
+        if pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
             break
         else
             HTTPS_SERVER_PORT=$((${HTTPS_SERVER_PORT} + 1))
@@ -89,7 +89,7 @@ startSslDaemon() {
         echo $'\n'"Trying port number ${SSL_DAEMON_PORT}"
         "./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}" -l "${SSL_DAEMON_PORT}" -o "${HTTPS_SERVER_PORT}" &
         sleep 0.5
-        if pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
+        if pidof "${SSL_DAEMON_NAME}" >/dev/null; then
             break
         else
             SSL_DAEMON_PORT=$((${SSL_DAEMON_PORT} + 1))
@@ -99,7 +99,7 @@ startSslDaemon() {
 
 startElevationPlayer() {
     message $'\nStarting Elevation Player...\n'
-    "./build/${ELEVATION_PLAYER}/${ELEVATION_PLAYER}" --cache-path "${SERVER_CACHE_PATH}" &
+    "./build/${ELEVATION_PLAYER_NAME}/${ELEVATION_PLAYER_NAME}" --cache-path "${SERVER_CACHE_PATH}" &
 }
 
 # EXPECTED PARAMS :
@@ -145,25 +145,25 @@ run() {
 
 stop() {
     checkParamNum 0 $# || exit 1
-    if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
-        kill -TERM $(pgrep -x "${HTTP_SERVER_NAME}")
+    if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
+        kill -TERM $(pidof "${HTTP_SERVER_NAME}")
         sleep 0.5
-        kill -KILL $(pgrep -x "${HTTP_SERVER_NAME}") 2>/dev/null
+        kill -KILL $(pidof "${HTTP_SERVER_NAME}") 2>/dev/null
     fi
-    if pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
-        kill -TERM $(pgrep -x "${HTTPS_SERVER_NAME}")
+    if pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
+        kill -TERM $(pidof "${HTTPS_SERVER_NAME}")
         sleep 0.5
-        kill -KILL $(pgrep -x "${HTTPS_SERVER_NAME}") 2>/dev/null
+        kill -KILL $(pidof "${HTTPS_SERVER_NAME}") 2>/dev/null
     fi
-    if pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
-        kill -TERM $(pgrep -x "${SSL_DAEMON_NAME}")
+    if pidof "${SSL_DAEMON_NAME}" >/dev/null; then
+        kill -TERM $(pidof "${SSL_DAEMON_NAME}")
         sleep 0.5
-        kill -KILL $(pgrep -x "${SSL_DAEMON_NAME}") 2>/dev/null
+        kill -KILL $(pidof "${SSL_DAEMON_NAME}") 2>/dev/null
     fi
-    if pgrep -x "${ELEVATION_PLAYER_NAME}" >/dev/null; then
-        kill -TERM $(pgrep -x "${ELEVATION_PLAYER_NAME}")
+    if pidof "${ELEVATION_PLAYER_NAME}" >/dev/null; then
+        kill -TERM $(pidof "${ELEVATION_PLAYER_NAME}")
         sleep 0.5
-        kill -KILL $(pgrep -x "${ELEVATION_PLAYER_NAME}") 2>/dev/null
+        kill -KILL $(pidof "${ELEVATION_PLAYER_NAME}") 2>/dev/null
     fi
 }
 
