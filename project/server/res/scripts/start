@@ -8,6 +8,7 @@ COMMON_LIB_NAME=common
 HTTP_SERVER_NAME=http-server
 HTTPS_SERVER_NAME=https-server
 SSL_DAEMON_NAME=ssl-daemon
+ELEVATION_PLAYER=elevation-player
 
 processesNotAlreadyStarted() {
     if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
@@ -18,6 +19,9 @@ processesNotAlreadyStarted() {
         false
     elif pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
         echo "Cannot start SSL Daemon : already started (PID $(pgrep -x "${SSL_DAEMON_NAME}"))"$'\n'
+        false
+    elif pgrep -x "${ELEVATION_PLAYER}" >/dev/null; then
+        echo "Cannot start SSL Daemon : already started (PID $(pgrep -x "${ELEVATION_PLAYER}"))"$'\n'
         false
     else
         true
@@ -92,6 +96,11 @@ startSslDaemon() {
     done
 }
 
+startSslDaemon() {
+    message $'\nStarting Elevation Player...\n'
+    "./build/${ELEVATION_PLAYER}/${ELEVATION_PLAYER}" &
+}
+
 # EXPECTED PARAMS :
 # 1 : Expression which, if true, makes us wait until any of the processes is finished.
 lanunchEverything() {
@@ -146,6 +155,11 @@ stop() {
         kill -TERM $(pgrep -x "${SSL_DAEMON_NAME}")
         sleep 0.5
         kill -KILL $(pgrep -x "${SSL_DAEMON_NAME}") 2>/dev/null
+    fi
+    if pgrep -x "${ELEVATION_PLAYER_NAME}" >/dev/null; then
+        kill -TERM $(pgrep -x "${ELEVATION_PLAYER_NAME}")
+        sleep 0.5
+        kill -KILL $(pgrep -x "${ELEVATION_PLAYER_NAME}") 2>/dev/null
     fi
 }
 

@@ -9,7 +9,8 @@ set(SSL_RESOURCE_DIR "${CMAKE_SOURCE_DIR}/../res/ssl")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/common/include")
 
-add_subdirectory(common      ) # Call CMakeLists.txt inside 'common/'
-add_subdirectory(http-server ) # Call CMakeLists.txt inside 'http-server/'
-add_subdirectory(https-server) # Call CMakeLists.txt inside 'https-server/'
-add_subdirectory(ssl-daemon  ) # Call CMakeLists.txt inside 'ssl-daemon/'
+add_subdirectory(common          ) # Call CMakeLists.txt inside 'common/'
+add_subdirectory(http-server     ) # Call CMakeLists.txt inside 'http-server/'
+add_subdirectory(https-server    ) # Call CMakeLists.txt inside 'https-server/'
+add_subdirectory(ssl-daemon      ) # Call CMakeLists.txt inside 'ssl-daemon/'
+add_subdirectory(elevation-player) # Call CMakeLists.txt inside 'elevation-player/'
