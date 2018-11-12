@@ -40,7 +40,7 @@ RestServerArgsParser::RestServerArgsParser(const std::vector<std::string>& args)
     }
 }
 
-uint32_t RestServerArgsParser::parsePort_(const std::string& portString) const {
+uint16_t RestServerArgsParser::parsePort_(const std::string& portString) const {
     uint32_t portId;
     std::istringstream iStrStrm(portString);
     iStrStrm >> portId;

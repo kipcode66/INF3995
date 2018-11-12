@@ -14,11 +14,11 @@ class RestServerArgsParser {
 public:
     explicit RestServerArgsParser(const std::vector<std::string>& args);
 
-    uint32_t    getPort()      const { return m_port;      }
+    uint16_t    getPort()      const { return m_port;      }
     std::string getCachePath() const { return m_cachePath; }
 
 protected:
-    uint32_t parsePort_(const std::string& portString) const;
+    uint16_t parsePort_(const std::string& portString) const;
     void usage_() const;
 
 protected:
