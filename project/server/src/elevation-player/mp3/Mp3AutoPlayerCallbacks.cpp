@@ -40,11 +40,13 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
             }
         }
         catch (const sqlite_error& e) {
-            m_logger.err(e.what());
             if (e.code == SQLITE_LOCKED) {
                 retry = true;
                 newSong = Mp3AutoPlayer::NO_SONG;
                 std::this_thread::sleep_for(100ms);
+            }
+            else {
+                m_logger.err(e.what());
             }
         }
     } while (retry);
