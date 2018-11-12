@@ -11,6 +11,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although not recommended)
 set(ELEVATION_PLAYER_CPP_SOURCES
+    ArgsParser.cpp
 )
 
 ###############################################################################
@@ -20,6 +21,7 @@ set(ELEVATION_PLAYER_CPP_SOURCES
 # All .h, .hpp, .hh files
 # Use quotes "" if a file contains a space (although not recommended)
 set(ELEVATION_PLAYER_HEADER_SOURCES
+    ArgsParser.hpp
 )
 
 makeAbsolute(ELEVATION_PLAYER_CPP_SOURCES)
