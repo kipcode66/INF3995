@@ -30,7 +30,8 @@ processesNotAlreadyStarted() {
 }
 
 assignHttpServerPortRange() {
-    if [ "$(whoami)" == root ]; then
+    checkParamNum 0 $# || exit 1
+    if "${IS_PROD_MODE}"; then
         HTTP_SERVER_MIN_PORT=80
     else
         HTTP_SERVER_MIN_PORT=8080
@@ -39,12 +40,14 @@ assignHttpServerPortRange() {
 }
 
 assignHttpsServerPortRange() {
+    checkParamNum 0 $# || exit 1
     HTTPS_SERVER_MIN_PORT=7777
     HTTPS_SERVER_MAX_PORT=$((${HTTPS_SERVER_MIN_PORT} + 20))
 }
 
 assignSslDaemonPortRange() {
-    if [ "$(whoami)" == root ]; then
+    checkParamNum 0 $# || exit 1
+    if "${IS_PROD_MODE}"; then
         SSL_DAEMON_MIN_PORT=443
     else
         SSL_DAEMON_MIN_PORT=4433
@@ -57,8 +60,15 @@ startHttpServer() {
     HTTP_SERVER_PORT="${HTTP_SERVER_MIN_PORT}"
     while [ "${HTTP_SERVER_PORT}" != "${HTTP_SERVER_MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${HTTP_SERVER_PORT}"
-        "./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}" --cache-path "${SERVER_CACHE_PATH}" --port "${HTTP_SERVER_PORT}" &
+
+        START_COMMAND="\"./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}\" --cache-path \"${SERVER_CACHE_PATH}\" --port \"${HTTP_SERVER_PORT}\" &"
+        if "${IS_PROD_MODE}"; then
+            eval "sudo ${START_COMMAND}" # Not quoted intentionally
+        else
+            eval ${START_COMMAND} # Not quoted intentionally
+        fi
         sleep 0.5
+
         if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
             break
         else
@@ -87,7 +97,12 @@ startSslDaemon() {
     SSL_DAEMON_PORT="${SSL_DAEMON_MIN_PORT}"
     while [ "${SSL_DAEMON_PORT}" != "${SSL_DAEMON_MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${SSL_DAEMON_PORT}"
-        "./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}" -l "${SSL_DAEMON_PORT}" -o "${HTTPS_SERVER_PORT}" &
+        START_COMMAND="\"./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}\" -l \"${SSL_DAEMON_PORT}\" -o \"${HTTPS_SERVER_PORT}\" &"
+        if "${IS_PROD_MODE}"; then
+            eval "sudo ${START_COMMAND}"
+        else
+            eval ${START_COMMAND}
+        fi
         sleep 0.5
         if pidof "${SSL_DAEMON_NAME}" >/dev/null; then
             break
@@ -104,9 +119,12 @@ startElevationPlayer() {
 
 # EXPECTED PARAMS :
 # 1 : Expression which, if true, makes us wait until any of the processes is finished.
+# 2 : Expression which, if true, makes us launch the servers with root access, and the
+#     player with normal user access.
 lanunchEverything() {
-    checkParamNum 1 $# || exit 1
+    checkParamNum 2 $# || exit 1
     local SHOULD_WAIT="${1}"
+    local IS_PROD_MODE="${2}"
 
     local SERVER_CACHE_PATH="${SERVER_DIR}/cache"
     mkdir -p "${SERVER_CACHE_PATH}"
@@ -133,14 +151,24 @@ lanunchEverything() {
     fi
 }
 
-start() {
+startDev() {
     checkParamNum 0 $# || exit 1
-    lanunchEverything false
+    lanunchEverything false false
+}
+
+startProd() {
+    checkParamNum 0 $# || exit 1
+    if [ "$(whoami)" != root ]; then
+        lanunchEverything false true
+    else
+        messageError $'\nCannot start the Elevation server in production environment while root:\nPulseAudio is anti-environmental and not like roots.\n'
+        exit 1
+    fi
 }
 
 run() {
     checkParamNum 0 $# || exit 1
-    lanunchEverything true
+    lanunchEverything true false
 }
 
 stop() {

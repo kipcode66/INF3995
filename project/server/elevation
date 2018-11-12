@@ -14,14 +14,15 @@ usage() {
     echo "    $0 <OPTION | DOCKER OPTION>"
     echo
     echo "OPTIONS"
-    echo "     -h | --help     Print this help menu and exit"
-    echo "     -a | --start    Start the Elevation server"
-    echo "     -r | --run      Start the Elevation server and wait until it terminates"
-    echo "     -o | --stop     Stop the Elevation server"
-    echo "     -b | --build    Build the Elevation server"
-    echo "     -c | --clean    Clean the Elevation server, its logs and its dependencies"
-    echo "     -t | --test     Run all automated tests"
-    echo "     -d | --database Initialize database"
+    echo "     -h | --help        Print this help menu and exit"
+    echo "     -p | --start-prod  Start the Elevation server in production mode. This will require sudo."
+    echo "     -a | --start-dev   Start the Elevation server in development mode"
+    echo "     -r | --run         Start the Elevation server and wait until it terminates"
+    echo "     -o | --stop        Stop the Elevation server"
+    echo "     -b | --build       Build the Elevation server"
+    echo "     -c | --clean       Clean the Elevation server, its logs and its dependencies"
+    echo "     -t | --test        Run all automated tests"
+    echo "     -d | --database    Initialize database"
     echo
     echo "DOCKER OPTIONS"
     echo "     -i | --create-image     Build docker image"
@@ -39,8 +40,12 @@ runScript() {
             usage
             ;;
 
-        -a |--start)
-            start
+        -p |--start-prod)
+            startProd
+            ;;
+
+        -a |--start-dev)
+            startDev
             ;;
 
         -r |--run)
