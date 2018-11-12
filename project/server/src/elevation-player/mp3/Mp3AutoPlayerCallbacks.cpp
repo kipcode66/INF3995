@@ -39,7 +39,7 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
                 newSong = songs[0].path;
             }
         }
-        catch (sqlite_error& e) {
+        catch (const sqlite_error& e) {
             m_logger.err(e.what());
             if (e.code == SQLITE_LOCKED) {
                 retry = true;
