@@ -65,6 +65,7 @@ cleanServer() {
     local BINARY_DIR="${SERVER_DIR}/build"
     cleanProject "${NAME}" "${BINARY_DIR}"
     rm -rf "${SERVER_DIR}/logs"
+    rm -rf "${SERVER_DIR}/cache"
 }
 
 cleanDependencies() {

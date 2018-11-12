@@ -2,6 +2,7 @@
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+SERVER_DIR="${SCRIPTS_DIR}/../../project/server"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
 COMMON_LIB_NAME=common
@@ -56,7 +57,7 @@ startHttpServer() {
     HTTP_SERVER_PORT="${HTTP_SERVER_MIN_PORT}"
     while [ "${HTTP_SERVER_PORT}" != "${HTTP_SERVER_MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${HTTP_SERVER_PORT}"
-        "./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}" "${HTTP_SERVER_PORT}" &
+        "./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}" --cache-path "${SERVER_CACHE_PATH}" --port "${HTTP_SERVER_PORT}" &
         sleep 0.5
         if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
             break
@@ -71,7 +72,7 @@ startHttpsServer() {
     HTTPS_SERVER_PORT="${HTTPS_SERVER_MIN_PORT}"
     while [ "${HTTPS_SERVER_PORT}" != "${HTTPS_SERVER_MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${HTTPS_SERVER_PORT}"
-        "./build/${HTTPS_SERVER_NAME}/${HTTPS_SERVER_NAME}" "${HTTPS_SERVER_PORT}" &
+        "./build/${HTTPS_SERVER_NAME}/${HTTPS_SERVER_NAME}" --cache-path "${SERVER_CACHE_PATH}" --port "${HTTPS_SERVER_PORT}" &
         sleep 0.5
         if pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
             break
@@ -96,9 +97,9 @@ startSslDaemon() {
     done
 }
 
-startSslDaemon() {
+startElevationPlayer() {
     message $'\nStarting Elevation Player...\n'
-    "./build/${ELEVATION_PLAYER}/${ELEVATION_PLAYER}" &
+    "./build/${ELEVATION_PLAYER}/${ELEVATION_PLAYER}" --cache-path "${SERVER_CACHE_PATH}" &
 }
 
 # EXPECTED PARAMS :
@@ -107,6 +108,8 @@ lanunchEverything() {
     checkParamNum 1 $# || exit 1
     local SHOULD_WAIT="${1}"
 
+    local SERVER_CACHE_PATH="${SERVER_DIR}/cache"
+    mkdir -p "${SERVER_CACHE_PATH}"
     if processesNotAlreadyStarted; then
         cd "${SERVER_DIR}"
         assignHttpServerPortRange
@@ -115,7 +118,8 @@ lanunchEverything() {
         startHttpsServer
         assignSslDaemonPortRange
         startSslDaemon
-        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"',\nand SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\n\n'
+        startElevationPlayer
+        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"$',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"$',\nand SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\nCache path: '"${SERVER_CACHE_PATH}"$'\n\n'
         if ${SHOULD_WAIT}; then
             message "${MESSAGE_STRING}"
             trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
