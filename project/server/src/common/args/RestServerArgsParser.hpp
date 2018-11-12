@@ -18,6 +18,7 @@ public:
     std::string getCachePath() const { return m_cachePath; }
 
 protected:
+    uint32_t parsePort_(const std::string& portString) const;
     void usage_() const;
 
 protected:
