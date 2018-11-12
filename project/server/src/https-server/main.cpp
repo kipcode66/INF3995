@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     uint16_t portId = parseArgs(argc, argv);
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
-        elevation::FileCache cache;
+        elevation::FileCache cache{"/tmp/elevation2"};
 
         elevation::SecureRestApi api(addr, elevation::Logger::getLogger("https-server"), cache);
         api.init();

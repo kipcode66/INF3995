@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
         elevation::Logger& logger = elevation::Logger::getLogger("http-server");
-        elevation::FileCache cache;
+        elevation::FileCache cache{"/tmp/elevation2"};
 
         elevation::RestApi api(addr, logger, cache);
         api.init();
