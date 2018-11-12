@@ -1,8 +1,6 @@
 #include <iostream>
 #include <inttypes.h>
 #include "http/RestApi.hpp"
-#include "mp3/Mp3AutoPlayerCallbacks.hpp"
-
 
 uint32_t parseArgs(int argc, char** argv) {
     uint32_t portId;
@@ -32,7 +30,6 @@ int main(int argc, char** argv) {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
         elevation::Logger& logger = elevation::Logger::getLogger("http-server");
         elevation::FileCache cache;
-        elevation::Mp3AutoPlayerCallbacks autoPlayerCallbacks(logger, cache);
 
         elevation::RestApi api(addr, logger, cache);
         api.init();

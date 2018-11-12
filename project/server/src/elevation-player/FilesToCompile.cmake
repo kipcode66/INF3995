@@ -12,6 +12,7 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # Use quotes "" if a file contains a space (although not recommended)
 set(ELEVATION_PLAYER_CPP_SOURCES
     ArgsParser.cpp
+    mp3/Mp3AutoPlayerCallbacks.cpp
 )
 
 ###############################################################################
@@ -22,6 +23,7 @@ set(ELEVATION_PLAYER_CPP_SOURCES
 # Use quotes "" if a file contains a space (although not recommended)
 set(ELEVATION_PLAYER_HEADER_SOURCES
     ArgsParser.hpp
+    mp3/Mp3AutoPlayerCallbacks.hpp
 )
 
 makeAbsolute(ELEVATION_PLAYER_CPP_SOURCES)
