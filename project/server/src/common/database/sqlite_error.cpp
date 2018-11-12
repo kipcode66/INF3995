@@ -8,14 +8,14 @@ sqlite_error::sqlite_error()
     , code(SQLITE_OK)
 { }
 
-sqlite_error::sqlite_error(int code)
-    : runtime_error(sqlite3_errstr(code))
-    , code(code)
+sqlite_error::sqlite_error(int code_)
+    : runtime_error(sqlite3_errstr(code_))
+    , code(code_)
 { }
 
-sqlite_error::sqlite_error(int code, const std::string& msg)
+sqlite_error::sqlite_error(int code_, const std::string& msg)
     : runtime_error(msg)
-    , code(code)
+    , code(code_)
 { }
 
 sqlite_error::~sqlite_error()
