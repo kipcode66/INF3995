@@ -40,15 +40,15 @@ runScript() {
             usage
             ;;
 
-        -p |--start-prod)
+        -p | --start-prod)
             startProd
             ;;
 
-        -a |--start-dev)
+        -a | --start-dev)
             startDev
             ;;
 
-        -r |--run)
+        -r | --run)
             run
             ;;
 
