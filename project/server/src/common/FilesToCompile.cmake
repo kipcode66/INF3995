@@ -14,6 +14,7 @@ set(COMMON_CPP_SOURCES
     logger/Logger.cpp
     mp3/header/Mp3Duration.cpp
     mp3/header/Mp3Header.cpp
+    mp3/player/Mp3AutoPlayer.cpp
     mp3/player/Mp3Player.cpp
     mp3/player/mad/MadDecoder.cpp
     mp3/player/mad/MadAudioFormatter.cpp
@@ -35,6 +36,7 @@ set(COMMON_HEADER_SOURCES
     logger/Logger.hpp
     mp3/header/Mp3Duration.hpp
     mp3/header/Mp3Header.hpp
+    mp3/player/Mp3AutoPlayer.hpp
     mp3/player/Mp3Player.hpp
     mp3/player/mad/MadDecoder.hpp
     mp3/player/pulse/PulseDevice.hpp

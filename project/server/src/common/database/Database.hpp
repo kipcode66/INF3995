@@ -37,6 +37,7 @@ public:
     std::vector<Song_t> getSongsByUser(int userId) const;
     std::vector<Song_t> getAllSongs() const;
     void createSong(const Song_t*);
+    void removeSong(uint32_t);
 
     void initDefaultAdmin(sqlite3* m_db);
 

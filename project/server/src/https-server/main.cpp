@@ -38,8 +38,9 @@ int main(int argc, char** argv) {
     uint16_t portId = parseArgs(argc, argv);
     try {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
+        elevation::FileCache cache;
 
-        elevation::SecureRestApi api(addr, elevation::Logger::getLogger("https-server"));
+        elevation::SecureRestApi api(addr, elevation::Logger::getLogger("https-server"), cache);
         api.init();
         std::cout << "Server is about to start." << std::endl;
         api.start();

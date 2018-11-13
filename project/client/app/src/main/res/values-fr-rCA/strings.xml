@@ -34,4 +34,7 @@
     <string name="setting_queue_period_label3">Rapide (1 sec)</string>
     <string name="song_queue_item_sent_by">Proposée par: %1$s</string>
     <string name="client_name_default">Vous</string>
+    <string name="local_song_sendButton_label_send">Envoyer</string>
+    <string name="local_song_sendButton_label_sending">Envoi...</string>
+    <string name="local_song_sendButton_label_sent">Envoyée</string>
 </resources>

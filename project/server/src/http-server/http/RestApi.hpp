@@ -7,12 +7,14 @@
 #include <pistache/description.h>
 #include <common/logger/Logger.hpp>
 #include <database/Database.hpp>
+#include <mp3/player/Mp3AutoPlayer.hpp>
 
 #include "filesystem/FileCache.hpp"
 
 #include <common/logger/Logger.hpp>
 
 using namespace Pistache;
+namespace fs = std::experimental::filesystem;
 namespace elevation {
 
 class RestApi {
@@ -20,10 +22,11 @@ public:
     static constexpr const int MAX_SONG_PER_USER = 5;
 
 public:
-    RestApi(Address addr, Logger& logger);
+    RestApi(Address addr, Logger& logger, FileCache& cache);
     ~RestApi();
     void init();
     void start();
+    void setUpAutoPlayer();
 
 protected:
     void createDescription_();
@@ -36,8 +39,8 @@ protected:
     std::shared_ptr<Http::Endpoint> m_httpEndpoint;
     Rest::Description m_desc;
     Rest::Router m_router;
-    FileCache m_cache;
     Logger& m_logger;
+    FileCache& m_cache;
 };
 
 } // namespace elevation

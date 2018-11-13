@@ -15,7 +15,6 @@ import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.ActiveActivityTrackingService
 import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
-import ca.polymtl.inf3990_01.client.presentation.Presenter
 import org.koin.android.ext.android.inject
 import java.util.Observer
 
@@ -25,7 +24,6 @@ abstract class AbstractDrawerActivity(
 ): AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     protected val stateService: AppStateService by inject()
-    protected val presenter: Presenter by inject()
     protected val activeActivityTracker: ActiveActivityTrackingService by inject()
 
     protected lateinit var drawerLayout: DrawerLayout
@@ -55,7 +53,7 @@ abstract class AbstractDrawerActivity(
         toggle.syncState()
 
         stateService.getState().updateNavigationView(navView)
-        presenter.addObserver(stateObserver)
+        stateService.addObserver(stateObserver)
         navView.setNavigationItemSelectedListener(this)
     }
 

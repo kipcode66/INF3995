@@ -20,11 +20,13 @@
 
 using namespace elevation;
 using namespace std::placeholders;
+namespace fs = std::experimental::filesystem;
 
-RestApi::RestApi(Address addr, Logger& logger)
+RestApi::RestApi(Address addr, Logger& logger, FileCache& cache)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
 , m_logger(logger)
+, m_cache(cache)
 {
     Database::instance();
 }
@@ -304,6 +306,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
                 m_cache.deleteFile(filePath.filename());
+                delete header;
                 return;
             }
 
