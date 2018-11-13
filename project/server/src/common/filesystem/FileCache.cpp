@@ -9,20 +9,28 @@ namespace elevation {
 
 namespace fs = std::experimental::filesystem;
 
+typedef fs::perms perms;
+
+const perms FileCache::FILE_PERMISSIONS = perms::add_perms |
+    perms::owner_read  | perms::owner_write |
+    perms::group_read  | perms::group_write |
+    perms::others_read | perms::others_write;
+
 FileCache::FileCache(const std::string& cachePath)
-    :m_path(cachePath), m_isInitialized(false)
+    : m_path(cachePath)
 {
     ensureCacheDirCreated_();
 }
 
 FileCache::FileCache(const std::experimental::filesystem::path& cachePath)
-    :m_path(cachePath), m_isInitialized(false)
+    : m_path(cachePath)
 {
     ensureCacheDirCreated_();
 }
 
 FileCache::FileCache()
-    :m_path(""), m_isInitialized(false)
+    : m_path("")
+    , m_isTemporaryFolder(true)
 {
     try {
         m_path = fs::temp_directory_path() / "elevation" / "FileCache";
@@ -37,7 +45,9 @@ FileCache::FileCache()
 
 FileCache::~FileCache() {
     wipeCachedFiles_();
+    deleteIntermediateFolders_();
     m_isInitialized = false;
+    m_isTemporaryFolder = false;
 }
 
 bool FileCache::isInitialized() {
@@ -78,6 +88,7 @@ void FileCache::setFileContent(const std::string& fileName, std::string& data) {
 
 void FileCache::setFileContent(const std::string& fileName, std::istream& data) {
     std::ofstream file((m_path / fileName).string());
+    fs::permissions(m_path / fileName, FILE_PERMISSIONS);
     std::istreambuf_iterator<char> begin(data);
     std::istreambuf_iterator<char> end;
     std::copy(begin, end, std::ostreambuf_iterator(file));
@@ -137,6 +148,20 @@ void FileCache::wipeCachedFiles_() noexcept {
     catch (fs::filesystem_error& e) {
         std::clog << e.what();
     }
+}
+
+void FileCache::deleteIntermediateFolders_() noexcept {
+    try {
+        if (m_isTemporaryFolder && m_path.has_parent_path() && m_path.parent_path().has_parent_path()) {
+            try {
+                fs::remove_all(m_path.parent_path());
+            }
+            catch (fs::filesystem_error& e) {
+                std::clog << e.what();
+            }
+        }
+    }
+    catch (...) { }
 }
 
 } // namespace elevation

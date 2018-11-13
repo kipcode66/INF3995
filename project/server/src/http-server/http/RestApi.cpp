@@ -20,11 +20,13 @@
 
 using namespace elevation;
 using namespace std::placeholders;
+namespace fs = std::experimental::filesystem;
 
-RestApi::RestApi(Address addr, Logger& logger)
+RestApi::RestApi(Address addr, Logger& logger, FileCache& cache)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
 , m_logger(logger)
+, m_cache(cache)
 {
     Database::instance();
 }
@@ -151,10 +153,10 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response, std::ostringstream logMsg) {
         User_t requestUser = { 0 };
         if (request_json.IsObject()) {
-            strcpy(requestUser.mac, request_json["mac"].GetString());
-            strcpy(requestUser.ip, request_json["ip"].GetString());
+            strncpy(requestUser.mac, request_json["mac"].GetString(), User_t::MAC_LENGTH);
+            strncpy(requestUser.ip, request_json["ip"].GetString(), User_t::IP_LENGTH);
             if (request_json.HasMember("nom")) {
-                strcpy(requestUser.name, request_json["nom"].GetString());
+                strncpy(requestUser.name, request_json["nom"].GetString(), User_t::NAME_LENGTH);
             }
         }
         
@@ -199,23 +201,30 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::thread([this](const Rest::Request& request, Http::ResponseWriter response) {
+        Database* db = Database::instance();
         std::ostringstream logMsg;
-        std::string param = request.headers().getRaw("X-Auth-Token").value();
-        if (std::stoul(param) == 0) {
-            logMsg << "Could not get the file list. Received an invalid token.";
+        auto t = request.headers().getRaw("X-Auth-Token");
+        uint32_t token = std::stoul(t.value());
+
+        User_t requestUser = {0};
+        try {
+            requestUser = db->getUserById(token);
+        } catch (sqlite_error& e) { }
+
+        if (token == 0 || *requestUser.mac == 0) {
+            logMsg << "Could not post the file. Received invalid token.";
             m_logger.err(logMsg.str());
             response.send(Http::Code::Forbidden, "Invalid token");
             return;
         }
-        Database* db = Database::instance();
         std::vector<Song_t> songs = db->getAllSongs();
         std::stringstream resp;
         resp << "{\n\"chansons\":[\n";
         for (auto& song : songs) {
-            resp << generateSong_(song, std::stoul(param)) << (&songs.back() != &song ? ",\n" : "\n");
+            resp << generateSong_(song, token) << (&songs.back() != &song ? ",\n" : "\n");
         }
         resp << "]\n}\n";
-        logMsg << "The file list for user \"" << param << "\" was successfuly sent.";
+        logMsg << "The file list for user \"" << token << "\" was successfuly sent.";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
     }, std::move(request), std::move(response)).detach();
@@ -310,11 +319,11 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
             // Put the song's path in the DB.
             Song_t song;
-            strcpy(song.title, header->getTitle().c_str());
-            strcpy(song.artist, header->getArtist().c_str());
+            strncpy(song.title, header->getTitle().c_str(), Song_t::TITLE_LENGTH);
+            strncpy(song.artist, header->getArtist().c_str(), Song_t::ARTIST_LENGTH);
             song.userId = requestUser.userId;
             song.duration = header->getDuration().getDurationInSeconds();
-            strcpy(song.path, filePath.string().c_str());
+            strncpy(song.path, filePath.string().c_str(), Song_t::PATH_LENGTH);
 
             const auto& songs = songsFuture.get();
             bool songInQueue = std::any_of(songs.cbegin(), songs.cend(), [&](const Song_t& a) {return strcmp(a.title, song.title) == 0;});

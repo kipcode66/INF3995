@@ -15,10 +15,12 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although space in filename is not recommended)
 set(HTTP_SERVER_TEST_CPP_SOURCES
+    args/TestRestServerArgsParser.cpp
     mp3/header/Mp3HeaderTest.cpp
     mp3/player/mad/TestMadDecoder.cpp
     mp3/player/pulse/TestPulseDevice.cpp
     mp3/player/TestMp3Player.cpp
+    mp3/player/TestMp3AutoPlayer.cpp
     os/TestSharedFileMemory.cpp
     filesystem/TestFileCache.cpp
     database/Testsqlite_error.cpp

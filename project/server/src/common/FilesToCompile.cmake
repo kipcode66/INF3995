@@ -11,9 +11,11 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although not recommended)
 set(COMMON_CPP_SOURCES
+    args/RestServerArgsParser.cpp
     logger/Logger.cpp
     mp3/header/Mp3Duration.cpp
     mp3/header/Mp3Header.cpp
+    mp3/player/Mp3AutoPlayer.cpp
     mp3/player/Mp3Player.cpp
     mp3/player/mad/MadDecoder.cpp
     mp3/player/mad/MadAudioFormatter.cpp
@@ -32,9 +34,11 @@ set(COMMON_CPP_SOURCES
 # All .h, .hpp, .hh files
 # Use quotes "" if a file contains a space (although not recommended)
 set(COMMON_HEADER_SOURCES
+    args/RestServerArgsParser.hpp
     logger/Logger.hpp
     mp3/header/Mp3Duration.hpp
     mp3/header/Mp3Header.hpp
+    mp3/player/Mp3AutoPlayer.hpp
     mp3/player/Mp3Player.hpp
     mp3/player/mad/MadDecoder.hpp
     mp3/player/pulse/PulseDevice.hpp

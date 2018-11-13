@@ -12,8 +12,8 @@
 
 using namespace elevation;
 
-SecureRestApi::SecureRestApi(Address addr, Logger& logger)
-: RestApi(addr, logger)
+SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache)
+: RestApi(addr, logger, cache)
 , m_logger(logger)
 { }
 

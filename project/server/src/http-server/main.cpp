@@ -1,35 +1,25 @@
 #include <iostream>
 #include <inttypes.h>
+
+#include <common/args/RestServerArgsParser.hpp>
 #include "http/RestApi.hpp"
 
-
-uint32_t parseArgs(int argc, char** argv) {
-    uint32_t portId;
-    if (argc == 1) {
-        portId = 80;
-    }
-    else if (argc == 2 && std::string(argv[1]) != "-h" && std::string(argv[1]) != "--help") {
-        std::istringstream iStrStrm(argv[1]);
-        iStrStrm >> portId;
-    }
-    else {
-        exit(0);
-    }
-
-    if (portId == 0 || portId > UINT32_MAX) {
-        std::cerr << std::endl <<
-            "Cannot bind server to port \"" << argv[1] << "\"" << std::endl;
-        exit(254);
-    }
-    return portId;
-}
-
 int main(int argc, char** argv) {
+    std::vector<std::string> args;
+    std::transform(
+        argv,
+        argv + argc,
+        std::back_inserter(args),
+        [](const char* arg) { return std::string(arg); }
+    );
+    elevation::RestServerArgsParser argsParser{args};
 
-    uint16_t portId = parseArgs(argc, argv);
     try {
-        Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(portId));
-        elevation::RestApi api(addr, elevation::Logger::getLogger("http-server"));
+        Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(argsParser.getPort()));
+        elevation::Logger& logger = elevation::Logger::getLogger("http-server");
+        elevation::FileCache cache{argsParser.getCachePath()};
+
+        elevation::RestApi api(addr, logger, cache);
         api.init();
         std::cout << "Server is about to start." << std::endl;
         api.start();

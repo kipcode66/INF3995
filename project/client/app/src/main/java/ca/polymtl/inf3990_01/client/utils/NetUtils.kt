@@ -5,6 +5,7 @@ import ca.polymtl.inf3990_01.client.model.LocalSong
 import java.nio.ByteBuffer
 import java.net.NetworkInterface
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 object NetUtils {
     fun translateIP(ip: Int): String {
@@ -36,6 +37,20 @@ object NetUtils {
         }
         // for now eat exceptions
         return ""
+    }
+
+    fun formatTime(miliSeconds: Long): String {
+        val hours = TimeUnit.MILLISECONDS.toHours(miliSeconds).toInt() % 24
+        val minutes = TimeUnit.MILLISECONDS.toMinutes(miliSeconds).toInt() % 60
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(miliSeconds).toInt() % 60
+        return when {
+            hours > 0 -> String.format("%d:%02d:%02d", hours, minutes, seconds)
+            minutes > 0 -> String.format("%02d:%02d", minutes, seconds)
+            seconds > 0 -> String.format("00:%02d", seconds)
+            else -> {
+                "00:00"
+            }
+        }
     }
 
 }

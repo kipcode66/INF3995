@@ -14,15 +14,6 @@
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="0dp">
-
-        <TextView
-            android:id="@+id/myText"
-            style="@style/TextAppearance.AppCompat.Headline"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/song_item_margin"
-            android:text="@string/songs_list_title" />
-
         <ListView
             android:id="@+id/song_queue"
             android:layout_width="match_parent"

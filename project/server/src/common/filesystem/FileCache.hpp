@@ -9,6 +9,9 @@ namespace elevation {
 
 class FileCache {
 public:
+    static const std::experimental::filesystem::perms FILE_PERMISSIONS;
+
+public:
     explicit FileCache(const std::string& cachePath);
     FileCache(const char *cachePath) : FileCache(std::string(cachePath)) {} // Explicit conversion to string.
     FileCache(const std::experimental::filesystem::path& cachePath);
@@ -35,10 +38,12 @@ public:
 protected:
     void ensureCacheDirCreated_() noexcept;
     void wipeCachedFiles_() noexcept;
+    void deleteIntermediateFolders_() noexcept;
 
 protected:
     std::experimental::filesystem::path m_path;
-    bool m_isInitialized;
+    bool m_isTemporaryFolder = false;
+    bool m_isInitialized = false;
 };
 
 } // namespace elevation

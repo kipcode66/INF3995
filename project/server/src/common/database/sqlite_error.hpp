@@ -17,8 +17,7 @@ public:
     sqlite_error& operator=(const sqlite_error&) = default;
     sqlite_error& operator=(sqlite_error&&) = default;
 
-protected:
-    int m_code;
+    const int code;
 };
 
 }

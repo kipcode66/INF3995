@@ -18,19 +18,8 @@ BOOST_AUTO_TEST_CASE(constructionDestruction) {
 BOOST_AUTO_TEST_CASE(copyConstructor) {
     sqlite_error errorOk{SQLITE_OK};
     sqlite_error errorError{SQLITE_ERROR};
-    sqlite_error copiedOk = errorOk;
-    sqlite_error copiedError = errorError;
-    BOOST_TEST(errorOk   .what() == copiedOk   .what());
-    BOOST_TEST(errorError.what() == copiedError.what());
-}
-
-BOOST_AUTO_TEST_CASE(copyAssignment) {
-    sqlite_error errorOk    {SQLITE_OK};
-    sqlite_error errorError {SQLITE_ERROR};
-    sqlite_error copiedOk   {SQLITE_ERROR};
-    sqlite_error copiedError{SQLITE_OK};
-    copiedOk = errorOk;
-    copiedError = errorError;
+    sqlite_error copiedOk{errorOk};
+    sqlite_error copiedError{errorError};
     BOOST_TEST(errorOk   .what() == copiedOk   .what());
     BOOST_TEST(errorError.what() == copiedError.what());
 }

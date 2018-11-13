@@ -26,24 +26,31 @@ void Mp3Player::run_(std::string fileName, std::shared_ptr<std::atomic<bool>> st
 
 Mp3Player::Mp3Player()
     : m_player(defaultFuture_())
+    , m_playerMutex(new std::mutex())
     , m_stopRequested(new std::atomic<bool>(false))
 { }
 
 Mp3Player::Mp3Player(Mp3Player&& that)
-    : m_player(std::move(that.m_player))
-    , m_stopRequested(std::move(that.m_stopRequested))
-{ }
+    : m_stopRequested(std::move(that.m_stopRequested))
+{
+    this->m_playerMutex = std::move(that.m_playerMutex);
+    std::lock_guard<std::mutex> lock(*m_playerMutex);
+    this->m_player = std::move(that.m_player);
+}
 
 Mp3Player::~Mp3Player() { }
 
 Mp3Player& Mp3Player::operator=(Mp3Player&& that) {
-    this->m_player = std::move(that.m_player);
     this->m_stopRequested->store(true);
     this->m_stopRequested = std::move(that.m_stopRequested);
+    this->m_playerMutex = std::move(that.m_playerMutex);
+    std::lock_guard<std::mutex> lock(*m_playerMutex);
+    this->m_player = std::move(that.m_player);
     return *this;
 }
 
 void Mp3Player::startPlaying(const std::string& fileName) {
+    std::lock_guard<std::mutex> lock(*m_playerMutex);
     m_player.get();
     m_player = std::async(&Mp3Player::run_, fileName, m_stopRequested);
 }
@@ -54,6 +61,7 @@ void Mp3Player::stopPlaying() {
 }
 
 void Mp3Player::waitUntilSongFinished() {
+    std::lock_guard<std::mutex> lock(*m_playerMutex);
     m_player.get();
     m_player = defaultFuture_();
 }

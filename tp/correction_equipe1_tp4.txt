@@ -1,0 +1,7 @@
+Équipe 1					Commentaires
+Conformité de la remise		1	/1	
+Clarté				3	/3	
+Documentation			-	/0	
+Qualité du code			7	/7	
+Fonctionnement			8	/9	Gestion d'erreur incomplète
+Total				19	/20	
