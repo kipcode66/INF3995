@@ -1,0 +1,40 @@
+Retour sur le travail de chacun:
+  Anthony: 
+    - Compte avancer plus sur le décodage MP3
+
+  Ottman:
+    - Aucun avancement
+    - Compte:
+      - Connexion des usagers [BD prête?]
+      - Connexion des superviseurs
+
+  Soukaina:
+    - A fait un refactoring
+    - Compte:
+      - Ajouter les message
+      - Code review à faire
+      - Ajouter la contrainte de 5 fichier max
+      - Faire le design
+      - Veux participer aux tests (?) [Tests fonctionnels]
+
+  Adam:
+    - A commencé la "Secure REST API" (le lien avec le REST API normal fonctionne)
+
+  Emir:
+    - A terminé ses tâches pour le livrable 1
+    - Sur quoi il peut travailler?
+
+
+
+Problèmes à discuter:
+  - Nécessité de mettre en ordre les tâches à faire.
+  - Json API à utiliser
+
+
+
+Réponses:
+  - DB prête à être utilisé dans le REST API. DB va évoluer d'après.
+  - Nécessité de produire des tests unitaires des fonctions de la DB.?
+
+  - Ajouter Ottman au drive
+  - Soukaina: Ajouter les définition de tests

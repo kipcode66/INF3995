@@ -10,10 +10,9 @@ public:
     ~RequestEvent();
     virtual void print();
 
-private: 
+private:
     std::string m_resource;
     Pistache::Http::Method m_method;
 };
 
 #endif // !SRC_REQUESTEVENT_HPP
- 

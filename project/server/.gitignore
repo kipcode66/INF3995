@@ -1,0 +1,11 @@
+build/
+*.log
+**/.idea/
+**/venv/
+cmake-build-debug/
+*.db
+tags
+
+/lib/
+/logs/
+/cache/

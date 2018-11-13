@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="server_url"
+        android:title="@string/server_url"
+        android:dialogTitle="@string/server_url"
+        android:entries="@array/server_url_entries"
+        android:entryValues="@array/server_url_entries"
+        android:defaultValue="192.168.2.52"
+        android:icon="@drawable/ic_menu_share"/>
+    <EditTextPreference
+        android:key="client_name"
+        android:title="@string/client_name"
+        android:dialogTitle="@string/client_name"
+        android:hint="@android:string/unknownName"
+        android:icon="@drawable/ic_menu_manage" />
+    <ListPreference
+        android:key="queue_period"
+        android:title="@string/setting_title_queue_period"
+        android:dialogTitle="@string/setting_title_queue_period"
+        android:entries="@array/setting_labels_queue_period"
+        android:entryValues="@array/setting_values_queue_period"
+        android:defaultValue="4000"
+        android:icon="@drawable/ic_menu_refresh"/>
+</PreferenceScreen>

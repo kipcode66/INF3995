@@ -1,0 +1,32 @@
+Retour sur le travail de chacun:
+  - Anthony:
+    - Docker: On laisse tomber, ne fonctionnera pas sur fpga
+    - Logger: Fonctionne, il ne reste qu'à l'utiliser.
+    - Les chansons MP3: Peuvent être décodé et lu, mais il faut les lire lors-qu'on envoi une chanson.
+    - Il faut faire communiquer les processus http-server et https-server ! [?]
+  - Ottman:
+    - Connexion des usagers: Bien avancé, ne reste que les tests.
+    - Connexion/Deco de l'admin: À un peu bloqué, mais ça avance.
+    - Login de l'admin avec un token ! [?]
+  - Soukaina:
+    - A travaillée sur le design principalement.
+    - A ajouté la durée des chansons dans l'affichage.
+    - Doit faire des tests foncitonnels et parler du UI [?]
+  - Adam:
+    - Il a travaillé sur les anomalies d'une précédente tâche.
+    - "On se pillais sur les pieds". Les tâche sont mal découpés [?]
+    - Ajustement nécessaire sur le RestApi. Nécessite une synchonisation avec Ottman et Emir.
+  - Emir:
+    - Travaillé sur la reception des chanson
+    - Doit se synchroniser avec les autres.
+
+Problèmes à discuter:
+  - Les tache livrable 2 pour client [?]
+  - Quand allons nous finir ? [?]
+
+
+Commentaires:
+  - Les chansons devront se faire enregistrer dans une table séparée dans la DB.
+  - Le login se fera à partir des usagers existants.
+  - Dans le UI, ajouter un Toast pour dire que le nombre de fichiers maximum est atteint.
+  - 

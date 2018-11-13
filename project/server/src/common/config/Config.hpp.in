@@ -1,0 +1,12 @@
+// THIS HEADER IS CONFIGURED AUTOMATICALLY BY CMAKE.
+
+#ifndef COMMON_CONFIG_CONFIG_HPP
+#define COMMON_CONFIG_CONFIG_HPP
+
+namespace elevation {
+
+static constexpr const char* SERVER_LOG_DIR = "@SERVER_LOG_DIR@"; ///< Directory where the server's logs will be placed.
+
+} // namespace elevation
+
+#endif // !COMMON_CONFIG_CONFIG_HPP

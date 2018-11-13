@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
+DB_NAME="server.db"
+EXISTING_DB="$SERVER_DIR/$DB_NAME"
+STRUCT_FILE="struct.sql"
+
+backup_db() {
+        i=1
+        while [ -f "$EXISTING_DB.auto_backup$i" ]; do
+                ((i++))
+        done
+        mv "$EXISTING_DB" "$EXISTING_DB.auto_backup$i"
+}
+
+write_db() {
+        if [ ! -f "$SERVER_DIR/$STRUCT_FILE" ]; then
+                echo "no $STRUCT_FILE found at $SERVER_DIR"
+        else
+                pushd $SERVER_DIR > /dev/null 2>&1
+                cat $STRUCT_FILE | sqlite3 $DB_NAME
+                popd > /dev/null 2>&1
+        fi
+}
+
+database() {
+        if [ -f $EXISTING_DB ]; then
+                echo -ne "$DB_NAME exist, [O]verwrite, [B]ackup and create, [C]ancel : "
+                read -n 1 choice
+                if   [ "$choice" = "O" ] || [ "$choice" = "o" ];
+                then
+                        rm -f $EXISTING_DB
+                        write_db
+                        echo ""
+                elif [ "$choice" = "B" ] || [ "$choice" = "b" ];
+                then
+                        backup_db
+                        write_db
+                        echo ""
+                elif [ "$choice" = "C" ] || [ "$choice" = "c" ];
+                then
+                        echo ""
+                        exit
+                fi
+        else
+                write_db
+        fi
+}
+

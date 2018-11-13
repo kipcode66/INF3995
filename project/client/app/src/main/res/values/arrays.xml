@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="server_url_entries" >
+        <item>@string/server_url_value1</item>
+        <item>@string/server_url_value2</item>
+        <item>192.168.2.52</item>
+    </string-array>
+    <string-array name="setting_labels_queue_period">
+        <item>@string/setting_queue_period_label1</item>
+        <item>@string/setting_queue_period_label2</item>
+        <item>@string/setting_queue_period_label3</item>
+    </string-array>
+    <string-array name="setting_values_queue_period">
+        <item>10000</item>
+        <item>4000</item>
+        <item>1000</item>
+    </string-array>
+</resources>
