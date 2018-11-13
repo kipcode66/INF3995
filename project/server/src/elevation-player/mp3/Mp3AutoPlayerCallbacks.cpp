@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <sqlite3/sqlite3.h>
+#include <experimental/filesystem>
 
 #include "Mp3AutoPlayerCallbacks.hpp"
 
@@ -52,6 +53,7 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
     } while (retry);
     try {
         Database* db = Database::instance();
+        auto song = db->getSongByPath(pathOfSong.c_str());
         db->removeSong(song.id);
     }
     catch (sqlite_error& e) {
@@ -62,13 +64,9 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
 
 void Mp3AutoPlayerCallbacks::songRemover_(fs::path pathOfSong) {
     try {
-        Database* db = Database::instance();
-        auto song = db->getSongByPath(pathOfSong.c_str());
-        if (song.id > 0) {
-            m_cache.deleteFile(pathOfSong.filename());
-        }
+        m_cache.deleteFile(pathOfSong.filename());
     }
-    catch (sqlite_error& e) {
+    catch (std::experimental::filesystem::filesystem_error& e) {
         m_logger.err(e.what());
     }
 }
