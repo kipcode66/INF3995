@@ -51,6 +51,7 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
         }
     } while (retry);
     try {
+        Database* db = Database::instance();
         db->removeSong(song.id);
     }
     catch (sqlite_error& e) {
