@@ -58,9 +58,9 @@ User_t Database::getUserByMac(const char* mac) const {
 
     errcode = sqlite3_blocking_step(statement);
     if (errcode == SQLITE_ROW) {
-        strcpy(user.ip, (char *)sqlite3_column_text(statement, 0));
-        strcpy(user.mac, (char *)sqlite3_column_text(statement, 1)); // do last as a coherence check
-        strcpy(user.name, (char *)sqlite3_column_text(statement, 2));
+        strncpy(user.ip, (char *)sqlite3_column_text(statement, 0), User_t::IP_LENGTH);
+        strncpy(user.mac, (char *)sqlite3_column_text(statement, 1), User_t::MAC_LENGTH); // do last as a coherence check
+        strncpy(user.name, (char *)sqlite3_column_text(statement, 2), User_t::NAME_LENGTH);
         user.userId = sqlite3_column_int(statement, 3);
     }
     errcode = sqlite3_finalize(statement);
@@ -82,9 +82,9 @@ User_t Database::getUserById(uint32_t id) const {
     errcode = sqlite3_blocking_step(statement);
     if (errcode == SQLITE_ROW) {
         user.userId = sqlite3_column_int(statement, 0);
-        strcpy(user.ip, (char *)sqlite3_column_text(statement, 1));
-        strcpy(user.name, (char *)sqlite3_column_text(statement, 3));
-        strcpy(user.mac, (char *)sqlite3_column_text(statement, 2)); // do last as a coherence check
+        strncpy(user.ip, (char *)sqlite3_column_text(statement, 1), User_t::IP_LENGTH);
+        strncpy(user.name, (char *)sqlite3_column_text(statement, 3), User_t::NAME_LENGTH);
+        strncpy(user.mac, (char *)sqlite3_column_text(statement, 2), User_t::MAC_LENGTH); // do last as a coherence check
     }
     errcode = sqlite3_finalize(statement);
 
@@ -233,11 +233,11 @@ Song_t Database::getSongByQuery_(const char* query) const {
     errcode = sqlite3_blocking_step(statement);
     if (errcode == SQLITE_ROW) {
         song.id = sqlite3_column_int(statement, 0);
-        strcpy(song.title, (char *)sqlite3_column_text(statement, 1));
-        strcpy(song.artist, (char *)sqlite3_column_text(statement, 2));
+        strncpy(song.title, (char *)sqlite3_column_text(statement, 1), Song_t::TITLE_LENGTH);
+        strncpy(song.artist, (char *)sqlite3_column_text(statement, 2), Song_t::ARTIST_LENGTH);
         song.userId = sqlite3_column_int(statement, 3);
         song.duration = sqlite3_column_int(statement, 4);
-        strcpy(song.path, (char *)sqlite3_column_text(statement, 5));
+        strncpy(song.path, (char *)sqlite3_column_text(statement, 5), Song_t::PATH_LENGTH);
     }
     errcode = sqlite3_finalize(statement);
     assertSqliteOk(errcode);
@@ -283,11 +283,11 @@ std::vector<Song_t> Database::getSongsByUser(int userId) const {
     errcode = sqlite3_blocking_step(statement);
     while (errcode == SQLITE_ROW) {
         song_buffer.id = sqlite3_column_int(statement, 0);
-        strcpy(song_buffer.title, (char *)sqlite3_column_text(statement, 1));
-        strcpy(song_buffer.artist, (char *)sqlite3_column_text(statement, 2));
+        strncpy(song_buffer.title, (char *)sqlite3_column_text(statement, 1), Song_t::TITLE_LENGTH);
+        strncpy(song_buffer.artist, (char *)sqlite3_column_text(statement, 2), Song_t::TITLE_LENGTH);
         song_buffer.userId = sqlite3_column_int(statement, 3);
         song_buffer.duration = sqlite3_column_int(statement, 4);
-        strcpy(song_buffer.path, (char *)sqlite3_column_text(statement, 5));
+        strncpy(song_buffer.path, (char *)sqlite3_column_text(statement, 5), Song_t::PATH_LENGTH);
 
         songs.push_back(song_buffer);
         errcode = sqlite3_blocking_step(statement);
@@ -312,11 +312,11 @@ std::vector<Song_t> Database::getAllSongs() const {
     errcode = sqlite3_blocking_step(statement);
     while (errcode == SQLITE_ROW) {
         song_buffer.id = sqlite3_column_int(statement, 0);
-        strcpy(song_buffer.title, (char *)sqlite3_column_text(statement, 1));
-        strcpy(song_buffer.artist, (char *)sqlite3_column_text(statement, 2));
+        strncpy(song_buffer.title, (char *)sqlite3_column_text(statement, 1), Song_t::TITLE_LENGTH);
+        strncpy(song_buffer.artist, (char *)sqlite3_column_text(statement, 2), Song_t::TITLE_LENGTH);
         song_buffer.userId = sqlite3_column_int(statement, 3);
         song_buffer.duration = sqlite3_column_int(statement, 4);
-        strcpy(song_buffer.path, (char *)sqlite3_column_text(statement, 5));
+        strncpy(song_buffer.path, (char *)sqlite3_column_text(statement, 5), Song_t::PATH_LENGTH);
 
         songs.push_back(song_buffer);
         errcode = sqlite3_blocking_step(statement);

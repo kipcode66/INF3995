@@ -153,10 +153,10 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response, std::ostringstream logMsg) {
         User_t requestUser = { 0 };
         if (request_json.IsObject()) {
-            strcpy(requestUser.mac, request_json["mac"].GetString());
-            strcpy(requestUser.ip, request_json["ip"].GetString());
+            strncpy(requestUser.mac, request_json["mac"].GetString(), User_t::MAC_LENGTH);
+            strncpy(requestUser.ip, request_json["ip"].GetString(), User_t::IP_LENGTH);
             if (request_json.HasMember("nom")) {
-                strcpy(requestUser.name, request_json["nom"].GetString());
+                strncpy(requestUser.name, request_json["nom"].GetString(), User_t::NAME_LENGTH);
             }
         }
         
@@ -319,11 +319,11 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
             // Put the song's path in the DB.
             Song_t song;
-            strcpy(song.title, header->getTitle().c_str());
-            strcpy(song.artist, header->getArtist().c_str());
+            strncpy(song.title, header->getTitle().c_str(), Song_t::TITLE_LENGTH);
+            strncpy(song.artist, header->getArtist().c_str(), Song_t::ARTIST_LENGTH);
             song.userId = requestUser.userId;
             song.duration = header->getDuration().getDurationInSeconds();
-            strcpy(song.path, filePath.string().c_str());
+            strncpy(song.path, filePath.string().c_str(), Song_t::PATH_LENGTH);
 
             const auto& songs = songsFuture.get();
             bool songInQueue = std::any_of(songs.cbegin(), songs.cend(), [&](const Song_t& a) {return strcmp(a.title, song.title) == 0;});

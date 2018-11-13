@@ -27,10 +27,7 @@ std::string generateSalt(int length) {
 std::string generateMd5Hash(const std::string& str, const std::string& salt) {
     uint32_t lengthOfMd5Hash = 32;
     std::string strTemp = str + salt;
-    // char stringToHash[strTemp.length()];
-    // strcpy(stringToHash, strTemp.c_str()); 
-    unsigned char digest[MD5_DIGEST_LENGTH];
-    // MD5((unsigned char*)&stringToHash, strlen(stringToHash), (unsigned char*)&digest);    
+    unsigned char digest[MD5_DIGEST_LENGTH];   
     MD5((unsigned char*)strTemp.c_str(), strTemp.size(), (unsigned char*)&digest);    
     char md5Hash[lengthOfMd5Hash];
     for(int i = 0; i < MD5_DIGEST_LENGTH; i++)
