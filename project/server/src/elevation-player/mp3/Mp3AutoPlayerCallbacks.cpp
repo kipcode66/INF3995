@@ -52,9 +52,11 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
         }
     } while (retry);
     try {
-        Database* db = Database::instance();
-        auto song = db->getSongByPath(pathOfSong.c_str());
-        db->removeSong(song.id);
+        if (newSong != Mp3AutoPlayer::NO_SONG) {
+            Database* db = Database::instance();
+            auto song = db->getSongByPath(newSong.c_str());
+            db->removeSong(song.id);
+        }
     }
     catch (sqlite_error& e) {
         m_logger.err(e.what());
