@@ -50,6 +50,12 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
             }
         }
     } while (retry);
+    try {
+        db->removeSong(song.id);
+    }
+    catch (sqlite_error& e) {
+        m_logger.err(e.what());
+    }
     return newSong;
 }
 
@@ -59,7 +65,6 @@ void Mp3AutoPlayerCallbacks::songRemover_(fs::path pathOfSong) {
         auto song = db->getSongByPath(pathOfSong.c_str());
         if (song.id > 0) {
             m_cache.deleteFile(pathOfSong.filename());
-            db->removeSong(song.id);
         }
     }
     catch (sqlite_error& e) {
