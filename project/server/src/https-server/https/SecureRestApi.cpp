@@ -61,25 +61,24 @@ public:
     std::string mot_de_passe;
     uint32_t id;
     Admin(const Rest::Request& req) {
-        auto body = req.body();
-        rapidjson::Document request_json;
-        request_json.Parse(body.c_str());
-        bool isValid = (request_json.IsObject()
-                        && request_json.HasMember("usager")
-                        && request_json.HasMember("mot_de_passe")
-                        && request_json["usager"]       != '\0'
-                        && request_json["mot_de_passe"] != '\0');
-        if (!isValid) {
+        rapidjson::Document jsonDocument;
+        jsonDocument.Parse(req.body().c_str());
+        bool fieldsValid = (jsonDocument.IsObject()
+                         && jsonDocument.HasMember("usager")
+                         && jsonDocument.HasMember("mot_de_passe")
+                         && jsonDocument["usager"]       != '\0'
+                         && jsonDocument["mot_de_passe"] != '\0');
+        if (!fieldsValid) {
             throw std::runtime_error("missing fields");
         }
-        this->usager = request_json["usager"].GetString();
-        this->mot_de_passe = request_json["mot_de_passe"].GetString();
         auto token = req.headers().getRaw("X-Auth-Token").value();
-        if (token.empty())
+        if (token.empty() || std::stoul(token) == 0) {
             throw std::runtime_error("invalid token");
+        }
+
+        this->usager = jsonDocument["usager"].GetString();
+        this->mot_de_passe = jsonDocument["mot_de_passe"].GetString();
         this->id = std::stoul(token);
-        if (this->id == 0)
-            throw std::runtime_error("invalid token");
     }
 };
 
@@ -159,15 +158,16 @@ void SecureRestApi::superviseurLogout_(const Rest::Request& request, Http::Respo
 
 void SecureRestApi::postChangePassword_(const Rest::Request& request, Http::ResponseWriter response) {
     try {
-        auto body = request.body();
-        rapidjson::Document request_json;
-        request_json.Parse(body.c_str());
-        if (!request_json.HasMember("ancien") || !request_json.HasMember("nouveau")) {
+        rapidjson::Document jsonDocument;
+        jsonDocument.Parse(request.body().c_str());
+        bool isValid = (jsonDocument.HasMember("ancien") &&
+                        jsonDocument.HasMember("nouveau"));
+        if (!isValid) {
             response.send(Http::Code::Bad_Request, "Malformed request");
             return;
         }
-        std::string ancien(request_json["ancien"].GetString());
-        std::string nouveau(request_json["nouveau"].GetString());
+        std::string ancien(jsonDocument["ancien"].GetString());
+        std::string nouveau(jsonDocument["nouveau"].GetString());
         std::cout << "changing " << ancien << " to " << nouveau  << std::endl;
     } catch(std::exception& e) {
         std::cerr << "error: " << e.what() << std::endl;
