@@ -55,6 +55,14 @@ void SecureRestApi::getSuperviseurFile_(const Rest::Request& request, Http::Resp
     m_logger.log(logMsg.str());
 }
 
+User_t getUserFromRequest(const Rest::Request& request) {
+    auto token = request.headers().getRaw("X-Auth-Token").value();
+    if (token.empty()) {
+        throw std::runtime_error("Header \"X-Auth-Token\" missing.");
+    }
+    Database* db = Database::instance();
+    return db->getUserById(std::stoul(token));
+}
 
 void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWriter response) {
     std::ostringstream logMsg;
@@ -201,5 +209,32 @@ void SecureRestApi::postChangePassword_(const Rest::Request& request, Http::Resp
     } catch(std::exception& e) {
         std::cerr << "error: " << e.what() << std::endl;
     }
+    std::async([&]() {
+        std::ostringstream logMsg;
+        Database* db = Database::instance();
+        if (!db->isAdminConnected(adminId)) {
+            logMsg << "Could not change password, this admin is not connected";
+            m_logger.err(logMsg.str());
+            response.send(Http::Code::Bad_Request, "Admin not connected");
+            return;
+        }
+        auto saltAndPasswordHash = db->getSaltAndHashedPasswordByLogin(login.c_str());
+        std::string salt = std::get<0>(saltAndPasswordHash);
+        std::string hash = std::get<1>(saltAndPasswordHash);
+        std::string password(request_json["mot_de_passe"].GetString());
+        std::string ancienHash = elevation::id_utils::generateMd5Hash(ancien, salt);
+        if (ancienHash == hash) {
+
+            // change password
+            std::string NouveauHash = elevation::id_utils::generateMd5Hash(nouveau, salt);
+            response.send(Http::Code::Ok, "Connexion successful");
+            return;
+        } else {
+            logMsg << "Could not Login admin with token \"" << adminId << "\". Received wrong password";
+            m_logger.err(logMsg.str());
+            response.send(Http::Code::Forbidden, "Wrong password");
+            return;
+        }
+    });
     response.send(Http::Code::Ok, "chgm_mdp");
 }
