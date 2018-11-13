@@ -28,3 +28,13 @@ Testing
 
 Use the elevation script.
 
+Building the database
+---------------------
+
+Use the elevation script.
+
+Starting the server in Production mode
+-----------------------------------
+
+Use the elevation script.
+
