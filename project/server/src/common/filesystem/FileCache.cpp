@@ -11,7 +11,7 @@ namespace fs = std::experimental::filesystem;
 
 typedef fs::perms perms;
 
-const perms FileCache::FILE_PERMISSIONS =
+const perms FileCache::FILE_PERMISSIONS = perms::add_perms |
     perms::owner_read  | perms::owner_write |
     perms::group_read  | perms::group_write |
     perms::others_read | perms::others_write;
