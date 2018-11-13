@@ -9,6 +9,13 @@ namespace elevation {
 
 namespace fs = std::experimental::filesystem;
 
+typedef fs::perms perms;
+
+const perms FileCache::FILE_PERMISSIONS =
+    perms::owner_read  | perms::owner_write |
+    perms::group_read  | perms::group_write |
+    perms::others_read | perms::others_write;
+
 FileCache::FileCache(const std::string& cachePath)
     : m_path(cachePath)
 {
@@ -81,6 +88,7 @@ void FileCache::setFileContent(const std::string& fileName, std::string& data) {
 
 void FileCache::setFileContent(const std::string& fileName, std::istream& data) {
     std::ofstream file((m_path / fileName).string());
+    fs::permissions(m_path / fileName, FILE_PERMISSIONS);
     std::istreambuf_iterator<char> begin(data);
     std::istreambuf_iterator<char> end;
     std::copy(begin, end, std::ostreambuf_iterator(file));

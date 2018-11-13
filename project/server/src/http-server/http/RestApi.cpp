@@ -201,23 +201,30 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::thread([this](const Rest::Request& request, Http::ResponseWriter response) {
+        Database* db = Database::instance();
         std::ostringstream logMsg;
-        std::string param = request.headers().getRaw("X-Auth-Token").value();
-        if (std::stoul(param) == 0) {
-            logMsg << "Could not get the file list. Received an invalid token.";
+        auto t = request.headers().getRaw("X-Auth-Token");
+        uint32_t token = std::stoul(t.value());
+
+        User_t requestUser = {0};
+        try {
+            requestUser = db->getUserById(token);
+        } catch (sqlite_error& e) { }
+
+        if (token == 0 || *requestUser.mac == 0) {
+            logMsg << "Could not post the file. Received invalid token.";
             m_logger.err(logMsg.str());
             response.send(Http::Code::Forbidden, "Invalid token");
             return;
         }
-        Database* db = Database::instance();
         std::vector<Song_t> songs = db->getAllSongs();
         std::stringstream resp;
         resp << "{\n\"chansons\":[\n";
         for (auto& song : songs) {
-            resp << generateSong_(song, std::stoul(param)) << (&songs.back() != &song ? ",\n" : "\n");
+            resp << generateSong_(song, token) << (&songs.back() != &song ? ",\n" : "\n");
         }
         resp << "]\n}\n";
-        logMsg << "The file list for user \"" << param << "\" was successfuly sent.";
+        logMsg << "The file list for user \"" << token << "\" was successfuly sent.";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
     }, std::move(request), std::move(response)).detach();
