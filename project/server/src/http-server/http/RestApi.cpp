@@ -133,6 +133,9 @@ std::string RestApi::generateSong_(const Song_t& song, uint32_t token) {
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
+
+    std::string passwordHash = elevation::id_utils::generateMd5Hash("password123", "abc");
+    std::cout << "passwordHash= " << passwordHash << std::endl;
     auto body = request.body();
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
