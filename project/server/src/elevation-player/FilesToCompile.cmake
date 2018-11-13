@@ -10,8 +10,9 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although not recommended)
-set(HTTP_SERVER_CPP_SOURCES
-    http/RestApi.cpp
+set(ELEVATION_PLAYER_CPP_SOURCES
+    ArgsParser.cpp
+    mp3/Mp3AutoPlayerCallbacks.cpp
 )
 
 ###############################################################################
@@ -20,9 +21,10 @@ set(HTTP_SERVER_CPP_SOURCES
 
 # All .h, .hpp, .hh files
 # Use quotes "" if a file contains a space (although not recommended)
-set(HTTP_SERVER_HEADER_SOURCES
-    http/RestApi.hpp
+set(ELEVATION_PLAYER_HEADER_SOURCES
+    ArgsParser.hpp
+    mp3/Mp3AutoPlayerCallbacks.hpp
 )
 
-makeAbsolute(HTTP_SERVER_CPP_SOURCES)
-makeAbsolute(HTTP_SERVER_HEADER_SOURCES)
+makeAbsolute(ELEVATION_PLAYER_CPP_SOURCES)
+makeAbsolute(ELEVATION_PLAYER_HEADER_SOURCES)

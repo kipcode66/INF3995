@@ -2,22 +2,27 @@
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+SERVER_DIR="${SCRIPTS_DIR}/../../project/server"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
 COMMON_LIB_NAME=common
 HTTP_SERVER_NAME=http-server
 HTTPS_SERVER_NAME=https-server
 SSL_DAEMON_NAME=ssl-daemon
+ELEVATION_PLAYER_NAME=elevation-player
 
 processesNotAlreadyStarted() {
-    if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
-        message "Cannot start HTTP Server : already started (PID $(pgrep -x "${HTTP_SERVER_NAME}"))"$'\n'
+    if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
+        message "Cannot start HTTP Server : already started (PID $(pidof "${HTTP_SERVER_NAME}"))"$'\n'
         false
-    elif pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
-        message "Cannot start HTTPS Server : already started (PID $(pgrep -x "${HTTPS_SERVER_NAME}"))"$'\n'
+    elif pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
+        message "Cannot start HTTPS Server : already started (PID $(pidof "${HTTPS_SERVER_NAME}"))"$'\n'
         false
-    elif pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
-        echo "Cannot start SSL Daemon : already started (PID $(pgrep -x "${SSL_DAEMON_NAME}"))"$'\n'
+    elif pidof "${SSL_DAEMON_NAME}" >/dev/null; then
+        echo "Cannot start SSL Daemon : already started (PID $(pidof "${SSL_DAEMON_NAME}"))"$'\n'
+        false
+    elif pidof "${ELEVATION_PLAYER_NAME}" >/dev/null; then
+        echo "Cannot start SSL Daemon : already started (PID $(pidof "${ELEVATION_PLAYER_NAME}"))"$'\n'
         false
     else
         true
@@ -25,7 +30,8 @@ processesNotAlreadyStarted() {
 }
 
 assignHttpServerPortRange() {
-    if [ "$(whoami)" == root ]; then
+    checkParamNum 0 $# || exit 1
+    if "${IS_PROD_MODE}"; then
         HTTP_SERVER_MIN_PORT=80
     else
         HTTP_SERVER_MIN_PORT=8080
@@ -34,12 +40,14 @@ assignHttpServerPortRange() {
 }
 
 assignHttpsServerPortRange() {
+    checkParamNum 0 $# || exit 1
     HTTPS_SERVER_MIN_PORT=7777
     HTTPS_SERVER_MAX_PORT=$((${HTTPS_SERVER_MIN_PORT} + 20))
 }
 
 assignSslDaemonPortRange() {
-    if [ "$(whoami)" == root ]; then
+    checkParamNum 0 $# || exit 1
+    if "${IS_PROD_MODE}"; then
         SSL_DAEMON_MIN_PORT=443
     else
         SSL_DAEMON_MIN_PORT=4433
@@ -52,9 +60,16 @@ startHttpServer() {
     HTTP_SERVER_PORT="${HTTP_SERVER_MIN_PORT}"
     while [ "${HTTP_SERVER_PORT}" != "${HTTP_SERVER_MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${HTTP_SERVER_PORT}"
-        "./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}" "${HTTP_SERVER_PORT}" &
+
+        START_COMMAND="\"./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}\" --cache-path \"${SERVER_CACHE_PATH}\" --port \"${HTTP_SERVER_PORT}\" &"
+        if "${IS_PROD_MODE}"; then
+            eval "sudo ${START_COMMAND}" # Not quoted intentionally
+        else
+            eval ${START_COMMAND} # Not quoted intentionally
+        fi
         sleep 0.5
-        if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
+
+        if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
             break
         else
             HTTP_SERVER_PORT=$((${HTTP_SERVER_PORT} + 1))
@@ -67,9 +82,9 @@ startHttpsServer() {
     HTTPS_SERVER_PORT="${HTTPS_SERVER_MIN_PORT}"
     while [ "${HTTPS_SERVER_PORT}" != "${HTTPS_SERVER_MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${HTTPS_SERVER_PORT}"
-        "./build/${HTTPS_SERVER_NAME}/${HTTPS_SERVER_NAME}" "${HTTPS_SERVER_PORT}" &
+        "./build/${HTTPS_SERVER_NAME}/${HTTPS_SERVER_NAME}" --cache-path "${SERVER_CACHE_PATH}" --port "${HTTPS_SERVER_PORT}" &
         sleep 0.5
-        if pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
+        if pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
             break
         else
             HTTPS_SERVER_PORT=$((${HTTPS_SERVER_PORT} + 1))
@@ -82,9 +97,14 @@ startSslDaemon() {
     SSL_DAEMON_PORT="${SSL_DAEMON_MIN_PORT}"
     while [ "${SSL_DAEMON_PORT}" != "${SSL_DAEMON_MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${SSL_DAEMON_PORT}"
-        "./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}" -l "${SSL_DAEMON_PORT}" -o "${HTTPS_SERVER_PORT}" &
+        START_COMMAND="\"./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}\" -l \"${SSL_DAEMON_PORT}\" -o \"${HTTPS_SERVER_PORT}\" &"
+        if "${IS_PROD_MODE}"; then
+            eval "sudo ${START_COMMAND}"
+        else
+            eval ${START_COMMAND}
+        fi
         sleep 0.5
-        if pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
+        if pidof "${SSL_DAEMON_NAME}" >/dev/null; then
             break
         else
             SSL_DAEMON_PORT=$((${SSL_DAEMON_PORT} + 1))
@@ -92,12 +112,22 @@ startSslDaemon() {
     done
 }
 
+startElevationPlayer() {
+    message $'\nStarting Elevation Player...\n'
+    "./build/${ELEVATION_PLAYER_NAME}/${ELEVATION_PLAYER_NAME}" --cache-path "${SERVER_CACHE_PATH}" &
+}
+
 # EXPECTED PARAMS :
 # 1 : Expression which, if true, makes us wait until any of the processes is finished.
+# 2 : Expression which, if true, makes us launch the servers with root access, and the
+#     player with normal user access.
 lanunchEverything() {
-    checkParamNum 1 $# || exit 1
+    checkParamNum 2 $# || exit 1
     local SHOULD_WAIT="${1}"
+    local IS_PROD_MODE="${2}"
 
+    local SERVER_CACHE_PATH="${SERVER_DIR}/cache"
+    mkdir -p "${SERVER_CACHE_PATH}"
     if processesNotAlreadyStarted; then
         cd "${SERVER_DIR}"
         assignHttpServerPortRange
@@ -106,7 +136,8 @@ lanunchEverything() {
         startHttpsServer
         assignSslDaemonPortRange
         startSslDaemon
-        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"',\nand SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\n\n'
+        startElevationPlayer
+        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"$',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"$',\nand SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\nCache path: '"${SERVER_CACHE_PATH}"$'\n\n'
         if ${SHOULD_WAIT}; then
             message "${MESSAGE_STRING}"
             trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
@@ -120,32 +151,47 @@ lanunchEverything() {
     fi
 }
 
-start() {
+startDev() {
     checkParamNum 0 $# || exit 1
-    lanunchEverything false
+    lanunchEverything false false
+}
+
+startProd() {
+    checkParamNum 0 $# || exit 1
+    if [ "$(whoami)" != root ]; then
+        lanunchEverything false true
+    else
+        messageError $'\nCannot start the Elevation server in production environment while root:\nPulseAudio is anti-environmental and not like roots.\n'
+        exit 1
+    fi
 }
 
 run() {
     checkParamNum 0 $# || exit 1
-    lanunchEverything true
+    lanunchEverything true false
 }
 
 stop() {
     checkParamNum 0 $# || exit 1
-    if pgrep -x "${HTTP_SERVER_NAME}" >/dev/null; then
-        kill -TERM $(pgrep -x "${HTTP_SERVER_NAME}")
+    if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
+        kill -TERM $(pidof "${HTTP_SERVER_NAME}")
         sleep 0.5
-        kill -KILL $(pgrep -x "${HTTP_SERVER_NAME}") 2>/dev/null
+        kill -KILL $(pidof "${HTTP_SERVER_NAME}") 2>/dev/null
     fi
-    if pgrep -x "${HTTPS_SERVER_NAME}" >/dev/null; then
-        kill -TERM $(pgrep -x "${HTTPS_SERVER_NAME}")
+    if pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
+        kill -TERM $(pidof "${HTTPS_SERVER_NAME}")
         sleep 0.5
-        kill -KILL $(pgrep -x "${HTTPS_SERVER_NAME}") 2>/dev/null
+        kill -KILL $(pidof "${HTTPS_SERVER_NAME}") 2>/dev/null
     fi
-    if pgrep -x "${SSL_DAEMON_NAME}" >/dev/null; then
-        kill -TERM $(pgrep -x "${SSL_DAEMON_NAME}")
+    if pidof "${SSL_DAEMON_NAME}" >/dev/null; then
+        kill -TERM $(pidof "${SSL_DAEMON_NAME}")
         sleep 0.5
-        kill -KILL $(pgrep -x "${SSL_DAEMON_NAME}") 2>/dev/null
+        kill -KILL $(pidof "${SSL_DAEMON_NAME}") 2>/dev/null
+    fi
+    if pidof "${ELEVATION_PLAYER_NAME}" >/dev/null; then
+        kill -TERM $(pidof "${ELEVATION_PLAYER_NAME}")
+        sleep 0.5
+        kill -KILL $(pidof "${ELEVATION_PLAYER_NAME}") 2>/dev/null
     fi
 }
 
