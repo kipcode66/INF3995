@@ -10,14 +10,12 @@ public:
     sqlite_error();
     sqlite_error(int);
     sqlite_error(int, const std::string&);
-    sqlite_error(sqlite_error&&) = default;
-    sqlite_error(const sqlite_error&) = default;
     virtual ~sqlite_error();
 
-    sqlite_error& operator=(const sqlite_error&) = default;
-    sqlite_error& operator=(sqlite_error&&) = default;
+    int code() const;
 
-    const int code;
+protected:
+    int m_code;
 };
 
 }

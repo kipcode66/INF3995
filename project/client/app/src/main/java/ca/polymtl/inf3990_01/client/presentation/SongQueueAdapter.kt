@@ -59,7 +59,7 @@ class SongQueueAdapter(
         view.layout_admin.visibility = if (appState.canDisplaySongOwnerData()) View.VISIBLE else View.INVISIBLE
         view.remove_song.visibility = if (appState.canRemoveSong(song)) View.VISIBLE else View.INVISIBLE
         view.setBackgroundResource(
-            if (appState.isSongHighlighted(song)) R.color.colorAccent
+            if (appState.isSongHighlighted(song)) R.color.highlight
             else android.R.color.background_light
         )
         view.remove_song.setOnClickListener {

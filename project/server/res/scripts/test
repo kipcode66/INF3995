@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+TEST_SERVER_DIR="$(git rev-parse --show-toplevel)/project/server/src/common/test/resources/database"
+TEST_DB_NAME="testServer.db"
+EXISTING_TEST_DB="$TEST_SERVER_DIR/$TEST_DB_NAME"
+TEST_STRUCT_FILE="testStruct.sql"
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
@@ -16,10 +20,31 @@ testHttpServer() {
     ctest --output-on-failure
 }
 
+write_test_db() {
+        if [ ! -f "$TEST_SERVER_DIR/$TEST_STRUCT_FILE" ]; then
+                echo "no $TEST_STRUCT_FILE found at $TEST_SERVER_DIR"
+        else
+                pushd $TEST_SERVER_DIR > /dev/null 2>&1
+                cat $TEST_STRUCT_FILE | sqlite3 $TEST_DB_NAME
+                popd > /dev/null 2>&1
+        fi
+}
+
+buildTestDB() {
+    if [ -f $EXISTING_TEST_DB ]; then
+            rm -f $EXISTING_TEST_DB
+            write_test_db
+            echo ""
+    else    
+            write_test_db
+    fi
+}
+
 test() {
     COMMON_TEST_DIR="${SERVER_DIR}/build/${COMMON_LIB_NAME}/test"
     DAEMON_TEST_DIR="${SERVER_DIR}/build/${SSL_DAEMON_NAME}/test"
 
+    buildTestDB
     testHttpServer
     testDaemon
 }

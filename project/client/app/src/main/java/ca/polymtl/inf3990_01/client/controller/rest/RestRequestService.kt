@@ -39,6 +39,9 @@ class RestRequestService(
         const val RESOURCE_URI = "/usager/file/"
     }
 
+    private var lastMessageSongList: String? = null
+    private var lastMessageSendSong: String? = null
+
     suspend fun getSongList(): List<Song> {
         val list: MutableList<Song> = mutableListOf()
         val token = tokenMgr.getToken()
@@ -61,7 +64,8 @@ class RestRequestService(
                         }
                         // TODO Send a signal to the Presenter to show popup with the response message.
                         // Temporarly, opening a Toast (a little message at the bottom of the screen)
-                        if (canDisplayMessage) {
+                        if (canDisplayMessage && lastMessageSongList != msg) {
+                            lastMessageSongList = msg
                             Handler(appCtx.mainLooper).post {
                                 Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show()
                             }
@@ -83,6 +87,7 @@ class RestRequestService(
     @Synchronized suspend fun sendSong(song: LocalSong) {
         val songToSend = encoder(song)
         val token = tokenMgr.getToken()
+        var canDisplayMessage = initMgr.isInitialized
         val resp: ResponseData<String> = suspendCoroutine { continuation ->
             val request = RESTRequest(
                     Request.Method.POST,
@@ -113,7 +118,10 @@ class RestRequestService(
                     dataProvider[song] = DataProvider.LocalSongSendState.NOT_SENT
                 }
             }
-            Handler(appCtx.mainLooper).post(Runnable { Toast.makeText(appCtx, "Post song error: " + resp.value, Toast.LENGTH_LONG).show() })
+            if (canDisplayMessage && lastMessageSendSong != resp.value) {
+                lastMessageSendSong = resp.value
+                Handler(appCtx.mainLooper).post(Runnable { Toast.makeText(appCtx, "Post song error: " + resp.value, Toast.LENGTH_LONG).show() })
+            }
         }
         else {
             synchronized(dataProvider) {
