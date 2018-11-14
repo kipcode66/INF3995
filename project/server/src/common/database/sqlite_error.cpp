@@ -5,20 +5,24 @@ namespace elevation {
 
 sqlite_error::sqlite_error()
     : runtime_error(sqlite3_errstr(SQLITE_OK))
-    , code(SQLITE_OK)
+    , m_code(SQLITE_OK)
 { }
 
-sqlite_error::sqlite_error(int code_)
-    : runtime_error(sqlite3_errstr(code_))
-    , code(code_)
+sqlite_error::sqlite_error(int code)
+    : runtime_error(sqlite3_errstr(code))
+    , m_code(code)
 { }
 
-sqlite_error::sqlite_error(int code_, const std::string& msg)
+sqlite_error::sqlite_error(int code, const std::string& msg)
     : runtime_error(msg)
-    , code(code_)
+    , m_code(code)
 { }
 
 sqlite_error::~sqlite_error()
 { }
+
+int sqlite_error::code() const {
+    return m_code;
+}
 
 }
