@@ -247,7 +247,7 @@ void Database::removeSong(uint32_t id) {
         id));
 }
 
-void Database::executeAndContinueOnLock_(const Query& query) {
+void Database::executeAndRetryOnLock_(const Query& query) {
     bool retry = false;
     do {
         retry = false;
@@ -268,15 +268,15 @@ void Database::executeAndContinueOnLock_(const Query& query) {
 }
 
 void Database::enableForeignKeys_() {
-    executeAndContinueOnLock_(Query("PRAGMA foreign_keys = ON;"));
+    executeAndRetryOnLock_(Query("PRAGMA foreign_keys = ON;"));
 }
 
 void Database::wipeDbSongs_() {
-    executeAndContinueOnLock_(Query("DELETE FROM cachedSong;"));
+    executeAndRetryOnLock_(Query("DELETE FROM cachedSong;"));
 }
 
 void Database::initDefaultAdmin() {
-    executeAndContinueOnLock_(Query("SELECT * FROM adminLogin;"));
+    executeAndRetryOnLock_(Query("SELECT * FROM adminLogin;"));
 }
 
 Database::Database() {

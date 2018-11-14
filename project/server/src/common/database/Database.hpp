@@ -58,7 +58,7 @@ protected:
     Database();
     Database(std::experimental::filesystem::path);
 
-    void executeAndContinueOnLock_(const Query&);
+    void executeAndRetryOnLock_(const Query&);
     void enableForeignKeys_();
     void wipeDbSongs_();
 
