@@ -9,6 +9,7 @@
 #include "User.hpp"
 #include "Song.hpp"
 #include "sqlite_error.hpp"
+#include "Query.hpp"
 
 #ifndef DATABASE_DATABASE_HPP
 #define DATABASE_DATABASE_HPP
@@ -18,8 +19,12 @@ namespace elevation {
 class Database {
 public:
     static constexpr const char* DEFAULT_PASSWORD = "admin";
+    static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
 
     static Database* instance();
+    static void assertSqliteOk(int errcode, const std::string& message);
+    static void assertSqliteOk(int errcode);
+
 
 protected:
     static Database* s_instance;
@@ -53,12 +58,14 @@ protected:
     Database();
     Database(std::experimental::filesystem::path);
 
-    static void assertSqliteOk_(int errcode, const std::string& message);
-    static void assertSqliteOk_(int errcode);
+    void executeAndContinueOnLock_(const Query&);
     void enableForeignKeys_();
     void wipeDbSongs_();
 
-    Song_t getSongByQuery_(const char*) const;
+    Song_t getSongByQuery_(const Query&) const;
+    std::vector<Song_t> getSongsByQuery_(const Query&) const;
+    User_t getUserByQuery_(const Query&) const;
+    void executeQuery_(const Query& query);
 
     sqlite3* m_db = 0;
 };
