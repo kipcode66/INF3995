@@ -229,7 +229,7 @@ buildDependencies() {
 buildServer() {
     message $'\nBuilding and installing the Elevation server...'
     cd "${SERVER_BINARY_DIR}"
-    cmake -DCMAKE_BUILD_TYPE=Debug ../src
+    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug ../src
     make -j$(getCoreCount)
     message $'Building the Elevation server done!\n'
 }
