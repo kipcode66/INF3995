@@ -15,7 +15,7 @@ using namespace elevation;
 using namespace std::chrono_literals;
 
 Database* Database::s_instance = nullptr;
-constexpr char Database::DB_NAME[] = "server.db";
+constexpr const char Database::DB_NAME[] = "server.db";
 
 Database* Database::instance() {
 
@@ -25,7 +25,7 @@ Database* Database::instance() {
     return s_instance;
 }
 
-void Database::assertSqliteOk(int errcode, const std::string& message) {
+void Database::assertSqliteOk_(int errcode, const std::string& message) {
     if (errcode != SQLITE_DONE
         && errcode != SQLITE_OK
         && errcode != SQLITE_ROW) {
@@ -35,7 +35,7 @@ void Database::assertSqliteOk(int errcode, const std::string& message) {
     }
 }
 
-void Database::assertSqliteOk(int errcode) {
+void Database::assertSqliteOk_(int errcode) {
     if (errcode != SQLITE_DONE
         && errcode != SQLITE_OK
         && errcode != SQLITE_ROW) {
@@ -46,11 +46,11 @@ void Database::assertSqliteOk(int errcode) {
 /*
  * Returns an empty user (all 0s) on unsuccessful search
  */
-User_t Database::getUserByMac(const char* mac) const {
+User_t Database::getUserByMac(const std::string& mac) const {
     User_t user = {0};
     int errcode = 0;
     char* query = sqlite3_mprintf(
-            "SELECT ip, mac, name, user_id FROM user WHERE (mac = '%q');", mac);
+            "SELECT ip, mac, name, user_id FROM user WHERE (mac = '%q');", mac.c_str());
 
     sqlite3_stmt *statement = nullptr;
     sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
@@ -64,7 +64,7 @@ User_t Database::getUserByMac(const char* mac) const {
         user.userId = sqlite3_column_int(statement, 3);
     }
     errcode = sqlite3_finalize(statement);
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 
     return std::move(user);
 }
@@ -88,7 +88,7 @@ User_t Database::getUserById(uint32_t id) const {
     }
     errcode = sqlite3_finalize(statement);
 
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
     return user;
 }
 
@@ -108,7 +108,7 @@ void Database::createUser(const User_t* user) {
     errcode = sqlite3_blocking_step(statement);
     errcode = sqlite3_finalize(statement);
 
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 }
 
 void Database::connectUser(const struct User_t* user) {
@@ -126,7 +126,7 @@ void Database::connectUser(const struct User_t* user) {
     errcode = sqlite3_blocking_step(statement);
     errcode = sqlite3_finalize(statement);
 
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 }
 
 int Database::getUserConnectionStatus(uint32_t userId) const {
@@ -145,15 +145,14 @@ int Database::getUserConnectionStatus(uint32_t userId) const {
     }
     errcode = sqlite3_finalize(statement);
 
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
     return status;
 }
 
-void Database::createAdmin(const char* password) {
+void Database::createAdmin(const std::string& password) {
     int errcode = 0;
-    std::string salt = id_utils::generateSalt(strlen(password));
-    std::string passwordStr(password);
-    std::string passwordHash = id_utils::generateMd5Hash(passwordStr, salt);
+    std::string salt = id_utils::generateSalt(password.length());
+    std::string passwordHash = id_utils::generateMd5Hash(password, salt);
     char* query = sqlite3_mprintf(
                 "INSERT INTO adminLogin VALUES ('admin', '%q', '%q');",
                 passwordHash.c_str(),
@@ -166,15 +165,15 @@ void Database::createAdmin(const char* password) {
     errcode = sqlite3_blocking_step(statement);
     errcode = sqlite3_finalize(statement);
 
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 }
 
-void Database::connectAdmin(const char* login, uint32_t adminId) {
+void Database::connectAdmin(const std::string& login, uint32_t adminId) {
     uint32_t adminIsConnected = 1;
     int errcode = 0;
     char* query = sqlite3_mprintf(
                 "INSERT or REPLACE INTO adminConnection VALUES ('%q', %u, %u, julianday('now'));",
-                login,
+                login.c_str(),
                 adminIsConnected,
                 adminId);
 
@@ -185,7 +184,7 @@ void Database::connectAdmin(const char* login, uint32_t adminId) {
     errcode = sqlite3_blocking_step(statement);
     errcode = sqlite3_finalize(statement);
 
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 }
 
 void Database::disconnectAdmin(uint32_t adminId) {
@@ -200,7 +199,7 @@ void Database::disconnectAdmin(uint32_t adminId) {
     errcode = sqlite3_blocking_step(statement);
     errcode = sqlite3_finalize(statement);
 
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 }
 
 bool Database::isAdminConnected(uint32_t adminId) const {
@@ -218,14 +217,14 @@ bool Database::isAdminConnected(uint32_t adminId) const {
     }
     errcode = sqlite3_finalize(statement);
 
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
     return isConnected;
 }
 
-std::pair<std::string, std::string> Database::getSaltAndHashedPasswordByLogin(const char* login) const {
+std::pair<std::string, std::string> Database::getSaltAndHashedPasswordByLogin(const std::string& login) const {
     int errcode = 0;
     char* query = sqlite3_mprintf(
-            "SELECT salt, hashed_password FROM adminLogin WHERE (login = '%q');", login);
+            "SELECT salt, hashed_password FROM adminLogin WHERE (login = '%q');", login.c_str());
     sqlite3_stmt *statement = nullptr;
     sqlite3_blocking_prepare_v2(m_db, query, strlen(query), &statement, 0); // strlen for perfo
     sqlite3_free(query);
@@ -238,7 +237,7 @@ std::pair<std::string, std::string> Database::getSaltAndHashedPasswordByLogin(co
         saltAndHashedPassword = std::make_pair(salt, hash);
     }
     errcode = sqlite3_finalize(statement);
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 
     return saltAndHashedPassword;
 }
@@ -260,7 +259,7 @@ Song_t Database::getSongByQuery_(const char* query) const {
         strncpy(song.path, (char *)sqlite3_column_text(statement, 5), Song_t::PATH_LENGTH);
     }
     errcode = sqlite3_finalize(statement);
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 
     return song;
 }
@@ -273,17 +272,17 @@ Song_t Database::getSongById(int id) const {
     return song;
 }
 
-Song_t Database::getSongByTitle(const char* title) const {
+Song_t Database::getSongByTitle(const std::string& title) const {
     char* query = sqlite3_mprintf(
-            "SELECT rowid, title, artist, user_id, duration, path FROM cachedSong WHERE (title = '%q');", title);
+            "SELECT rowid, title, artist, user_id, duration, path FROM cachedSong WHERE (title = '%q');", title.c_str());
     Song_t song = getSongByQuery_(query);
     sqlite3_free(query);
     return song;
 }
 
-Song_t Database::getSongByPath(const char* path) const {
+Song_t Database::getSongByPath(const std::string& path) const {
     char* query = sqlite3_mprintf(
-            "SELECT rowid, title, artist, user_id, duration, path FROM cachedSong WHERE (path = '%q');", path);
+            "SELECT rowid, title, artist, user_id, duration, path FROM cachedSong WHERE (path = '%q');", path.c_str());
     Song_t song = getSongByQuery_(query);
     sqlite3_free(query);
     return song;
@@ -313,7 +312,7 @@ std::vector<Song_t> Database::getSongsByUser(int userId) const {
         errcode = sqlite3_blocking_step(statement);
     }
     errcode = sqlite3_finalize(statement);
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 
     return songs;
 }
@@ -342,7 +341,7 @@ std::vector<Song_t> Database::getAllSongs() const {
         errcode = sqlite3_blocking_step(statement);
     }
     errcode = sqlite3_finalize(statement);
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 
     return songs;
 }
@@ -364,7 +363,7 @@ void Database::createSong(const Song_t* song) {
 
     errcode = sqlite3_blocking_step(statement);
     errcode = sqlite3_finalize(statement);
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 }
 
 void Database::removeSong(uint32_t id) {
@@ -378,10 +377,10 @@ void Database::removeSong(uint32_t id) {
 
     errcode = sqlite3_blocking_step(statement);
     errcode = sqlite3_finalize(statement);
-    assertSqliteOk(errcode);
+    assertSqliteOk_(errcode);
 }
 
-void Database::enable_foreign_keys(sqlite3* m_db) {
+void Database::enableForeignKeys_() {
     int errcode = 0;
     do {
         try {
@@ -396,7 +395,7 @@ void Database::enable_foreign_keys(sqlite3* m_db) {
             } while (errcode == SQLITE_ROW);
 
             errcode = sqlite3_finalize(statement);
-            assertSqliteOk(errcode);
+            assertSqliteOk_(errcode);
             errcode = SQLITE_OK;
         }
         catch(sqlite_error& e) {
@@ -404,10 +403,10 @@ void Database::enable_foreign_keys(sqlite3* m_db) {
         }
     } while(errcode == SQLITE_LOCKED);
 
-    assertSqliteOk(errcode, "Cannot enable foreign keys");
+    assertSqliteOk_(errcode, "Cannot enable foreign keys");
 }
 
-void Database::wipeDbSongs(sqlite3* m_db) {
+void Database::wipeDbSongs_() {
     int errcode = 0;
     do {
         try {
@@ -422,7 +421,7 @@ void Database::wipeDbSongs(sqlite3* m_db) {
             } while (errcode == SQLITE_ROW);
 
             errcode = sqlite3_finalize(statement);
-            assertSqliteOk(errcode);
+            assertSqliteOk_(errcode);
             errcode = SQLITE_OK;
         }
         catch(sqlite_error& e) {
@@ -430,10 +429,10 @@ void Database::wipeDbSongs(sqlite3* m_db) {
         }
     } while(errcode == SQLITE_LOCKED);
 
-    assertSqliteOk(errcode, "Cannot wipe cached songs");
+    assertSqliteOk_(errcode, "Cannot wipe cached songs");
 }
 
-void Database::initDefaultAdmin(sqlite3* m_db) {
+void Database::initDefaultAdmin() {
     int errcode = 0;
     do {
         try {
@@ -449,25 +448,25 @@ void Database::initDefaultAdmin(sqlite3* m_db) {
             }
 
             errcode = sqlite3_finalize(statement);
-            assertSqliteOk(errcode);
+            assertSqliteOk_(errcode);
         }
         catch (sqlite_error& e) {
             std::this_thread::sleep_for(100ms);
         }
     } while (errcode == SQLITE_LOCKED);
 
-    assertSqliteOk(errcode, "Cannot create a default admin");
+    assertSqliteOk_(errcode, "Cannot create a default admin");
 }
 
 Database::Database() {
-    assertSqliteOk(sqlite3_enable_shared_cache(true), "Cannot enable db shared cache mode");
+    assertSqliteOk_(sqlite3_enable_shared_cache(true), "Cannot enable db shared cache mode");
     try {
-        assertSqliteOk(
+        assertSqliteOk_(
             sqlite3_open_v2(Database::DB_NAME, &m_db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_SHAREDCACHE, NULL),
             "Cannot connect to database");
-        enable_foreign_keys(m_db);
-        wipeDbSongs(m_db);
-        initDefaultAdmin(m_db);
+        enableForeignKeys_();
+        wipeDbSongs_();
+        initDefaultAdmin();
     } catch (...) {
         sqlite3_close(m_db);
         throw;
@@ -475,13 +474,13 @@ Database::Database() {
 }
 
 Database::Database(std::experimental::filesystem::path serverPath) {
-    assertSqliteOk(sqlite3_enable_shared_cache(true), "Cannot enable db shared cache mode");
+    assertSqliteOk_(sqlite3_enable_shared_cache(true), "Cannot enable db shared cache mode");
     try {
-        assertSqliteOk(
+        assertSqliteOk_(
             sqlite3_open_v2(serverPath.c_str(), &m_db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_SHAREDCACHE, NULL),
             "Cannot connect to database");
-        enable_foreign_keys(m_db);
-        wipeDbSongs(m_db);
+        enableForeignKeys_();
+        wipeDbSongs_();
         //initDefaultAdmin(m_db);
     } catch (...) {
         sqlite3_close(m_db);
