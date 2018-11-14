@@ -6,8 +6,8 @@
 #include <utility>
 #include <experimental/filesystem>
 
-#include "User.hpp"
-#include "Song.hpp"
+#include "templates/User.hpp"
+#include "templates/Song.hpp"
 #include "sqlite_error.hpp"
 #include "Query.hpp"
 
