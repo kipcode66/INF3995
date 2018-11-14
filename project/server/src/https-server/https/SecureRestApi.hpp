@@ -29,6 +29,13 @@ private:
 
 private:
     Logger& m_logger;
+    class Admin {
+    public:
+        Admin(const Rest::Request&);
+        std::string usager;
+        std::string mot_de_passe;
+        uint32_t id;
+    };
 };
 
 } // namespace elevation
