@@ -22,7 +22,7 @@ ArgsParser::ArgsParser(const std::vector<std::string>& args) {
                 throw std::invalid_argument("Missing argument.");
             }
         }
-        if (arg == "-p" || arg == "--port") {
+        else if (arg == "-p" || arg == "--port") {
             std::string portString;
             try {
                 portString = args.at(i + 1);
