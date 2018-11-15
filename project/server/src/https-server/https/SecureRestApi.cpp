@@ -7,9 +7,9 @@
 #include "misc/id_utils.hpp"
 #include "database/Database.hpp"
 
-#include "http-server/database/Database.hpp"
 #include "rapidjson/document.h"
 
+#include <common/database/Database.hpp>
 #include <common/logger/Logger.hpp>
 
 using namespace elevation;
