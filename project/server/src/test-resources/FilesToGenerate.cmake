@@ -25,4 +25,4 @@ set(FILE_CACHE_TEST_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/file_cache")
 
 set(TEST_RESOURCES_GENERATED_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
 
-configure_file(config/TestConfiguration.hpp.in "${TEST_RESOURCES_GENERATED_INCLUDE_DIR}/TestResources.hpp" @ONLY)
+configure_file(config/TestResources.hpp.in "${TEST_RESOURCES_GENERATED_INCLUDE_DIR}/TestResources.hpp" @ONLY)
