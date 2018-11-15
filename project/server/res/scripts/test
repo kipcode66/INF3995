@@ -52,7 +52,17 @@ test() {
     ELEVATION_PLAYER_TEST_DIR="${SERVER_DIR}/build/${ELEVATION_PLAYER_NAME}/test"
 
     buildTestDB
-    testCommon
-    testElevationPlayer
-    testDaemon
+
+    testsSuccess=1
+    testCommon || testsSuccess=0
+    testElevationPlayer || testsSuccess=0
+    testDaemon || testsSuccess=0
+
+    if [ "${testsSuccess}" != 0 ]; then
+        message $'\nAll tests passed.\n'
+    else
+        messageError $' ========================================\n' \
+                      $'= Some tests failed ; see above output =\n' \
+                      $'========================================\n'
+    fi
 }
