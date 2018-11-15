@@ -77,7 +77,7 @@ User_t Database::getUserById(uint32_t id) const {
 
 void Database::createUser(const User_t* user) {
     executeQuery_(Query(
-        "INSERT OR REPLACE INTO user VALUES (user_id, ip, mac, name) "
+        "INSERT OR REPLACE INTO user (user_id, ip, mac, name) "
         "VALUES (%u, '%q', '%q', '%q');",
         user->userId,
         user->ip,
