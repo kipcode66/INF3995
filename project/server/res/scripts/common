@@ -16,6 +16,7 @@ messageError() {
     tput setaf 1 2>/dev/null
     echo "$@" >&2
     tput sgr0 2>/dev/null
+    false
 }
 
 # EXPECTED PARAMS:
