@@ -74,6 +74,7 @@ startHttpServer() {
 
         START_COMMAND="\"./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}\" --cache-path \"${SERVER_CACHE_PATH}\" --port \"${HTTP_SERVER_PORT}\" &"
         if "${IS_PROD_MODE}"; then
+            sudo echo -n
             eval "sudo ${START_COMMAND}" # Not quoted intentionally
         else
             eval ${START_COMMAND} # Not quoted intentionally
@@ -110,6 +111,7 @@ startSslDaemon() {
         echo $'\n'"Trying port number ${SSL_DAEMON_PORT}"
         START_COMMAND="\"./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}\" -l \"${SSL_DAEMON_PORT}\" -o \"${HTTPS_SERVER_PORT}\" &"
         if "${IS_PROD_MODE}"; then
+            sudo echo -n
             eval "sudo ${START_COMMAND}"
         else
             eval ${START_COMMAND}
