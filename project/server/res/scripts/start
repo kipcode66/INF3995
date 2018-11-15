@@ -34,14 +34,14 @@ checkProcessesNotAlreadyStarted() {
     fi
 }
 
-# Starts one of the processes under the 'build/' directory.
+# Starts one of the Elevation server processes.
 # The process will be called with:
 #     <NAME> <PORT_OPTION> <PORT> <EXTRA_PARAMS>
 #
 # EXPECTED PARAMS:
 #  1 : Process name
 #  2 : Process executable
-#  3 : Environment variable to set the port number into. Empty string if don't care.
+#  3 : Environment variable to set the port number into.
 #  4 : Base port in production mode
 #  5 : Number of ports to try in production mode
 #  6 : Base port in dev mode
@@ -72,7 +72,7 @@ startServerProcess() {
 
     message $'\nStarting '"${NAME}"$'...\n'
     local port="${MIN_PORT}"
-    while [ "${port}" != "${MAX_PORT}" ]; do
+    while [ "${port}" -le "${MAX_PORT}" ]; do
         echo $'\n'"Trying port number ${port}"
 
         START_COMMAND="\"${PROCESS_EXECUTABLE}\" \"${PORT_OPTION}\" \"${port}\" ${EXTRA_PARAMS} &"
@@ -179,20 +179,27 @@ lanunchEverything() {
     mkdir -p "${SERVER_CACHE_PATH}"
     if checkProcessesNotAlreadyStarted; then
         cd "${SERVER_DIR}"
-        startElevationPlayer
-        startHttpServer
-        startHttpsServer
-        startSslDaemon
-        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"$',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"$',\nSSL Daemon started on port '"${SSL_DAEMON_PORT}"$',\nand '"${ELEVATION_PLAYER_NAME}"$' started on port '"${ELEVATION_PLAYER_PORT}"$'.\nCache path: '"${SERVER_CACHE_PATH}"$'\n\n'
-        if ${SHOULD_WAIT}; then
-            message "${MESSAGE_STRING}"
-            trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
-                                       # SIGINT (CTRL+C) / SIGTERM signal.
-            wait -n
-            stop
+        startedEverything=1
+        startElevationPlayer || startedEverything=0
+        startHttpServer      || startedEverything=0
+        startHttpsServer     || startedEverything=0
+        startSslDaemon       || startedEverything=0
+
+        if [ "${startedEverything}" != 0 ]; then
+            local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"$',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"$',\nSSL Daemon started on port '"${SSL_DAEMON_PORT}"$',\nand '"${ELEVATION_PLAYER_NAME}"$' started on port '"${ELEVATION_PLAYER_PORT}"$'.\nCache path: '"${SERVER_CACHE_PATH}"$'\n\n'
+            if ${SHOULD_WAIT}; then
+                message "${MESSAGE_STRING}"
+                trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
+                                        # SIGINT (CTRL+C) / SIGTERM signal.
+                wait -n
+                stop
+            else
+                disown
+                message "${MESSAGE_STRING}"
+            fi
         else
-            disown
-            message "${MESSAGE_STRING}"
+            stop
+            messageError $'\nCould not start the Elevation server.\n'
         fi
     fi
 }
