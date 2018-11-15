@@ -228,7 +228,7 @@ stop() {
     checkParamNum 0 $# || exit 1
     for processName in "${PROCESS_NAMES[@]}"; do
         if isProcessRunning "${processName}"; then
-            kill -TERM $(pidof "${processName}")
+            kill -TERM $(pidof "${processName}") 2>/dev/null || messageError $'Could not kill '"${processName}"$' ; you might need root privileges.'
             sleep 0.5
             kill -KILL $(pidof "${processName}") 2>/dev/null
         fi
