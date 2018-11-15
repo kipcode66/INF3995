@@ -7,7 +7,6 @@
 #include <pistache/description.h>
 #include <common/logger/Logger.hpp>
 #include <database/Database.hpp>
-#include <mp3/player/Mp3AutoPlayer.hpp>
 
 #include "filesystem/FileCache.hpp"
 

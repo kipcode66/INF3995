@@ -16,6 +16,10 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # Use quotes "" if a file contains a space (although space in filename is not recommended)
 set(ELEVATION_PLAYER_TEST_CPP_SOURCES
     TestElevationPlayerArgsParser.cpp
+    mp3/player/mad/TestMadDecoder.cpp
+    mp3/player/pulse/TestPulseDevice.cpp
+    mp3/player/TestMp3Player.cpp
+    mp3/player/TestMp3AutoPlayer.cpp
 )
 
 makeAbsolute(ELEVATION_PLAYER_TEST_CPP_SOURCES)
