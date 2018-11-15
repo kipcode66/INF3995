@@ -48,9 +48,7 @@ messageError() {
 checkParamNum() {
     if [ "${2}" != "${1}" ]; then
         messageError "${FUNCNAME[1]} : Got ${2} params ; expected ${1}"
-        false
     fi
-    true
 }
 
 # EXPECTED PARAMS:
