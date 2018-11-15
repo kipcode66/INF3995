@@ -41,7 +41,8 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
             }
         }
         catch (const sqlite_error& e) {
-            if (e.code() == SQLITE_LOCKED) {
+            if (e.code() == SQLITE_LOCKED ||
+                e.code() == SQLITE_BUSY) {
                 retry = true;
                 newSong = Mp3AutoPlayer::NO_SONG;
                 std::this_thread::sleep_for(100ms);

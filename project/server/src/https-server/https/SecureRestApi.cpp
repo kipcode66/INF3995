@@ -35,11 +35,6 @@ void SecureRestApi::createSecureDescription_() {
             .hide();
 
     superviseurPath
-            .route(m_desc.post("/changement_mdp"))
-            .bind(&SecureRestApi::postChangePassword_, this)
-            .hide();
-
-    superviseurPath
             .route(m_desc.post("/login"))
             .bind(&SecureRestApi::superviseurLogin_, this)
             .hide();
@@ -141,7 +136,8 @@ void SecureRestApi::postChangePassword_(const Rest::Request& request, Http::Resp
     try {
         rapidjson::Document jsonDocument;
         jsonDocument.Parse(request.body().c_str());
-        bool isValid = (jsonDocument.HasMember("ancien") &&
+        bool isValid = (jsonDocument.IsObject() &&
+                        jsonDocument.HasMember("ancien") &&
                         jsonDocument.HasMember("nouveau"));
         if (!isValid) {
             response.send(Http::Code::Bad_Request, "Malformed request");
@@ -150,7 +146,7 @@ void SecureRestApi::postChangePassword_(const Rest::Request& request, Http::Resp
         std::string ancien(jsonDocument["ancien"].GetString());
         std::string nouveau(jsonDocument["nouveau"].GetString());
         if (nouveau == ancien) {
-            response.send(Http::Code::Ok, "No action performed");
+            response.send(Http::Code::Ok, "password unchanged");
             return;
         }
 
@@ -159,13 +155,14 @@ void SecureRestApi::postChangePassword_(const Rest::Request& request, Http::Resp
         std::string salt = std::get<0>(saltAndPasswordHash);
         std::string passHashFromDB = std::get<1>(saltAndPasswordHash);
         if (elevation::id_utils::generateMd5Hash(ancien, salt) == passHashFromDB) {
-            db->createAdmin(nouveau);
+            db->setAdminPassword(nouveau);
             response.send(Http::Code::Ok, "password changed");
         } else {
             response.send(Http::Code::Bad_Request, "old password incorrect");
         }
     } catch(std::exception& e) {
         std::cerr << "error: " << e.what() << std::endl;
+        response.send(Http::Code::Internal_Server_Error, e.what());
     }
     return;
 }

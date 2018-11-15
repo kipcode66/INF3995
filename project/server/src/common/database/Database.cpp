@@ -75,7 +75,7 @@ User_t Database::getUserById(uint32_t id) const {
         id));
 }
 
-void Database::setAdminPassword(const User_t* user) {
+void Database::createUser(const User_t* user) {
     executeQuery_(Query(
         "INSERT OR REPLACE INTO user VALUES (user_id, ip, mac, name) "
         "VALUES (%u, '%q', '%q', '%q');",
@@ -104,7 +104,7 @@ int Database::getUserConnectionStatus(uint32_t userId) const {
     return 0;
 }
 
-void Database::createAdmin(const std::string& password) {
+void Database::setAdminPassword(const std::string& password) {
     std::string salt = id_utils::generateSalt(password.length());
     std::string passwordHash = id_utils::generateMd5Hash(password, salt);
     executeQuery_(Query(
@@ -253,7 +253,8 @@ void Database::executeAndRetryOnLock_(const Query& query) {
             while(stmt.step());
         }
         catch(sqlite_error& e) {
-            if (e.code() == SQLITE_LOCKED) {
+            if (e.code() == SQLITE_LOCKED ||
+                e.code() == SQLITE_BUSY) {
                 std::this_thread::sleep_for(100ms);
                 retry = true;
             }
@@ -278,12 +279,13 @@ void Database::initDefaultAdmin() {
         retry = false;
         try {
             Statement stmt(m_db, Query{"SELECT * FROM adminLogin;"});
-            if (stmt.step()) {
-                createAdmin(DEFAULT_PASSWORD);
+            if (!stmt.step()) {
+                setAdminPassword(DEFAULT_PASSWORD);
             }
         }
         catch(sqlite_error& e) {
-            if (e.code() == SQLITE_LOCKED) {
+            if (e.code() == SQLITE_LOCKED ||
+                e.code() == SQLITE_BUSY) {
                 std::this_thread::sleep_for(100ms);
                 retry = true;
             }
