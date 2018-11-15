@@ -55,6 +55,12 @@ assignSslDaemonPortRange() {
     SSL_DAEMON_MAX_PORT=$((${SSL_DAEMON_MIN_PORT} + 20))
 }
 
+assignElevationPlayerPortRange() {
+    checkParamNum 0 $# || exit 1
+    ELEVATION_PLAYER_MIN_PORT=6666
+    ELEVATION_PLAYER_MAX_PORT=$((${ELEVATION_PLAYER_MIN_PORT} + 20))
+}
+
 startHttpServer() {
     message $'\nStarting HTTP Server...\n'
     HTTP_SERVER_PORT="${HTTP_SERVER_MIN_PORT}"
@@ -114,7 +120,16 @@ startSslDaemon() {
 
 startElevationPlayer() {
     message $'\nStarting Elevation Player...\n'
-    "./build/${ELEVATION_PLAYER_NAME}/${ELEVATION_PLAYER_NAME}" --cache-path "${SERVER_CACHE_PATH}" &
+    ELEVATION_PLAYER_PORT="${ELEVATION_PLAYER_MIN_PORT}"
+    while [ "${ELEVATION_PLAYER_PORT}" != "${ELEVATION_PLAYER_MAX_PORT}" ]; do
+        "./build/${ELEVATION_PLAYER_NAME}/${ELEVATION_PLAYER_NAME}" --cache-path "${SERVER_CACHE_PATH}" --port "${ELEVATION_PLAYER_PORT}" &
+        sleep 0.5
+        if pidof "${ELEVATION_PLAYER_NAME}" >/dev/null; then
+            break
+        else
+            ELEVATION_PLAYER_PORT=$((${ELEVATION_PLAYER_PORT} + 1))
+        fi
+    done
 }
 
 # EXPECTED PARAMS :
@@ -136,8 +151,9 @@ lanunchEverything() {
         startHttpsServer
         assignSslDaemonPortRange
         startSslDaemon
+        assignElevationPlayerPortRange
         startElevationPlayer
-        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"$',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"$',\nand SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\nCache path: '"${SERVER_CACHE_PATH}"$'\n\n'
+        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"$',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"$',\nSSL Daemon started on port '"${SSL_DAEMON_PORT}"$',\nand '"${ELEVATION_PLAYER_NAME}"$' started on port '"${ELEVATION_PLAYER_PORT}"$'.\nCache path: '"${SERVER_CACHE_PATH}"$'\n\n'
         if ${SHOULD_WAIT}; then
             message "${MESSAGE_STRING}"
             trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
