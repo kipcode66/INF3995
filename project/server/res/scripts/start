@@ -2,14 +2,7 @@
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
-SERVER_DIR="${SCRIPTS_DIR}/../../project/server"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
-
-COMMON_LIB_NAME=common
-HTTP_SERVER_NAME=http-server
-HTTPS_SERVER_NAME=https-server
-SSL_DAEMON_NAME=ssl-daemon
-ELEVATION_PLAYER_NAME=elevation-player
 
 processesNotAlreadyStarted() {
     if pidof "${HTTP_SERVER_NAME}" >/dev/null; then

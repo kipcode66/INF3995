@@ -4,8 +4,6 @@ THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
-SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
-
 # EXPECTED PARAMS :
 # 1 : Name of the dependency.
 # 2 : Directory containing the CMakeLists.txt script.

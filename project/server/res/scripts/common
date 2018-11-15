@@ -1,5 +1,25 @@
 #!/usr/bin/env bash
 
+###############################################################################
+#                         COMMON CONSTANT DEFINITIONS                         #
+###############################################################################
+
+THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+GIT_DIR="${SCRIPTS_DIR}/../../../.."
+SERVER_DIR="${SCRIPTS_DIR}/../.."
+TEST_RESOURCES_DIR="${SERVER_DIR}/src/test-resources"
+
+COMMON_LIB_NAME=common
+HTTP_SERVER_NAME=http-server
+HTTPS_SERVER_NAME=https-server
+SSL_DAEMON_NAME=ssl-daemon
+ELEVATION_PLAYER_NAME=elevation-player
+
+###############################################################################
+#                         COMMON FUNCTION DEFINITIONS                         #
+###############################################################################
+
 # EXPECTED PARAMS:
 # any amount
 message() {
