@@ -2,119 +2,168 @@
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
-SERVER_DIR="${SCRIPTS_DIR}/../../project/server"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
-COMMON_LIB_NAME=common
-HTTP_SERVER_NAME=http-server
-HTTPS_SERVER_NAME=https-server
-SSL_DAEMON_NAME=ssl-daemon
-ELEVATION_PLAYER_NAME=elevation-player
+# EXPECTED PARAMS:
+# 1 : The process to check the existance of.
+# Return code : 0 if the process already started, otherwise nonzero.
+isProcessRunning() {
+    checkParamNum 1 $# || exit 1
+    local PROCESS_NAME="${1}"
+    pidof "${PROCESS_NAME}" >/dev/null
+}
 
-processesNotAlreadyStarted() {
-    if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
-        message "Cannot start HTTP Server : already started (PID $(pidof "${HTTP_SERVER_NAME}"))"$'\n'
-        false
-    elif pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
-        message "Cannot start HTTPS Server : already started (PID $(pidof "${HTTPS_SERVER_NAME}"))"$'\n'
-        false
-    elif pidof "${SSL_DAEMON_NAME}" >/dev/null; then
-        echo "Cannot start SSL Daemon : already started (PID $(pidof "${SSL_DAEMON_NAME}"))"$'\n'
-        false
-    elif pidof "${ELEVATION_PLAYER_NAME}" >/dev/null; then
-        echo "Cannot start SSL Daemon : already started (PID $(pidof "${ELEVATION_PLAYER_NAME}"))"$'\n'
-        false
-    else
+checkProcessesNotAlreadyStarted() {
+    local startedProcesses=()
+    for processName in "${PROCESS_NAMES[@]}"; do
+        if isProcessRunning "${processName}"; then
+            startedProcesses+=("${processName}")
+        fi
+    done
+
+    if [ ${#startedProcesses[@]} == 0 ]; then
         true
-    fi
-}
-
-assignHttpServerPortRange() {
-    checkParamNum 0 $# || exit 1
-    if "${IS_PROD_MODE}"; then
-        HTTP_SERVER_MIN_PORT=80
     else
-        HTTP_SERVER_MIN_PORT=8080
+        local errMsg=$'\nCannot start the Elevation server: Some processes already started:\n'
+        for startedProcessName in "${startedProcesses[@]}"; do
+            errMsg+="* '${startedProcessName}' (PID $(pidof ${startedProcessName}))"$'\n'
+        done
+        errMsg+=$'\n'
+        messageError "${errMsg}"
+        false
     fi
-    HTTP_SERVER_MAX_PORT=$((${HTTP_SERVER_MIN_PORT} + 20))
 }
 
-assignHttpsServerPortRange() {
-    checkParamNum 0 $# || exit 1
-    HTTPS_SERVER_MIN_PORT=7777
-    HTTPS_SERVER_MAX_PORT=$((${HTTPS_SERVER_MIN_PORT} + 20))
-}
+# Starts one of the Elevation server processes.
+# The process will be called with:
+#     <NAME> <PORT_OPTION> <PORT> <EXTRA_PARAMS>
+#
+# EXPECTED PARAMS:
+#  1 : Process name
+#  2 : Process executable
+#  3 : Environment variable to set the port number into.
+#  4 : Base port in production mode
+#  5 : Number of ports to try in production mode
+#  6 : Base port in dev mode
+#  7 : Number of ports to try in dev mode
+#  8 : Delay after starting the process before checking whether it is still alive
+#  9 : The option to specify the port.
+# 10 : Extra parameters to pass to process. Must not contain Bash variables ; expand them before calling.
+startServerProcess() {
+    checkParamNum 10 $# || exit 1
+    local NAME="${1}"
+    local PROCESS_EXECUTABLE="${2}"
+    local OUTPUT_VARIABLE="${3}"
+    local BASE_PORT_PROD_MODE="${4}"
+    local NUM_TRIES_PROD_MODE="${5}"
+    local BASE_PORT_DEV_MODE="${6}"
+    local NUM_TRIES_DEV_MODE="${7}"
+    local RETRY_DELAY="${8}"
+    local PORT_OPTION="${9}"
+    local EXTRA_PARAMS="${10}"
 
-assignSslDaemonPortRange() {
-    checkParamNum 0 $# || exit 1
     if "${IS_PROD_MODE}"; then
-        SSL_DAEMON_MIN_PORT=443
+        local MIN_PORT="${BASE_PORT_PROD_MODE}"
+        local MAX_PORT=$(("${MIN_PORT}" + "${NUM_TRIES_PROD_MODE}" - 1))
     else
-        SSL_DAEMON_MIN_PORT=4433
+        local MIN_PORT="${BASE_PORT_DEV_MODE}"
+        local MAX_PORT=$(("${MIN_PORT}" + "${NUM_TRIES_DEV_MODE}" - 1))
     fi
-    SSL_DAEMON_MAX_PORT=$((${SSL_DAEMON_MIN_PORT} + 20))
-}
 
-startHttpServer() {
-    message $'\nStarting HTTP Server...\n'
-    HTTP_SERVER_PORT="${HTTP_SERVER_MIN_PORT}"
-    while [ "${HTTP_SERVER_PORT}" != "${HTTP_SERVER_MAX_PORT}" ]; do
-        echo $'\n'"Trying port number ${HTTP_SERVER_PORT}"
+    message $'\nStarting '"${NAME}"$'...\n'
+    local port="${MIN_PORT}"
+    while [ "${port}" -le "${MAX_PORT}" ]; do
+        echo $'\n'"Trying port number ${port}"
 
-        START_COMMAND="\"./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}\" --cache-path \"${SERVER_CACHE_PATH}\" --port \"${HTTP_SERVER_PORT}\" &"
-        if "${IS_PROD_MODE}"; then
+        START_COMMAND="\"${PROCESS_EXECUTABLE}\" \"${PORT_OPTION}\" \"${port}\" ${EXTRA_PARAMS} &"
+        if "${IS_PROD_MODE}" && [ "${port}" -le 1024 ]; then
+            sudo echo -n # The start command is launched in background,
+                         # which means we would start sleeping while the user is typing their password.
+                         # Use a dummy non-background command to make sure the user doesn't have to
+                         # type their password during the retry interval.
+
             eval "sudo ${START_COMMAND}" # Not quoted intentionally
         else
             eval ${START_COMMAND} # Not quoted intentionally
         fi
-        sleep 0.5
+        sleep "${RETRY_DELAY}"
 
-        if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
+        if isProcessRunning "${NAME}"; then
             break
         else
-            HTTP_SERVER_PORT=$((${HTTP_SERVER_PORT} + 1))
+            port=$((${port} + 1))
         fi
     done
+
+    if [ "${port}" -le "${MAX_PORT}" ]; then
+        eval "${OUTPUT_VARIABLE}"="${port}"
+    else
+        messageError $'\nCould not start '"${NAME}"$'\n'
+    fi
+}
+
+startHttpServer() {
+    checkParamNum 0 $# || exit 1
+    local NAME="${HTTP_SERVER_NAME}"
+    local PROCESS_EXECUTABLE="./build/${HTTP_SERVER_NAME}/${HTTP_SERVER_NAME}"
+    local OUTPUT_VARIABLE="HTTP_SERVER_PORT"
+    local BASE_PORT_PROD_MODE="80"
+    local NUM_TRIES_PROD_MODE="20"
+    local BASE_PORT_DEV_MODE="8080"
+    local NUM_TRIES_DEV_MODE="20"
+    local RETRY_DELAY="0.5"
+    local PORT_OPTION="--port"
+    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\""
+
+    startServerProcess "${NAME}" "${PROCESS_EXECUTABLE}" "${OUTPUT_VARIABLE}" "${BASE_PORT_PROD_MODE}" "${NUM_TRIES_PROD_MODE}" "${BASE_PORT_DEV_MODE}" "${NUM_TRIES_DEV_MODE}" "${RETRY_DELAY}" "${PORT_OPTION}" "${EXTRA_PARAMS}"
 }
 
 startHttpsServer() {
-    message $'\nStarting HTTPS Server...\n'
-    HTTPS_SERVER_PORT="${HTTPS_SERVER_MIN_PORT}"
-    while [ "${HTTPS_SERVER_PORT}" != "${HTTPS_SERVER_MAX_PORT}" ]; do
-        echo $'\n'"Trying port number ${HTTPS_SERVER_PORT}"
-        "./build/${HTTPS_SERVER_NAME}/${HTTPS_SERVER_NAME}" --cache-path "${SERVER_CACHE_PATH}" --port "${HTTPS_SERVER_PORT}" &
-        sleep 0.5
-        if pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
-            break
-        else
-            HTTPS_SERVER_PORT=$((${HTTPS_SERVER_PORT} + 1))
-        fi
-    done
+    checkParamNum 0 $# || exit 1
+    local NAME="${HTTPS_SERVER_NAME}"
+    local PROCESS_EXECUTABLE="./build/${HTTPS_SERVER_NAME}/${HTTPS_SERVER_NAME}"
+    local OUTPUT_VARIABLE="HTTPS_SERVER_PORT"
+    local BASE_PORT_PROD_MODE="443"
+    local NUM_TRIES_PROD_MODE="20"
+    local BASE_PORT_DEV_MODE="4433"
+    local NUM_TRIES_DEV_MODE="20"
+    local RETRY_DELAY="0.5"
+    local PORT_OPTION="--port"
+    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\""
+
+    startServerProcess "${NAME}" "${PROCESS_EXECUTABLE}" "${OUTPUT_VARIABLE}" "${BASE_PORT_PROD_MODE}" "${NUM_TRIES_PROD_MODE}" "${BASE_PORT_DEV_MODE}" "${NUM_TRIES_DEV_MODE}" "${RETRY_DELAY}" "${PORT_OPTION}" "${EXTRA_PARAMS}"
 }
 
 startSslDaemon() {
-    message $'\nStarting SSL Daemon...\n'
-    SSL_DAEMON_PORT="${SSL_DAEMON_MIN_PORT}"
-    while [ "${SSL_DAEMON_PORT}" != "${SSL_DAEMON_MAX_PORT}" ]; do
-        echo $'\n'"Trying port number ${SSL_DAEMON_PORT}"
-        START_COMMAND="\"./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}\" -l \"${SSL_DAEMON_PORT}\" -o \"${HTTPS_SERVER_PORT}\" &"
-        if "${IS_PROD_MODE}"; then
-            eval "sudo ${START_COMMAND}"
-        else
-            eval ${START_COMMAND}
-        fi
-        sleep 0.5
-        if pidof "${SSL_DAEMON_NAME}" >/dev/null; then
-            break
-        else
-            SSL_DAEMON_PORT=$((${SSL_DAEMON_PORT} + 1))
-        fi
-    done
+    checkParamNum 0 $# || exit 1
+    local NAME="${SSL_DAEMON_NAME}"
+    local PROCESS_EXECUTABLE="./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}"
+    local OUTPUT_VARIABLE="SSL_DAEMON_PORT"
+    local BASE_PORT_PROD_MODE="7777"
+    local NUM_TRIES_PROD_MODE="20"
+    local BASE_PORT_DEV_MODE="7777"
+    local NUM_TRIES_DEV_MODE="20"
+    local RETRY_DELAY="0.5"
+    local PORT_OPTION="-l"
+    local EXTRA_PARAMS="-o \"${HTTPS_SERVER_PORT}\""
+
+    startServerProcess "${NAME}" "${PROCESS_EXECUTABLE}" "${OUTPUT_VARIABLE}" "${BASE_PORT_PROD_MODE}" "${NUM_TRIES_PROD_MODE}" "${BASE_PORT_DEV_MODE}" "${NUM_TRIES_DEV_MODE}" "${RETRY_DELAY}" "${PORT_OPTION}" "${EXTRA_PARAMS}"
 }
 
 startElevationPlayer() {
-    message $'\nStarting Elevation Player...\n'
-    "./build/${ELEVATION_PLAYER_NAME}/${ELEVATION_PLAYER_NAME}" --cache-path "${SERVER_CACHE_PATH}" &
+    checkParamNum 0 $# || exit 1
+    local NAME="${ELEVATION_PLAYER_NAME}"
+    local PROCESS_EXECUTABLE="./build/${ELEVATION_PLAYER_NAME}/${ELEVATION_PLAYER_NAME}"
+    local OUTPUT_VARIABLE="ELEVATION_PLAYER_PORT"
+    local BASE_PORT_PROD_MODE="6666"
+    local NUM_TRIES_PROD_MODE="20"
+    local BASE_PORT_DEV_MODE="6666"
+    local NUM_TRIES_DEV_MODE="20"
+    local RETRY_DELAY="0.5"
+    local PORT_OPTION="--port"
+    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\""
+
+    startServerProcess "${NAME}" "${PROCESS_EXECUTABLE}" "${OUTPUT_VARIABLE}" "${BASE_PORT_PROD_MODE}" "${NUM_TRIES_PROD_MODE}" "${BASE_PORT_DEV_MODE}" "${NUM_TRIES_DEV_MODE}" "${RETRY_DELAY}" "${PORT_OPTION}" "${EXTRA_PARAMS}"
 }
 
 # EXPECTED PARAMS :
@@ -128,25 +177,29 @@ lanunchEverything() {
 
     local SERVER_CACHE_PATH="${SERVER_DIR}/cache"
     mkdir -p "${SERVER_CACHE_PATH}"
-    if processesNotAlreadyStarted; then
+    if checkProcessesNotAlreadyStarted; then
         cd "${SERVER_DIR}"
-        assignHttpServerPortRange
-        startHttpServer
-        assignHttpsServerPortRange
-        startHttpsServer
-        assignSslDaemonPortRange
-        startSslDaemon
-        startElevationPlayer
-        local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"$',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"$',\nand SSL Daemon started on port '"${SSL_DAEMON_PORT}"$'.\nCache path: '"${SERVER_CACHE_PATH}"$'\n\n'
-        if ${SHOULD_WAIT}; then
-            message "${MESSAGE_STRING}"
-            trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
-                                       # SIGINT (CTRL+C) / SIGTERM signal.
-            wait -n
-            stop
+        startedEverything=1
+        startElevationPlayer || startedEverything=0
+        startHttpServer      || startedEverything=0
+        startHttpsServer     || startedEverything=0
+        startSslDaemon       || startedEverything=0
+
+        if [ "${startedEverything}" != 0 ]; then
+            local MESSAGE_STRING=$'\nHTTP Server started on port '"${HTTP_SERVER_PORT}"$',\nHTTPS Server started on port '"${HTTPS_SERVER_PORT}"$',\nSSL Daemon started on port '"${SSL_DAEMON_PORT}"$',\nand '"${ELEVATION_PLAYER_NAME}"$' started on port '"${ELEVATION_PLAYER_PORT}"$'.\nCache path: '"${SERVER_CACHE_PATH}"$'\n\n'
+            if ${SHOULD_WAIT}; then
+                message "${MESSAGE_STRING}"
+                trap stopBySignal INT TERM # Call 'stopBySignal' when we recieve the
+                                        # SIGINT (CTRL+C) / SIGTERM signal.
+                wait -n
+                stop
+            else
+                disown
+                message "${MESSAGE_STRING}"
+            fi
         else
-            disown
-            message "${MESSAGE_STRING}"
+            stop
+            messageError $'\nCould not start the Elevation server.\n'
         fi
     fi
 }
@@ -173,26 +226,13 @@ run() {
 
 stop() {
     checkParamNum 0 $# || exit 1
-    if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
-        kill -TERM $(pidof "${HTTP_SERVER_NAME}")
-        sleep 0.5
-        kill -KILL $(pidof "${HTTP_SERVER_NAME}") 2>/dev/null
-    fi
-    if pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
-        kill -TERM $(pidof "${HTTPS_SERVER_NAME}")
-        sleep 0.5
-        kill -KILL $(pidof "${HTTPS_SERVER_NAME}") 2>/dev/null
-    fi
-    if pidof "${SSL_DAEMON_NAME}" >/dev/null; then
-        kill -TERM $(pidof "${SSL_DAEMON_NAME}")
-        sleep 0.5
-        kill -KILL $(pidof "${SSL_DAEMON_NAME}") 2>/dev/null
-    fi
-    if pidof "${ELEVATION_PLAYER_NAME}" >/dev/null; then
-        kill -TERM $(pidof "${ELEVATION_PLAYER_NAME}")
-        sleep 0.5
-        kill -KILL $(pidof "${ELEVATION_PLAYER_NAME}") 2>/dev/null
-    fi
+    for processName in "${PROCESS_NAMES[@]}"; do
+        if isProcessRunning "${processName}"; then
+            kill -TERM $(pidof "${processName}") 2>/dev/null || messageError $'Could not kill '"${processName}"$' ; you might need root privileges.'
+            sleep 0.5
+            kill -KILL $(pidof "${processName}") 2>/dev/null
+        fi
+    done
 }
 
 stopBySignal() {

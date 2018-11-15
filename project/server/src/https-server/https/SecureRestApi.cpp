@@ -7,7 +7,9 @@
 #include "misc/id_utils.hpp"
 #include "database/Database.hpp"
 
+#include "rapidjson/document.h"
 
+#include <common/database/Database.hpp>
 #include <common/logger/Logger.hpp>
 
 using namespace elevation;
@@ -45,6 +47,11 @@ void SecureRestApi::createSecureDescription_() {
     superviseurPath
             .route(m_desc.post("/logout"))
             .bind(&SecureRestApi::superviseurLogout_, this)
+            .hide();
+
+    superviseurPath
+            .route(m_desc.post("/changement_mdp"))
+            .bind(&SecureRestApi::postChangePassword_, this)
             .hide();
 }
 

@@ -8,7 +8,7 @@
 
 #include <mp3/player/Mp3AutoPlayer.hpp>
 
-#include <TestConfiguration.hpp>
+#include <TestResources.hpp>
 
 namespace elevation {
 
