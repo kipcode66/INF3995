@@ -16,6 +16,8 @@ HTTPS_SERVER_NAME=https-server
 SSL_DAEMON_NAME=ssl-daemon
 ELEVATION_PLAYER_NAME=elevation-player
 
+PROCESS_NAMES=("${COMMON_LIB_NAME}" "${HTTP_SERVER_NAME}" "${HTTPS_SERVER_NAME}" "${SSL_DAEMON_NAME}" "${ELEVATION_PLAYER_NAME}")
+
 ###############################################################################
 #                         COMMON FUNCTION DEFINITIONS                         #
 ###############################################################################
