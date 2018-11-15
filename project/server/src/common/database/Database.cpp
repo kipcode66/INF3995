@@ -74,14 +74,11 @@ User_t Database::getUserById(uint32_t id) const {
         "SELECT user_id, ip, name, mac FROM user WHERE (user_id = %u);",
         id));
 }
-namespace DB {
-constexpr char const *User = "user";
-}
 
 void Database::createUser(const User_t* user) {
     executeQuery_(Query(
-        (std::string("INSERT OR REPLACE INTO ") + DB::User + " (user_id, ip, mac, name) "
-        "VALUES (%u, '%q', '%q', '%q');").c_str(),
+        "INSERT OR REPLACE INTO user VALUES (user_id, ip, mac, name) "
+        "VALUES (%u, '%q', '%q', '%q');",
         user->userId,
         user->ip,
         user->mac,
@@ -144,6 +141,23 @@ bool Database::isAdminConnected(uint32_t adminId) const {
     }
     return false;
 }
+
+std::string Database::getAdminPassword() const {
+    Statement stmt{m_db, Query(
+        "SELECT password FROM user WHERE (login = '%q');",
+        Database::ADMIN_NAME
+    )};
+    if (stmt.step()) {
+        return stmt.getColumnText(0);
+    }
+    return 0;
+}
+
+/* User_t Database::changeAdminPassword(uint32_t id) const { */
+/*     return getUserByQuery_(Query( */
+/*         "SELECT password FROM user WHERE (login = '%q');", */
+/*         Database::ADMIN_NAME); */
+/* } */
 
 std::pair<std::string, std::string> Database::getSaltAndHashedPasswordByLogin(
         const std::string& login) const {

@@ -142,7 +142,17 @@ void SecureRestApi::postChangePassword_(const Rest::Request& request, Http::Resp
         }
         std::string ancien(jsonDocument["ancien"].GetString());
         std::string nouveau(jsonDocument["nouveau"].GetString());
-        std::cout << "changing " << ancien << " to " << nouveau  << std::endl;
+        if (nouveau == ancien) return;
+
+        Database* db = Database::instance();
+        auto saltAndPasswordHash = db->getSaltAndHashedPasswordByLogin(Database::ADMIN_NAME);
+        std::string salt = std::get<0>(saltAndPasswordHash);
+        std::string passHashFromDB = std::get<1>(saltAndPasswordHash);
+        if (elevation::id_utils::generateMd5Hash(ancien, salt) == passHashFromDB) {
+            std::cout << "matches" << std::endl;
+        } else {
+            std::cout << "doesn't match" << std::endl;
+        }
     } catch(std::exception& e) {
         std::cerr << "error: " << e.what() << std::endl;
     }

@@ -18,12 +18,12 @@ namespace elevation {
 
 class Database {
 public:
-    static constexpr const char* DEFAULT_PASSWORD = "admin";
+    static constexpr const char*   ADMIN_NAME         = "admin";
+    static constexpr const char*   DEFAULT_PASSWORD   = "admin";
     static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
 
     static Database* instance();
     static void assertSqliteOk(int errcode, const std::string& message = "");
-
 
 protected:
     static Database* s_instance;
@@ -39,8 +39,9 @@ public:
     void connectAdmin(const std::string& login, uint32_t adminId);
     void disconnectAdmin(uint32_t adminId);
     bool isAdminConnected(uint32_t adminId) const;
+    std::string getAdminPassword() const;
     std::pair<std::string, std::string> getSaltAndHashedPasswordByLogin(const std::string& login) const;
-    
+
     Song_t getSongById(int) const;
     Song_t getSongByTitle(const std::string&) const;
     Song_t getSongByPath(const std::string&) const;
