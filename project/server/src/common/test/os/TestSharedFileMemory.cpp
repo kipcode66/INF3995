@@ -5,7 +5,7 @@
 
 #include <os/SharedFileMemory.hpp>
 
-#include <TestConfiguration.hpp>
+#include <TestResources.hpp>
 
 namespace elevation {
 

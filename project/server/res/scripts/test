@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-TEST_SERVER_DIR="$(git rev-parse --show-toplevel)/project/server/src/common/test/resources/database"
-TEST_DB_NAME="testServer.db"
-EXISTING_TEST_DB="$TEST_SERVER_DIR/$TEST_DB_NAME"
-TEST_STRUCT_FILE="testStruct.sql"
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+TEST_RESOURCES_DIR="${THIS_SCRIPT_DIR}/../../src/test-resources"
+
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
 testDaemon() {
@@ -27,16 +24,21 @@ testElevationPlayer() {
 }
 
 write_test_db() {
-    if [ ! -f "$TEST_SERVER_DIR/$TEST_STRUCT_FILE" ]; then
-        echo "no $TEST_STRUCT_FILE found at $TEST_SERVER_DIR"
+    if [ ! -f "$TEST_DATABASE_RESOURCES_DIR/$TEST_STRUCT_FILE" ]; then
+        echo "no $TEST_STRUCT_FILE found at $TEST_DATABASE_RESOURCES_DIR"
     else
-        pushd $TEST_SERVER_DIR > /dev/null 2>&1
+        pushd $TEST_DATABASE_RESOURCES_DIR > /dev/null 2>&1
         cat $TEST_STRUCT_FILE | sqlite3 $TEST_DB_NAME
         popd > /dev/null 2>&1
     fi
 }
 
 buildTestDB() {
+    local TEST_DATABASE_RESOURCES_DIR="$TEST_RESOURCES_DIR/database"
+    local TEST_DB_NAME="testServer.db"
+    local EXISTING_TEST_DB="$TEST_DATABASE_RESOURCES_DIR/database/$TEST_DB_NAME"
+    local TEST_STRUCT_FILE="testStruct.sql"
+
     if [ -f $EXISTING_TEST_DB ]; then
         rm -f $EXISTING_TEST_DB
         write_test_db
@@ -47,9 +49,9 @@ buildTestDB() {
 }
 
 test() {
-    COMMON_TEST_DIR="${SERVER_DIR}/build/${COMMON_LIB_NAME}/test"
-    DAEMON_TEST_DIR="${SERVER_DIR}/build/${SSL_DAEMON_NAME}/test"
-    ELEVATION_PLAYER_TEST_DIR="${SERVER_DIR}/build/${ELEVATION_PLAYER_NAME}/test"
+    local COMMON_TEST_DIR="${SERVER_DIR}/build/${COMMON_LIB_NAME}/test"
+    local DAEMON_TEST_DIR="${SERVER_DIR}/build/${SSL_DAEMON_NAME}/test"
+    local ELEVATION_PLAYER_TEST_DIR="${SERVER_DIR}/build/${ELEVATION_PLAYER_NAME}/test"
 
     buildTestDB
 
