@@ -75,7 +75,7 @@ User_t Database::getUserById(uint32_t id) const {
         id));
 }
 
-void Database::createUser(const User_t* user) {
+void Database::setAdminPassword(const User_t* user) {
     executeQuery_(Query(
         "INSERT OR REPLACE INTO user VALUES (user_id, ip, mac, name) "
         "VALUES (%u, '%q', '%q', '%q');",
@@ -273,7 +273,25 @@ void Database::wipeDbSongs_() {
 }
 
 void Database::initDefaultAdmin() {
-    executeAndRetryOnLock_(Query("SELECT * FROM adminLogin;"));
+    bool retry = false;
+    do {
+        retry = false;
+        try {
+            Statement stmt(m_db, Query{"SELECT * FROM adminLogin;"});
+            if (stmt.step()) {
+                createAdmin(DEFAULT_PASSWORD);
+            }
+        }
+        catch(sqlite_error& e) {
+            if (e.code() == SQLITE_LOCKED) {
+                std::this_thread::sleep_for(100ms);
+                retry = true;
+            }
+            else {
+                throw e;
+            }
+        }
+    } while(retry);
 }
 
 Database::Database() {
