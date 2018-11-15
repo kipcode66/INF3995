@@ -4,21 +4,33 @@ THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
-processesNotAlreadyStarted() {
-    if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
-        message "Cannot start HTTP Server : already started (PID $(pidof "${HTTP_SERVER_NAME}"))"$'\n'
-        false
-    elif pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
-        message "Cannot start HTTPS Server : already started (PID $(pidof "${HTTPS_SERVER_NAME}"))"$'\n'
-        false
-    elif pidof "${SSL_DAEMON_NAME}" >/dev/null; then
-        echo "Cannot start SSL Daemon : already started (PID $(pidof "${SSL_DAEMON_NAME}"))"$'\n'
-        false
-    elif pidof "${ELEVATION_PLAYER_NAME}" >/dev/null; then
-        echo "Cannot start SSL Daemon : already started (PID $(pidof "${ELEVATION_PLAYER_NAME}"))"$'\n'
-        false
-    else
+# EXPECTED PARAMS:
+# 1 : The process to check the existance of.
+# Return code : 0 if the process already started, otherwise nonzero.
+hasProcessStarted() {
+    checkParamNum 1 $# || exit 1
+    local PROCESS_NAME="${1}"
+    pidof "${PROCESS_NAME}" >/dev/null
+}
+
+checkProcessesNotAlreadyStarted() {
+    local startedProcesses=()
+    for processName in "${PROCESS_NAMES[@]}"; do
+        if hasProcessStarted "${processName}"; then
+            startedProcesses+=("${processName}")
+        fi
+    done
+
+    if [ ${#startedProcesses[@]} == 0 ]; then
         true
+    else
+        local errMsg=$'\nCannot start the Elevation server: Some processes already started:\n'
+        for startedProcessName in "${startedProcesses[@]}"; do
+            errMsg+="* '${startedProcessName}' (PID $(pidof ${startedProcessName}))"$'\n'
+        done
+        errMsg+=$'\n'
+        messageError "${errMsg}"
+        false
     fi
 }
 
@@ -136,7 +148,7 @@ lanunchEverything() {
 
     local SERVER_CACHE_PATH="${SERVER_DIR}/cache"
     mkdir -p "${SERVER_CACHE_PATH}"
-    if processesNotAlreadyStarted; then
+    if checkProcessesNotAlreadyStarted; then
         cd "${SERVER_DIR}"
         assignHttpServerPortRange
         startHttpServer
