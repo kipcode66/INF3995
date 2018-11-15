@@ -5,10 +5,11 @@ import android.content.SharedPreferences
 import android.util.Log
 import ca.polymtl.inf3990_01.client.controller.event.*
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
+import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
+import ca.polymtl.inf3990_01.client.model.User
 import ca.polymtl.inf3990_01.client.presentation.Presenter
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.cancelAndJoin
 import kotlinx.coroutines.experimental.launch
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit
 class AppController(
         private val eventMgr: EventManager,
         private val restService: RestRequestService,
+        private val secureRestService: SecureRestRequestService,
         private val presenter: Presenter,
         private val preferences: SharedPreferences,
         private val localSongController: LocalSongController,
@@ -31,6 +33,7 @@ class AppController(
 
     private var reloadQueueJob: Job? = null
     private var task: ScheduledFuture<*>? = null
+    private var reloadBlackListJob: Job? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
         if (key == QUEUE_PERIOD_KEY) {
@@ -46,6 +49,7 @@ class AppController(
         eventMgr.addEventListener(this::reloadQueue)
         eventMgr.addEventListener(this::onSendSong)
         eventMgr.addEventListener(this::onReloadLocalSong)
+        eventMgr.addEventListener(this::reloadBlackListUser)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -87,6 +91,20 @@ class AppController(
         }
     }
 
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun reloadBlackListUser(event: RequestBlackListReloadEvent) {
+        Log.d("AppController", "Reloading the black list of users")
+        if (reloadBlackListJob?.isCompleted != false) {
+            val jobTmp = reloadBlackListJob
+            reloadBlackListJob = async {
+                jobTmp?.join()
+                val list = secureRestService.getBlackList()
+                // now, we update the model
+                presenter.setBlackListOfUsers(list)
+            }
+        }
+    }
     private fun scheduleQueueTask(prefs: SharedPreferences): ScheduledFuture<*> {
         return executor.scheduleAtFixedRate({
             eventMgr.dispatchEvent(RequestQueueReloadEvent())

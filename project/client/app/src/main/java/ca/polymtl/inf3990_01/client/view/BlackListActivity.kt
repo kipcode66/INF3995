@@ -4,13 +4,26 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.event.EventManager
+import ca.polymtl.inf3990_01.client.controller.event.RequestBlackListReloadEvent
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
+import ca.polymtl.inf3990_01.client.model.UserList
+import ca.polymtl.inf3990_01.client.presentation.BlackListAdapter
+import kotlinx.android.synthetic.main.content_black_list.*
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.ParameterList
 
 class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R.id.drawer_layout) {
 
+    var usersList = UserList()
+    val eventMgr: EventManager by inject()
+    val blackListAdapter: BlackListAdapter by inject{ ParameterList(usersList, layoutInflater) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        users_list.adapter = blackListAdapter
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -29,8 +42,11 @@ class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R
                 stateService.setState(v[(v.indexOf(currState) + 1) % v.size])
                 return true
             }
-            R.id.action_settings -> return true
+            R.id.action_reload ->
+            { eventMgr.dispatchEvent(RequestBlackListReloadEvent())
+                return true }
             else -> return super.onOptionsItemSelected(item)
         }
     }
 }
+

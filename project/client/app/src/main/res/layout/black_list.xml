@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:columnCount="3"
+    android:padding="@dimen/song_item_padding"
+    android:focusable="true"
+    android:clickable="true"
+    android:longClickable="true"
+    android:hapticFeedbackEnabled="true"
+    android:focusableInTouchMode="true" >
+
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_column="0"
+        android:layout_columnWeight="1" >
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="User name "
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            style="@style/Base.TextAppearance.AppCompat.Title" />
+
+        <TextView
+            android:id="@+id/mac"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Adress MAC"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            style="@style/Base.TextAppearance.AppCompat.Medium" />
+
+        <TextView
+            android:id="@+id/ip"
+            android:layout_width="match_parent"
+            android:layout_height="37dp"
+            android:text="adress IP"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/unblock"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:contentDescription="unblock"
+        android:layout_column="2"
+        android:layout_columnWeight="0" />
+
+</GridLayout>

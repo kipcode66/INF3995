@@ -6,7 +6,6 @@ import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.event.LocalSongLoadEvent
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
-import ca.polymtl.inf3990_01.client.model.LocalSong
 import ca.polymtl.inf3990_01.client.model.LocalSongs
 import kotlinx.android.synthetic.main.content_local_song.*
 import ca.polymtl.inf3990_01.client.presentation.LocalSongAdapter

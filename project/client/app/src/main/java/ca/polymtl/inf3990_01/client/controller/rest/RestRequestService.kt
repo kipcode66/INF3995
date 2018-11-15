@@ -12,6 +12,7 @@ import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.LocalSong
 import ca.polymtl.inf3990_01.client.model.Song
+import ca.polymtl.inf3990_01.client.model.User
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.NetworkResponse
 import com.android.volley.Request
@@ -35,7 +36,6 @@ class RestRequestService(
                 val titre: String, val artiste: String, val duree: String,
                 val proposeePar: String?, val proprietaire: Boolean, val no: Int)
         private class SongListResponseData(val chansons: List<SongResponseData>)
-
         const val RESOURCE_URI = "/usager/file/"
     }
 
@@ -150,5 +150,6 @@ class RestRequestService(
         t.start()
         return pin
     }
+
 
 }
