@@ -149,7 +149,10 @@ void SecureRestApi::postChangePassword_(const Rest::Request& request, Http::Resp
         }
         std::string ancien(jsonDocument["ancien"].GetString());
         std::string nouveau(jsonDocument["nouveau"].GetString());
-        if (nouveau == ancien) return;
+        if (nouveau == ancien) {
+            response.send(Http::Code::Ok, "No action performed");
+            return;
+        }
 
         Database* db = Database::instance();
         auto saltAndPasswordHash = db->getSaltAndHashedPasswordByLogin(Database::ADMIN_NAME);

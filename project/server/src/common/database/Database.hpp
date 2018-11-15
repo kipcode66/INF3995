@@ -30,15 +30,15 @@ protected:
     static const char DB_NAME[];
 
 public:
-    User_t getUserByMac(const std::string&) const;
-    User_t getUserById(uint32_t) const;
-    void createUser(const User_t* user);
-    void createAdmin(const std::string& password);
-    void updateTimestamp(const User_t* user);
-    void connectUser(const struct User_t* user);
-    void connectAdmin(const std::string& login, uint32_t adminId);
-    void disconnectAdmin(uint32_t adminId);
-    bool isAdminConnected(uint32_t adminId) const;
+    User_t getUserByMac     (const std::string&) const;
+    User_t getUserById      (uint32_t) const;
+    void   createUser       (const User_t* user);
+    void   createAdmin      (const std::string& password);
+    void   updateTimestamp  (const User_t* user);
+    void   connectUser      (const struct User_t* user);
+    void   connectAdmin     (const std::string& login, uint32_t adminId);
+    void   disconnectAdmin  (uint32_t adminId);
+    bool   isAdminConnected (uint32_t adminId) const;
     std::string getAdminPassword() const;
     std::pair<std::string, std::string> getSaltAndHashedPasswordByLogin(const std::string& login) const;
 

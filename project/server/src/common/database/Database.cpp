@@ -74,9 +74,6 @@ User_t Database::getUserById(uint32_t id) const {
         "SELECT user_id, ip, name, mac FROM user WHERE (user_id = %u);",
         id));
 }
-namespace DB {
-constexpr char const *User = "user";
-}
 
 void Database::createUser(const User_t* user) {
     executeQuery_(Query(
