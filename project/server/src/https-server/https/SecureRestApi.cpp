@@ -149,14 +149,15 @@ void SecureRestApi::postChangePassword_(const Rest::Request& request, Http::Resp
         std::string salt = std::get<0>(saltAndPasswordHash);
         std::string passHashFromDB = std::get<1>(saltAndPasswordHash);
         if (elevation::id_utils::generateMd5Hash(ancien, salt) == passHashFromDB) {
-            std::cout << "matches" << std::endl;
+            db->createAdmin(nouveau);
+            response.send(Http::Code::Ok, "password changed");
         } else {
-            std::cout << "doesn't match" << std::endl;
+            response.send(Http::Code::Bad_Request, "old password incorrect");
         }
     } catch(std::exception& e) {
         std::cerr << "error: " << e.what() << std::endl;
     }
-    response.send(Http::Code::Ok, "chgm_mdp");
+    return;
 }
 
 SecureRestApi::Admin::Admin(const Rest::Request& req) {

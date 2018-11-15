@@ -108,7 +108,7 @@ void Database::createAdmin(const std::string& password) {
     std::string salt = id_utils::generateSalt(password.length());
     std::string passwordHash = id_utils::generateMd5Hash(password, salt);
     executeQuery_(Query(
-        "INSERT INTO adminLogin VALUES ('admin', '%q', '%q');",
+        "INSERT OR REPLACE INTO adminLogin VALUES ('admin', '%q', '%q');",
         passwordHash.c_str(),
         salt.c_str()));
 }
@@ -141,23 +141,6 @@ bool Database::isAdminConnected(uint32_t adminId) const {
     }
     return false;
 }
-
-std::string Database::getAdminPassword() const {
-    Statement stmt{m_db, Query(
-        "SELECT password FROM user WHERE (login = '%q');",
-        Database::ADMIN_NAME
-    )};
-    if (stmt.step()) {
-        return stmt.getColumnText(0);
-    }
-    return 0;
-}
-
-/* User_t Database::changeAdminPassword(uint32_t id) const { */
-/*     return getUserByQuery_(Query( */
-/*         "SELECT password FROM user WHERE (login = '%q');", */
-/*         Database::ADMIN_NAME); */
-/* } */
 
 std::pair<std::string, std::string> Database::getSaltAndHashedPasswordByLogin(
         const std::string& login) const {
