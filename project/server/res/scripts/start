@@ -219,26 +219,13 @@ run() {
 
 stop() {
     checkParamNum 0 $# || exit 1
-    if pidof "${HTTP_SERVER_NAME}" >/dev/null; then
-        kill -TERM $(pidof "${HTTP_SERVER_NAME}")
-        sleep 0.5
-        kill -KILL $(pidof "${HTTP_SERVER_NAME}") 2>/dev/null
-    fi
-    if pidof "${HTTPS_SERVER_NAME}" >/dev/null; then
-        kill -TERM $(pidof "${HTTPS_SERVER_NAME}")
-        sleep 0.5
-        kill -KILL $(pidof "${HTTPS_SERVER_NAME}") 2>/dev/null
-    fi
-    if pidof "${SSL_DAEMON_NAME}" >/dev/null; then
-        kill -TERM $(pidof "${SSL_DAEMON_NAME}")
-        sleep 0.5
-        kill -KILL $(pidof "${SSL_DAEMON_NAME}") 2>/dev/null
-    fi
-    if pidof "${ELEVATION_PLAYER_NAME}" >/dev/null; then
-        kill -TERM $(pidof "${ELEVATION_PLAYER_NAME}")
-        sleep 0.5
-        kill -KILL $(pidof "${ELEVATION_PLAYER_NAME}") 2>/dev/null
-    fi
+    for processName in "${PROCESS_NAMES[@]}"; do
+        if isProcessRunning "${processName}"; then
+            kill -TERM $(pidof "${processName}")
+            sleep 0.5
+            kill -KILL $(pidof "${processName}") 2>/dev/null
+        fi
+    done
 }
 
 stopBySignal() {
