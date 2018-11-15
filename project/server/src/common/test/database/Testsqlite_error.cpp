@@ -4,7 +4,7 @@
 #include <database/sqlite_error.hpp>
 #include <sqlite3/sqlite3.h>
 
-#include <TestConfiguration.hpp>
+#include <TestResources.hpp>
 
 namespace elevation {
 

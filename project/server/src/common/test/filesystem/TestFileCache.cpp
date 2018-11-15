@@ -3,7 +3,7 @@
 
 #include <filesystem/FileCache.hpp>
 
-#include <TestConfiguration.hpp>
+#include <TestResources.hpp>
 
 #include <fstream>
 #include <iostream>

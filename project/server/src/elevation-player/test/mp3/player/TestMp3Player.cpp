@@ -5,7 +5,7 @@
 
 #include <mp3/player/Mp3Player.hpp>
 
-#include <TestConfiguration.hpp>
+#include <TestResources.hpp>
 
 namespace elevation {
 
