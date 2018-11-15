@@ -83,8 +83,8 @@ constexpr char const *User = "user";
 
 void Database::createUser(const User_t* user) {
     executeQuery_(Query(
-        "INSERT OR REPLACE INTO " DB::User " (user_id, ip, mac, name) "
-        "VALUES (%u, '%q', '%q', '%q');",
+        (std::string("INSERT OR REPLACE INTO ") + DB::User + " (user_id, ip, mac, name) "
+        "VALUES (%u, '%q', '%q', '%q');").c_str(),
         user->userId,
         user->ip,
         user->mac,
