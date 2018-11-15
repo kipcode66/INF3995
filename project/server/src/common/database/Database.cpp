@@ -30,19 +30,16 @@ void Database::assertSqliteOk(int errcode, const std::string& message) {
     if (errcode != SQLITE_DONE
         && errcode != SQLITE_OK
         && errcode != SQLITE_ROW) {
-        std::ostringstream what;
-        what << message << "; Sqlite error message: " << sqlite3_errstr(errcode);
-        throw sqlite_error(errcode, what.str());
+        if (message.length() > 0) {
+            std::ostringstream what;
+            what << message << "; Sqlite error message: " << sqlite3_errstr(errcode);
+            throw sqlite_error(errcode, what.str());
+        }
+        else {
+            throw sqlite_error(errcode);
+        }
     }
 }
-void Database::assertSqliteOk(int errcode) {
-    if (errcode != SQLITE_DONE
-        && errcode != SQLITE_OK
-        && errcode != SQLITE_ROW) {
-        throw sqlite_error(errcode);
-    }
-}
-
 
 void Database::executeQuery_(const Query& query) {
     Statement stmt{m_db, query};
@@ -305,7 +302,6 @@ Database::Database(std::experimental::filesystem::path serverPath) {
             "Cannot connect to database");
         enableForeignKeys_();
         wipeDbSongs_();
-        //initDefaultAdmin(m_db);
     } catch (...) {
         sqlite3_close(m_db);
         throw;

@@ -22,8 +22,7 @@ public:
     static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
 
     static Database* instance();
-    static void assertSqliteOk(int errcode, const std::string& message);
-    static void assertSqliteOk(int errcode);
+    static void assertSqliteOk(int errcode, const std::string& message = "");
 
 
 protected:
