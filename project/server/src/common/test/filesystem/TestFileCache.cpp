@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <thread>
 
 namespace elevation {
 
@@ -111,6 +112,37 @@ BOOST_AUTO_TEST_CASE(getSetDeleteFileContent) {
     std::string content2;
     fileCache.getFileContent(dummyMp3DestinationFile.filename(), content2);
     BOOST_TEST(content == content2);
+
+    fileCache.deleteFile(dummyMp3DestinationFile.filename());
+
+    BOOST_TEST(!fs::exists(dummyMp3DestinationFile));
+
+    cleanup();
+}
+
+BOOST_AUTO_TEST_CASE(readWhileRightThreaded) {
+    fs::path fileCacheDir = std::string(FILE_CACHE_TEST_DIRECTORY);
+    fs::path dummyMp3SourceFile = TEST_MP3_PATH;
+    fs::path dummyMp3DestinationFile = fileCacheDir;
+    dummyMp3DestinationFile /= dummyMp3SourceFile.filename();
+
+    FileCache fileCache(FILE_CACHE_TEST_DIRECTORY);
+    BOOST_TEST(!fs::exists(dummyMp3DestinationFile));
+
+    std::ifstream is(dummyMp3SourceFile.string());
+    BOOST_REQUIRE(!is.fail());
+    auto t = std::thread([&]() {
+        fileCache.setFileContent(dummyMp3DestinationFile.filename(), is);
+        is.close();
+    });
+
+    auto t2 = std::thread([&]() {
+        std::string content2;
+        fileCache.getFileContent(dummyMp3DestinationFile.filename(), content2);
+    });
+
+    BOOST_CHECK_NO_THROW(t.join());
+    BOOST_CHECK_NO_THROW(t2.join());
 
     fileCache.deleteFile(dummyMp3DestinationFile.filename());
 
