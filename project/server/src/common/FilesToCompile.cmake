@@ -16,6 +16,7 @@ set(COMMON_CPP_SOURCES
     mp3/header/Mp3Duration.cpp
     mp3/header/Mp3Header.cpp
     mp3/event/Mp3Event.cpp
+    mp3/event/VolumeChangeEvent.cpp
     mp3/communication/Mp3EventSocket.cpp
     mp3/communication/Mp3EventListenerSocket.cpp
     mp3/communication/Mp3EventClientSocket.cpp
@@ -45,6 +46,7 @@ set(COMMON_HEADER_SOURCES
     mp3/header/Mp3Duration.hpp
     mp3/header/Mp3Header.hpp
     mp3/event/Mp3Event.hpp
+    mp3/event/VolumeChangeEvent.hpp
     mp3/communication/Mp3EventSocket.hpp
     mp3/communication/Mp3EventListenerSocket.hpp
     mp3/communication/Mp3EventClientSocket.hpp
