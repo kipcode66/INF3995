@@ -1,10 +1,9 @@
-#ifndef COMMUNICATION_LISTENER_SOCKET_HPP
-#define COMMUNICATION_LISTENER_SOCKET_HPP
+#ifndef OS_LISTENER_SOCKET_HPP
+#define OS_LISTENER_SOCKET_HPP
 
 #include "Socket.hpp"
 
 namespace elevation {
-namespace daemon {
 
 class ListenerSocket : public Socket {
 public:
@@ -22,7 +21,6 @@ public:
     Socket accept();
 };
 
-} // namespace daemon
 } // namespace elevation
 
-#endif // !COMMUNICATION_LISTENER_SOCKET_HPP
+#endif // !OS_LISTENER_SOCKET_HPP

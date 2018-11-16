@@ -1,9 +1,10 @@
 #include "DaemonMaster.hpp"
 #include "signal/SignalHandling.hpp"
-#include "communication/ListenerSocket.hpp"
-#include "communication/ClientSocket.hpp"
 #include "ssl/SslContext.hpp"
 #include "core/DaemonRunner.hpp"
+
+#include <common/os/ListenerSocket.hpp>
+#include <common/os/ClientSocket.hpp>
 
 namespace elevation {
 namespace daemon {

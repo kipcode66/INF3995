@@ -14,7 +14,6 @@
 #include "exception/SocketClosedException.hpp"
 
 namespace elevation {
-namespace daemon {
 
 Socket::Socket(uint16_t portNum)
     : m_fd(s_NO_FD)
@@ -100,5 +99,4 @@ char Socket::readCharacter_() {
     return nextCharacter;
 }
 
-} // namespace daemon
 } // namespace elevation

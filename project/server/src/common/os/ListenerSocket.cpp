@@ -5,7 +5,6 @@
 #include <cstring>
 
 namespace elevation {
-namespace daemon {
 
 ListenerSocket::ListenerSocket(uint16_t portNum)
     : Socket(portNum)
@@ -49,5 +48,4 @@ Socket ListenerSocket::accept() {
     return socketObject;
 }
 
-} // namespace daemon
 } // namespace elevation

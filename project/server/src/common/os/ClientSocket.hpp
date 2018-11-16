@@ -1,10 +1,9 @@
-#ifndef COMMUNICATION_CLIENT_SOCKET_HPP
-#define COMMUNICATION_CLIENT_SOCKET_HPP
+#ifndef OS_CLIENT_SOCKET_HPP
+#define OS_CLIENT_SOCKET_HPP
 
 #include "Socket.hpp"
 
 namespace elevation {
-namespace daemon {
 
 class ClientSocket : public Socket {
 public:
@@ -18,7 +17,6 @@ public:
     ClientSocket& operator=(ClientSocket&& that);
 };
 
-} // namespace daemon
 } // namespace elevation
 
-#endif // !COMMUNICATION_CLIENT_SOCKET_HPP
+#endif // !OS_CLIENT_SOCKET_HPP

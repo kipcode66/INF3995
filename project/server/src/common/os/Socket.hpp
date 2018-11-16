@@ -1,14 +1,18 @@
-#ifndef COMMUNICATION_SOCKET_HPP
-#define COMMUNICATION_SOCKET_HPP
+#ifndef OS_SOCKET_HPP
+#define OS_SOCKET_HPP
 
 #include <iostream>
 #include <string>
 
 namespace elevation {
+
 namespace daemon {
+class SslSession;
+} // namespace daemon
 
 class Socket {
-    friend class SslSession; // Requires the file descriptor.
+    
+    friend class daemon::SslSession; // Requires the file descriptor
 
 public:
     static constexpr int s_NO_FD = -1;
@@ -40,7 +44,6 @@ protected:
     uint16_t m_portNum;
 };
 
-} // namespace daemon
 } // namespace elevation
 
-#endif // !COMMUNICATION_SOCKET_HPP
+#endif // !OS_SOCKET_HPP

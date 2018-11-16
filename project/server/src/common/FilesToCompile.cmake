@@ -20,6 +20,10 @@ set(COMMON_CPP_SOURCES
     database/Statement.cpp
     database/Query.cpp
     os/SharedFileMemory.cpp
+    os/Socket.cpp
+    os/ListenerSocket.cpp
+    os/ClientSocket.cpp
+    os/exception/SocketClosedException.cpp
     filesystem/FileCache.cpp
     misc/id_utils.cpp
 )
@@ -42,6 +46,10 @@ set(COMMON_HEADER_SOURCES
     database/templates/Song.hpp
     database/templates/User.hpp
     os/SharedFileMemory.hpp
+    os/Socket.hpp
+    os/ListenerSocket.hpp
+    os/ClientSocket.hpp
+    os/exception/SocketClosedException.hpp
     filesystem/FileCache.hpp
     misc/Base64.hpp
     misc/id_utils.hpp
