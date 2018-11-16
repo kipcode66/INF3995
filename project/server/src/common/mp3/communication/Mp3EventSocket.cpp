@@ -17,4 +17,8 @@ Mp3EventSocket& Mp3EventSocket::operator=(Mp3EventSocket&& that) {
     return *this;
 }
 
+void Mp3EventSocket::write(const Mp3Event& event) {
+    Socket::write(event.serialize());
+}
+
 } // namespace elevation

@@ -2,6 +2,7 @@
 #define MP3_EVENT_MP3EVENTCLIENTSOCKET_HPP
 
 #include "os/Socket.hpp"
+#include "mp3/event/Mp3Event.hpp"
 
 namespace elevation {
 
@@ -18,6 +19,8 @@ public:
 
     Mp3EventSocket& operator=(const Mp3EventSocket&) = delete;
     Mp3EventSocket& operator=(Mp3EventSocket&& that);
+    
+    void write(const Mp3Event& event);
 };
 
 } // namespace elevation
