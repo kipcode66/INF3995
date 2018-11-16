@@ -5,7 +5,7 @@
 
 namespace elevation {
 
-class Mp3EventSocket : Socket {
+class Mp3EventSocket : public Socket {
 public:
     /**
      * @brief Makes an Mp3EventSocket from an accepted Socket.

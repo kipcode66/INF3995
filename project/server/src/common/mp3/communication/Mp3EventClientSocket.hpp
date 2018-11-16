@@ -5,7 +5,7 @@
 
 namespace elevation {
 
-class Mp3EventClientSocket : ClientSocket {
+class Mp3EventClientSocket : public ClientSocket {
 public:
     explicit Mp3EventClientSocket(uint16_t port);
     Mp3EventClientSocket(const Mp3EventClientSocket&) = delete;
