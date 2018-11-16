@@ -4,10 +4,12 @@ namespace elevation {
 
 Mp3EventSocket::Mp3EventSocket(Socket&& socket)
     : Socket(std::move(socket))
+    , m_packetReader(*this)
 { }
 
 Mp3EventSocket::Mp3EventSocket(Mp3EventSocket&& that)
     : Socket(std::move(that))
+    , m_packetReader(*this)
 { }
 
 Mp3EventSocket::~Mp3EventSocket() { }
@@ -22,7 +24,7 @@ void Mp3EventSocket::write(const Mp3Event& event) {
 }
 
 std::unique_ptr<Mp3Event> Mp3EventSocket::readEvent() {
-    return nullptr;
+    return Mp3EventPacketReader{*this}.readEvent();
 }
 
 } // namespace elevation

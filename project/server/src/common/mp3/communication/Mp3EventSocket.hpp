@@ -5,6 +5,7 @@
 
 #include "os/Socket.hpp"
 #include "mp3/event/Mp3Event.hpp"
+#include "packet/Mp3EventPacketReader.hpp"
 
 namespace elevation {
 
@@ -24,6 +25,9 @@ public:
     
     void write(const Mp3Event& event);
     std::unique_ptr<Mp3Event> readEvent();
+
+protected:
+    Mp3EventPacketReader m_packetReader;
 };
 
 } // namespace elevation
