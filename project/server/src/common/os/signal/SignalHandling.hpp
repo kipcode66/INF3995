@@ -7,9 +7,6 @@ namespace elevation {
 
 class SignalHandling {
 public:
-    static std::atomic<bool> s_cleanupRequested; ///< @brief Whether a signal such as SIGINT requested a cleanup.
-
-public:
     static void installSignalHandlers();
     static bool isCleanupRequested();
 
