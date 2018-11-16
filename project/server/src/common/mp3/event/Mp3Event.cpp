@@ -13,4 +13,15 @@ std::string Mp3Event::serialize() const {
     return messageStream.str();
 }
 
+void Mp3Event::padToDataSize(std::ostream& dataStream) {
+    std::streampos initialWritePos = dataStream.tellp();
+    dataStream.seekp(0, std::ios::end);
+    std::size_t currentDataSize = dataStream.tellp();
+    dataStream.seekp(initialWritePos);
+
+    while (currentDataSize < DATA_SIZE) {
+        dataStream << PADDING;
+    }
+}
+
 } // namespace elevation
