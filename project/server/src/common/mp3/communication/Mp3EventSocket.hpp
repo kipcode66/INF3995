@@ -7,8 +7,11 @@ namespace elevation {
 
 class Mp3EventSocket : Socket {
 public:
-    explicit Mp3EventSocket(uint16_t port);
-    explicit Mp3EventSocket(uint16_t port, int fd);
+    /**
+     * @brief Makes an Mp3EventSocket from an accepted Socket.
+     * The latter may not be used again after this call.
+     */
+    explicit Mp3EventSocket(Socket&& socket);
     Mp3EventSocket(const Mp3EventSocket&) = delete;
     Mp3EventSocket(Mp3EventSocket&& that);
     virtual ~Mp3EventSocket();

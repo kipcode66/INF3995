@@ -2,12 +2,8 @@
 
 namespace elevation {
 
-Mp3EventSocket::Mp3EventSocket(uint16_t port)
-    : Socket(port)
-{ }
-
-Mp3EventSocket::Mp3EventSocket(uint16_t port, int fd)
-    : Socket(port, fd)
+Mp3EventSocket::Mp3EventSocket(Socket&& socket)
+    : Socket(std::move(socket))
 { }
 
 Mp3EventSocket::Mp3EventSocket(Mp3EventSocket&& that)
