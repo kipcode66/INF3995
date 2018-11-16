@@ -11,6 +11,7 @@ public:
 
 public:
     static void installSignalHandlers();
+    static bool isCleanupRequested();
 
 private:
     static void installSignalHandlerFor_(int signal);

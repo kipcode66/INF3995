@@ -28,6 +28,10 @@ void SignalHandling::installSignalHandlers() {
     installSignalHandlerFor_(SIGTERM);
 }
 
+bool SignalHandling::isCleanupRequested() {
+    return s_cleanupRequested.load();
+}
+
 void SignalHandling::installSignalHandlerFor_(int signal) {
     // From https://www.gnu.org/software/libc/manual/html_node/Sigaction-Function-Example.html
     struct sigaction newAction, oldAction;
