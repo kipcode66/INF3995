@@ -1,7 +1,7 @@
 #ifndef EVENT_EVENTMANAGER_HPP
 #define EVENT_EVENTMANAGER_HPP
 
-#include <common/mp3/communication/Mp3EventListenerSocket.hpp>
+#include <thread>
 
 namespace elevation {
 
@@ -11,7 +11,11 @@ public:
     virtual ~EventManager();
 
 protected:
-    Mp3EventListenerSocket m_listener;
+    static void accepterThread_(Mp3EventListenerSocket listener);
+    static void connectionThread_();
+
+protected:
+    std::thread m_accepterThread;
 };
 
 } // namespace elevation
