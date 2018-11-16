@@ -1,6 +1,8 @@
 #ifndef OS_LISTENER_SOCKET_HPP
 #define OS_LISTENER_SOCKET_HPP
 
+#include <memory>
+
 #include "Socket.hpp"
 
 namespace elevation {
@@ -18,7 +20,7 @@ public:
     ListenerSocket& operator=(const ListenerSocket&) = delete;
     ListenerSocket& operator=(ListenerSocket&&);
 
-    virtual Socket accept();
+    virtual std::unique_ptr<Socket> accept();
 };
 
 } // namespace elevation
