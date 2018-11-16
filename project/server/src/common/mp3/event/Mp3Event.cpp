@@ -1,6 +1,5 @@
 #include "Mp3Event.hpp"
 
-#include <bitset>
 #include <sstream>
 
 namespace elevation {
