@@ -15,6 +15,8 @@ public:
 
     Mp3EventListenerSocket& operator=(const Mp3EventListenerSocket& that) = delete;
     Mp3EventListenerSocket& operator=(Mp3EventListenerSocket&& that);
+
+    virtual std::unique_ptr<Socket> accept() override;
 };
 
 } // namespace elevation
