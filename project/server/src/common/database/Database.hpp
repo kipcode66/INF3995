@@ -57,6 +57,7 @@ public:
 protected:
     Database();
     Database(std::experimental::filesystem::path);
+    virtual ~Database();
 
     void executeAndRetryOnLock_(const Query&);
     void enableForeignKeys_();

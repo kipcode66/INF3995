@@ -297,6 +297,8 @@ void Database::initDefaultAdmin() {
 }
 
 Database::Database() {
+    assertSqliteOk(!sqlite3_threadsafe());
+    assertSqliteOk(sqlite3_initialize(), "Unable to initialize SQLite");
     assertSqliteOk(sqlite3_enable_shared_cache(true), "Cannot enable db shared cache mode");
     try {
         assertSqliteOk(
@@ -306,7 +308,7 @@ Database::Database() {
         wipeDbSongs_();
         initDefaultAdmin();
     } catch (...) {
-        sqlite3_close(m_db);
+        sqlite3_close_v2(m_db);
         throw;
     }
 }
@@ -320,7 +322,12 @@ Database::Database(std::experimental::filesystem::path serverPath) {
         enableForeignKeys_();
         wipeDbSongs_();
     } catch (...) {
-        sqlite3_close(m_db);
+        sqlite3_close_v2(m_db);
         throw;
     }
+}
+
+Database::~Database() {
+    sqlite3_close_v2(m_db);
+    sqlite3_shutdown();
 }
