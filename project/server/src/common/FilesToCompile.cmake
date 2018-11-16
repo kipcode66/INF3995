@@ -15,6 +15,7 @@ set(COMMON_CPP_SOURCES
     logger/Logger.cpp
     mp3/header/Mp3Duration.cpp
     mp3/header/Mp3Header.cpp
+    mp3/event/Mp3EventSocket.cpp
     mp3/event/Mp3EventListenerSocket.cpp
     mp3/event/Mp3EventClientSocket.cpp
     database/Database.cpp
@@ -41,6 +42,7 @@ set(COMMON_HEADER_SOURCES
     logger/Logger.hpp
     mp3/header/Mp3Duration.hpp
     mp3/header/Mp3Header.hpp
+    mp3/event/Mp3EventSocket.hpp
     mp3/event/Mp3EventListenerSocket.hpp
     mp3/event/Mp3EventClientSocket.hpp
     database/Database.hpp
