@@ -10,12 +10,21 @@ namespace elevation {
 
 class Mp3Event {
 public:
+
+    enum class EventType : uint16_t {
+        NONE = 0,
+        VOLUME_CHANGE,
+        NUM_EVENTS
+    };
+
+public:
     static constexpr uint32_t EVENT_SIGNATURE = 0x8d8315d4; ///< Bytes which indicate that the transmitted data is an event and not another kind of packet.
     static constexpr std::size_t DATA_SIZE = 16; ///< Size (in B) of serialized data of subclasses.
     static constexpr char PADDING = '\0';
+    static constexpr std::size_t EVENT_TYPE_SIZE = sizeof(EventType);
 
 public:
-    explicit Mp3Event();
+    explicit Mp3Event(EventType eventType);
     virtual ~Mp3Event() = 0;
 
     virtual std::string serialize() const = 0;
@@ -34,6 +43,9 @@ public:
      * @brief Adds null bytes to the given stream so that it has exactly #DATA_SIZE bytes.
      */
     static void padToDataSize(std::ostream& dataStream);
+
+protected:
+    EventType m_eventType;
 };
 
 } // namespace elevation

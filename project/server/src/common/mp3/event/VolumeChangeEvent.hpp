@@ -8,8 +8,6 @@
 namespace elevation {
 
 class VolumeChangeEvent : public Mp3Event {
-    static constexpr uint16_t EVENT_TYPE = 1; ///< Must be different for each event.
-
 public:
     explicit VolumeChangeEvent(uint8_t changeTo);
     virtual ~VolumeChangeEvent();

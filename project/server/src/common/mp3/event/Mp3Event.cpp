@@ -4,12 +4,15 @@
 
 namespace elevation {
 
-Mp3Event::Mp3Event() { }
+Mp3Event::Mp3Event(EventType eventType)
+    : m_eventType(eventType)
+{ }
+
 Mp3Event::~Mp3Event() { }
 
 std::string Mp3Event::serialize() const {
     std::ostringstream messageStream;
-    messageStream << std::bitset<sizeof(EVENT_SIGNATURE)>(EVENT_SIGNATURE);
+    messageStream << serializeInteger(EVENT_SIGNATURE) << std::bitset<sizeof(m_eventType)>(static_cast<std::size_t>(m_eventType));
     return messageStream.str();
 }
 
