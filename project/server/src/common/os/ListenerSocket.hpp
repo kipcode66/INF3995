@@ -18,7 +18,7 @@ public:
     ListenerSocket& operator=(const ListenerSocket&) = delete;
     ListenerSocket& operator=(ListenerSocket&&);
 
-    Socket accept();
+    virtual Socket accept();
 };
 
 } // namespace elevation
