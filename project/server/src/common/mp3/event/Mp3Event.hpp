@@ -24,7 +24,7 @@ public:
      * @brief Serializes a single integer as binary into a string.
      */
     template <class T>
-    std::string serializeInteger(T integer) {
+    static std::string serializeInteger(T integer) {
         std::ostringstream integerStream;
         integerStream << std::bitset<sizeof(T)>(integer);
         return integerStream.str();
@@ -33,7 +33,7 @@ public:
     /**
      * @brief Adds null bytes to the given stream so that it has exactly #DATA_SIZE bytes.
      */
-    void padToDataSize(std::ostream& dataStream);
+    static void padToDataSize(std::ostream& dataStream);
 };
 
 } // namespace elevation
