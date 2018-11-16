@@ -1,10 +1,9 @@
-#ifndef SIGNAL_SIGNAL_HANDLING_HPP
-#define SIGNAL_SIGNAL_HANDLING_HPP
+#ifndef SIGNAL_SIGNALHANDLING_HPP
+#define SIGNAL_SIGNALHANDLING_HPP
 
 #include <atomic>
 
 namespace elevation {
-namespace daemon {
 
 class SignalHandling {
 public:
@@ -21,7 +20,6 @@ private:
     ~SignalHandling();
 };
 
-} // namespace daemon
 } // namespace elevation
 
-#endif // !SIGNAL_SIGNAL_HANDLING_HPP
+#endif // !SIGNAL_SIGNALHANDLING_HPP

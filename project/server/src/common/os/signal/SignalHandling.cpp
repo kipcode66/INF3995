@@ -8,7 +8,7 @@
 static std::atomic<struct sigaction> oldSigaction;
 
 extern "C" void signalHandler_(int signal) {
-    elevation::daemon::SignalHandling::s_cleanupRequested.store(true);
+    elevation::SignalHandling::s_cleanupRequested.store(true);
 
     static char message[] = "Caught signal.\nIf the SSL Daemon does not stop immediately, "
                             "it will on the next HTTPS connection, or if sending the same "
@@ -20,7 +20,6 @@ extern "C" void signalHandler_(int signal) {
 }
 
 namespace elevation {
-namespace daemon {
 
 std::atomic<bool> SignalHandling::s_cleanupRequested(false);
 
@@ -38,6 +37,5 @@ void SignalHandling::installSignalHandlerFor_(int signal) {
     ::sigaction(signal, &newAction, NULL); // Set new sigaction
 }
 
-} // namespace daemon
 } // namespace elevation
 
