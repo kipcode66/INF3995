@@ -12,8 +12,8 @@
 
 using namespace elevation;
 
-SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache)
-: RestApi(addr, logger, cache)
+SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
+: RestApi(addr, logger, cache, std::move(playerEventSocket))
 , m_logger(logger)
 { }
 

@@ -18,7 +18,8 @@ int main(int argc, char** argv) {
         Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(argsParser.getPort()));
         elevation::FileCache cache{argsParser.getCachePath()};
 
-        elevation::SecureRestApi api(addr, elevation::Logger::getLogger("https-server"), cache);
+        elevation::Mp3EventClientSocket playerEventSocket{argsParser.getPlayerPort()};
+        elevation::SecureRestApi api(addr, elevation::Logger::getLogger("https-server"), cache, std::move(playerEventSocket));
         api.init();
         std::cout << "Server is about to start." << std::endl;
         api.start();

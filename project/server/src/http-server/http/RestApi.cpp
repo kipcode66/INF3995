@@ -20,11 +20,12 @@ using namespace elevation;
 using namespace std::placeholders;
 namespace fs = std::experimental::filesystem;
 
-RestApi::RestApi(Address addr, Logger& logger, FileCache& cache)
+RestApi::RestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
 , m_logger(logger)
 , m_cache(cache)
+, m_playerEventSocket(std::move(playerEventSocket))
 {
     Database::instance();
 }
