@@ -1,6 +1,8 @@
 #ifndef MP3_EVENT_MP3EVENTCLIENTSOCKET_HPP
 #define MP3_EVENT_MP3EVENTCLIENTSOCKET_HPP
 
+#include <memory>
+
 #include "os/Socket.hpp"
 #include "mp3/event/Mp3Event.hpp"
 
@@ -21,6 +23,7 @@ public:
     Mp3EventSocket& operator=(Mp3EventSocket&& that);
     
     void write(const Mp3Event& event);
+    std::unique_ptr<Mp3Event> readEvent();
 };
 
 } // namespace elevation

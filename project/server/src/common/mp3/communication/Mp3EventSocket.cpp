@@ -21,4 +21,8 @@ void Mp3EventSocket::write(const Mp3Event& event) {
     Socket::write(event.serialize());
 }
 
+std::unique_ptr<Mp3Event> Mp3EventSocket::readEvent() {
+    return nullptr;
+}
+
 } // namespace elevation
