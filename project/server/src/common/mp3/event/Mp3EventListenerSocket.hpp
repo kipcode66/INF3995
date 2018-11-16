@@ -1,0 +1,21 @@
+#ifndef MP3_EVENT_MP3EVENTLISTENERSOCKET_HPP
+#define MP3_EVENT_MP3EVENTLISTENERSOCKET_HPP
+
+#include "os/ListenerSocket.hpp"
+
+namespace elevation {
+
+class Mp3EventListenerSocket : ListenerSocket {
+public:
+    explicit Mp3EventListenerSocket(uint16_t port);
+    Mp3EventListenerSocket(const Mp3EventListenerSocket& that) = delete;
+    Mp3EventListenerSocket(Mp3EventListenerSocket&& that);
+    virtual ~Mp3EventListenerSocket();
+
+    Mp3EventListenerSocket& operator=(const Mp3EventListenerSocket& that) = delete;
+    Mp3EventListenerSocket& operator=(Mp3EventListenerSocket&& that);
+};
+
+} // namespace elevation
+
+#endif // !MP3_EVENT_MP3EVENTLISTENERSOCKET_HPP
