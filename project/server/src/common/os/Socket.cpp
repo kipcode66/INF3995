@@ -60,12 +60,11 @@ void Socket::write(const std::string& str) {
     ::write(m_fd, str.c_str(), str.size() + 1);
 }
 
-std::string Socket::readLine() {
-    constexpr const char LINE_DELIMITER = '\n'; // The server normally sends \r\n, but only the \n interests us.
+std::string Socket::readLine(char end) {
     std::ostringstream dataStream;
 
     char nextCharacter = readCharacter_();
-    while (nextCharacter != LINE_DELIMITER) {
+    while (nextCharacter != end) {
         dataStream << nextCharacter;
         nextCharacter = readCharacter_();
     }

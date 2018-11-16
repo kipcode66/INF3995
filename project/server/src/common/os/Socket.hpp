@@ -28,9 +28,9 @@ public:
     Socket& operator=(const Socket& other) = delete;
     Socket& operator=(Socket&& other);
 
-    void write(const std::string& str);
-    std::string readLine(); ///< Reads data until the next \n character. Throws SocketClosedException if the Socket is closed.
-    std::string read(std::size_t dataLength); ///< Reads a certain amount of data. Throws SocketClosedException if the Socket is closed.
+    virtual void write(const std::string& str);
+    virtual std::string readLine(char end = '\n'); ///< Reads data until a certain character. Throws SocketClosedException if the Socket is closed.
+    virtual std::string read(std::size_t dataLength); ///< Reads a certain amount of data. Throws SocketClosedException if the Socket is closed.
 
     inline uint16_t getPort() const {
         return m_portNum;
