@@ -16,6 +16,8 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTPS_SERVER_CPP_SOURCES
     https/SecureRestApi.cpp
+    https/volume.cpp
+    https/apiDescription.cpp
 )
 
 ###############################################################################
