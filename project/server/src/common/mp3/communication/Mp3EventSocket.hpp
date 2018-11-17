@@ -22,8 +22,7 @@ public:
 
     Mp3EventSocket& operator=(const Mp3EventSocket&) = delete;
     Mp3EventSocket& operator=(Mp3EventSocket&& that);
-    
-    void write(const Mp3Event& event);
+
     std::unique_ptr<Mp3Event> readEvent();
 
 protected:

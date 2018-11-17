@@ -19,10 +19,6 @@ Mp3EventSocket& Mp3EventSocket::operator=(Mp3EventSocket&& that) {
     return *this;
 }
 
-void Mp3EventSocket::write(const Mp3Event& event) {
-    Socket::write(event.serialize());
-}
-
 std::unique_ptr<Mp3Event> Mp3EventSocket::readEvent() {
     return Mp3EventPacketReader{*this}.readEvent();
 }
