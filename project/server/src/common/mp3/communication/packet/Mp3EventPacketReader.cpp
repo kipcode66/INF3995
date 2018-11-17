@@ -10,7 +10,8 @@ Mp3EventPacketReader::Mp3EventPacketReader(Mp3EventSocket& socket)
 std::unique_ptr<Mp3Event> Mp3EventPacketReader::readEvent() {
     readSignature_();
     Mp3Event::EventType eventType = readType_();
-    return deserializeEvent_(eventType);
+    std::string payload = readPayload_();
+    return deserializeEvent_(eventType, std::move(payload));
 }
 
 void Mp3EventPacketReader::readSignature_() {
@@ -35,7 +36,7 @@ std::string Mp3EventPacketReader::readPayload_() {
     return payload;
 }
 
-std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeEvent_(Mp3Event::EventType eventType) {
+std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeEvent_(Mp3Event::EventType eventType, std::string payload) {
     switch(eventType) {
     case Mp3Event::EventType::VOLUME_CHANGE:
         std::cout << "Got volume change event" << std::endl;
