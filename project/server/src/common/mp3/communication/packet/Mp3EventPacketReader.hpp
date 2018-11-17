@@ -25,6 +25,10 @@ public:
     std::unique_ptr<Mp3Event> readEvent();
 
 protected:
+    void readSignature_();
+    Mp3Event::EventType readType_();
+
+protected:
     Mp3EventSocket& m_socket;
 };
 
