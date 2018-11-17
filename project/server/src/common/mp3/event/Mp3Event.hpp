@@ -19,9 +19,9 @@ public:
 
 public:
     static constexpr uint32_t EVENT_SIGNATURE = 0x8d8315d4; ///< Bytes which indicate that the transmitted data is an event and not another kind of packet.
-    static constexpr std::size_t DATA_SIZE = 16; ///< Size (in B) of serialized data of subclasses.
     static constexpr char PADDING = '\0';
-    static constexpr std::size_t EVENT_TYPE_SIZE = sizeof(EventType);
+    static constexpr std::size_t DATA_SIZE = 16; ///< Size (in B) of serialized data of subclasses.
+    static constexpr std::size_t PAYLOAD_SIZE = DATA_SIZE - sizeof(EVENT_SIGNATURE) - sizeof(EventType); ///< Size (in B) of serialized payload.
 
 public:
     explicit Mp3Event(EventType eventType);
