@@ -37,7 +37,6 @@ BOOST_AUTO_TEST_CASE(constructWithInvalidType) {
     testCases.push_back({static_cast<Mp3Event::EventType>(static_cast<uint32_t>(Mp3Event::EventType::NUM_EVENTS) + 1)});
 
     for (const auto& testCase : testCases) {
-        std::cout << "Type " << static_cast<std::size_t>(testCase.eventType) << std::endl;
         BOOST_CHECK_THROW(TestMp3Event{testCase.eventType}, std::invalid_argument);
     }
 }
