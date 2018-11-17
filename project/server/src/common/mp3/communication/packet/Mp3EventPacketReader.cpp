@@ -10,17 +10,7 @@ Mp3EventPacketReader::Mp3EventPacketReader(Mp3EventSocket& socket)
 std::unique_ptr<Mp3Event> Mp3EventPacketReader::readEvent() {
     readSignature_();
     Mp3Event::EventType eventType = readType_();
-
-    switch(eventType) {
-    case Mp3Event::EventType::VOLUME_CHANGE:
-        std::cout << "Got volume change event" << std::endl;
-        break;
-    default:
-        throw std::runtime_error("Unknown event type " + std::to_string(static_cast<std::size_t>(eventType)));
-        break;
-    }
-
-    return nullptr;
+    return deserializeEvent_(eventType);
 }
 
 void Mp3EventPacketReader::readSignature_() {
@@ -38,6 +28,18 @@ Mp3Event::EventType Mp3EventPacketReader::readType_() {
     Mp3Event::EventType eventType;
     eventTypeStream.read(reinterpret_cast<char*>(&eventType), sizeof(Mp3Event::EventType));
     return eventType;
+}
+
+std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeEvent_(Mp3Event::EventType eventType) {
+    switch(eventType) {
+    case Mp3Event::EventType::VOLUME_CHANGE:
+        std::cout << "Got volume change event" << std::endl;
+        break;
+    default:
+        throw std::runtime_error("Unknown event type " + std::to_string(static_cast<std::size_t>(eventType)));
+        break;
+    }
+    return nullptr;
 }
 
 } // namespace elevation
