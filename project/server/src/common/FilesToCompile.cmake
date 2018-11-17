@@ -27,6 +27,7 @@ set(COMMON_CPP_SOURCES
     database/Query.cpp
     os/SharedFileMemory.cpp
     os/Socket.cpp
+    os/TestSocket.cpp
     os/ListenerSocket.cpp
     os/ClientSocket.cpp
     os/exception/SocketClosedException.cpp
@@ -60,6 +61,7 @@ set(COMMON_HEADER_SOURCES
     database/templates/User.hpp
     os/SharedFileMemory.hpp
     os/Socket.hpp
+    os/TestSocket.hpp
     os/ListenerSocket.hpp
     os/ClientSocket.hpp
     os/exception/SocketClosedException.hpp
