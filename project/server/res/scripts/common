@@ -1,21 +1,42 @@
 #!/usr/bin/env bash
 
+###############################################################################
+#                         COMMON CONSTANT DEFINITIONS                         #
+###############################################################################
+
+THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+GIT_DIR="${SCRIPTS_DIR}/../../../.."
+SERVER_DIR="${SCRIPTS_DIR}/../.."
+TEST_RESOURCES_DIR="${SERVER_DIR}/src/test-resources"
+
+COMMON_LIB_NAME=common
+HTTP_SERVER_NAME=http-server
+HTTPS_SERVER_NAME=https-server
+SSL_DAEMON_NAME=ssl-daemon
+ELEVATION_PLAYER_NAME=elevation-player
+
+PROCESS_NAMES=("${COMMON_LIB_NAME}" "${HTTP_SERVER_NAME}" "${HTTPS_SERVER_NAME}" "${SSL_DAEMON_NAME}" "${ELEVATION_PLAYER_NAME}")
+
+###############################################################################
+#                         COMMON FUNCTION DEFINITIONS                         #
+###############################################################################
+
 # EXPECTED PARAMS:
 # any amount
 message() {
-    tput bold 2>/dev/null
-    tput setaf 10 2>/dev/null
+    echo -n -e '\e[1;92m'
     echo "$@"
-    tput sgr0 2>/dev/null
+    echo -n -e  '\e[0m'
 }
 
 # EXPECTED PARAMS:
 # any amount
 messageError() {
-    tput bold 2>/dev/null
-    tput setaf 1 2>/dev/null
+    echo -n -e '\e[1;91m'
     echo "$@" >&2
-    tput sgr0 2>/dev/null
+    echo -n -e '\e[0m'
+    false
 }
 
 # EXPECTED PARAMS:
@@ -27,9 +48,7 @@ messageError() {
 checkParamNum() {
     if [ "${2}" != "${1}" ]; then
         messageError "${FUNCNAME[1]} : Got ${2} params ; expected ${1}"
-        false
     fi
-    true
 }
 
 # EXPECTED PARAMS:

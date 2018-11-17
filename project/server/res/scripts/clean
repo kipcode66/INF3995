@@ -2,7 +2,6 @@
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
-SERVER_DIR="${SCRIPTS_DIR}/../.."
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
 # EXPECTED PARAMS :
@@ -26,8 +25,8 @@ cleanPistache() {
 
 cleanOpenSsl() {
     local NAME="openssl"
-    local MAKEFILE_DIR="${DEPS_DIR}/openssl/build"
-    cleanProject "${NAME}" "${MAKEFILE_DIR}"
+    local BINARY_DIR="${DEPS_DIR}/openssl/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
 }
 
 cleanTagLib() {
@@ -44,20 +43,28 @@ cleanZLib() {
 
 cleanSqlite3() {
     local NAME="sqlite3"
-    local MAKEFILE_DIR="${DEPS_DIR}/sqlite3/build"
-    cleanProject "${NAME}" "${MAKEFILE_DIR}"
+    local BINARY_DIR="${DEPS_DIR}/sqlite3/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
 }
 
 cleanLibmad() {
     local NAME="libmad"
-    local MAKEFILE_DIR="${DEPS_DIR}/libmad/build"
-    cleanProject "${NAME}" "${MAKEFILE_DIR}"
+    local BINARY_DIR="${DEPS_DIR}/libmad/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
+}
+
+cleanRapidjson() {
+    local NAME="rapidjson"
+    local BINARY_DIR="${DEPS_DIR}/rapidjson/rapidjson/build"
+    cleanProject "${NAME}" "${BINARY_DIR}"
 }
 
 cleanServer() {
     local NAME="the elevation server"
     local BINARY_DIR="${SERVER_DIR}/build"
     cleanProject "${NAME}" "${BINARY_DIR}"
+    rm -rf "${SERVER_DIR}/logs"
+    rm -rf "${SERVER_DIR}/cache"
 }
 
 cleanDependencies() {
@@ -67,6 +74,7 @@ cleanDependencies() {
     cleanZLib
     cleanSqlite3
     cleanLibmad
+    cleanRapidjson
 }
 
 clean() {

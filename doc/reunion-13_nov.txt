@@ -1,0 +1,27 @@
+Retour sur le livrable 1:
+  - On est content du travail remis (sauf l'horrible "jaune-malade"!)
+
+Retour sur le travail de chacun:
+  - Anthony:
+    - Jouer les chansons dans un autre processus (qui n'est PAS ROOT!)
+    - Compte travailler sur sa seule tâche (suppression de chansons) et GROS Refactoring.
+
+  - Adam:
+    - A commencé la tâche "Changement de mot de passe pour l'admin"
+    - Commentaire: Il trouve que les tâche n'était pas bien séparée. [?]
+
+  - Ottman:
+    - A travailler sur le rest API et a fini les tests.
+    - Compte travailler sur les prochaine tâches. (changement de volume)
+    - Parler des statistique et la liste noire. [?]
+
+  - Emir:
+    - A travaillé sur des petites tâches nécessaires pour la remise du premier livrable. (requêtes gérées en multi-thread, fix des memory-leak da la DB, ...)
+
+  - Soukaina:
+    - A travaillé sur les taches du livrable 2.
+    - Compte travailler sur la tâche "suppression des chansons".
+
+Problèmes à discuter:
+  - Fermer les tâche dans le livrable 1.
+  - Refactoring [?]

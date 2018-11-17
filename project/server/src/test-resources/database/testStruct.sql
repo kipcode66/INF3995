@@ -1,0 +1,10 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE user (ip VARCHAR(16), mac VARCHAR(18) UNIQUE, name VARCHAR(256), user_id INTEGER UNIQUE);
+INSERT INTO user VALUES('192.168.0.1','11:22:33:44:55:66','othman',123456789);
+CREATE TABLE userConnection (user_id INTEGER UNIQUE NOT NULL PRIMARY KEY, isConnected INTEGER, timeStamp REAL, FOREIGN KEY(user_id) REFERENCES user(user_id));
+CREATE TABLE adminLogin (login VARCHAR(256) UNIQUE NOT NULL, hashed_password VARCHAR(32) NOT NULL, salt VARCHAR(32) NOT NULL);
+CREATE TABLE adminConnection (login VARCHAR(256) UNIQUE NOT NULL, isConnected INTEGER, admin_id INTEGER, timeStamp REAL);
+INSERT INTO adminConnection VALUES('admin',0,123456789,0.0);
+CREATE TABLE cachedSong (title VARCHAR(256), artist VARCHAR(256), user_id INTEGER NOT NULL, duration INTEGER, path VARCHAR(256));
+COMMIT;

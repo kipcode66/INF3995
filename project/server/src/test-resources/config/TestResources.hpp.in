@@ -1,0 +1,25 @@
+// THIS HEADER IS CONFIGURED AUTOMATICALLY BY CMAKE.
+
+#ifndef TEST_CONFIG_TESTCONFIGURATION_HPP
+#define TEST_CONFIG_TESTCONFIGURATION_HPP
+
+#include <chrono>
+
+namespace elevation {
+
+static constexpr const char* HTTP_SERVER_TEST_RESOURCE_DIR = "@HTTP_SERVER_TEST_RESOURCE_DIR@";
+static constexpr const char* TEST_MP3_PATH = "@TEST_MP3_PATH@";
+static constexpr const char* TEST_TEXT_PATH = "@TEST_TEXT_PATH@";
+static constexpr const char* TEST_MP3_AS_TXT_PATH = "@TEST_MP3_AS_TXT_PATH@";
+static constexpr const char* TEST_TXT_AS_MP3_PATH = "@TEST_TXT_AS_MP3_PATH@";
+static constexpr const char* TIPPERARY_PATH = "@TIPPERARY_PATH@";
+static constexpr const char* TIPPERARY_SHORT_PATH = "@TIPPERARY_SHORT_PATH@";
+static constexpr const char* TIPPERARY_SHORT_WAV_PATH = "@TIPPERARY_SHORT_WAV_PATH@";
+static constexpr const char* DATABASE_TEST_PATH = "@DATABASE_TEST_PATH@";
+static const std::chrono::duration<double> TIPPERARY_SHORT_DURATION_SECONDS(0.7);
+
+static constexpr const char* FILE_CACHE_TEST_DIRECTORY = "@FILE_CACHE_TEST_DIRECTORY@";
+
+} // namespace elevation
+
+#endif // !TEST_CONFIG_TESTCONFIGURATION_HPP

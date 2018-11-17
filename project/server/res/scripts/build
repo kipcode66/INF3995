@@ -4,8 +4,6 @@ THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
-SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
-
 # EXPECTED PARAMS :
 # 1 : Name of the dependency.
 # 2 : Directory containing the CMakeLists.txt script.
@@ -184,6 +182,8 @@ buildSqlite3() {
     local EXTRA_ARGS="--includedir=${SQLITE3_INCLUDE_DIR} --disable-tcl"
     local INSTALL_TARGET=install
 
+    export CFLAGS='-DSQLITE_ENABLE_UNLOCK_NOTIFY=1'
+
     buildWithConfigure "sqlite3" "${SOURCE_DIR}" "${BINARY_DIR}" "${INSTALL_DIR}" "${BUILT_FLAG}" "${CONFIGURE}" "${EXTRA_ARGS}" "${INSTALL_TARGET}"
 }
 
@@ -227,7 +227,7 @@ buildDependencies() {
 buildServer() {
     message $'\nBuilding and installing the Elevation server...'
     cd "${SERVER_BINARY_DIR}"
-    cmake -DCMAKE_BUILD_TYPE=Debug ../src
+    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_BUILD_TYPE=Debug ../src
     make -j$(getCoreCount)
     message $'Building the Elevation server done!\n'
 }

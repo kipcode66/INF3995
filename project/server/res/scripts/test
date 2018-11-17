@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
 testDaemon() {
@@ -10,16 +9,62 @@ testDaemon() {
     ctest --output-on-failure
 }
 
-testHttpServer() {
-    message $'\nTesting HTTP Server...\n'
-    cd "${HTTP_SERVER_TEST_DIR}"
+testCommon() {
+    message $'\nTesting Common library...\n'
+    cd "${COMMON_TEST_DIR}"
     ctest --output-on-failure
 }
 
-test() {
-    HTTP_SERVER_TEST_DIR="${SERVER_DIR}/build/${HTTP_SERVER_NAME}/test"
-    DAEMON_TEST_DIR="${SERVER_DIR}/build/${SSL_DAEMON_NAME}/test"
+testElevationPlayer() {
+    message $'\nTesting Elevation Player...\n'
+    cd "${ELEVATION_PLAYER_TEST_DIR}"
+    ctest --output-on-failure
+}
 
-    testHttpServer
-    testDaemon
+write_test_db() {
+    if [ ! -f "$TEST_DATABASE_RESOURCES_DIR/$TEST_STRUCT_FILE" ]; then
+        echo "no $TEST_STRUCT_FILE found at $TEST_DATABASE_RESOURCES_DIR"
+    else
+        pushd $TEST_DATABASE_RESOURCES_DIR > /dev/null 2>&1
+        cat $TEST_STRUCT_FILE | sqlite3 $TEST_DB_NAME
+        popd > /dev/null 2>&1
+    fi
+}
+
+buildTestDB() {
+    local TEST_DATABASE_RESOURCES_DIR="$TEST_RESOURCES_DIR/database"
+    local TEST_DB_NAME="testServer.db"
+    local EXISTING_TEST_DB="$TEST_DATABASE_RESOURCES_DIR/$TEST_DB_NAME"
+    local TEST_STRUCT_FILE="testStruct.sql"
+
+    pwd
+    echo rm -f "$EXISTING_TEST_DB"
+    if [ -f "$EXISTING_TEST_DB" ]; then
+        rm -f "$EXISTING_TEST_DB"
+        write_test_db
+        echo ""
+    else    
+        write_test_db
+    fi
+}
+
+test() {
+    local COMMON_TEST_DIR="${SERVER_DIR}/build/${COMMON_LIB_NAME}/test"
+    local DAEMON_TEST_DIR="${SERVER_DIR}/build/${SSL_DAEMON_NAME}/test"
+    local ELEVATION_PLAYER_TEST_DIR="${SERVER_DIR}/build/${ELEVATION_PLAYER_NAME}/test"
+
+    buildTestDB
+
+    testsSuccess=1
+    testCommon || testsSuccess=0
+    testElevationPlayer || testsSuccess=0
+    testDaemon || testsSuccess=0
+
+    if [ "${testsSuccess}" != 0 ]; then
+        message $'\nAll tests passed.\n'
+    else
+        messageError $' ========================================\n' \
+                      $'= Some tests failed ; see above output =\n' \
+                      $'========================================\n'
+    fi
 }
