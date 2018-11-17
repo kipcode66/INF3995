@@ -18,6 +18,7 @@ set(HTTP_SERVER_TEST_CPP_SOURCES
     args/TestRestServerArgsParser.cpp
     mp3/header/Mp3HeaderTest.cpp
     os/TestSharedFileMemory.cpp
+    mp3/event/TestMp3Event.cpp
     filesystem/TestFileCache.cpp
     database/Testsqlite_error.cpp
     misc/IdUtilsTest.cpp
