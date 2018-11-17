@@ -5,8 +5,13 @@
 namespace elevation {
 
 Mp3Event::Mp3Event(EventType eventType)
-    : m_eventType(eventType)
-{ }
+{
+    std::size_t eventTypeAsInteger = static_cast<std::size_t>(eventType);
+    if (eventTypeAsInteger <= 0 || eventTypeAsInteger >= static_cast<std::size_t>(EventType::NUM_EVENTS)) {
+        throw std::invalid_argument("Cannot create event " + std::to_string(eventTypeAsInteger) + " as it is not a valid event type");
+    }
+    m_eventType = eventType;
+}
 
 Mp3Event::~Mp3Event() { }
 
