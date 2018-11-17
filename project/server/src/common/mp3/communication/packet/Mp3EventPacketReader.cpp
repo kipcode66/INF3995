@@ -30,6 +30,11 @@ Mp3Event::EventType Mp3EventPacketReader::readType_() {
     return eventType;
 }
 
+std::string Mp3EventPacketReader::readPayload_() {
+    std::string payload = m_socket.read(Mp3Event::PAYLOAD_SIZE);
+    return payload;
+}
+
 std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeEvent_(Mp3Event::EventType eventType) {
     switch(eventType) {
     case Mp3Event::EventType::VOLUME_CHANGE:

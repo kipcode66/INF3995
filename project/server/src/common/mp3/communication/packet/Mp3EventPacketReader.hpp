@@ -27,6 +27,7 @@ public:
 protected:
     void readSignature_();
     Mp3Event::EventType readType_();
+    std::string readPayload_();
     std::unique_ptr<Mp3Event> deserializeEvent_(Mp3Event::EventType);
 
 protected:
