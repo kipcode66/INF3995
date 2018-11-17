@@ -50,6 +50,16 @@ void SecureRestApi::createSecureDescription_() {
             .hide();
 
     superviseurPath
+            .route(m_desc.post("/volume/augmenter/:pc"))
+            .bind(&SecureRestApi::postSuperviseurVolumeAug_, this)
+            .hide();
+
+    superviseurPath
+            .route(m_desc.post("/volume/diminuer/:pc"))
+            .bind(&SecureRestApi::postSuperviseurVolumeDim_, this)
+            .hide();
+
+    superviseurPath
             .route(m_desc.post("/login"))
             .bind(&SecureRestApi::superviseurLogin_, this)
             .hide();
@@ -76,8 +86,16 @@ void SecureRestApi::deleteSuperviseurChanson_(const Rest::Request& request, Http
     response.send(Http::Code::Ok, "deleteSuperviseurChanson called");
 }
 
-void getSuperviseurVolume_(const Rest::Request& request, Http::ResponseWriter response) {
+void SecureRestApi::getSuperviseurVolume_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "getSuperviseurVolume_ called");
+}
+
+void SecureRestApi::postSuperviseurVolumeAug_ (const Rest::Request& request, Http::ResponseWriter response) {
+    response.send(Http::Code::Ok, "volume Up");
+}
+
+void SecureRestApi::postSuperviseurVolumeDim_ (const Rest::Request& request, Http::ResponseWriter response) {
+    response.send(Http::Code::Ok, "volume Down");
 }
 
 void SecureRestApi::postSuperviseurInversion_(const Rest::Request& request, Http::ResponseWriter response) {

@@ -31,6 +31,8 @@ private:
     void deleteSuperviseurChanson_ (const Rest::Request&, Http::ResponseWriter);
     void postSuperviseurInversion_ (const Rest::Request&, Http::ResponseWriter);
     void getSuperviseurVolume_     (const Rest::Request&, Http::ResponseWriter);
+    void postSuperviseurVolumeAug_ (const Rest::Request&, Http::ResponseWriter);
+    void postSuperviseurVolumeDim_ (const Rest::Request&, Http::ResponseWriter);
 
 private:
     Logger& m_logger;
