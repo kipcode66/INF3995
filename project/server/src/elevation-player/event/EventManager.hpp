@@ -3,6 +3,7 @@
 
 #include <thread>
 
+#include <common/logger/Logger.hpp>
 #include <common/mp3/communication/Mp3EventListenerSocket.hpp>
 #include <common/mp3/communication/Mp3EventSocket.hpp>
 
@@ -10,7 +11,7 @@ namespace elevation {
 
 class EventManager {
 public:
-    explicit EventManager(uint16_t port);
+    explicit EventManager(uint16_t port, Logger& logger);
     virtual ~EventManager();
 
 protected:
@@ -19,6 +20,7 @@ protected:
 
 protected:
     std::thread m_accepterThread;
+    Logger& m_logger;
 };
 
 } // namespace elevation

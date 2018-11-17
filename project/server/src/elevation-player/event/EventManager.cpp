@@ -1,13 +1,15 @@
 #include "EventManager.hpp"
 
 #include <functional>
+#include <iostream>
 
 #include <common/mp3/communication/Mp3EventListenerSocket.hpp>
 #include <common/os/signal/SignalHandling.hpp>
 
 namespace elevation {
 
-EventManager::EventManager(uint16_t port)
+EventManager::EventManager(uint16_t port, Logger& logger)
+    : m_logger(logger)
 {
     Mp3EventListenerSocket listener{port};
     m_accepterThread = std::thread(&EventManager::accepterThread_, std::move(listener));
@@ -40,7 +42,12 @@ void EventManager::accepterThread_(Mp3EventListenerSocket listener) {
 void EventManager::connectionThread_(std::unique_ptr<Mp3EventSocket> eventSocket) {
     std::cout << "Connection accepted" << std::endl;
     while (true) {
-        eventSocket->readEvent();
+        try {
+            eventSocket->readEvent();
+        }
+        catch (const std::exception& e) {
+            
+        }
     }
 }
 

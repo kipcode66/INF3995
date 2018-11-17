@@ -25,8 +25,10 @@ int main(int argc, char** argv) {
     );
     ArgsParser argsParser{args};
     FileCache fileCache{argsParser.getCachePath()};
-    Mp3AutoPlayerCallbacks autoPlayer{Logger::getLogger("elevation-player"), fileCache};
-    EventManager eventMgr{argsParser.getPort()};
+
+    Logger& logger = Logger::getLogger("elevation-player");
+    Mp3AutoPlayerCallbacks autoPlayer{logger, fileCache};
+    EventManager eventMgr{argsParser.getPort(), logger};
     waitForever();
     return 0;
 }
