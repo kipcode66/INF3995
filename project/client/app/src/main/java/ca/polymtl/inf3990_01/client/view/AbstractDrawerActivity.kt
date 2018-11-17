@@ -101,7 +101,7 @@ abstract class AbstractDrawerActivity(
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 startActivity(intent)
             }
-            R.id.nav_blacklist -> {
+            R.id.nav_black_list -> {
                 val intent = Intent(this, BlackListActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 startActivity(intent)

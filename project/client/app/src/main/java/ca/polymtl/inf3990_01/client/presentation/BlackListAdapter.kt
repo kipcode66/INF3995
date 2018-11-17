@@ -1,6 +1,7 @@
 package ca.polymtl.inf3990_01.client.presentation
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +18,6 @@ import java.util.*
 class BlackListAdapter(
         private val userList: UserList,
         private val layoutInflater: LayoutInflater,
-        private val stateService: AppStateService,
         private val appCtx: Context,
         presenter: Presenter
 ): BaseAdapter() {
@@ -40,7 +40,6 @@ class BlackListAdapter(
     override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {
         val view = v ?: layoutInflater.inflate(R.layout.black_list, viewGroup, false)
         val user = this.userList[postion]
-        val appState = stateService.getState()
         view.name.text = user.name
         view.mac.text = user.mac
         view.ip.text = user.ip

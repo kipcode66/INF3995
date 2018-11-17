@@ -120,7 +120,7 @@ class SecureRestRequestService(
             var canDisplayMessage = initMgr.isInitialized
             val request = RESTRequest<UserListResponseData>(
                     Request.Method.GET,
-                    httpsClient.getBaseURL() + RestRequestService.RESOURCE_URI + token,
+                    httpsClient.getBaseURL() + RestRequestService.RESOURCE_URI ,
                     "",
                     UserListResponseData::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),

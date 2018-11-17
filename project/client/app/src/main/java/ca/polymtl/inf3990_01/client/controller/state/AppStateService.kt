@@ -19,7 +19,7 @@ class AppStateService: Observable() {
                 override val type = State.User
 
                 override fun updateNavigationView(navView: NavigationView) {
-                    navView.menu.findItem(R.id.nav_blacklist).isVisible = false
+                    navView.menu.findItem(R.id.nav_black_list).isVisible = true
                     navView.menu.findItem(R.id.nav_statistics).isVisible = false
                 }
 
@@ -45,7 +45,7 @@ class AppStateService: Observable() {
                 override val type = State.Admin
 
                 override fun updateNavigationView(navView: NavigationView) {
-                    navView.menu.findItem(R.id.nav_blacklist).isVisible = true
+                    navView.menu.findItem(R.id.nav_black_list).isVisible = true
                     navView.menu.findItem(R.id.nav_statistics).isVisible = true
                 }
 

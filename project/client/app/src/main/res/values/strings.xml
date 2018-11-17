@@ -20,7 +20,7 @@
     <string name="wifi_disabled">Wifi must be enabled</string>
     <string name="title_activity_local_song">Your Songs</string>
     <string name="title_activity_statistics">Statistics</string>
-    <string name="title_activity_black_list">BlackList</string>
+    <string name="title_activity_black_list">Black List</string>
     <string name="title_activity_setting">Settings</string>
     <string name="action_reload">Reload</string>
     <string name="songs_list_title">Songs List</string>
