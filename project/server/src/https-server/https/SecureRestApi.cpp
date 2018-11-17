@@ -26,7 +26,6 @@ void SecureRestApi::init() {
     createSecureDescription_();
 }
 
-
 void SecureRestApi::getSuperviseurFile_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "getSuperviseurFile called");
     std::ostringstream logMsg;

@@ -18,6 +18,8 @@ set(HTTPS_SERVER_CPP_SOURCES
     https/SecureRestApi.cpp
     https/volume.cpp
     https/apiDescription.cpp
+    https/blacklist.cpp
+    https/statistics.cpp
 )
 
 ###############################################################################

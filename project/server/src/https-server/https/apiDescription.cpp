@@ -52,6 +52,27 @@ void SecureRestApi::createSecureDescription_() {
             .hide();
 
     /**
+     * Statistics
+     */
+    superviseurPath
+            .route(m_desc.get("/statistiques"))
+            .bind(&SecureRestApi::getSuperviseurStatistiques_, this)
+            .hide();
+
+    /**
+     * Blacklist management
+     */
+    superviseurPath
+            .route(m_desc.post("/bloquer"))
+            .bind(&SecureRestApi::postSuperviseurBloquer_, this)
+            .hide();
+
+    superviseurPath
+            .route(m_desc.post("/debloquer"))
+            .bind(&SecureRestApi::postSuperviseurDebloquer_, this)
+            .hide();
+
+    /**
      * Login Management
      */
     superviseurPath
@@ -69,3 +90,4 @@ void SecureRestApi::createSecureDescription_() {
             .bind(&SecureRestApi::postChangePassword_, this)
             .hide();
 }
+

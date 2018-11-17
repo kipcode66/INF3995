@@ -24,19 +24,24 @@ public:
 private:
     void createSecureDescription_();
 
-    void getSuperviseurFile_                (const Rest::Request&, Http::ResponseWriter);
-    void deleteSuperviseurChanson_          (const Rest::Request&, Http::ResponseWriter);
-    void postSuperviseurInversion_          (const Rest::Request&, Http::ResponseWriter);
+    void getSuperviseurFile_               (const Rest::Request&, Http::ResponseWriter);
+    void deleteSuperviseurChanson_         (const Rest::Request&, Http::ResponseWriter);
+    void postSuperviseurInversion_         (const Rest::Request&, Http::ResponseWriter);
 
-    void getSuperviseurVolume_              (const Rest::Request&, Http::ResponseWriter);
-    void postSuperviseurVolumeAug_          (const Rest::Request&, Http::ResponseWriter);
-    void postSuperviseurVolumeDim_          (const Rest::Request&, Http::ResponseWriter);
-    void postSuperviseurSourdineActiver_    (const Rest::Request&, Http::ResponseWriter);
-    void postSuperviseurSourdineDesactiver_ (const Rest::Request&, Http::ResponseWriter);
+    void getSuperviseurVolume_             (const Rest::Request&, Http::ResponseWriter);
+    void postSuperviseurVolumeAug_         (const Rest::Request&, Http::ResponseWriter);
+    void postSuperviseurVolumeDim_         (const Rest::Request&, Http::ResponseWriter);
+    void postSuperviseurSourdineActiver_   (const Rest::Request&, Http::ResponseWriter);
+    void postSuperviseurSourdineDesactiver_(const Rest::Request&, Http::ResponseWriter);
 
-    void postChangePassword_                (const Rest::Request&, Http::ResponseWriter);
-    void superviseurLogin_                  (const Rest::Request&, Http::ResponseWriter);
-    void superviseurLogout_                 (const Rest::Request&, Http::ResponseWriter);
+    void getSuperviseurStatistiques_       (const Rest::Request&, Http::ResponseWriter);
+
+    void postSuperviseurBloquer_           (const Rest::Request&, Http::ResponseWriter);
+    void postSuperviseurDebloquer_         (const Rest::Request&, Http::ResponseWriter);
+
+    void postChangePassword_               (const Rest::Request&, Http::ResponseWriter);
+    void superviseurLogin_                 (const Rest::Request&, Http::ResponseWriter);
+    void superviseurLogout_                (const Rest::Request&, Http::ResponseWriter);
 
 private:
     Logger& m_logger;
