@@ -30,6 +30,7 @@ private:
     void superviseurLogout_        (const Rest::Request&, Http::ResponseWriter);
     void deleteSuperviseurChanson_ (const Rest::Request&, Http::ResponseWriter);
     void postSuperviseurInversion_ (const Rest::Request&, Http::ResponseWriter);
+    void getSuperviseurVolume_     (const Rest::Request&, Http::ResponseWriter);
 
 private:
     Logger& m_logger;

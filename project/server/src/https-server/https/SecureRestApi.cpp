@@ -40,8 +40,13 @@ void SecureRestApi::createSecureDescription_() {
             .hide();
 
     superviseurPath
-            .route(m_desc.post("/inversion/"))
+            .route(m_desc.post("/inversion"))
             .bind(&SecureRestApi::postSuperviseurInversion_, this)
+            .hide();
+
+    superviseurPath
+            .route(m_desc.get("/volume"))
+            .bind(&SecureRestApi::getSuperviseurVolume_, this)
             .hide();
 
     superviseurPath
@@ -69,6 +74,10 @@ void SecureRestApi::getSuperviseurFile_(const Rest::Request& request, Http::Resp
 
 void SecureRestApi::deleteSuperviseurChanson_(const Rest::Request& request, Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "deleteSuperviseurChanson called");
+}
+
+void getSuperviseurVolume_(const Rest::Request& request, Http::ResponseWriter response) {
+    response.send(Http::Code::Ok, "getSuperviseurVolume_ called");
 }
 
 void SecureRestApi::postSuperviseurInversion_(const Rest::Request& request, Http::ResponseWriter response) {
