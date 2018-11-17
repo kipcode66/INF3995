@@ -23,20 +23,24 @@ public:
 
 private:
     void createSecureDescription_();
+
     void getSuperviseurFile_       (const Rest::Request&, Http::ResponseWriter);
     void postChangePassword_       (const Rest::Request&, Http::ResponseWriter);
     void superviseurLogin_         (const Rest::Request&, Http::ResponseWriter);
     void superviseurLogout_        (const Rest::Request&, Http::ResponseWriter);
     void deleteSuperviseurChanson_ (const Rest::Request&, Http::ResponseWriter);
+    void postSuperviseurInversion_ (const Rest::Request&, Http::ResponseWriter);
 
 private:
     Logger& m_logger;
+
     class Admin {
     public:
         Admin(const Rest::Request&);
+
         std::string usager;
         std::string mot_de_passe;
-        uint32_t id;
+        uint32_t    id;
     };
 };
 
