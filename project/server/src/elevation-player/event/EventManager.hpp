@@ -15,12 +15,11 @@ public:
     virtual ~EventManager();
 
 protected:
-    static void accepterThread_(Mp3EventListenerSocket listener);
-    static void connectionThread_(std::unique_ptr<Mp3EventSocket> socket);
+    static void accepterThread_(Mp3EventListenerSocket listener, Logger& logger);
+    static void connectionThread_(std::unique_ptr<Mp3EventSocket> socket, Logger& logger);
 
 protected:
     std::thread m_accepterThread;
-    Logger& m_logger;
 };
 
 } // namespace elevation

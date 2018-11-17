@@ -9,10 +9,9 @@
 namespace elevation {
 
 EventManager::EventManager(uint16_t port, Logger& logger)
-    : m_logger(logger)
 {
     Mp3EventListenerSocket listener{port};
-    m_accepterThread = std::thread(&EventManager::accepterThread_, std::move(listener));
+    m_accepterThread = std::thread(&EventManager::accepterThread_, std::move(listener), std::ref(logger));
 }
 
 EventManager::~EventManager() {
@@ -21,12 +20,12 @@ EventManager::~EventManager() {
     m_accepterThread.join();
 }
 
-void EventManager::accepterThread_(Mp3EventListenerSocket listener) {
+void EventManager::accepterThread_(Mp3EventListenerSocket listener, Logger& logger) {
     while (true) {
         try {
             std::unique_ptr<Socket> socket = listener.accept();
             std::unique_ptr<Mp3EventSocket> eventSocket{new Mp3EventSocket{std::move(*socket)}};
-            std::thread(&EventManager::connectionThread_, std::move(eventSocket)).detach();
+            std::thread(&EventManager::connectionThread_, std::move(eventSocket), std::ref(logger)).detach();
         }
         catch (const std::exception& e) {
             std::cerr << "A C++ exception occurred while trying to establish client-server connections : " <<
@@ -39,14 +38,14 @@ void EventManager::accepterThread_(Mp3EventListenerSocket listener) {
     }
 }
 
-void EventManager::connectionThread_(std::unique_ptr<Mp3EventSocket> eventSocket) {
-    std::cout << "Connection accepted" << std::endl;
+void EventManager::connectionThread_(std::unique_ptr<Mp3EventSocket> eventSocket, Logger& logger) {
+    logger.log("New connection accepted");
     while (true) {
         try {
             eventSocket->readEvent();
         }
         catch (const std::exception& e) {
-            
+            logger.err(std::string("Got C++ exception: ") + e.what());
         }
     }
 }
