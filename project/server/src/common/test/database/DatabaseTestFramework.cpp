@@ -4,17 +4,17 @@
 
 #include <database/sqlite_error.hpp>
 #include <sqlite3/sqlite3.h>
-#include <TestConfiguration.hpp>
+#include <TestResources.hpp>
 #include <database/Database.hpp>
 #include <misc/id_utils.hpp>
 
 namespace elevation {
-    
+
 class DatabaseTest : public Database {
-public: 
+public:
     static DatabaseTest* instance();
 
-protected: 
+protected:
     DatabaseTest();
     sqlite3* m_db = 0;
     static DatabaseTest* s_instance;
@@ -68,13 +68,13 @@ BOOST_AUTO_TEST_CASE(createUser) {
     BOOST_CHECK_EQUAL(user.ip, createdUser.ip);
 }
 
-BOOST_AUTO_TEST_CASE(createAdmin) {
+BOOST_AUTO_TEST_CASE(setAdminPassword) {
     DatabaseTest* db = DatabaseTest::instance();
-    db->createAdmin("admin");
+    db->setAdminPassword("admin");
 
     std::pair<std::string, std::string> saltAndHash =  db->getSaltAndHashedPasswordByLogin("admin");
     std::string hashedPassword = id_utils::generateMd5Hash("admin", std::get<0>(saltAndHash));
-   
+
     BOOST_CHECK_EQUAL(hashedPassword, std::get<1>(saltAndHash));
 }
 
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(connectUser) {
     db->connectUser(&createdUser);
 
     int connectionStatus = db->getUserConnectionStatus(createdUser.userId);
-   
+
     BOOST_CHECK_EQUAL(connectionStatus, 1);
 }
 
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(connectAdmin) {
     db->connectAdmin("admin", 123456789);
 
     bool connectionStatus = db->isAdminConnected(123456789);
-   
+
     BOOST_CHECK_EQUAL(connectionStatus, true);
 }
 
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(disconnectAdmin) {
     db->disconnectAdmin(123456789);
 
     bool connectionStatus = db->isAdminConnected(123456789);
-   
+
     BOOST_CHECK_EQUAL(connectionStatus, false);
 }
 

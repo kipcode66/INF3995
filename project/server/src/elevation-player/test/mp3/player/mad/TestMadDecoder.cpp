@@ -3,7 +3,7 @@
 
 #include <mp3/player/mad/MadDecoder.hpp>
 
-#include <TestConfiguration.hpp>
+#include <TestResources.hpp>
 
 namespace elevation {
 

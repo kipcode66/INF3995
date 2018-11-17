@@ -5,7 +5,7 @@
 
 #include <stdexcept>
 
-#include <TestConfiguration.hpp>
+#include <TestResources.hpp>
 
 namespace elevation {
 

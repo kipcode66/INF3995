@@ -92,6 +92,7 @@ void FileCache::setFileContent(const std::string& fileName, std::istream& data) 
     std::istreambuf_iterator<char> begin(data);
     std::istreambuf_iterator<char> end;
     std::copy(begin, end, std::ostreambuf_iterator(file));
+    file.close();
 }
 
 std::string FileCache::getFileContent(const std::string& fileName) const {
@@ -111,6 +112,7 @@ void FileCache::getFileContent(const std::string& fileName, std::ostream& data) 
     std::istreambuf_iterator<char> begin(file);
     std::istreambuf_iterator<char> end;
     std::copy(begin, end, std::ostreambuf_iterator(data));
+    file.close();
 }
 
 void FileCache::deleteFile(const std::string& fileName) {

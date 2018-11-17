@@ -43,17 +43,17 @@ static void unlock_notify_cb(void **apArg, int nArg) {
 }
 
 /*
-** This function assumes that an SQLite API call (either sqlite3_prepare_v2() 
+** This function assumes that an SQLite API call (either sqlite3_prepare_v2()
 ** or sqlite3_step()) has just returned SQLITE_LOCKED. The argument is the
 ** associated database connection.
 **
-** This function calls sqlite3_unlock_notify() to register for an 
-** unlock-notify callback, then blocks until that callback is delivered 
+** This function calls sqlite3_unlock_notify() to register for an
+** unlock-notify callback, then blocks until that callback is delivered
 ** and returns SQLITE_OK. The caller should then retry the failed operation.
 **
-** Or, if sqlite3_unlock_notify() indicates that to block would deadlock 
-** the system, then this function returns SQLITE_LOCKED immediately. In 
-** this case the caller should not retry the operation and should roll 
+** Or, if sqlite3_unlock_notify() indicates that to block would deadlock
+** the system, then this function returns SQLITE_LOCKED immediately. In
+** this case the caller should not retry the operation and should roll
 ** back the current transaction (if any).
 */
 static int wait_for_unlock_notify(sqlite3 *db) {
@@ -74,11 +74,11 @@ static int wait_for_unlock_notify(sqlite3 *db) {
         throw std::runtime_error("Invalid SQLite error code for sqlite3_unlock_notify [code=" + std::to_string(rc) + "]");
     }
 
-    /* The call to sqlite3_unlock_notify() always returns either SQLITE_LOCKED 
-    ** or SQLITE_OK. 
+    /* The call to sqlite3_unlock_notify() always returns either SQLITE_LOCKED
+    ** or SQLITE_OK.
     **
     ** If SQLITE_LOCKED was returned, then the system is deadlocked. In this
-    ** case this function needs to return SQLITE_LOCKED to the caller so 
+    ** case this function needs to return SQLITE_LOCKED to the caller so
     ** that the current transaction can be rolled back. Otherwise, block
     ** until the unlock-notify callback is invoked, then return SQLITE_OK.
     */

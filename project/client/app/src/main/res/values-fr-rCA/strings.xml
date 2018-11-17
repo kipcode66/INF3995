@@ -38,4 +38,11 @@
     <string name="local_song_sendButton_label_send">Envoyer</string>
     <string name="local_song_sendButton_label_sending">Envoi...</string>
     <string name="local_song_sendButton_label_sent">Envoyée</string>
+    <string name="login_hint_username">Nom</string>
+    <string name="login_hint_password">Mot de passe</string>
+    <string name="login_submit_text">Connexion</string>
+    <string name="login_dialog_title">Connexion</string>
+    <string name="action_show_login">Connexion Administrateur</string>
+    <string name="action_diconnect">Déconnexion</string>
+    <string name="error_message_unauthenticated">Non-Authentifié</string>
 </resources>
