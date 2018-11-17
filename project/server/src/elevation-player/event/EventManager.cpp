@@ -23,7 +23,8 @@ void EventManager::accepterThread_(Mp3EventListenerSocket listener) {
     while (true) {
         try {
             std::unique_ptr<Socket> socket = listener.accept();
-            std::thread(&EventManager::connectionThread_, std::move(socket)).detach();
+            std::unique_ptr<Mp3EventSocket> eventSocket{new Mp3EventSocket{std::move(*socket)}};
+            std::thread(&EventManager::connectionThread_, std::move(eventSocket)).detach();
         }
         catch (const std::exception& e) {
             std::cerr << "A C++ exception occurred while trying to establish client-server connections : " <<
@@ -36,8 +37,11 @@ void EventManager::accepterThread_(Mp3EventListenerSocket listener) {
     }
 }
 
-void EventManager::connectionThread_(std::unique_ptr<Socket> socket) {
+void EventManager::connectionThread_(std::unique_ptr<Mp3EventSocket> eventSocket) {
     std::cout << "Connection accepted" << std::endl;
+    while (true) {
+        eventSocket->readEvent();
+    }
 }
 
 } // namespace elevation

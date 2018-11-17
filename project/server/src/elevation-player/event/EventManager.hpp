@@ -4,6 +4,7 @@
 #include <thread>
 
 #include <common/mp3/communication/Mp3EventListenerSocket.hpp>
+#include <common/mp3/communication/Mp3EventSocket.hpp>
 
 namespace elevation {
 
@@ -14,7 +15,7 @@ public:
 
 protected:
     static void accepterThread_(Mp3EventListenerSocket listener);
-    static void connectionThread_(std::unique_ptr<Socket> socket);
+    static void connectionThread_(std::unique_ptr<Mp3EventSocket> socket);
 
 protected:
     std::thread m_accepterThread;
