@@ -12,7 +12,7 @@ Mp3Event::~Mp3Event() { }
 
 std::string Mp3Event::serialize() const {
     std::ostringstream messageStream;
-    messageStream << serializeInteger(EVENT_SIGNATURE) << std::bitset<sizeof(m_eventType)>(static_cast<std::size_t>(m_eventType));
+    messageStream << serializeElement(EVENT_SIGNATURE) << serializeElement(m_eventType);
     return messageStream.str();
 }
 

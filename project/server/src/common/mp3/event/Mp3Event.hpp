@@ -30,13 +30,14 @@ public:
     virtual std::string serialize() const = 0;
 
     /**
-     * @brief Serializes a single integer as binary into a string.
+     * @brief Serializes a single integer/binary element as binary into a string.
      */
     template <class T>
-    static std::string serializeInteger(T integer) {
-        std::ostringstream integerStream;
-        integerStream << std::bitset<sizeof(T)>(integer);
-        return integerStream.str();
+    static std::string serializeElement(T element) {
+        std::ostringstream elementStream;
+        elementStream.write(reinterpret_cast<char*>(&element), sizeof(T));
+        std::string serializedData = elementStream.str();
+        return serializedData;
     }
 
     /**

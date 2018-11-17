@@ -13,7 +13,7 @@ VolumeChangeEvent::~VolumeChangeEvent() { }
 
 std::string VolumeChangeEvent::serialize() const {
     std::ostringstream serializationStream;
-    serializationStream << Mp3Event::serialize() << serializeInteger(m_changeTo);
+    serializationStream << Mp3Event::serialize() << serializeElement(m_changeTo);
     padToDataSize(serializationStream);
     return serializationStream.str();
 }
