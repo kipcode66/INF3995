@@ -28,7 +28,8 @@ public:
     Socket& operator=(const Socket& other) = delete;
     Socket& operator=(Socket&& other);
 
-    virtual void write(const std::string& str);
+    virtual void writeRaw(const std::string& str);
+    virtual void write(const std::string& str); ///< Same as writeRaw(), but also sends the trailing null byte.
     virtual std::string readLine(char end = '\n'); ///< Reads data until a certain character. Throws SocketClosedException if the Socket is closed.
     virtual std::string read(std::size_t dataLength); ///< Reads a certain amount of data. Throws SocketClosedException if the Socket is closed.
 
@@ -38,6 +39,7 @@ public:
 
 protected:
     char readCharacter_();
+    void writeRaw_(const std::string& str, bool includeNullByte);
 
 protected:
     int m_fd;

@@ -56,8 +56,12 @@ Socket& Socket::operator=(Socket&& that) {
     return *this;
 }
 
+void Socket::writeRaw(const std::string& str) {
+    writeRaw_(str, false);
+}
+
 void Socket::write(const std::string& str) {
-    ::write(m_fd, str.c_str(), str.size() + 1);
+    writeRaw_(str, true);
 }
 
 std::string Socket::readLine(char end) {
@@ -96,6 +100,11 @@ char Socket::readCharacter_() {
         throw SocketClosedException();
     }
     return nextCharacter;
+}
+
+void Socket::writeRaw_(const std::string& str, bool includeNullByte) {
+    std::size_t extraBytesToSend = includeNullByte ? 1 : 0;
+    ::write(m_fd, str.c_str(), str.size() + extraBytesToSend);
 }
 
 } // namespace elevation

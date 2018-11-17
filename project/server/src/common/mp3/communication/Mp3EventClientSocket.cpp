@@ -19,7 +19,7 @@ Mp3EventClientSocket& Mp3EventClientSocket::operator=(Mp3EventClientSocket&& tha
 
 void Mp3EventClientSocket::write(const Mp3Event& event) {
     std::string serializedEvent = event.serialize();
-    Socket::write(std::move(serializedEvent));
+    Socket::writeRaw(std::move(serializedEvent));
 }
 
 } // namespace elevation
