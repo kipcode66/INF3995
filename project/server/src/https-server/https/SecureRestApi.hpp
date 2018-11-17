@@ -38,6 +38,7 @@ private:
 
     void postSuperviseurBloquer_           (const Rest::Request&, Http::ResponseWriter);
     void postSuperviseurDebloquer_         (const Rest::Request&, Http::ResponseWriter);
+    void getSuperviseurListenoire_         (const Rest::Request&, Http::ResponseWriter);
 
     void postChangePassword_               (const Rest::Request&, Http::ResponseWriter);
     void superviseurLogin_                 (const Rest::Request&, Http::ResponseWriter);

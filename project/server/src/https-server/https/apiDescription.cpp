@@ -72,6 +72,11 @@ void SecureRestApi::createSecureDescription_() {
             .bind(&SecureRestApi::postSuperviseurDebloquer_, this)
             .hide();
 
+    superviseurPath
+            .route(m_desc.get("/listenoire"))
+            .bind(&SecureRestApi::getSuperviseurListenoire_, this)
+            .hide();
+
     /**
      * Login Management
      */
