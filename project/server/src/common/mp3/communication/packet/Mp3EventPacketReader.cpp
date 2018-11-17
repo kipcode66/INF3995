@@ -39,13 +39,25 @@ std::string Mp3EventPacketReader::readPayload_() {
 std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeEvent_(Mp3Event::EventType eventType, std::string payload) {
     switch(eventType) {
     case Mp3Event::EventType::VOLUME_CHANGE:
-        std::cout << "Got volume change event" << std::endl;
-        break;
+        return deserializeVolumeChangeEvent_(std::move(payload));
     default:
         throw std::runtime_error("Unknown event type " + std::to_string(static_cast<std::size_t>(eventType)));
         break;
     }
-    return nullptr;
+}
+
+std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeVolumeChangeEvent_(std::string payload) {
+    auto newVolume = deserializeElement_<uint8_t>(payload, 0);
+    return std::unique_ptr<Mp3Event>{new VolumeChangeEvent{newVolume}};
+}
+
+template <class T>
+T Mp3EventPacketReader::deserializeElement_(std::string payload, std::size_t offset) {
+    T element;
+    std::istringstream payloadStream{payload};
+    payloadStream.seekg(offset);
+    payloadStream.read(reinterpret_cast<char*>(&element), sizeof(T));
+    return element;
 }
 
 } // namespace elevation
