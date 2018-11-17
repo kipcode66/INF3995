@@ -24,6 +24,7 @@ void Mp3Event::padToDataSize(std::ostream& dataStream) {
 
     while (currentDataSize < DATA_SIZE) {
         dataStream << PADDING;
+        ++currentDataSize;
     }
 }
 
