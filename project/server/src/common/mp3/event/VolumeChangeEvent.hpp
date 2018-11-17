@@ -14,6 +14,8 @@ public:
 
     virtual std::string serialize() const;
 
+    uint8_t getNewVolume() const { return m_changeTo; }
+
 protected:
     uint8_t m_changeTo;
 };
