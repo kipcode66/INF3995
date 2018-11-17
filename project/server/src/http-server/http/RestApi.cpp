@@ -366,25 +366,9 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
-<<<<<<< HEAD
-    uint32_t id = request.param(":id").as<uint32_t>();
-    uint32_t no = request.param(":no").as<uint32_t>();
+    /* uint32_t id = request.param(":id").as<uint32_t>(); */
+    /* uint32_t no = request.param(":no").as<uint32_t>(); */
 
-    Pistache::Http::Code httpCode;
-    // search id/no in database
-    if (/* found */ 1 ) {
-        if (/* allowed to delete */ 1) {
-            httpCode = Http::Code::Ok;
-        } else {
-            // requester is not the owner of the song
-            httpCode = Http::Code::Forbidden;
-        }
-    } else {
-        // song doesn't exist
-        httpCode = Http::Code::Method_Not_Allowed;
-    }
-    response.send(httpCode);
-=======
     response.send(Http::Code::Ok, "deleteFile");
 
     User_t requestUser; // TODO
@@ -393,6 +377,5 @@ void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter res
     m_logger.log(osStream.str());
 
     std::cout << "deleteFile function called" << std::endl;
->>>>>>> dev
 }
 

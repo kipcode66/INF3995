@@ -23,10 +23,11 @@ public:
 
 private:
     void createSecureDescription_();
-    void getSuperviseurFile_(const Rest::Request&, Http::ResponseWriter);
-    void postChangePassword_(const Rest::Request&, Http::ResponseWriter);
-    void superviseurLogin_  (const Rest::Request&, Http::ResponseWriter);
-    void superviseurLogout_ (const Rest::Request&, Http::ResponseWriter);
+    void getSuperviseurFile_       (const Rest::Request&, Http::ResponseWriter);
+    void postChangePassword_       (const Rest::Request&, Http::ResponseWriter);
+    void superviseurLogin_         (const Rest::Request&, Http::ResponseWriter);
+    void superviseurLogout_        (const Rest::Request&, Http::ResponseWriter);
+    void deleteSuperviseurChanson_ (const Rest::Request&, Http::ResponseWriter);
 
 private:
     Logger& m_logger;

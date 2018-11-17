@@ -35,6 +35,11 @@ void SecureRestApi::createSecureDescription_() {
             .hide();
 
     superviseurPath
+            .route(m_desc.del("/chanson/:no"))
+            .bind(&SecureRestApi::deleteSuperviseurChanson_, this)
+            .hide();
+
+    superviseurPath
             .route(m_desc.post("/login"))
             .bind(&SecureRestApi::superviseurLogin_, this)
             .hide();
@@ -57,6 +62,9 @@ void SecureRestApi::getSuperviseurFile_(const Rest::Request& request, Http::Resp
     m_logger.log(logMsg.str());
 }
 
+void SecureRestApi::deleteSuperviseurChanson_(const Rest::Request& request, Http::ResponseWriter response) {
+    response.send(Http::Code::Ok, "deleteSuperviseurChanson called");
+}
 
 void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWriter response) {
     std::ostringstream logMsg;
