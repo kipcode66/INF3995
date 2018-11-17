@@ -5,10 +5,13 @@ import android.content.SharedPreferences
 import android.util.Log
 import ca.polymtl.inf3990_01.client.controller.event.*
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
+import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
+import ca.polymtl.inf3990_01.client.controller.state.AppStateService
+import ca.polymtl.inf3990_01.client.model.Song
+import ca.polymtl.inf3990_01.client.model.SongQueue
 import ca.polymtl.inf3990_01.client.presentation.Presenter
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.cancelAndJoin
 import kotlinx.coroutines.experimental.launch
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
@@ -17,10 +20,12 @@ import java.util.concurrent.TimeUnit
 class AppController(
         private val eventMgr: EventManager,
         private val restService: RestRequestService,
+        private val secureRestService: SecureRestRequestService,
         private val presenter: Presenter,
         private val preferences: SharedPreferences,
         private val localSongController: LocalSongController,
-        private val appCtx: Context
+        private val appCtx: Context,
+        private val appStateService: AppStateService
 ) {
     companion object {
         const val QUEUE_PERIOD_KEY = "queue_period"
@@ -30,6 +35,8 @@ class AppController(
     private val executor = ScheduledThreadPoolExecutor(1)
 
     private var reloadQueueJob: Job? = null
+    private var loginJob: Job? = null
+    private var logoutJob: Job? = null
     private var task: ScheduledFuture<*>? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
@@ -46,6 +53,8 @@ class AppController(
         eventMgr.addEventListener(this::reloadQueue)
         eventMgr.addEventListener(this::onSendSong)
         eventMgr.addEventListener(this::onReloadLocalSong)
+        eventMgr.addEventListener(this::onLoginRequest)
+        eventMgr.addEventListener(this::onLogoutRequest)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -80,7 +89,13 @@ class AppController(
             val jobTmp = reloadQueueJob
             reloadQueueJob = async {
                 jobTmp?.join()
-                val list = restService.getSongList()
+                lateinit var list: List<Song>
+                if (appStateService.getState().type == AppStateService.State.Admin) {
+                    list = secureRestService.getSongList()
+                }
+                else {
+                    list = restService.getSongList()
+                }
                 // now, we update the model
                 presenter.setQueue(list)
             }
@@ -101,5 +116,29 @@ class AppController(
 
     private fun onReloadLocalSong(event: LocalSongLoadEvent) {
         localSongController.reloadLocalSong()
+    }
+
+    private fun onLoginRequest(event: LoginRequestEvent) {
+        if (loginJob?.isCompleted != false) {
+            val jobTmp = loginJob
+            loginJob = async {
+                jobTmp?.join()
+                if (appStateService.getState().type != AppStateService.State.Admin) {
+                    secureRestService.login(event.login, event.password)
+                }
+            }
+        }
+    }
+
+    private fun onLogoutRequest(event: LogoutRequestEvent) {
+        if (logoutJob?.isCompleted != false) {
+            val jobTmp = logoutJob
+            logoutJob = async {
+                jobTmp?.join()
+                if (appStateService.getState().type == AppStateService.State.Admin) {
+                    secureRestService.logout()
+                }
+            }
+        }
     }
 }
