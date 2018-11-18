@@ -6,6 +6,8 @@
 #include <common/mp3/communication/Mp3EventListenerSocket.hpp>
 #include <common/os/signal/SignalHandling.hpp>
 
+#include "mp3/event/ElevationPlayerMp3EventVisitor.hpp"
+
 namespace elevation {
 
 EventManager::EventManager(uint16_t port, Logger& logger)
@@ -40,9 +42,11 @@ void EventManager::accepterThread_(Mp3EventListenerSocket listener, Logger& logg
 
 void EventManager::connectionThread_(std::unique_ptr<Mp3EventSocket> eventSocket, Logger& logger) {
     logger.log("New connection accepted");
+
+    ElevationPlayerMp3EventVisitor visitor;
     while (true) {
         try {
-            eventSocket->readEvent();
+            eventSocket->readEvent()->acceptVisitor(visitor);
         }
         catch (const std::exception& e) {
             logger.err(std::string("Got C++ exception: ") + e.what());
