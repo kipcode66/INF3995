@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(serialize) {
     };
 
     std::vector<TestCase> testCases;
-    std::vector volumeChangeSerialization = getSignatureVector();
+    std::vector<uint8_t> volumeChangeSerialization = getSignatureVector();
     volumeChangeSerialization.push_back(0x01);
     volumeChangeSerialization.push_back(0x00);
     testCases.push_back({Mp3Event::EventType::VOLUME_CHANGE, volumeChangeSerialization});
