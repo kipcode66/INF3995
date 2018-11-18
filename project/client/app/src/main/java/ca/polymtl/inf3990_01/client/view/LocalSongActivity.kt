@@ -36,7 +36,7 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.queue, menu)
+        menuInflater.inflate(R.menu.local_song, menu)
         menu.findItem(R.id.action_show_login).isVisible = appStateService.getState().type == AppStateService.State.User
         menu.findItem(R.id.action_disconnect).isVisible = appStateService.getState().type == AppStateService.State.Admin
         return true
