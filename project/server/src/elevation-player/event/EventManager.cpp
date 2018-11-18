@@ -18,7 +18,7 @@ EventManager::EventManager(uint16_t port, Logger& logger)
 
 EventManager::~EventManager() {
     // NOTE: In theory, since the Elevation Player never finishes until we kill it,
-    // This destructor should never get called. However, if it is, it will block forever.
+    // this destructor should never get called. However, if it is, it will block forever.
     m_accepterThread.join();
 }
 
