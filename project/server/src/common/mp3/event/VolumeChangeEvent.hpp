@@ -12,11 +12,12 @@ public:
     explicit VolumeChangeEvent(uint8_t changeTo);
     virtual ~VolumeChangeEvent();
 
-    virtual std::string serialize() const;
+    virtual bool operator==(const Mp3Event& other) const override;
 
+    virtual std::string serialize() const;
     uint8_t getNewVolume() const { return m_changeTo; }
 
-    virtual bool operator==(const Mp3Event& other) const override;
+    virtual void acceptVisitor(const AbstractMp3EventVisitor& visitor) override;
 
 protected:
     uint8_t m_changeTo;

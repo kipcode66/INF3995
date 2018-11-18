@@ -6,6 +6,8 @@
 #include <sstream>
 #include <bitset>
 
+#include "AbstractMp3EventVisitor.hpp"
+
 namespace elevation {
 
 class Mp3Event {
@@ -30,6 +32,8 @@ public:
     virtual bool operator==(const Mp3Event& other) const = 0;
 
     virtual std::string serialize() const = 0;
+
+    virtual void acceptVisitor(const AbstractMp3EventVisitor& visitor) = 0;
 
     /**
      * @brief Useful for unit tests.

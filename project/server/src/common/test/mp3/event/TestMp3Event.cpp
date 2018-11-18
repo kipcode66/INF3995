@@ -44,6 +44,7 @@ public:
 
     virtual std::string serialize() const override;
     virtual bool operator==(const Mp3Event& other) const override { return false; }
+    virtual void acceptVisitor(const AbstractMp3EventVisitor& visitor) { throw std::runtime_error("TestMp3Event is a test class and does not support accepting a visitor"); }
 };
 
 std::string TestMp3Event::serialize() const {

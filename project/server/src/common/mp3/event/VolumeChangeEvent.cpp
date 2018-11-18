@@ -29,4 +29,8 @@ bool VolumeChangeEvent::operator==(const Mp3Event& other) const {
     }
 }
 
+void VolumeChangeEvent::acceptVisitor(const AbstractMp3EventVisitor& visitor) {
+    visitor.onVolumeChangeEvent(*this);
+}
+
 } // namespace elevation
