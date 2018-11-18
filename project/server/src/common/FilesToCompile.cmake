@@ -49,6 +49,7 @@ set(COMMON_HEADER_SOURCES
     mp3/header/Mp3Header.hpp
     mp3/event/Mp3Event.hpp
     mp3/event/VolumeChangeEvent.hpp
+    mp3/event/Mp3EventVisitor.hpp
     mp3/communication/Mp3EventSocket.hpp
     mp3/communication/Mp3EventListenerSocket.hpp
     mp3/communication/Mp3EventClientSocket.hpp
