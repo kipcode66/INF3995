@@ -4,7 +4,7 @@ using namespace elevation;
 
 
 void SecureRestApi::createVolumeDescription_(Pistache::Rest::Description& desc) {
-    auto volumePath = desc.path("/volume");
+    auto volumePath = desc.path("superviseur/volume");
     volumePath
             .route(desc.get(""))
             .bind(&SecureRestApi::getSuperviseurVolume_, this)
@@ -56,3 +56,4 @@ void SecureRestApi::postSuperviseurSourdineDesactiver_(const Rest::Request& requ
                                                        Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "volume unmuted");
 }
+
