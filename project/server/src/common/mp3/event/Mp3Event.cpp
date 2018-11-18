@@ -27,6 +27,10 @@ void Mp3Event::padToDataSize(std::ostream& dataStream) {
     std::size_t currentDataSize = dataStream.tellp();
     dataStream.seekp(initialWritePos);
 
+    if (currentDataSize > DATA_SIZE) {
+        throw std::invalid_argument(std::string("Trying to pad event data to ") + std::to_string(DATA_SIZE) + "B, but it is already of size " + std::to_string(currentDataSize) + "B");
+    }
+
     while (currentDataSize < DATA_SIZE) {
         dataStream << PADDING;
         ++currentDataSize;
