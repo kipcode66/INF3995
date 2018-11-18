@@ -2,6 +2,7 @@
 #define MP3_EVENT_ELEVATION_PLAYERMP3EVENTVISITOR_HPP
 
 #include <common/mp3/event/AbstractMp3EventVisitor.hpp>
+#include <common/mp3/event/VolumeChangeEvent.hpp>
 
 namespace elevation {
 

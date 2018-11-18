@@ -1,9 +1,9 @@
 #ifndef MP3_EVENT_ABSTRACTMP3EVENTVISITOR_HPP
 #define MP3_EVENT_ABSTRACTMP3EVENTVISITOR_HPP
 
-#include "VolumeChangeEvent.hpp"
-
 namespace elevation {
+
+class VolumeChangeEvent; // Forward-declaration to break circular dependencies.
 
 class AbstractMp3EventVisitor {
 public:
