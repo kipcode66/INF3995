@@ -39,20 +39,7 @@ void SecureRestApi::createSecureDescription_() {
     /**
      * Blacklist management
      */
-    superviseurPath
-            .route(m_desc.post("/bloquer"))
-            .bind(&SecureRestApi::postSuperviseurBloquer_, this)
-            .hide();
-
-    superviseurPath
-            .route(m_desc.post("/debloquer"))
-            .bind(&SecureRestApi::postSuperviseurDebloquer_, this)
-            .hide();
-
-    superviseurPath
-            .route(m_desc.get("/listenoire"))
-            .bind(&SecureRestApi::getSuperviseurListenoire_, this)
-            .hide();
+    createBlacklistDescription_(m_desc);
 
     /**
      * Login Management
