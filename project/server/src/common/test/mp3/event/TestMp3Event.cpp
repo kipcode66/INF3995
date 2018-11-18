@@ -12,7 +12,6 @@ namespace elevation {
 
 bool areEqual(const std::string& gottenValue, const std::vector<uint8_t>& expectedValue) {
     if (gottenValue.size() != expectedValue.size()) {
-        std::cout << std::hex << "Got vector of size" << gottenValue.size() << "' instead of '" << expectedValue.size() << "'" << std::endl;
         return false;
     }
 
@@ -20,7 +19,6 @@ bool areEqual(const std::string& gottenValue, const std::vector<uint8_t>& expect
         std::size_t value    = (uint8_t)gottenValue[i];
         std::size_t expected = (uint8_t)expectedValue[i];
         if (value != expected) {
-            std::cout << std::hex << "Got '" << value << "' instead of '" << expected << "' at position " << std::dec << i << std::endl;
             return false;
         }
     }
