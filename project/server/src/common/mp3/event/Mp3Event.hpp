@@ -32,6 +32,11 @@ public:
     virtual std::string serialize() const = 0;
 
     /**
+     * @brief Useful for unit tests.
+     */
+    EventType getEventType() const { return m_eventType; }
+
+    /**
      * @brief Serializes a single integer/binary element as binary into a string.
      */
     template <class T>
