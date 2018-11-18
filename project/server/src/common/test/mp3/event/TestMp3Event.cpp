@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(padToDataSizeSuccess) {
     std::vector<TestCase> testCases;
     testCases.push_back({""                 , ""                 });
     testCases.push_back({"a"                , "a"                });
-    testCases.push_back({"0123456789ABCDEFG", "0123456789ABCDEFG"});
+    testCases.push_back({"0123456789ABCDEF", "0123456789ABCDEF"});
 
     for (const auto& testCase : testCases) {
         std::ostringstream inputStream;
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(padToDataSizeFailure) {
     };
 
     std::vector<TestCase> testCases;
-    testCases.push_back({"0123456789ABCDEFGH"});
+    testCases.push_back({"0123456789ABCDEFG"});
 
     for (const auto& testCase : testCases) {
         std::ostringstream inputStream{testCase.input};
