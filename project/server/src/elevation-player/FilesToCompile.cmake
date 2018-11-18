@@ -17,6 +17,7 @@ set(ELEVATION_PLAYER_CPP_SOURCES
     mp3/player/mad/MadDecoder.cpp
     mp3/player/pulse/PulseDevice.cpp
     mp3/player/mad/MadAudioFormatter.cpp
+    mp3/event/ElevationPlayerMp3EventVisitor.cpp
     mp3/Mp3AutoPlayerCallbacks.cpp
     event/EventManager.cpp
 )
@@ -34,6 +35,7 @@ set(ELEVATION_PLAYER_HEADER_SOURCES
     mp3/player/mad/MadDecoder.hpp
     mp3/player/pulse/PulseDevice.hpp
     mp3/player/mad/MadAudioFormatter.hpp
+    mp3/event/ElevationPlayerMp3EventVisitor.hpp
     mp3/Mp3AutoPlayerCallbacks.hpp
     event/EventManager.hpp
 )
