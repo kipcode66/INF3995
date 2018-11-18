@@ -17,9 +17,11 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 set(HTTPS_SERVER_CPP_SOURCES
     https/SecureRestApi.cpp
     https/volume.cpp
-    https/apiDescription.cpp
     https/blacklist.cpp
     https/statistics.cpp
+    https/auth.cpp
+    https/statistics.cpp
+    https/fileManagement.cpp
 )
 
 ###############################################################################
@@ -30,6 +32,7 @@ set(HTTPS_SERVER_CPP_SOURCES
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTPS_SERVER_HEADER_SOURCES
     https/SecureRestApi.hpp
+    https/Admin.hpp
 )
 
 makeAbsolute(HTTPS_SERVER_CPP_SOURCES)

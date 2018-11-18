@@ -19,9 +19,13 @@ public:
     void init();
 
 private:
-    void createSecureDescription_    ( );
-    void createVolumeDescription_    ( Pistache::Rest::Description&);
-    void createBlacklistDescription_ ( Pistache::Rest::Description&);
+    void createSecureDescription_          ();
+
+    void createVolumeDescription_          (Rest::Description&);
+    void createBlacklistDescription_       (Rest::Description&);
+    void createStatisticsDescription_      (Rest::Description&);
+    void createAuthDescription_            (Rest::Description&);
+    void createFileManagementDescription_  (Rest::Description&);
 
     void getSuperviseurFile_               (const Rest::Request&, Http::ResponseWriter);
     void deleteSuperviseurChanson_         (const Rest::Request&, Http::ResponseWriter);
@@ -45,15 +49,6 @@ private:
 
 private:
     Logger& m_logger;
-
-    class Admin {
-    public:
-        Admin(const Rest::Request&);
-
-        std::string usager;
-        std::string mot_de_passe;
-        uint32_t    id;
-    };
 };
 
 } // namespace elevation
