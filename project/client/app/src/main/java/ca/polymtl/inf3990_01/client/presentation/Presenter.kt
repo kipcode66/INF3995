@@ -25,12 +25,6 @@ class Presenter(stateService: AppStateService): Observable() {
         notifyObservers(songQueue)
     }
 
-    fun setBlackListOfUsers(user: Collection<User>){
-        blackList.clear()
-        blackList.addAll(user)
-        setChanged()
-        notifyObservers(blackList)
-    }
 
     private fun onStateUpdate(o: Observable, arg: Any?) {
         if (o is AppStateService) {

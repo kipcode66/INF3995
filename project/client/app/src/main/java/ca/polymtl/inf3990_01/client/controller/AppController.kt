@@ -6,6 +6,7 @@ import android.util.Log
 import ca.polymtl.inf3990_01.client.controller.event.*
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
+import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.User
 import ca.polymtl.inf3990_01.client.presentation.Presenter
 import kotlinx.coroutines.experimental.Job
@@ -19,6 +20,7 @@ class AppController(
         private val eventMgr: EventManager,
         private val restService: RestRequestService,
         private val secureRestService: SecureRestRequestService,
+        private val dataProvider: DataProvider,
         private val presenter: Presenter,
         private val preferences: SharedPreferences,
         private val localSongController: LocalSongController,
@@ -101,7 +103,7 @@ class AppController(
                 jobTmp?.join()
                 val list = secureRestService.getBlackList()
                 // now, we update the model
-                presenter.setBlackListOfUsers(list)
+                dataProvider.setBlackListOfUsers(list)
             }
         }
     }
