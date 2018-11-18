@@ -7,7 +7,7 @@ namespace elevation {
 
 class AbstractMp3EventVisitor {
 public:
-    virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) = 0;
+    virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) const = 0;
 };
 
 } // namespace elevation

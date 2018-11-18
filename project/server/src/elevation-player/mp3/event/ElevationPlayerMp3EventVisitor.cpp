@@ -4,7 +4,7 @@
 
 namespace elevation {
 
-void ElevationPlayerMp3EventVisitor::onVolumeChangeEvent(const VolumeChangeEvent& event) {
+void ElevationPlayerMp3EventVisitor::onVolumeChangeEvent(const VolumeChangeEvent& event) const {
     std::cout << "Got volume change event to " << event.getNewVolume() << std::endl;
 }
 
