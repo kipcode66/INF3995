@@ -31,3 +31,6 @@ add_executable(elevation-player     main.cpp "${ELEVATION_PLAYER_HEADER_SOURCES}
 add_library   (elevation-player-lib          "${ELEVATION_PLAYER_CPP_SOURCES}" "${ELEVATION_PLAYER_HEADER_SOURCES}") # Static library used for unit tests
 set_target_properties(elevation-player-lib PROPERTIES OUTPUT_NAME elevation-player)
 target_link_libraries(elevation-player elevation-player-lib)
+
+# Testing
+add_subdirectory(test)

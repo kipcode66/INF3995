@@ -2,6 +2,7 @@ package ca.polymtl.inf3990_01.client.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.annotation.IdRes
 import android.support.annotation.LayoutRes
 import android.support.design.widget.NavigationView
@@ -31,11 +32,12 @@ abstract class AbstractDrawerActivity(
     protected lateinit var navView: NavigationView
 
     private val stateObserver = Observer { _, state ->
-        if (state is AppState) {
-            state.updateNavigationView(navView)
-            // If it's an activity that is not available in the current state, finish the activity.
-            state.finishActivityIfNeeded(this@AbstractDrawerActivity)
+        stateService.getState().updateNavigationView(navView)
+        Handler(mainLooper).post {
+            navView.invalidate()
+            toolbar.invalidate()
         }
+        stateService.getState().finishActivityIfNeeded(this@AbstractDrawerActivity)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +57,7 @@ abstract class AbstractDrawerActivity(
         stateService.getState().updateNavigationView(navView)
         stateService.addObserver(stateObserver)
         navView.setNavigationItemSelectedListener(this)
+        stateService.getState().finishActivityIfNeeded(this@AbstractDrawerActivity)
     }
 
     override fun onDestroy() {

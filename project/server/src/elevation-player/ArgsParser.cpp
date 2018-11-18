@@ -1,6 +1,7 @@
 #include "ArgsParser.hpp"
 
 #include <iostream>
+#include <sstream>
 
 namespace elevation {
 
@@ -21,6 +22,20 @@ ArgsParser::ArgsParser(const std::vector<std::string>& args) {
                 throw std::invalid_argument("Missing argument.");
             }
         }
+        else if (arg == "-p" || arg == "--port") {
+            std::string portString;
+            try {
+                portString = args.at(i + 1);
+                ++i;
+            } catch (std::out_of_range& e) {
+                throw std::invalid_argument("Missing argument.");
+            }
+            std::istringstream portStream{portString};
+            portStream >> m_port;
+            if (m_port == 0) {
+                throw std::invalid_argument("Invalid port \"" + portString + "\"");
+            }
+        }
         else if (arg == "-h" || arg == "--help") {
             usage_();
             exit(0);
@@ -34,11 +49,13 @@ ArgsParser::ArgsParser(const std::vector<std::string>& args) {
 void ArgsParser::usage_() {
     std::cerr <<
         "USAGE:\n"
-        "    elevation-player <OPTION>\n"
+        "    elevation-player -h\n"
+        "    elevation-player -c <PATH> -p <PORT>\n"
         "\n"
         "OPTIONS:\n"
         "    -c | --cache-path <PATH>   Path to the cache directory, where the MP3 songs are.\n"
-        "    -h | --help                Show this help message and exit\n";
+        "    -h | --help                Show this help message and exit\n"
+        "    -p | --port <PORT>         Port to listen to events on.\n";
 }
 
 } // namespace elevation

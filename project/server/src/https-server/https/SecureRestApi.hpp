@@ -16,6 +16,7 @@ namespace elevation {
 class SecureRestApi : public RestApi {
 private:
     static constexpr const char* ADMIN_USERNAME = "admin";
+
 public:
     SecureRestApi(Address addr, Logger& logger, FileCache&);
     void init();
@@ -23,13 +24,21 @@ public:
 private:
     void createSecureDescription_();
     void getSuperviseurFile_(const Rest::Request&, Http::ResponseWriter);
-    void superviseurLogin_(const Rest::Request&, Http::ResponseWriter);
-    void superviseurLogout_(const Rest::Request&, Http::ResponseWriter);
+    void postChangePassword_(const Rest::Request&, Http::ResponseWriter);
+    void superviseurLogin_  (const Rest::Request&, Http::ResponseWriter);
+    void superviseurLogout_ (const Rest::Request&, Http::ResponseWriter);
 
 private:
     Logger& m_logger;
+    class Admin {
+    public:
+        Admin(const Rest::Request&);
+        std::string usager;
+        std::string mot_de_passe;
+        uint32_t id;
+    };
 };
 
 } // namespace elevation
 
-#endif // HTTPS_RESTAPI_HPP
+#endif // !HTTPS_RESTAPI_HPP

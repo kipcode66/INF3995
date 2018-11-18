@@ -133,8 +133,34 @@ class RestRequestService(
     }
 
     suspend fun deleteSong(song: Song) {
-        TODO("Not Implemented")
+        val token = tokenMgr.getToken()
+        val songToDelete = song.id.toString()
+        val resp: ResponseData<String> = suspendCoroutine { continuation ->
+            val request = RESTRequest(
+                    Request.Method.POST,
+                    httpClient.getBaseURL() + "/usager/chanson/$token",
+                    songToDelete,
+                    String::class.java,
+                    mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
+                    Response.Listener { resp ->
+                        continuation.resume(resp)
+                    },
+                    Response.ErrorListener { error ->
+                        val msg = when (error.networkResponse?.statusCode ?: 0) {
+                            403 -> appCtx.getString(R.string.error_message_server)
+                            405 -> appCtx.getString(R.string.error_message_deletion_refused)
+                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
+                        }
+                        continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
+                    }
+            )
+            request.setRetryPolicy(DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            httpClient.addToRequestQueue(request)
+        }
     }
+
+
+
 
     private fun encoder(song: LocalSong): PipedInputStream {
         val inStream = File(song.file.toString()).inputStream()

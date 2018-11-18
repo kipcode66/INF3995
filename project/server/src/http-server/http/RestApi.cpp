@@ -16,8 +16,6 @@
 #include "rapidjson/stringbuffer.h"
 
 
-#include <sstream>
-
 using namespace elevation;
 using namespace std::placeholders;
 namespace fs = std::experimental::filesystem;
@@ -133,6 +131,9 @@ std::string RestApi::generateSong_(const Song_t& song, uint32_t token) {
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
+
+    std::string passwordHash = elevation::id_utils::generateMd5Hash("password123", "abc");
+    std::cout << "passwordHash= " << passwordHash << std::endl;
     auto body = request.body();
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
@@ -256,13 +257,13 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
         try {
             Database* db = Database::instance();
 
+            std::stringstream decoded;
             // Start the decoding immediately
             auto decodedFuture = std::async(std::launch::async, [&](){
                 // Decode the string.
-                std::stringstream encoded(body);
-                std::stringstream decoded;
+                std::istringstream encoded(body);
                 Base64::Decode(encoded, decoded);
-                return decoded;
+                return;
             });
 
             uint32_t token = std::stoul(t.value());
@@ -300,7 +301,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             tmpPath += ".mp3";
             filePath = tmpPath;
 
-            auto decoded = decodedFuture.get();
+            decodedFuture.get(); // Wait for the decoding to finish
             m_cache.setFileContent(filePath, decoded);
             filePath = m_cache.getFile(filePath).path(); // resolve the filename into a real path
 

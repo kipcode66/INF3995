@@ -9,6 +9,6 @@ val controllerModule = module(createOnStart = true) {
     single { ActiveActivityTrackingService(get()) }
     single { EventManager.getInstance() }
     single { AppStateService() }
-    single { AppController(get(), get(), get(), get(), get(), get(),get()) }
+    single { AppController(get(), get(), get(), get(), get(), get(), get(), get()) }
     single { LocalSongController(get(), get(), get()) }
 }

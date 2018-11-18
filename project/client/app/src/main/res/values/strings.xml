@@ -33,6 +33,8 @@
     <string name="error_message_unknown">Unknown Error</string>
     <string name="error_message_forbidden">Forbidden</string>
     <string name="error_message_unknow_user">unauthenticated user</string>
+    <string name="error_message_access">access denied</string>
+    <string name="error_message_deletion_refused">the song does not belong to the user or wrong song</string>
     <string name="desc_message_remove_song">Query the server to remove a song</string>
     <string name="error_message_no_ip">&lt;no IP&gt;</string>
     <string name="error_message_no_mac">&lt;no MAC&gt;</string>
@@ -46,4 +48,12 @@
     <string name="local_song_sendButton_label_send">Send</string>
     <string name="local_song_sendButton_label_sending">Sending...</string>
     <string name="local_song_sendButton_label_sent">Sent</string>
+    <string name="login_hint_username">Username</string>
+    <string name="login_hint_password">Password</string>
+    <string name="login_submit_text">Login</string>
+    <string name="login_dialog_title">Login</string>
+    <string name="login_username_default_text" translatable="false">admin</string>
+    <string name="action_show_login">Admin Login</string>
+    <string name="action_diconnect">Disconnect</string>
+    <string name="error_message_unauthenticated">Unauthorised</string>
 </resources>

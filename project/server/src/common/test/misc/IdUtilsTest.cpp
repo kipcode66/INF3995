@@ -7,7 +7,7 @@
 #include <sqlite3/sqlite3.h>
 #include <misc/id_utils.hpp>
 
-#include <TestConfiguration.hpp>
+#include <TestResources.hpp>
 
 namespace elevation {
 const int numberOfTestCases = 100;

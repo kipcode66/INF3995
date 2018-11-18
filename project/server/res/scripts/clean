@@ -2,7 +2,6 @@
 
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
-SERVER_DIR="${SCRIPTS_DIR}/../.."
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
 
 # EXPECTED PARAMS :

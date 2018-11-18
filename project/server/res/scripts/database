@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-SERVER_DIR="$(git rev-parse --show-toplevel)/project/server"
+THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
+source "${SCRIPTS_DIR}/common"
+
 DB_NAME="server.db"
 EXISTING_DB="$SERVER_DIR/$DB_NAME"
 STRUCT_FILE="struct.sql"
