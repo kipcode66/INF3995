@@ -23,11 +23,6 @@ int main(int argc, char** argv) {
         elevation::FileCache cache{argsParser.getCachePath()};
 
         elevation::Mp3EventClientSocket playerEventSocket{argsParser.getPlayerPort()};
-        while (true) {
-            playerEventSocket.write(elevation::VolumeChangeEvent(10));
-            using namespace std::chrono_literals;
-            std::this_thread::sleep_for(1s);
-        }
         elevation::RestApi api(addr, logger, cache, std::move(playerEventSocket));
         api.init();
         std::cout << "Server is about to start." << std::endl;
