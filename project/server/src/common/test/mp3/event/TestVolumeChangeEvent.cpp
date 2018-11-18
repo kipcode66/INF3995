@@ -1,31 +1,13 @@
-#define BOOST_TEST_MODULE Mp3Event
+#define BOOST_TEST_MODULE VolumeChangeEvent
 #include <boost/test/unit_test.hpp>
 
 #include <stdexcept>
-#include <iostream>
 
 #include <TestResources.hpp>
 
 #include "mp3/event/Mp3Event.hpp"
 
 namespace elevation {
-
-bool areEqual(const std::string& gottenValue, const std::vector<uint8_t>& expectedValue) {
-    if (gottenValue.size() != expectedValue.size()) {
-        std::cout << std::hex << "Got vector of size" << gottenValue.size() << "' instead of '" << expectedValue.size() << "'" << std::endl;
-        return false;
-    }
-
-    for (std::size_t i = 0; i < gottenValue.size(); ++i) {
-        std::size_t value    = (uint8_t)gottenValue[i];
-        std::size_t expected = (uint8_t)expectedValue[i];
-        if (value != expected) {
-            std::cout << std::hex << "Got '" << value << "' instead of '" << expected << "' at position " << std::dec << i << std::endl;
-            return false;
-        }
-    }
-    return true;
-}
 
 std::vector<uint8_t> getSignatureVector() {
     std::vector<uint8_t> signatureVector;
@@ -45,7 +27,6 @@ public:
     virtual ~TestMp3Event() = default;
 
     virtual std::string serialize() const override;
-    virtual bool operator==(const Mp3Event& other) const override { return false; }
 };
 
 std::string TestMp3Event::serialize() const {

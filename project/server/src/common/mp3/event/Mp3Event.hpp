@@ -27,6 +27,8 @@ public:
     explicit Mp3Event(EventType eventType);
     virtual ~Mp3Event() = 0;
 
+    virtual bool operator==(const Mp3Event& other) const = 0;
+
     virtual std::string serialize() const = 0;
 
     /**

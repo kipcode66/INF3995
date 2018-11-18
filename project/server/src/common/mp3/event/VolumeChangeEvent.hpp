@@ -16,6 +16,8 @@ public:
 
     uint8_t getNewVolume() const { return m_changeTo; }
 
+    virtual bool operator==(const Mp3Event& other) const override;
+
 protected:
     uint8_t m_changeTo;
 };
