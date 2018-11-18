@@ -7,7 +7,7 @@
 
 #include "ArgsParser.hpp"
 #include "mp3/Mp3AutoPlayerCallbacks.hpp"
-#include "event/EventManager.hpp"
+#include "mp3/event/EventManager.hpp"
 
 void waitForever() {
     std::promise<void>().get_future().wait();
