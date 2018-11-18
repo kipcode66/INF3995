@@ -45,7 +45,7 @@ void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::Respon
     std::ostringstream logMsg;
     try {
         Admin admin(request);
-        if (admin.usager != ADMIN_USERNAME) {
+        if (admin.usager != Database::ADMIN_NAME) {
             logMsg << "Could not login the admin. Received wrong login";
             m_logger.err(logMsg.str());
             response.send(Http::Code::Bad_Request, "Wrong login");
