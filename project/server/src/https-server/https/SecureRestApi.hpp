@@ -23,6 +23,7 @@ public:
 
 private:
     void createSecureDescription_();
+    void createVolumeDescription_(Pistache::Rest::Description&);
 
     void getSuperviseurFile_               (const Rest::Request&, Http::ResponseWriter);
     void deleteSuperviseurChanson_         (const Rest::Request&, Http::ResponseWriter);

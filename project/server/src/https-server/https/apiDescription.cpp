@@ -26,30 +26,7 @@ void SecureRestApi::createSecureDescription_() {
     /**
      * Volume Management
      */
-    superviseurPath
-            .route(m_desc.get("/volume"))
-            .bind(&SecureRestApi::getSuperviseurVolume_, this)
-            .hide();
-
-    superviseurPath
-            .route(m_desc.post("/volume/augmenter/:pc"))
-            .bind(&SecureRestApi::postSuperviseurVolumeAug_, this)
-            .hide();
-
-    superviseurPath
-            .route(m_desc.post("/volume/diminuer/:pc"))
-            .bind(&SecureRestApi::postSuperviseurVolumeDim_, this)
-            .hide();
-
-    superviseurPath
-            .route(m_desc.post("/volume/sourdine/activer"))
-            .bind(&SecureRestApi::postSuperviseurSourdineActiver_, this)
-            .hide();
-
-    superviseurPath
-            .route(m_desc.post("/volume/sourdine/desactiver"))
-            .bind(&SecureRestApi::postSuperviseurSourdineDesactiver_, this)
-            .hide();
+    createVolumeDescription_(m_desc);
 
     /**
      * Statistics
