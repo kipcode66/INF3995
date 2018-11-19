@@ -135,9 +135,9 @@ class RestRequestService(
         val songToDelete = song.id.toString()
         suspendCoroutine<ResponseData<String>> { continuation ->
             val request = RESTRequest(
-                    Request.Method.POST,
-                    httpClient.getBaseURL() + "/usager/chanson/$token",
-                    songToDelete,
+                    Request.Method.DELETE,
+                    httpClient.getBaseURL() + "/usager/chanson/$token/$songToDelete",
+                    "",
                     String::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
                     Response.Listener { resp ->
