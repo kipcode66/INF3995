@@ -25,6 +25,12 @@ class SongQueueAdapter(
 ): BaseAdapter() {
     init {
         presenter.addObserver(Observer(this::onPresenterUpdate))
+        stateService.addObserver(this::onAppStateChange)
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onAppStateChange( o: Observable, arg: Any?) {
+        Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -32,9 +38,6 @@ class SongQueueAdapter(
         if (arg is SongQueue) {
             songQueue.clear()
             songQueue.addAll(arg)
-            Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
-        }
-        else if (arg is AppState) {
             Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
         }
     }

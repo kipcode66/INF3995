@@ -23,7 +23,7 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
     private val appStateService: AppStateService by inject()
     val localSongAdapter: LocalSongAdapter by inject{ ParameterList(songsList, layoutInflater) }
 
-    private val appStateObserver = Observer { o: Observable?, arg: Any? ->
+    private fun onAppStateChange(o: Observable?, arg: Any?) {
         Handler(this.mainLooper).post(this::invalidateOptionsMenu)
     }
 
@@ -31,7 +31,7 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
         super.onCreate(savedInstanceState)
         songs_list.adapter = localSongAdapter
         eventMgr.dispatchEvent(LocalSongLoadEvent())
-        appStateService.addObserver(appStateObserver)
+        appStateService.addObserver(Observer(this::onAppStateChange))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

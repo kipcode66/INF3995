@@ -26,13 +26,13 @@ class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawe
     private val songQueue: SongQueue = SongQueue()
     private val songQueueAdapter: SongQueueAdapter by inject{ ParameterList(songQueue, layoutInflater) }
 
-    private val appStateObserver = Observer { o: Observable?, arg: Any? ->
+    private fun onAppStateChange(o: Observable?, arg: Any?) {
         Handler(this.mainLooper).post(this::invalidateOptionsMenu)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appStateService.addObserver(appStateObserver)
+        appStateService.addObserver(Observer(this::onAppStateChange))
         song_queue.adapter = songQueueAdapter
     }
 

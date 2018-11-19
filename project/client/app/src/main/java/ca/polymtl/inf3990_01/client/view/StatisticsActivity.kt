@@ -15,13 +15,13 @@ class StatisticsActivity : AbstractDrawerActivity(R.layout.activity_statistics, 
     private val eventMgr: EventManager by inject()
     private val appStateService: AppStateService by inject()
 
-    private val appStateObserver = Observer { o: Observable?, arg: Any? ->
+    private fun onAppStateChange(o: Observable?, arg: Any?) {
         Handler(this.mainLooper).post(this::invalidateOptionsMenu)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appStateService.addObserver(appStateObserver)
+        appStateService.addObserver(Observer(this::onAppStateChange))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
