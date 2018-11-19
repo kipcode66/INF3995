@@ -18,7 +18,7 @@ void Mp3EventPacketReader::readSignature_() {
     static const std::string EVENT_SIGNATURE_STRING = Mp3Event::serializeElement(Mp3Event::EVENT_SIGNATURE);
     std::string signature = m_socket.read(EVENT_SIGNATURE_STRING.size());
     if (signature != EVENT_SIGNATURE_STRING) {
-        throw std::runtime_error("Could not read event from socket : recieved data is not an event");
+        throw std::runtime_error("Could not read event from socket : received data is not an event");
     }
 }
 
