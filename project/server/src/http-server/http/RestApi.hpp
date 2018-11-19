@@ -5,11 +5,12 @@
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
 #include <pistache/description.h>
+#include <rapidjson/document.h>
+
 #include <common/logger/Logger.hpp>
 #include <database/Database.hpp>
 
-#include "filesystem/FileCache.hpp"
-
+#include <common/filesystem/FileCache.hpp>
 #include <common/logger/Logger.hpp>
 #include <common/mp3/communication/Mp3EventClientSocket.hpp>
 
@@ -34,7 +35,9 @@ protected:
     void getFileList_(const Rest::Request& request, Http::ResponseWriter response);
     void postFile_(const Rest::Request& request, Http::ResponseWriter response);
     void deleteFile_(const Rest::Request& request, Http::ResponseWriter response);
-    std::string generateSong_(const Song_t& song, uint32_t token, bool adminSerialization = false);
+
+    std::string generateAllSongsAsViewedBy_(uint32_t token, bool adminSerialization = false);
+    rapidjson::Document generateSong_(const Song_t& song, uint32_t token, bool adminSerialization);
 
     static User_t getUserFromRequestToken_(const Rest::Request& request);
 

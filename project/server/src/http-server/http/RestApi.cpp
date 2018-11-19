@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
 #include "RestApi.hpp"
@@ -15,8 +16,6 @@
 #include "misc/Base64.hpp"
 #include "misc/id_utils.hpp"
 #include "mp3/header/Mp3Header.hpp"
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
 #include "exception/MissingTokenException.hpp"
 #include "exception/InvalidTokenException.hpp"
 
@@ -177,32 +176,22 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
     // querying a param from the request object, by name
     std::thread([this](const Rest::Request& request, Http::ResponseWriter response) {
-        Database* db = Database::instance();
-        std::ostringstream logMsg;
-        auto t = request.headers().getRaw("X-Auth-Token");
-        uint32_t token = std::stoul(t.value());
-
-        User_t requestUser = {0};
         try {
-            requestUser = db->getUserById(token);
-        } catch (sqlite_error& e) { }
+            User_t requestUser = getUserFromRequestToken_(request);
+            std::string serializedList = generateAllSongsAsViewedBy_(requestUser.userId);
 
-        if (token == 0 || *requestUser.mac == 0) {
-            logMsg << "Could not post the file. Received invalid token.";
+            std::ostringstream logMsg;
+            logMsg << "The file list for user \"" << requestUser.userId << "\" was successfuly sent.";
+            m_logger.log(logMsg.str());
+            response.send(Http::Code::Ok, serializedList);
+        }
+        catch (const std::exception& e) {
+            std::ostringstream logMsg;
+            logMsg << "An error occurred: " << e.what();
             m_logger.err(logMsg.str());
-            response.send(Http::Code::Forbidden, "Invalid token");
+            response.send(Pistache::Http::Code::Forbidden, e.what());
             return;
         }
-        std::vector<Song_t> songs = db->getAllSongs();
-        std::stringstream resp;
-        resp << "{\n\"chansons\":[\n";
-        for (auto& song : songs) {
-            resp << generateSong_(song, token) << (&songs.back() != &song ? ",\n" : "\n");
-        }
-        resp << "]\n}\n";
-        logMsg << "The file list for user \"" << token << "\" was successfuly sent.";
-        m_logger.log(logMsg.str());
-        response.send(Http::Code::Ok, resp.str());
     }, std::move(request), std::move(response)).detach();
 }
 
@@ -390,7 +379,25 @@ void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter res
     );
 }
 
-std::string RestApi::generateSong_(const Song_t& song, uint32_t token, bool adminSerialization) {
+std::string RestApi::generateAllSongsAsViewedBy_(uint32_t token, bool adminSerialization) {
+    std::vector<Song_t> songs = Database::instance()->getAllSongs();
+    rapidjson::Document songsDoc;
+    songsDoc.SetObject();
+    rapidjson::Document songsArray;
+    songsArray.SetArray();
+    for (auto& song : songs) {
+        songsArray.PushBack(generateSong_(song, token, adminSerialization), songsDoc.GetAllocator());
+    }
+    songsDoc.AddMember("chansons", songsArray, songsDoc.GetAllocator());
+
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    songsDoc.Accept(writer);
+
+    return buf.GetString();
+}
+
+rapidjson::Document RestApi::generateSong_(const Song_t& song, uint32_t token, bool adminSerialization) {
     rapidjson::Document songDoc;
     songDoc.SetObject();
     try {
@@ -408,7 +415,7 @@ std::string RestApi::generateSong_(const Song_t& song, uint32_t token, bool admi
 
         if (adminSerialization) {
             Database* db = Database::instance();
-            User_t owner = db->getUserById(token);
+            User_t owner = db->getUserById(song.userId);
             songDoc.AddMember("mac", rapidjson::Value(owner.mac   , strlen(owner.mac   )), songDoc.GetAllocator());
             songDoc.AddMember("ip" , rapidjson::Value(owner.ip    , strlen(owner.ip    )), songDoc.GetAllocator());
             songDoc.AddMember("id" , owner.userId, songDoc.GetAllocator());
@@ -419,11 +426,7 @@ std::string RestApi::generateSong_(const Song_t& song, uint32_t token, bool admi
         msg << "An error occured while generating song a song's json: " << e.what();
         m_logger.err(msg.str());
     }
-    rapidjson::StringBuffer buf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
-    songDoc.Accept(writer);
-
-    return buf.GetString();
+    return songDoc;
 }
 
 User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
