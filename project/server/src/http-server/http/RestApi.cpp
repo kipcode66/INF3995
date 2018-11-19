@@ -14,7 +14,8 @@
 #include "mp3/header/Mp3Header.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
-
+#include "exception/MissingTokenException.hpp"
+#include "exception/InvalidTokenException.hpp"
 
 using namespace elevation;
 using namespace std::placeholders;
@@ -375,4 +376,23 @@ void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter res
     m_logger.log(osStream.str());
 
     std::cout << "deleteFile function called" << std::endl;
+}
+
+User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
+    auto t = request.headers().getRaw("X-Auth-Token");
+    if (t.value().empty()) {
+        throw MissingTokenException{};
+    }
+
+    uint32_t token = std::stoul(t.value());
+    User_t requestUser = {0};
+    try {
+        requestUser = Database::instance()->getUserById(token);
+    } catch (sqlite_error& e) { }
+
+    if (token == 0 || *requestUser.mac == 0) {
+        throw InvalidTokenException{};
+    }
+
+    return requestUser;
 }

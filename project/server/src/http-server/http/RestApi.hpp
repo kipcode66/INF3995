@@ -36,6 +36,8 @@ protected:
     void deleteFile_(const Rest::Request& request, Http::ResponseWriter response);
     std::string generateSong_(const Song_t& song, uint32_t token);
 
+    static User_t getUserFromRequestToken_(const Rest::Request& request);
+
     std::shared_ptr<Http::Endpoint> m_httpEndpoint;
     Rest::Description m_desc;
     Rest::Router m_router;
