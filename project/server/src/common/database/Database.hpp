@@ -20,6 +20,7 @@ class Database {
 public:
     static constexpr const char*   ADMIN_NAME         = "admin";
     static constexpr const char*   DEFAULT_PASSWORD   = "admin";
+    static constexpr const int32_t IS_BLACKLISTED     = 1;
     static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
 
     static Database* instance();
@@ -41,6 +42,8 @@ public:
     bool   isAdminConnected (uint32_t adminId) const;
     std::string getAdminPassword() const;
     std::pair<std::string, std::string> getSaltAndHashedPasswordByLogin(const std::string& login) const;
+
+    std::vector<User_t> getBlackList();
 
     Song_t              getSongById(int) const;
     Song_t              getSongByTitle(const std::string&) const;
@@ -66,6 +69,7 @@ protected:
     Song_t getSongByQuery_(const Query&) const;
     std::vector<Song_t> getSongsByQuery_(const Query&) const;
     User_t getUserByQuery_(const Query&) const;
+    std::vector<User_t> getUsersByQuery_(const Query&) const;
     void executeQuery_(const Query& query);
 
     sqlite3* m_db = 0;

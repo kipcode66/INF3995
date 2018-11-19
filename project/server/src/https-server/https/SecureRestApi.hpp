@@ -27,6 +27,9 @@ private:
     void postChangePassword_(const Rest::Request&, Http::ResponseWriter);
     void superviseurLogin_  (const Rest::Request&, Http::ResponseWriter);
     void superviseurLogout_ (const Rest::Request&, Http::ResponseWriter);
+    void getBlackList_      (const Rest::Request&, Http::ResponseWriter);
+    
+    std::string generateUser_(const User_t&);       
 
 private:
     Logger& m_logger;
