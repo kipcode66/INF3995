@@ -31,6 +31,7 @@ abstract class AbstractDrawerActivity(
     protected lateinit var toolbar: Toolbar
     protected lateinit var navView: NavigationView
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onStateChange(o: Observable, arg: Any?) {
         stateService.getState().updateNavigationView(navView.menu)
         stateService.getState().finishActivityIfNeeded(this)
@@ -54,10 +55,6 @@ abstract class AbstractDrawerActivity(
         navView.setNavigationItemSelectedListener(this)
         stateService.getState().updateNavigationView(navView.menu)
         stateService.getState().finishActivityIfNeeded(this@AbstractDrawerActivity)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 
     override fun onStart() {

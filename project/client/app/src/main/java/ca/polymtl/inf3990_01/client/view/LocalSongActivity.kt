@@ -22,6 +22,7 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
     private val appStateService: AppStateService by inject()
     val localSongAdapter: LocalSongAdapter by inject{ ParameterList(songsList, layoutInflater) }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onAppStateChange(o: Observable?, arg: Any?) {
         Handler(this.mainLooper).post(this::invalidateOptionsMenu)
     }

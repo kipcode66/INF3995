@@ -32,6 +32,7 @@ class Presenter(stateService: AppStateService): Observable() {
         notifyObservers(blackList)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onStateUpdate(o: Observable, arg: Any?) {
         if (o is AppStateService) {
             setChanged()

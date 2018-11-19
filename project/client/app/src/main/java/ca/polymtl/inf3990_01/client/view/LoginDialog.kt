@@ -19,7 +19,7 @@ class LoginDialog(
         setOnCancelListener { this@LoginDialog.dismiss() }
         setTitle(R.string.login_dialog_title)
         login_username.setText(R.string.login_username_default_text)
-        login_username.setOnEditorActionListener { v, actionId, event ->
+        login_username.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 login_password.requestFocus()
                 true
@@ -28,7 +28,7 @@ class LoginDialog(
                 false
             }
         }
-        login_password.setOnEditorActionListener { v, actionId, event ->
+        login_password.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 login_button_submit.performClick()
             }

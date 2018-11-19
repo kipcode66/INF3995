@@ -59,6 +59,7 @@ class RESTRequest<T>(
 
     override fun deliverResponse(response: ResponseData<T>) = listener.onResponse(response)
 
+    @Suppress("UNCHECKED_CAST")
     override fun parseNetworkResponse(response: NetworkResponse?): Response<ResponseData<T>> {
         return try {
             val json = String(

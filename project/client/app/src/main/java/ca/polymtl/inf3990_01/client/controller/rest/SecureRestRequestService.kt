@@ -44,8 +44,8 @@ class SecureRestRequestService(
         val list: MutableList<Song> = mutableListOf()
         val token = tokenService.getToken()
         val resp: ResponseData<SongListResponseData> = suspendCoroutine { continuation ->
-            var canDisplayMessage = initMgr.isInitialized
-            val request = RESTRequest<SongListResponseData>(
+            val canDisplayMessage = initMgr.isInitialized
+            val request = RESTRequest(
                 Request.Method.GET,
                 httpsClient.getBaseURL() + RESOURCE_URI,
                 "",
@@ -72,7 +72,7 @@ class SecureRestRequestService(
                     continuation.resume(resp)
                 }
             )
-            request.setRetryPolicy(DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         for (chanson in resp.value.chansons) {
@@ -85,7 +85,7 @@ class SecureRestRequestService(
     suspend fun deleteSong(song: Song) {
         val token = tokenService.getToken()
         val songToDelete = song.id.toString()
-        val resp: ResponseData<String> = suspendCoroutine { continuation ->
+        suspendCoroutine<ResponseData<String>> { continuation ->
             val request = RESTRequest(
                     Request.Method.POST,
                     httpsClient.getBaseURL() + "/usager/chanson/$token",
@@ -104,7 +104,7 @@ class SecureRestRequestService(
                         continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
                     }
             )
-            request.setRetryPolicy(DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
     }
@@ -173,7 +173,7 @@ class SecureRestRequestService(
     }
 
     suspend fun logout() {
-        val resp: Boolean = suspendCoroutine { continuation ->
+        suspendCoroutine<Boolean> { continuation ->
             val canDisplayMessage = initMgr.isInitialized
             val token = tokenService.getToken()
             val request = RESTRequest(

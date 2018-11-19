@@ -15,6 +15,7 @@ class SettingActivity : AbstractDrawerActivity(R.layout.activity_setting, R.id.d
     private val eventMgr: EventManager by inject()
     private val appStateService: AppStateService by inject()
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onAppStateChange(o: Observable?, arg: Any?) {
         Handler(this.mainLooper).post(this::invalidateOptionsMenu)
     }

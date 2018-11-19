@@ -15,6 +15,7 @@ class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R
     private val eventMgr: EventManager by inject()
     private val appStateService: AppStateService by inject()
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onAppStateChange(o: Observable?, arg: Any?) {
         Handler(this.mainLooper).post(this::invalidateOptionsMenu)
     }

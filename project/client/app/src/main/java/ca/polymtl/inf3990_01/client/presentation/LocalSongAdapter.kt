@@ -1,4 +1,5 @@
 package ca.polymtl.inf3990_01.client.presentation
+
 import android.content.Context
 import android.os.Handler
 import android.view.LayoutInflater
@@ -36,10 +37,12 @@ class LocalSongAdapter(
         dataProvider.observeLocalSongs(Observer(this::onLocalSongsChange))
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onLocalSongSendStateChange(o: Observable, arg: Any?) {
         Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onLocalSongsChange(o: Observable, arg: Any?) {
         if (arg is LocalSongs) {
             localSongs.clear()
@@ -48,6 +51,7 @@ class LocalSongAdapter(
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onPresenter(o: Observable, arg: Any?) {
         if (arg is SongQueue) {
             ownedSongs = getUpdatedOwnerSongsQueue()

@@ -26,6 +26,7 @@ class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawe
     private val songQueue: SongQueue = SongQueue()
     private val songQueueAdapter: SongQueueAdapter by inject{ ParameterList(songQueue, layoutInflater) }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onAppStateChange(o: Observable?, arg: Any?) {
         Handler(this.mainLooper).post(this::invalidateOptionsMenu)
     }

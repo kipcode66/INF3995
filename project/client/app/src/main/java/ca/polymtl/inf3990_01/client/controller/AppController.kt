@@ -67,6 +67,7 @@ class AppController(
     /**
      * When the app resumes from inactivity (when starting or coming back from being paused), we start the reload loop.
      */
+    @Suppress("UNUSED_PARAMETER")
     private fun onAppStart(event: AppResumeEvent) {
         // Make sure that the previous task was stopped
         task?.cancel(true)
@@ -114,6 +115,7 @@ class AppController(
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onReloadLocalSong(event: LocalSongLoadEvent) {
         localSongController.reloadLocalSong()
     }
@@ -130,6 +132,7 @@ class AppController(
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onLogoutRequest(event: LogoutRequestEvent) {
         if (logoutJob?.isCompleted != false) {
             val jobTmp = logoutJob
