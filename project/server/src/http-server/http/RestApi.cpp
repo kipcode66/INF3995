@@ -106,7 +106,7 @@ std::string generateBody(uint32_t id, std::string message) {
     return buf.GetString();
 }
 
-std::string RestApi::generateSong_(const Song_t& song, uint32_t token) {
+std::string RestApi::generateSong_(const Song_t& song, uint32_t token, bool adminSerialization) {
     rapidjson::Document songDoc;
     songDoc.SetObject();
     try {
@@ -121,6 +121,14 @@ std::string RestApi::generateSong_(const Song_t& song, uint32_t token) {
         songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
         songDoc.AddMember("proprietaire", token == song.userId ? true : false, songDoc.GetAllocator());
         songDoc.AddMember("no", song.id, songDoc.GetAllocator());
+
+        if (adminSerialization) {
+            Database* db = Database::instance();
+            User_t owner = db->getUserById(token);
+            songDoc.AddMember("mac", rapidjson::Value(owner.mac   , strlen(owner.mac   )), songDoc.GetAllocator());
+            songDoc.AddMember("ip" , rapidjson::Value(owner.ip    , strlen(owner.ip    )), songDoc.GetAllocator());
+            songDoc.AddMember("id" , owner.userId, songDoc.GetAllocator());
+        }
     }
     catch (sqlite_error& e) {
         std::stringstream msg;
