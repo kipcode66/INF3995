@@ -1,14 +1,12 @@
 package ca.polymtl.inf3990_01.client.presentation
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
-import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.UserList
 import kotlinx.android.synthetic.main.black_list.view.*
@@ -19,10 +17,17 @@ class BlackListAdapter(
         private val userList: UserList,
         private val layoutInflater: LayoutInflater,
         private val appCtx: Context,
+        private val stateService: AppStateService,
         presenter: Presenter
 ): BaseAdapter() {
     init {
         presenter.addObserver(Observer(this::onPresenterUpdate))
+        stateService.addObserver(Observer(this::onStateChange))
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onStateChange(o: Observable, arg: Any?) {
+        Handler(appCtx.mainLooper).post(this::notifyDataSetChanged)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -30,9 +35,6 @@ class BlackListAdapter(
         if (arg is UserList) {
             userList.clear()
             userList.addAll(arg)
-            Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
-        }
-        else if (arg is AppState) {
             Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
         }
     }

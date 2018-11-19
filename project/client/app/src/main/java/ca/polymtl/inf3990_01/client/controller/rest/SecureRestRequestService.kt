@@ -27,29 +27,27 @@ class SecureRestRequestService(
     private val initMgr: InitializationManager,
     private val appStateService: AppStateService
     ) {
-        companion object {
-            private class userResponseData(
-                   val mac: String, val ip: String, val name: String)
-            private class UserListResponseData(val users: List<userResponseData>)
-            data class LoginRequestData(val usager: String, val mot_de_passe: String)
-            private class SongResponseData(
-                    val titre: String, val artiste: String, val duree: String,
-                    val ip: String, val mac: String, val id: BigInteger,
-                    val proposeePar: String?, val proprietaire: Boolean, val no: Int)
-            private class SongListResponseData(val chansons: List<SongResponseData>)
+    companion object {
+        private class UserResponseData(
+            val mac: String, val ip: String, val name: String)
+        private class UserListResponseData(val users: List<UserResponseData>)
+        data class LoginRequestData(val usager: String, val mot_de_passe: String)
+        private class SongResponseData(
+            val titre: String, val artiste: String, val duree: String,
+            val ip: String, val mac: String, val id: BigInteger,
+            val proposeePar: String?, val proprietaire: Boolean, val no: Int)
+        private class SongListResponseData(val chansons: List<SongResponseData>)
 
-            const val RESOURCE_URI = "/superviseur/file"
-
-        }
+        const val RESOURCE_URI = "/superviseur/file"
+    }
     private var lastMessageSongList: String? = null
-
 
     suspend fun getSongList(): List<Song> {
         val list: MutableList<Song> = mutableListOf()
         val token = tokenService.getToken()
         val resp: ResponseData<SongListResponseData> = suspendCoroutine { continuation ->
-            var canDisplayMessage = initMgr.isInitialized
-            val request = RESTRequest<SongListResponseData>(
+            val canDisplayMessage = initMgr.isInitialized
+            val request = RESTRequest(
                 Request.Method.GET,
                 httpsClient.getBaseURL() + RESOURCE_URI,
                 "",
@@ -76,7 +74,7 @@ class SecureRestRequestService(
                     continuation.resume(resp)
                 }
             )
-            request.setRetryPolicy(DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         for (chanson in resp.value.chansons) {
@@ -86,7 +84,32 @@ class SecureRestRequestService(
         return list
     }
 
-
+    suspend fun deleteSong(song: Song) {
+        val token = tokenService.getToken()
+        val songToDelete = song.id.toString()
+        suspendCoroutine<ResponseData<String>> { continuation ->
+            val request = RESTRequest(
+                    Request.Method.POST,
+                    httpsClient.getBaseURL() + "/usager/chanson/$token",
+                    songToDelete,
+                    String::class.java,
+                    mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
+                    Response.Listener { resp ->
+                        continuation.resume(resp)
+                    },
+                    Response.ErrorListener { error ->
+                        val msg = when (error.networkResponse?.statusCode ?: 0) {
+                            401 -> appCtx.getString(R.string.error_message_unknow_user)
+                            405 -> appCtx.getString(R.string.error_message_deletion_refused)
+                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
+                        }
+                        continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
+                    }
+            )
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+    }
 
     suspend fun swapSongs(pair: Pair<Song, Song>) {
         TODO("Not Implemented")
@@ -100,7 +123,6 @@ class SecureRestRequestService(
         TODO("Not Implemented")
     }
 
-
     suspend fun blockUser(user: User) {
         TODO("Not Implemented")
     }
@@ -109,16 +131,12 @@ class SecureRestRequestService(
         TODO("Not Implemented")
     }
 
-    suspend fun deleteSong(song: Song) {
-        TODO("Not Implemented")
-    }
-
     suspend fun getBlackList(): List<User> {
         val list: MutableList<User> = mutableListOf()
         val token = tokenService.getToken()
         val resp: ResponseData<UserListResponseData> = suspendCoroutine { continuation ->
-            var canDisplayMessage = initMgr.isInitialized
-            val request = RESTRequest<UserListResponseData>(
+            val canDisplayMessage = initMgr.isInitialized
+            val request = RESTRequest(
                     Request.Method.GET,
                     httpsClient.getBaseURL() + RestRequestService.RESOURCE_URI ,
                     "",
@@ -142,7 +160,7 @@ class SecureRestRequestService(
                         continuation.resume(resp)
                     }
             )
-            request.setRetryPolicy(DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         for (user in resp.value.users) {
@@ -191,7 +209,7 @@ class SecureRestRequestService(
     }
 
     suspend fun logout() {
-        val resp: Boolean = suspendCoroutine { continuation ->
+        suspendCoroutine<Boolean> { continuation ->
             val canDisplayMessage = initMgr.isInitialized
             val token = tokenService.getToken()
             val request = RESTRequest(

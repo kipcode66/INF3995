@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.event.DeleteSongEvent
+import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.SongQueue
@@ -21,10 +23,17 @@ class SongQueueAdapter(
         private val stateService: AppStateService,
         private val appCtx: Context,
         private val preferences: SharedPreferences,
+        private val eventMgr: EventManager,
         presenter: Presenter
 ): BaseAdapter() {
     init {
         presenter.addObserver(Observer(this::onPresenterUpdate))
+        stateService.addObserver(this::onAppStateChange)
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onAppStateChange( o: Observable, arg: Any?) {
+        Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -32,9 +41,6 @@ class SongQueueAdapter(
         if (arg is SongQueue) {
             songQueue.clear()
             songQueue.addAll(arg)
-            Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
-        }
-        else if (arg is AppState) {
             Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
         }
     }
@@ -63,8 +69,7 @@ class SongQueueAdapter(
             else android.R.color.background_light
         )
         view.remove_song.setOnClickListener {
-            //TODO : send query to server to remove 'song'
-            //TODO : Send an event in the event manager that the AppController will catch and handle
+            eventMgr.dispatchEvent(DeleteSongEvent(song))
         }
         return view
     }

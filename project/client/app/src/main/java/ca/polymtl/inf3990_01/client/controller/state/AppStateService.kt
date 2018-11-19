@@ -1,6 +1,8 @@
 package ca.polymtl.inf3990_01.client.controller.state
 
-import android.support.design.widget.NavigationView
+import android.content.Context
+import android.os.Handler
+import android.view.Menu
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.model.LocalSong
 import ca.polymtl.inf3990_01.client.model.Song
@@ -9,7 +11,7 @@ import ca.polymtl.inf3990_01.client.view.BlackListActivity
 import ca.polymtl.inf3990_01.client.view.StatisticsActivity
 import java.util.*
 
-class AppStateService: Observable() {
+class AppStateService(private val appCtx: Context): Observable() {
     enum class State {
         User,
         Admin;
@@ -18,9 +20,10 @@ class AppStateService: Observable() {
             Pair(State.User, object : AppState {
                 override val type = State.User
 
-                override fun updateNavigationView(navView: NavigationView) {
-                    navView.menu.findItem(R.id.nav_black_list).isVisible = false
-                    navView.menu.findItem(R.id.nav_statistics).isVisible = false
+                override fun updateNavigationView(menu: Menu) {
+                    menu.findItem(R.id.nav_blacklist).isVisible = false
+                    menu.findItem(R.id.nav_statistics).isVisible = false
+                    menu.removeItem(menu.add("").itemId)
                 }
 
                 override fun isSongHighlighted(song: Song): Boolean = song.sentBy == null
@@ -44,9 +47,10 @@ class AppStateService: Observable() {
             Pair(State.Admin, object : AppState {
                 override val type = State.Admin
 
-                override fun updateNavigationView(navView: NavigationView) {
-                    navView.menu.findItem(R.id.nav_black_list).isVisible = true
-                    navView.menu.findItem(R.id.nav_statistics).isVisible = true
+                override fun updateNavigationView(menu: Menu) {
+                    menu.findItem(R.id.nav_blacklist).isVisible = true
+                    menu.findItem(R.id.nav_statistics).isVisible = true
+                    menu.removeItem(menu.add("").itemId)
                 }
 
                 override fun sendFile(song: LocalSong): Boolean {
@@ -74,6 +78,6 @@ class AppStateService: Observable() {
     fun setState(state: State) {
         stateInternal = states[state]!!
         setChanged()
-        notifyObservers()
+        Handler(appCtx.mainLooper).post(this::notifyObservers)
     }
 }

@@ -17,7 +17,7 @@ import ca.polymtl.inf3990_01.client.controller.ActiveActivityTrackingService
 import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import org.koin.android.ext.android.inject
-import java.util.Observer
+import java.util.*
 
 abstract class AbstractDrawerActivity(
         @LayoutRes private val layoutRes: Int,
@@ -31,13 +31,10 @@ abstract class AbstractDrawerActivity(
     protected lateinit var toolbar: Toolbar
     protected lateinit var navView: NavigationView
 
-    private val stateObserver = Observer { _, state ->
-        stateService.getState().updateNavigationView(navView)
-        Handler(mainLooper).post {
-            navView.invalidate()
-            toolbar.invalidate()
-        }
-        stateService.getState().finishActivityIfNeeded(this@AbstractDrawerActivity)
+    @Suppress("UNUSED_PARAMETER")
+    private fun onStateChange(o: Observable, arg: Any?) {
+        stateService.getState().updateNavigationView(navView.menu)
+        stateService.getState().finishActivityIfNeeded(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,15 +51,10 @@ abstract class AbstractDrawerActivity(
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-        stateService.getState().updateNavigationView(navView)
-        stateService.addObserver(stateObserver)
+        stateService.addObserver(Observer(this::onStateChange))
         navView.setNavigationItemSelectedListener(this)
+        stateService.getState().updateNavigationView(navView.menu)
         stateService.getState().finishActivityIfNeeded(this@AbstractDrawerActivity)
-    }
-
-    override fun onDestroy() {
-        stateService.deleteObserver(stateObserver)
-        super.onDestroy()
     }
 
     override fun onStart() {
@@ -101,7 +93,7 @@ abstract class AbstractDrawerActivity(
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 startActivity(intent)
             }
-            R.id.nav_black_list -> {
+            R.id.nav_blacklist -> {
                 val intent = Intent(this, BlackListActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                 startActivity(intent)

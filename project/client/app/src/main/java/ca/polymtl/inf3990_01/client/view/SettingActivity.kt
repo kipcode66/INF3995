@@ -15,18 +15,19 @@ class SettingActivity : AbstractDrawerActivity(R.layout.activity_setting, R.id.d
     private val eventMgr: EventManager by inject()
     private val appStateService: AppStateService by inject()
 
-    private val appStateObserver = Observer { o: Observable?, arg: Any? ->
+    @Suppress("UNUSED_PARAMETER")
+    private fun onAppStateChange(o: Observable?, arg: Any?) {
         Handler(this.mainLooper).post(this::invalidateOptionsMenu)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appStateService.addObserver(appStateObserver)
+        appStateService.addObserver(Observer(this::onAppStateChange))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.queue, menu)
+        menuInflater.inflate(R.menu.setting, menu)
         menu.findItem(R.id.action_show_login).isVisible = appStateService.getState().type == AppStateService.State.User
         menu.findItem(R.id.action_disconnect).isVisible = appStateService.getState().type == AppStateService.State.Admin
         return true

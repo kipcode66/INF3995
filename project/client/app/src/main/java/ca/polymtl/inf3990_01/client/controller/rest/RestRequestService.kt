@@ -12,16 +12,14 @@ import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.LocalSong
 import ca.polymtl.inf3990_01.client.model.Song
-import ca.polymtl.inf3990_01.client.model.User
 import com.android.volley.DefaultRetryPolicy
-import com.android.volley.NetworkResponse
 import com.android.volley.Request
 import com.android.volley.Response
-import java.io.*
-import java.net.HttpURLConnection
-import java.net.URL
+import java.io.File
+import java.io.InputStreamReader
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
 import kotlin.coroutines.experimental.suspendCoroutine
-
 
 
 class RestRequestService(
@@ -46,8 +44,8 @@ class RestRequestService(
         val list: MutableList<Song> = mutableListOf()
         val token = tokenMgr.getToken()
         val resp: ResponseData<SongListResponseData> = suspendCoroutine { continuation ->
-            var canDisplayMessage = initMgr.isInitialized
-            val request = RESTRequest<SongListResponseData>(
+            val canDisplayMessage = initMgr.isInitialized
+            val request = RESTRequest(
                     Request.Method.GET,
                     httpClient.getBaseURL() + RESOURCE_URI + token,
                     "",
@@ -74,7 +72,7 @@ class RestRequestService(
                         continuation.resume(resp)
                     }
             )
-            request.setRetryPolicy(DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpClient.addToRequestQueue(request)
         }
         for (chanson in resp.value.chansons) {
@@ -87,7 +85,7 @@ class RestRequestService(
     @Synchronized suspend fun sendSong(song: LocalSong) {
         val songToSend = encoder(song)
         val token = tokenMgr.getToken()
-        var canDisplayMessage = initMgr.isInitialized
+        val canDisplayMessage = initMgr.isInitialized
         val resp: ResponseData<String> = suspendCoroutine { continuation ->
             val request = RESTRequest(
                     Request.Method.POST,
@@ -109,7 +107,7 @@ class RestRequestService(
                         continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
                     }
             )
-            request.setRetryPolicy(DefaultRetryPolicy(10*1000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT))
+            request.retryPolicy = DefaultRetryPolicy(10 * 1000, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpClient.addToRequestQueue(request)
         }
         if (resp.code != 200) {
@@ -120,7 +118,7 @@ class RestRequestService(
             }
             if (canDisplayMessage && lastMessageSendSong != resp.value) {
                 lastMessageSendSong = resp.value
-                Handler(appCtx.mainLooper).post(Runnable { Toast.makeText(appCtx, "Post song error: " + resp.value, Toast.LENGTH_LONG).show() })
+                Handler(appCtx.mainLooper).post { Toast.makeText(appCtx, "Post song error: " + resp.value, Toast.LENGTH_LONG).show() }
             }
         }
         else {
@@ -133,8 +131,34 @@ class RestRequestService(
     }
 
     suspend fun deleteSong(song: Song) {
-        TODO("Not Implemented")
+        val token = tokenMgr.getToken()
+        val songToDelete = song.id.toString()
+        suspendCoroutine<ResponseData<String>> { continuation ->
+            val request = RESTRequest(
+                    Request.Method.POST,
+                    httpClient.getBaseURL() + "/usager/chanson/$token",
+                    songToDelete,
+                    String::class.java,
+                    mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
+                    Response.Listener { resp ->
+                        continuation.resume(resp)
+                    },
+                    Response.ErrorListener { error ->
+                        val msg = when (error.networkResponse?.statusCode ?: 0) {
+                            403 -> appCtx.getString(R.string.error_message_server)
+                            405 -> appCtx.getString(R.string.error_message_deletion_refused)
+                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
+                        }
+                        continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
+                    }
+            )
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpClient.addToRequestQueue(request)
+        }
     }
+
+
+
 
     private fun encoder(song: LocalSong): PipedInputStream {
         val inStream = File(song.file.toString()).inputStream()
