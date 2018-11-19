@@ -3,9 +3,12 @@
 #include <future>
 #include <ctime>
 #include <iomanip>
-#include <rapidjson/writer.h>
 #include <sstream>
 #include <iostream>
+#include <stdexcept>
+#include <utility>
+
+#include <rapidjson/writer.h>
 
 #include "RestApi.hpp"
 #include "database/Database.hpp"
@@ -91,7 +94,6 @@ void RestApi::createDescription_() {
             .hide();
 }
 
-
 std::string generateBody(uint32_t id, std::string message) {
     rapidjson::Document idDoc;
     idDoc.SetObject();
@@ -148,7 +150,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 || !request_json.HasMember("ip")
                 || request_json["mac"] == '\n'
                 || request_json["ip"] == '\n'))) {
-        logMsg << "Could not login the admin. The request is malformed.";
+        logMsg << "Could not login the user. The request is malformed.";
         m_logger.err(logMsg.str());
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
@@ -368,14 +370,53 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "deleteFile");
+    std::async(
+        std::launch::async,
+        [this](const Rest::Request& request, Http::ResponseWriter response) {
+            Database* db = Database::instance();
+            uint32_t songId;
+            try {
+                songId = request.param(":no").as<uint32_t>();
+            }
+            catch (const std::runtime_error& e) {
+                response.send(Pistache::Http::Code::Bad_Request, e.what());
+            }
 
-    User_t requestUser; // TODO
-    std::ostringstream osStream;
-    osStream << '{' << requestUser.mac << '}' << " Removed MP3 \"" << "TITLE TODO" << "\" of length " << "SONG LENGTH TODO";
-    m_logger.log(osStream.str());
+            try {
+                User_t requestUser = getUserFromRequestToken_(request);
 
-    std::cout << "deleteFile function called" << std::endl;
+                Song_t song =
+                    db->getSongById(songId);
+                
+                if (song.id != 0 && song.userId == requestUser.userId) {
+                    db->removeSong(songId);
+                    m_cache.deleteFile(song.path);
+
+                    std::ostringstream logMessage;
+                    logMessage << '{' << requestUser.mac << '}' << " Removed MP3 \"" << song.title << "\" of length " << song.duration;
+                    m_logger.log(logMessage.str());
+                    response.send(Pistache::Http::Code::Ok);
+                }
+                else {
+                    std::ostringstream logMessage;
+                    if (song.id == 0) {
+                        logMessage << '{' << requestUser.mac << '}' << " tried to remove nonexistant song of id " << songId;
+                    }
+                    else {
+                        logMessage << '{' << requestUser.mac << '}' << " tried to remove song \"" << song.title << "\" of user " << song.userId;
+                    }
+                    m_logger.err(logMessage.str());
+                    response.send(Pistache::Http::Code::Method_Not_Allowed);
+                }
+            }
+            catch (const std::exception& e) {
+                response.send(Pistache::Http::Code::Forbidden, e.what());
+                return;
+            }
+        },
+        request,
+        std::move(response)
+    );
 }
 
 User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
