@@ -17,16 +17,14 @@ SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache)
 : RestApi(addr, logger, cache)
 , m_volumeApi(m_desc)
 , m_blacklistApi(m_desc)
+, m_statsApi(m_desc)
 , m_logger(logger)
 { }
 
 void SecureRestApi::init() {
     auto opts = Http::Endpoint::options();
     m_httpEndpoint->init(opts);
-    createDescription_();
+    /* createDescription_(); */
     /* createSecureDescription_(); */
-}
-
-void SecureRestApi::createSecureDescription_() {
 }
 

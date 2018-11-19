@@ -9,6 +9,7 @@
 #include "http-server/http/RestApi.hpp"
 #include "descriptions/VolumeApi.hpp"
 #include "descriptions/BlacklistApi.hpp"
+#include "descriptions/StatsApi.hpp"
 #include <common/logger/Logger.hpp>
 
 using namespace Pistache;
@@ -20,17 +21,14 @@ public:
     void init();
 
 private:
-    void createSecureDescription_          ();
 
-    /* void createVolumeDescription_          (Rest::Description&); */
-    /* void createBlacklistDescription_       (Rest::Description&); */
     void createStatisticsDescription_      (Rest::Description&);
     void createAuthDescription_            (Rest::Description&);
     void createFileManagementDescription_  (Rest::Description&);
 
-    VolumeApi         m_volumeApi;
-    BlacklistApi      m_blacklistApi;
-    /* StatisticsApi     m_volumeApi; */
+    VolumeApi      m_volumeApi;
+    BlacklistApi   m_blacklistApi;
+    StatsApi       m_statsApi;
     /* AuthApi           m_volumeApi; */
     /* FileManagementApi m_volumeApi; */
 

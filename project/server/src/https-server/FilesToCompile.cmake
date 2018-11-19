@@ -21,6 +21,7 @@ set(HTTPS_SERVER_CPP_SOURCES
 
     https/descriptions/VolumeApi.cpp
     https/descriptions/BlacklistApi.cpp
+    https/descriptions/StatsApi.cpp
 )
 
 ###############################################################################
@@ -36,6 +37,7 @@ set(HTTPS_SERVER_HEADER_SOURCES
 
     https/descriptions/VolumeApi.hpp
     https/descriptions/BlacklistApi.hpp
+    https/descriptions/StatsApi.hpp
 )
 
 makeAbsolute(HTTPS_SERVER_CPP_SOURCES)

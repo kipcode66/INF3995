@@ -1,17 +1,11 @@
-#include "SecureRestApi.hpp"
+#include <pistache/description.h>
 
-using namespace elevation;
+class StatsApi {
+public:
+    StatsApi(Pistache::Rest::Description& desc);
 
-void SecureRestApi::createStatisticsDescription_(Pistache::Rest::Description& desc) {
-    auto superviseurPath = desc.path("/superviseur");
-    superviseurPath
-            .route(desc.get("/statistiques"))
-            .bind(&SecureRestApi::getSuperviseurStatistiques_, this)
-            .hide();
-}
-
-void SecureRestApi::getSuperviseurStatistiques_(const Rest::Request& request,
-                                 Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "statistics");
-}
+private:
+    void getSuperviseurStatistiques_( const Pistache::Rest::Request&,
+                                      Pistache::Http::ResponseWriter);
+};
 
