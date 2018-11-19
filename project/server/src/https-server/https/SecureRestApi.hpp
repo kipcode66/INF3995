@@ -18,7 +18,7 @@ private:
     static constexpr const char* ADMIN_USERNAME = "admin";
 
 public:
-    SecureRestApi(Address addr, Logger& logger, FileCache&);
+    SecureRestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket);
     void init();
 
 private:

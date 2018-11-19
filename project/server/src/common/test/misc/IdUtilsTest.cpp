@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(md5Type) {
 
 BOOST_AUTO_TEST_CASE(idRange) {
     for (int i = 0; i < 1; i++) {
-        uint32_t id = id_utils::generateId(macToHash, id_utils::generateSalt(i)); 
+        uint32_t id = id_utils::generateId(macToHash, id_utils::generateSalt(i));
         BOOST_CHECK(id >= 1 && id <= UINT32_MAX );
     }
 }

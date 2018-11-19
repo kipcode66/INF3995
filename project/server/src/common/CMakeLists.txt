@@ -25,6 +25,7 @@ link_libraries(                            # Equivalent to the -l flag in g++
     mad
     ssl
     crypto
+    atomic
     stdc++fs
 )
 

@@ -5,7 +5,6 @@
 #include <cstring>
 
 namespace elevation {
-namespace daemon {
 
 ClientSocket::ClientSocket(uint16_t portNum)
     : Socket(portNum)
@@ -33,5 +32,4 @@ ClientSocket& ClientSocket::operator=(ClientSocket&& that) {
     return *this;
 }
 
-} // namespace daemon
 } // namespace elevation

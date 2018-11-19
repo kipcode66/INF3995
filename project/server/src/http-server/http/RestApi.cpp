@@ -3,9 +3,12 @@
 #include <future>
 #include <ctime>
 #include <iomanip>
-#include <rapidjson/writer.h>
 #include <sstream>
 #include <iostream>
+#include <stdexcept>
+#include <utility>
+
+#include <rapidjson/writer.h>
 
 #include "RestApi.hpp"
 #include "database/Database.hpp"
@@ -14,17 +17,19 @@
 #include "mp3/header/Mp3Header.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
-
+#include "exception/MissingTokenException.hpp"
+#include "exception/InvalidTokenException.hpp"
 
 using namespace elevation;
 using namespace std::placeholders;
 namespace fs = std::experimental::filesystem;
 
-RestApi::RestApi(Address addr, Logger& logger, FileCache& cache)
+RestApi::RestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
 , m_logger(logger)
 , m_cache(cache)
+, m_playerEventSocket(std::move(playerEventSocket))
 {
     Database::instance();
 }
@@ -89,7 +94,6 @@ void RestApi::createDescription_() {
             .hide();
 }
 
-
 std::string generateBody(uint32_t id, std::string message) {
     rapidjson::Document idDoc;
     idDoc.SetObject();
@@ -146,7 +150,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 || !request_json.HasMember("ip")
                 || request_json["mac"] == '\n'
                 || request_json["ip"] == '\n'))) {
-        logMsg << "Could not login the admin. The request is malformed.";
+        logMsg << "Could not login the user. The request is malformed.";
         m_logger.err(logMsg.str());
         response.send(Http::Code::Bad_Request, "Malformed request");
         return;
@@ -160,13 +164,12 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 strncpy(requestUser.name, request_json["nom"].GetString(), User_t::NAME_LENGTH);
             }
         }
-        
-        
+
         User_t existingUser = { 0 };
         Database* db = Database::instance();
         existingUser = db->getUserByMac(requestUser.mac);
         if (*existingUser.mac == 0) {
-            std::string salt = id_utils::generateSalt(strlen(requestUser.mac)); 
+            std::string salt = id_utils::generateSalt(strlen(requestUser.mac));
             requestUser.userId = id_utils::generateId(requestUser.mac, salt);
 
             db->createUser(&requestUser);
@@ -184,7 +187,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 db->createUser(&requestUser);
 
                 logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
-                m_logger.log(logMsg.str());    
+                m_logger.log(logMsg.str());
 
                 std::string body = generateBody(requestUser.userId, "connection successful");
                 response.send(Http::Code::Ok, body);
@@ -232,7 +235,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
-    std::cout << "postFile function called" << std::endl;
+    m_logger.log("postFile called");
     std::ostringstream logMsg;
 
     auto t = request.headers().getRaw("X-Auth-Token");
@@ -288,7 +291,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             std::time_t now = std::time(nullptr);
             std::tm* nowTm = std::localtime(&now);
             std::stringstream fileName;
-            // Generate a new name 
+            // Generate a new name
             fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S_") << std::hash<std::string>()(t.value());
             std::experimental::filesystem::path filePath(fileName.str());
             std::experimental::filesystem::path tmpPath = filePath;
@@ -366,12 +369,70 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "deleteFile");
+    std::async(
+        std::launch::async,
+        [this](const Rest::Request& request, Http::ResponseWriter response) {
+            Database* db = Database::instance();
+            uint32_t songId;
+            try {
+                songId = request.param(":no").as<uint32_t>();
+            }
+            catch (const std::runtime_error& e) {
+                response.send(Pistache::Http::Code::Bad_Request, e.what());
+            }
 
-    User_t requestUser; // TODO
-    std::ostringstream osStream;
-    osStream << '{' << requestUser.mac << '}' << " Removed MP3 \"" << "TITLE TODO" << "\" of length " << "SONG LENGTH TODO";
-    m_logger.log(osStream.str());
+            try {
+                User_t requestUser = getUserFromRequestToken_(request);
 
-    std::cout << "deleteFile function called" << std::endl;
+                Song_t song =
+                    db->getSongById(songId);
+
+                if (song.id != 0 && song.userId == requestUser.userId) {
+                    db->removeSong(songId);
+                    m_cache.deleteFile(song.path);
+
+                    std::ostringstream logMessage;
+                    logMessage << '{' << requestUser.mac << '}' << " Removed MP3 \"" << song.title << "\" of length " << song.duration;
+                    m_logger.log(logMessage.str());
+                    response.send(Pistache::Http::Code::Ok);
+                }
+                else {
+                    std::ostringstream logMessage;
+                    if (song.id == 0) {
+                        logMessage << '{' << requestUser.mac << '}' << " tried to remove nonexistant song of id " << songId;
+                    }
+                    else {
+                        logMessage << '{' << requestUser.mac << '}' << " tried to remove song \"" << song.title << "\" of user " << song.userId;
+                    }
+                    m_logger.err(logMessage.str());
+                    response.send(Pistache::Http::Code::Method_Not_Allowed);
+                }
+            }
+            catch (const std::exception& e) {
+                response.send(Pistache::Http::Code::Forbidden, e.what());
+                return;
+            }
+        },
+        request,
+        std::move(response)
+    );
+}
+
+User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
+    auto t = request.headers().getRaw("X-Auth-Token");
+    if (t.value().empty()) {
+        throw MissingTokenException{};
+    }
+
+    uint32_t token = std::stoul(t.value());
+    User_t requestUser = {0};
+    try {
+        requestUser = Database::instance()->getUserById(token);
+    } catch (sqlite_error& e) { }
+
+    if (token == 0 || *requestUser.mac == 0) {
+        throw InvalidTokenException{};
+    }
+
+    return requestUser;
 }

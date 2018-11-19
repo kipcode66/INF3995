@@ -5,8 +5,6 @@
 #include "SecureRestApi.hpp"
 #include "rapidjson/document.h"
 #include "misc/id_utils.hpp"
-#include "database/Database.hpp"
-
 #include "rapidjson/document.h"
 
 #include <common/database/Database.hpp>
@@ -14,8 +12,8 @@
 
 using namespace elevation;
 
-SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache)
-: RestApi(addr, logger, cache)
+SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
+: RestApi(addr, logger, cache, std::move(playerEventSocket))
 , m_logger(logger)
 { }
 
@@ -57,6 +55,14 @@ void SecureRestApi::getSuperviseurFile_(const Rest::Request& request, Http::Resp
     m_logger.log(logMsg.str());
 }
 
+User_t getUserFromRequest(const Rest::Request& request) {
+    auto token = request.headers().getRaw("X-Auth-Token").value();
+    if (token.empty()) {
+        throw std::runtime_error("Header \"X-Auth-Token\" missing.");
+    }
+    Database* db = Database::instance();
+    return db->getUserById(std::stoul(token));
+}
 
 void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWriter response) {
     std::ostringstream logMsg;
@@ -71,9 +77,9 @@ void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::Respon
         std::async([&]() {
             Database* db = Database::instance();
             if (db->isAdminConnected(admin.id)) {
-                logMsg << "Could not Login Admin. Admin with token \"" << admin.id << "\" is already connected.";
-                m_logger.err(logMsg.str());
-                response.send(Http::Code::Bad_Request, "Admin already connected with this token");
+                logMsg << "Admin with token \"" << admin.id << "\" is already connected. Answering idempotently with OK.";
+                m_logger.log(logMsg.str());
+                response.send(Http::Code::Ok, "Already connected");
                 return;
             }
             auto saltAndPasswordHash = db->getSaltAndHashedPasswordByLogin(admin.usager.c_str());
@@ -118,9 +124,9 @@ void SecureRestApi::superviseurLogout_(const Rest::Request& request, Http::Respo
     std::async([&]() {
         Database* db = Database::instance();
         if (!db->isAdminConnected(adminId)) {
-            logMsg << "Could not logout admin with token \"" << adminId << "\". Admin was not already logged in.";
-            m_logger.err(logMsg.str());
-            response.send(Http::Code::Unauthorized, "Admin not connected");
+            logMsg << "User with token \"" << adminId << "\" requested to logout while not being admin. Harmlessly (and politely) response with OK.";
+            m_logger.log(logMsg.str());
+            response.send(Http::Code::Ok, "Already logged out");
             return;
         } else {
             logMsg << "Admin with token \"" << adminId << "\" was successfuly logged out.";
@@ -187,4 +193,3 @@ SecureRestApi::Admin::Admin(const Rest::Request& req) {
     this->mot_de_passe = jsonDocument["mot_de_passe"].GetString();
     this->id = std::stoul(token);
 }
-

@@ -14,7 +14,6 @@
 #include "exception/SocketClosedException.hpp"
 
 namespace elevation {
-namespace daemon {
 
 Socket::Socket(uint16_t portNum)
     : m_fd(s_NO_FD)
@@ -57,16 +56,19 @@ Socket& Socket::operator=(Socket&& that) {
     return *this;
 }
 
-void Socket::write(const std::string& str) {
-    ::write(m_fd, str.c_str(), str.size() + 1);
+void Socket::writeRaw(const std::string& str) {
+    writeRaw_(str, false);
 }
 
-std::string Socket::readLine() {
-    constexpr const char LINE_DELIMITER = '\n'; // The server normally sends \r\n, but only the \n interests us.
+void Socket::write(const std::string& str) {
+    writeRaw_(str, true);
+}
+
+std::string Socket::readLine(char end) {
     std::ostringstream dataStream;
 
     char nextCharacter = readCharacter_();
-    while (nextCharacter != LINE_DELIMITER) {
+    while (nextCharacter != end) {
         dataStream << nextCharacter;
         nextCharacter = readCharacter_();
     }
@@ -100,5 +102,9 @@ char Socket::readCharacter_() {
     return nextCharacter;
 }
 
-} // namespace daemon
+void Socket::writeRaw_(const std::string& str, bool includeNullByte) {
+    std::size_t extraBytesToSend = includeNullByte ? 1 : 0;
+    ::write(m_fd, str.c_str(), str.size() + extraBytesToSend);
+}
+
 } // namespace elevation

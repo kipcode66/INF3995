@@ -15,11 +15,23 @@ set(COMMON_CPP_SOURCES
     logger/Logger.cpp
     mp3/header/Mp3Duration.cpp
     mp3/header/Mp3Header.cpp
+    mp3/event/Mp3Event.cpp
+    mp3/event/VolumeChangeEvent.cpp
+    mp3/communication/Mp3EventSocket.cpp
+    mp3/communication/Mp3EventListenerSocket.cpp
+    mp3/communication/Mp3EventClientSocket.cpp
+    mp3/communication/packet/Mp3EventPacketReader.cpp
     database/Database.cpp
     database/sqlite_error.cpp
     database/Statement.cpp
     database/Query.cpp
     os/SharedFileMemory.cpp
+    os/Socket.cpp
+    os/TestSocket.cpp
+    os/ListenerSocket.cpp
+    os/ClientSocket.cpp
+    os/exception/SocketClosedException.cpp
+    os/signal/SignalHandling.cpp
     filesystem/FileCache.cpp
     misc/id_utils.cpp
 )
@@ -35,6 +47,13 @@ set(COMMON_HEADER_SOURCES
     logger/Logger.hpp
     mp3/header/Mp3Duration.hpp
     mp3/header/Mp3Header.hpp
+    mp3/event/Mp3Event.hpp
+    mp3/event/VolumeChangeEvent.hpp
+    mp3/event/AbstractMp3EventVisitor.hpp
+    mp3/communication/Mp3EventSocket.hpp
+    mp3/communication/Mp3EventListenerSocket.hpp
+    mp3/communication/Mp3EventClientSocket.hpp
+    mp3/communication/packet/Mp3EventPacketReader.hpp
     database/Database.hpp
     database/sqlite_error.hpp
     database/Statement.hpp
@@ -42,6 +61,12 @@ set(COMMON_HEADER_SOURCES
     database/templates/Song.hpp
     database/templates/User.hpp
     os/SharedFileMemory.hpp
+    os/Socket.hpp
+    os/TestSocket.hpp
+    os/ListenerSocket.hpp
+    os/ClientSocket.hpp
+    os/exception/SocketClosedException.hpp
+    os/signal/SignalHandling.hpp
     filesystem/FileCache.hpp
     misc/Base64.hpp
     misc/id_utils.hpp

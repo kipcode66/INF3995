@@ -113,7 +113,7 @@ startHttpServer() {
     local NUM_TRIES_DEV_MODE="20"
     local RETRY_DELAY="0.5"
     local PORT_OPTION="--port"
-    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\""
+    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\" --player-port ${ELEVATION_PLAYER_PORT}"
 
     startServerProcess "${NAME}" "${PROCESS_EXECUTABLE}" "${OUTPUT_VARIABLE}" "${BASE_PORT_PROD_MODE}" "${NUM_TRIES_PROD_MODE}" "${BASE_PORT_DEV_MODE}" "${NUM_TRIES_DEV_MODE}" "${RETRY_DELAY}" "${PORT_OPTION}" "${EXTRA_PARAMS}"
 }
@@ -129,7 +129,7 @@ startHttpsServer() {
     local NUM_TRIES_DEV_MODE="20"
     local RETRY_DELAY="0.5"
     local PORT_OPTION="--port"
-    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\""
+    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\" --player-port ${ELEVATION_PLAYER_PORT}"
 
     startServerProcess "${NAME}" "${PROCESS_EXECUTABLE}" "${OUTPUT_VARIABLE}" "${BASE_PORT_PROD_MODE}" "${NUM_TRIES_PROD_MODE}" "${BASE_PORT_DEV_MODE}" "${NUM_TRIES_DEV_MODE}" "${RETRY_DELAY}" "${PORT_OPTION}" "${EXTRA_PARAMS}"
 }

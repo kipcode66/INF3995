@@ -14,8 +14,9 @@ class RestServerArgsParser {
 public:
     explicit RestServerArgsParser(const std::vector<std::string>& args);
 
-    uint16_t    getPort()      const { return m_port;      }
-    std::string getCachePath() const { return m_cachePath; }
+    uint16_t    getPort()       const { return m_port;       }
+    uint16_t    getPlayerPort() const { return m_playerPort; }
+    std::string getCachePath()  const { return m_cachePath;  }
 
 protected:
     uint16_t parsePort_(const std::string& portString) const;
@@ -23,6 +24,7 @@ protected:
 
 protected:
     uint32_t m_port;
+    uint32_t m_playerPort;
     std::string m_cachePath;
 };
 

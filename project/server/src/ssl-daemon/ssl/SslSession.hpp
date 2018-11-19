@@ -4,7 +4,7 @@
 #include <openssl/ssl.h>
 #include <memory>
 
-#include "communication/Socket.hpp"
+#include <common/os/Socket.hpp>
 
 namespace elevation {
 namespace daemon {
