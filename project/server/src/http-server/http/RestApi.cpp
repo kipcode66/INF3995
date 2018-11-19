@@ -106,42 +106,6 @@ std::string generateBody(uint32_t id, std::string message) {
     return buf.GetString();
 }
 
-std::string RestApi::generateSong_(const Song_t& song, uint32_t token, bool adminSerialization) {
-    rapidjson::Document songDoc;
-    songDoc.SetObject();
-    try {
-        User_t user = Database::instance()->getUserById(song.userId);
-        Mp3Duration d(song.duration);
-        std::stringstream duration;
-        duration << std::setfill('0') << std::setw(2);
-        duration << d.getMinutes() << ':' << d.getSeconds();
-        songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), songDoc.GetAllocator());
-        songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
-        songDoc.AddMember("duree", rapidjson::Value(duration.str().c_str(), duration.str().length()), songDoc.GetAllocator());
-        songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
-        songDoc.AddMember("proprietaire", token == song.userId ? true : false, songDoc.GetAllocator());
-        songDoc.AddMember("no", song.id, songDoc.GetAllocator());
-
-        if (adminSerialization) {
-            Database* db = Database::instance();
-            User_t owner = db->getUserById(token);
-            songDoc.AddMember("mac", rapidjson::Value(owner.mac   , strlen(owner.mac   )), songDoc.GetAllocator());
-            songDoc.AddMember("ip" , rapidjson::Value(owner.ip    , strlen(owner.ip    )), songDoc.GetAllocator());
-            songDoc.AddMember("id" , owner.userId, songDoc.GetAllocator());
-        }
-    }
-    catch (sqlite_error& e) {
-        std::stringstream msg;
-        msg << "An error occured while generating song a song's json: " << e.what();
-        m_logger.err(msg.str());
-    }
-    rapidjson::StringBuffer buf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
-    songDoc.Accept(writer);
-
-    return buf.GetString();
-}
-
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
 
     std::string passwordHash = elevation::id_utils::generateMd5Hash("password123", "abc");
@@ -424,6 +388,42 @@ void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter res
         request,
         std::move(response)
     );
+}
+
+std::string RestApi::generateSong_(const Song_t& song, uint32_t token, bool adminSerialization) {
+    rapidjson::Document songDoc;
+    songDoc.SetObject();
+    try {
+        User_t user = Database::instance()->getUserById(song.userId);
+        Mp3Duration d(song.duration);
+        std::stringstream duration;
+        duration << std::setfill('0') << std::setw(2);
+        duration << d.getMinutes() << ':' << d.getSeconds();
+        songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), songDoc.GetAllocator());
+        songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
+        songDoc.AddMember("duree", rapidjson::Value(duration.str().c_str(), duration.str().length()), songDoc.GetAllocator());
+        songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
+        songDoc.AddMember("proprietaire", token == song.userId ? true : false, songDoc.GetAllocator());
+        songDoc.AddMember("no", song.id, songDoc.GetAllocator());
+
+        if (adminSerialization) {
+            Database* db = Database::instance();
+            User_t owner = db->getUserById(token);
+            songDoc.AddMember("mac", rapidjson::Value(owner.mac   , strlen(owner.mac   )), songDoc.GetAllocator());
+            songDoc.AddMember("ip" , rapidjson::Value(owner.ip    , strlen(owner.ip    )), songDoc.GetAllocator());
+            songDoc.AddMember("id" , owner.userId, songDoc.GetAllocator());
+        }
+    }
+    catch (sqlite_error& e) {
+        std::stringstream msg;
+        msg << "An error occured while generating song a song's json: " << e.what();
+        m_logger.err(msg.str());
+    }
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    songDoc.Accept(writer);
+
+    return buf.GetString();
 }
 
 User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
