@@ -109,7 +109,7 @@ static int wait_for_unlock_notify(sqlite3 *db) {
 */
 int sqlite3_blocking_step(sqlite3_stmt *pStmt) {
     int rc;
-    while( SQLITE_LOCKED==(rc = sqlite3_step(pStmt)) ) {
+    while( SQLITE_LOCKED==(rc = sqlite3_step(pStmt)) || SQLITE_BUSY==rc ) {
         rc = wait_for_unlock_notify(sqlite3_db_handle(pStmt));
         if( rc!=SQLITE_OK ) break;
         sqlite3_reset(pStmt);
@@ -136,7 +136,7 @@ int sqlite3_blocking_prepare_v2(
     const char **pz           /* OUT: End of parsed string */
 ) {
     int rc;
-    while( SQLITE_LOCKED==(rc = sqlite3_prepare_v2(db, zSql, nSql, ppStmt, pz)) ) {
+    while( SQLITE_LOCKED==(rc = sqlite3_prepare_v2(db, zSql, nSql, ppStmt, pz)) || SQLITE_BUSY==rc ) {
         rc = wait_for_unlock_notify(db);
         if( rc!=SQLITE_OK ) break;
     }
