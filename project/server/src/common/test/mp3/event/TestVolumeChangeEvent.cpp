@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(serialize) {
 
     // Signature
     std::vector<uint8_t> volumeChangeSerialization = getSignatureAndTypeVector();
-    
+
     volumeChangeSerialization.push_back(42);
     testCases.push_back({42 , volumeChangeSerialization});
 

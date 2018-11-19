@@ -11,7 +11,7 @@ class SslSession;
 } // namespace daemon
 
 class Socket {
-    
+
     friend class daemon::SslSession; // Requires the file descriptor
 
 public:

@@ -28,7 +28,7 @@ std::string TestSocket::readLine(char end) {
         ++endIt;
     }
     std::string nextLine = consumeDataFromBuffer_(m_writtenData.begin(), endIt);
-    
+
     if (nextLine.empty() || nextLine.back() != end) {
         m_isClosed = true;
         throw SocketClosedException();
