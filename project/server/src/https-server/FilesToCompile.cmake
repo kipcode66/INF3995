@@ -16,13 +16,11 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTPS_SERVER_CPP_SOURCES
     https/SecureRestApi.cpp
-    https/blacklist.cpp
-    https/statistics.cpp
-    https/auth.cpp
-    https/statistics.cpp
-    https/fileManagement.cpp
+
     Admin.cpp
+
     https/descriptions/VolumeApi.cpp
+    https/descriptions/BlacklistApi.cpp
 )
 
 ###############################################################################
@@ -33,8 +31,11 @@ set(HTTPS_SERVER_CPP_SOURCES
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTPS_SERVER_HEADER_SOURCES
     https/SecureRestApi.hpp
+
     Admin.hpp
+
     https/descriptions/VolumeApi.hpp
+    https/descriptions/BlacklistApi.hpp
 )
 
 makeAbsolute(HTTPS_SERVER_CPP_SOURCES)
