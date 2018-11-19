@@ -54,7 +54,7 @@ class DataProvider {
         localSongsObservable.makeChanged()
         localSongsObservable.notifyObservers(localSongs)
     }
-    fun setBlackListOfUsers(user: Collection<User>){
+    fun setBlackListOfUsers(user: Collection<User>) {
         blackList.clear()
         blackList.addAll(user)
         blackListObservable.makeChanged()

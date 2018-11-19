@@ -62,8 +62,7 @@ class SecureRestRequestService(
                         500 -> appCtx.getString(R.string.error_message_server)
                         else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
                     }
-                    // TODO Send a signal to the Presenter to show popup with the response message.
-                    // Temporarly, opening a Toast (a little message at the bottom of the screen)
+                    // lastMessageSongList is used to prevent having the same message spamming the user.
                     if (canDisplayMessage && lastMessageSongList != msg) {
                         lastMessageSongList = msg
                         Handler(appCtx.mainLooper).post {

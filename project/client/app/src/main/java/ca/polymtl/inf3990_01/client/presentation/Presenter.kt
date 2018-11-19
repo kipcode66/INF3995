@@ -12,7 +12,6 @@ import java.util.*
  */
 class Presenter(stateService: AppStateService): Observable() {
     private val songQueue: SongQueue = SongQueue()
-    private val blackList: UserList = UserList()
 
     init {
         stateService.addObserver(this::onStateUpdate)

@@ -23,7 +23,7 @@ class AppStateService(private val appCtx: Context): Observable() {
                 override fun updateNavigationView(menu: Menu) {
                     menu.findItem(R.id.nav_blacklist).isVisible = false
                     menu.findItem(R.id.nav_statistics).isVisible = false
-                    menu.removeItem(menu.add("").itemId)
+                    menu.removeItem(menu.add("").itemId) // Forces an update of the view
                 }
 
                 override fun isSongHighlighted(song: Song): Boolean = song.sentBy == null
@@ -50,7 +50,7 @@ class AppStateService(private val appCtx: Context): Observable() {
                 override fun updateNavigationView(menu: Menu) {
                     menu.findItem(R.id.nav_blacklist).isVisible = true
                     menu.findItem(R.id.nav_statistics).isVisible = true
-                    menu.removeItem(menu.add("").itemId)
+                    menu.removeItem(menu.add("").itemId) // Forces an update of the view
                 }
 
                 override fun sendFile(song: LocalSong): Boolean {
