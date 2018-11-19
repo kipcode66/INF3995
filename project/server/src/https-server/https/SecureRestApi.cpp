@@ -15,6 +15,7 @@ using namespace elevation;
 
 SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache)
 : RestApi(addr, logger, cache)
+, m_volumeApi(m_desc)
 , m_logger(logger)
 { }
 
@@ -35,7 +36,7 @@ void SecureRestApi::createSecureDescription_() {
     /**
      * Volume Management
      */
-    createVolumeDescription_(m_desc);
+    /* createVolumeDescription_(m_desc); */
 
     /**
      * Statistics
@@ -51,5 +52,7 @@ void SecureRestApi::createSecureDescription_() {
      * Login Management
      */
     createAuthDescription_(m_desc);
+
+    /* this->m_volumeApi = new VolumeApi(this->m_desc); */
 }
 

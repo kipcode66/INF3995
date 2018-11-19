@@ -1,58 +1,57 @@
-#include "SecureRestApi.hpp"
+#include "VolumeApi.hpp"
 
-using namespace elevation;
+using namespace Pistache;
 
-
-void SecureRestApi::createVolumeDescription_(Pistache::Rest::Description& desc) {
+VolumeApi::VolumeApi(Pistache::Rest::Description& desc) {
     auto volumePath = desc.path("superviseur/volume");
     volumePath
             .route(desc.get(""))
-            .bind(&SecureRestApi::getSuperviseurVolume_, this)
+            .bind(&VolumeApi::GET_volume_, this)
             .hide();
 
     volumePath
             .route(desc.post("/augmenter/:pc"))
-            .bind(&SecureRestApi::postSuperviseurVolumeAug_, this)
+            .bind(&VolumeApi::POST_volumeAug_, this)
             .hide();
 
     volumePath
             .route(desc.post("/diminuer/:pc"))
-            .bind(&SecureRestApi::postSuperviseurVolumeDim_, this)
+            .bind(&VolumeApi::POST_volumeDim_, this)
             .hide();
 
     auto sourdinePath = volumePath.path("/sourdine");
     sourdinePath
             .route(desc.post("/activer"))
-            .bind(&SecureRestApi::postSuperviseurSourdineActiver_, this)
+            .bind(&VolumeApi::POST_sourdineActiver_, this)
             .hide();
 
     sourdinePath
             .route(desc.post("/desactiver"))
-            .bind(&SecureRestApi::postSuperviseurSourdineDesactiver_, this)
+            .bind(&VolumeApi::POST_sourdineDesactiver_, this)
             .hide();
 }
 
-void SecureRestApi::getSuperviseurVolume_(const Rest::Request& request,
+void VolumeApi::GET_volume_(const Rest::Request& request,
                                           Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "getSuperviseurVolume_ called");
+    response.send(Http::Code::Ok, "GET_volume_ called");
 }
 
-void SecureRestApi::postSuperviseurVolumeAug_ (const Rest::Request& request,
+void VolumeApi::POST_volumeAug_ (const Rest::Request& request,
                                                Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "volume Up");
 }
 
-void SecureRestApi::postSuperviseurVolumeDim_ (const Rest::Request& request,
+void VolumeApi::POST_volumeDim_ (const Rest::Request& request,
                                                Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "volume Down");
 }
 
-void SecureRestApi::postSuperviseurSourdineActiver_(const Rest::Request& request,
+void VolumeApi::POST_sourdineActiver_(const Rest::Request& request,
                                                     Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "volume muted");
 }
 
-void SecureRestApi::postSuperviseurSourdineDesactiver_(const Rest::Request& request,
+void VolumeApi::POST_sourdineDesactiver_(const Rest::Request& request,
                                                        Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "volume unmuted");
 }
