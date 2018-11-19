@@ -233,7 +233,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
 }
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
-    std::cout << "postFile function called" << std::endl;
+    m_logger.log("postFile called");
     std::ostringstream logMsg;
 
     auto t = request.headers().getRaw("X-Auth-Token");
