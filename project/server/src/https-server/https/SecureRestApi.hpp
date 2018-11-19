@@ -10,6 +10,9 @@
 #include "descriptions/VolumeApi.hpp"
 #include "descriptions/BlacklistApi.hpp"
 #include "descriptions/StatsApi.hpp"
+#include "descriptions/FileManagementApi.hpp"
+#include "descriptions/AuthApi.hpp"
+
 #include <common/logger/Logger.hpp>
 
 using namespace Pistache;
@@ -22,26 +25,11 @@ public:
 
 private:
 
-    void createStatisticsDescription_      (Rest::Description&);
-    void createAuthDescription_            (Rest::Description&);
-    void createFileManagementDescription_  (Rest::Description&);
-
-    VolumeApi      m_volumeApi;
-    BlacklistApi   m_blacklistApi;
-    StatsApi       m_statsApi;
-    /* AuthApi           m_volumeApi; */
-    /* FileManagementApi m_volumeApi; */
-
-    void getSuperviseurFile_               (const Rest::Request&, Http::ResponseWriter);
-    void deleteSuperviseurChanson_         (const Rest::Request&, Http::ResponseWriter);
-    void postSuperviseurInversion_         (const Rest::Request&, Http::ResponseWriter);
-
-    void getSuperviseurStatistiques_       (const Rest::Request&, Http::ResponseWriter);
-
-
-    void postChangePassword_               (const Rest::Request&, Http::ResponseWriter);
-    void superviseurLogin_                 (const Rest::Request&, Http::ResponseWriter);
-    void superviseurLogout_                (const Rest::Request&, Http::ResponseWriter);
+    VolumeApi         m_volumeApi;
+    BlacklistApi      m_blacklistApi;
+    StatsApi          m_statsApi;
+    AuthApi           m_authApi;
+    FileManagementApi m_fileManagementApi;
 
 private:
     Logger& m_logger;
