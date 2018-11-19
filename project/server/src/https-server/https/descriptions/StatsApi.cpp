@@ -1,4 +1,4 @@
-#include <pistache/net.h>
+/* #include <pistache/net.h> */
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
 #include <pistache/description.h>
@@ -8,7 +8,7 @@
 using namespace Pistache;
 
 
-StatsApi::StatsApi(Pistache::Rest::Description& desc) {
+StatsApi::StatsApi(Rest::Description& desc) {
     auto superviseurPath = desc.path("/superviseur");
     superviseurPath
             .route(desc.get("/statistiques"))

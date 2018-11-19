@@ -28,3 +28,4 @@ run_curl "listenoire" "GET" "/superviseur/listenoire"
 run_curl "login" "POST" "/superviseur/login"
 run_curl "logout" "POST" "/superviseur/logout"
 run_curl "change mdp" "POST" "/superviseur/changement_mdp"
+

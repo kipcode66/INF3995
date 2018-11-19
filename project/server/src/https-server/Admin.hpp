@@ -1,12 +1,12 @@
 #ifndef HTTPS_ADMIN_HPP
 #define HTTPS_ADMIN_HPP
 
-#include "https/SecureRestApi.hpp"
+#include <pistache/description.h>
 #include <rapidjson/document.h>
 
 class Admin {
 public:
-    Admin(const Rest::Request&);
+    Admin(const Pistache::Rest::Request&);
 
     std::string getUsername() const;
     std::string getMotDePasse() const;
