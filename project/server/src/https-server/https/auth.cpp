@@ -30,7 +30,7 @@ void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::Respon
     std::ostringstream logMsg;
     try {
         Admin admin(request);
-        if (admin.usager != Database::ADMIN_NAME) {
+        if (admin.getUsername() != Database::ADMIN_NAME) {
             logMsg << "Could not login the admin. Received wrong login";
             m_logger.err(logMsg.str());
             response.send(Http::Code::Bad_Request, "Wrong login");
@@ -38,24 +38,24 @@ void SecureRestApi::superviseurLogin_(const Rest::Request& request, Http::Respon
         }
         std::async([&]() {
             Database* db = Database::instance();
-            if (db->isAdminConnected(admin.id)) {
-                logMsg << "Could not Login Admin. Admin with token \"" << admin.id << "\" is already connected.";
+            if (db->isAdminConnected(admin.getId())) {
+                logMsg << "Could not Login Admin. Admin with token \"" << admin.getId() << "\" is already connected.";
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Bad_Request, "Admin already connected with this token");
                 return;
             }
-            auto saltAndPasswordHash = db->getSaltAndHashedPasswordByLogin(admin.usager.c_str());
+            auto saltAndPasswordHash = db->getSaltAndHashedPasswordByLogin(admin.getUsername().c_str());
             std::string salt = std::get<0>(saltAndPasswordHash);
             std::string hash = std::get<1>(saltAndPasswordHash);
-            std::string passwordHash = elevation::id_utils::generateMd5Hash(admin.mot_de_passe, salt);
+            std::string passwordHash = elevation::id_utils::generateMd5Hash(admin.getMotDePasse(), salt);
             if (passwordHash == hash) {
-                db->connectAdmin(admin.usager.c_str(), admin.id);
-                logMsg << "Successfuly logged in admin with token \"" << admin.id << "\".";
+                db->connectAdmin(admin.getUsername().c_str(), admin.getId());
+                logMsg << "Successfuly logged in admin with token \"" << admin.getId() << "\".";
                 m_logger.log(logMsg.str());
                 response.send(Http::Code::Ok, "Connexion successful");
                 return;
             } else {
-                logMsg << "Could not Login admin with token \"" << admin.id << "\". Received wrong password";
+                logMsg << "Could not Login admin with token \"" << admin.getId() << "\". Received wrong password";
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Forbidden, "Wrong password");
                 return;

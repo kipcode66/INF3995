@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-PORT=7778
+PORT=7777
 IP=127.0.0.1
 METHOD=https
 

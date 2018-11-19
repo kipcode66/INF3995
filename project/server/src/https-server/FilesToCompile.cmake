@@ -22,6 +22,7 @@ set(HTTPS_SERVER_CPP_SOURCES
     https/auth.cpp
     https/statistics.cpp
     https/fileManagement.cpp
+    Admin.cpp
 )
 
 ###############################################################################
@@ -32,7 +33,7 @@ set(HTTPS_SERVER_CPP_SOURCES
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTPS_SERVER_HEADER_SOURCES
     https/SecureRestApi.hpp
-    https/Admin.hpp
+    Admin.hpp
 )
 
 makeAbsolute(HTTPS_SERVER_CPP_SOURCES)
