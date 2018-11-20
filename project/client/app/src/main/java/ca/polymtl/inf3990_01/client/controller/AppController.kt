@@ -95,7 +95,11 @@ class AppController(
             val jobTmp = reloadQueueJob
             reloadQueueJob = async {
                 jobTmp?.join()
-                val list = restService.getSongList()
+                val list = if (appStateService.getState().type == AppStateService.State.Admin) {
+                    secureRestService.getSongList()
+                } else {
+                    restService.getSongList()
+                }
                 // now, we update the model
                 presenter.setQueue(list)
             }
