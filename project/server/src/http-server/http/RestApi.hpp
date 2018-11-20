@@ -42,6 +42,7 @@ protected:
     std::string generateAllSongsAsViewedBy_(uint32_t token, bool adminSerialization = false);
     rapidjson::Value& generateSong_(const Song_t& song, uint32_t token, rapidjson::Document::AllocatorType& allocator, bool adminSerialization);
 
+protected:
     std::shared_ptr<Pistache::Http::Endpoint> m_httpEndpoint;
     Pistache::Rest::Description m_desc;
     Pistache::Rest::Router m_router;
