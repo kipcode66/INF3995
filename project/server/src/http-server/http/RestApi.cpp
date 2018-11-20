@@ -1,3 +1,5 @@
+#include "RestApi.hpp"
+
 #include <math.h>
 #include <thread>
 #include <future>
@@ -11,11 +13,12 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include "RestApi.hpp"
-#include "database/Database.hpp"
-#include "misc/Base64.hpp"
-#include "misc/id_utils.hpp"
-#include "mp3/header/Mp3Header.hpp"
+#include <common/database/Database.hpp>
+#include <common/misc/Base64.hpp>
+#include <common/misc/id_utils.hpp>
+#include <common/mp3/header/Mp3Header.hpp>
+#include <common/rest/rest_utils.hpp>
+
 #include "exception/BadRequestException.hpp"
 #include "exception/MissingTokenException.hpp"
 #include "exception/InvalidTokenException.hpp"
