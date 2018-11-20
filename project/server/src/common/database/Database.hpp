@@ -6,6 +6,7 @@
 #include <utility>
 #include <experimental/filesystem>
 
+#include "Statement.hpp"
 #include "templates/User.hpp"
 #include "templates/Song.hpp"
 #include "sqlite_error.hpp"
@@ -72,6 +73,7 @@ protected:
     User_t getUserByQuery_(const Query&) const;
     std::vector<User_t> getUsersByQuery_(const Query&) const;
     void executeQuery_(const Query& query);
+    User_t getUserFromStatement_(const Statement& stmt) const;
 
     sqlite3* m_db = 0;
 };

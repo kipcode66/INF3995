@@ -9,7 +9,6 @@
 #include <thread>
 
 #include "misc/id_utils.hpp"
-#include "Statement.hpp"
 #include "Query.hpp"
 
 using namespace elevation;
@@ -46,35 +45,30 @@ void Database::executeQuery_(const Query& query) {
     stmt.step();
 }
 
+User_t Database::getUserFromStatement_(const Statement& stmt) const {
+    User_t user;
+    user.userId = stmt.getColumnInt(0);
+    strncpy(user.ip, stmt.getColumnText(1).c_str(), User_t::IP_LENGTH);
+    strncpy(user.name, stmt.getColumnText(2).c_str(), User_t::NAME_LENGTH);
+    strncpy(user.mac, stmt.getColumnText(3).c_str(), User_t::MAC_LENGTH);
+    return user;
+}
+
 User_t Database::getUserByQuery_(const Query& query) const {
-    User_t user = {0};
+    User_t user;
     Statement stmt{m_db, query};
-
     if (stmt.step()) {
-        user.userId = stmt.getColumnInt(0);
-        strncpy(user.ip, stmt.getColumnText(1).c_str(), User_t::IP_LENGTH);
-        strncpy(user.name, stmt.getColumnText(2).c_str(), User_t::NAME_LENGTH);
-        strncpy(user.mac, stmt.getColumnText(3).c_str(), User_t::MAC_LENGTH); // do last as a coherence check
+        user = getUserFromStatement_(stmt);
     }
-
-    return std::move(user);
+    return user;
 }
 
 std::vector<User_t> Database::getUsersByQuery_(const Query& query) const {
-    User_t user;
     std::vector<User_t> users;
     Statement stmt{m_db, query};
-
     while (stmt.step()) {
-        user = { 0 };
-        user.userId = stmt.getColumnInt(0);
-        strncpy(user.ip, stmt.getColumnText(1).c_str(), User_t::IP_LENGTH);
-        strncpy(user.name, stmt.getColumnText(2).c_str(), User_t::NAME_LENGTH);
-        strncpy(user.mac, stmt.getColumnText(3).c_str(), User_t::MAC_LENGTH); // do last as a coherence check
-
-        users.push_back(user);
+        users.push_back(getUserFromStatement_(stmt));
     }
-
     return users;
 }
 
