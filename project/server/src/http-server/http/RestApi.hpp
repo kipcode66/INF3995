@@ -37,7 +37,7 @@ protected:
     void deleteFile_(const Rest::Request& request, Http::ResponseWriter response);
 
     std::string generateAllSongsAsViewedBy_(uint32_t token, bool adminSerialization = false);
-    rapidjson::Document generateSong_(const Song_t& song, uint32_t token, bool adminSerialization);
+    rapidjson::Value& generateSong_(const Song_t& song, uint32_t token, rapidjson::Document::AllocatorType& allocator, bool adminSerialization);
 
     static User_t getUserFromRequestToken_(const Rest::Request& request);
 

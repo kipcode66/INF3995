@@ -383,12 +383,12 @@ std::string RestApi::generateAllSongsAsViewedBy_(uint32_t token, bool adminSeria
     std::vector<Song_t> songs = Database::instance()->getAllSongs();
     rapidjson::Document songsDoc;
     songsDoc.SetObject();
-    rapidjson::Document songsArray;
+    rapidjson::Value songsArray;
     songsArray.SetArray();
     for (auto& song : songs) {
-        songsArray.PushBack(generateSong_(song, token, adminSerialization), songsDoc.GetAllocator());
+        songsArray.PushBack(generateSong_(song, token, songsDoc.GetAllocator(), adminSerialization), songsDoc.GetAllocator());
     }
-    songsDoc.AddMember("chansons", songsArray, songsDoc.GetAllocator());
+    songsDoc.AddMember(rapidjson::Value().SetString("chansons"), songsArray, songsDoc.GetAllocator());
 
     rapidjson::StringBuffer buf;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
@@ -397,8 +397,8 @@ std::string RestApi::generateAllSongsAsViewedBy_(uint32_t token, bool adminSeria
     return buf.GetString();
 }
 
-rapidjson::Document RestApi::generateSong_(const Song_t& song, uint32_t token, bool adminSerialization) {
-    rapidjson::Document songDoc;
+rapidjson::Value& RestApi::generateSong_(const Song_t& song, uint32_t token, rapidjson::Document::AllocatorType& allocator, bool adminSerialization) {
+    rapidjson::Value songDoc;
     songDoc.SetObject();
     try {
         User_t user = Database::instance()->getUserById(song.userId);
@@ -406,19 +406,19 @@ rapidjson::Document RestApi::generateSong_(const Song_t& song, uint32_t token, b
         std::stringstream duration;
         duration << std::setfill('0') << std::setw(2);
         duration << d.getMinutes() << ':' << d.getSeconds();
-        songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), songDoc.GetAllocator());
-        songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), songDoc.GetAllocator());
-        songDoc.AddMember("duree", rapidjson::Value(duration.str().c_str(), duration.str().length()), songDoc.GetAllocator());
-        songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), songDoc.GetAllocator());
-        songDoc.AddMember("proprietaire", token == song.userId ? true : false, songDoc.GetAllocator());
-        songDoc.AddMember("no", song.id, songDoc.GetAllocator());
+        songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), allocator);
+        songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), allocator);
+        songDoc.AddMember("duree", rapidjson::Value(duration.str().c_str(), duration.str().length()), allocator);
+        songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), allocator);
+        songDoc.AddMember("proprietaire", token == song.userId ? true : false, allocator);
+        songDoc.AddMember("no", song.id, allocator);
 
         if (adminSerialization) {
             Database* db = Database::instance();
             User_t owner = db->getUserById(song.userId);
-            songDoc.AddMember("mac", rapidjson::Value(owner.mac   , strlen(owner.mac   )), songDoc.GetAllocator());
-            songDoc.AddMember("ip" , rapidjson::Value(owner.ip    , strlen(owner.ip    )), songDoc.GetAllocator());
-            songDoc.AddMember("id" , owner.userId, songDoc.GetAllocator());
+            songDoc.AddMember("mac", rapidjson::Value(owner.mac, strlen(owner.mac)), allocator);
+            songDoc.AddMember("ip" , rapidjson::Value(owner.ip , strlen(owner.ip )), allocator);
+            songDoc.AddMember("id" , owner.userId, allocator);
         }
     }
     catch (sqlite_error& e) {
@@ -426,7 +426,7 @@ rapidjson::Document RestApi::generateSong_(const Song_t& song, uint32_t token, b
         msg << "An error occured while generating song a song's json: " << e.what();
         m_logger.err(msg.str());
     }
-    return songDoc;
+    return songDoc.Move();
 }
 
 User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
