@@ -29,16 +29,6 @@ BlacklistApi::BlacklistApi(Pistache::Rest::Description& desc, Logger& logger)
         .hide();
 }
 
-void BlacklistApi::postSuperviseurBloquer_(const Rest::Request& request,
-                                            Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "user blocked");
-}
-
-void BlacklistApi::postSuperviseurDebloquer_(const Rest::Request& request,
-                                              Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "user unblocked");
-}
-
 void BlacklistApi::getSuperviseurListenoire_(const Rest::Request& request,
                                              Http::ResponseWriter response) {
     std::thread([this](const Rest::Request& request, Http::ResponseWriter response) {
@@ -95,5 +85,15 @@ std::string BlacklistApi::generateUser_(const User_t& user) {
     userDoc.Accept(writer);
 
     return buf.GetString();
+}
+
+void BlacklistApi::postSuperviseurBloquer_(const Rest::Request& request,
+                                            Http::ResponseWriter response) {
+    response.send(Http::Code::Ok, "user blocked");
+}
+
+void BlacklistApi::postSuperviseurDebloquer_(const Rest::Request& request,
+                                              Http::ResponseWriter response) {
+    response.send(Http::Code::Ok, "user unblocked");
 }
 

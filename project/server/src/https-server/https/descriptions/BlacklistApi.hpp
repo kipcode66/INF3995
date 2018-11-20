@@ -11,11 +11,11 @@ public:
     BlacklistApi(Pistache::Rest::Description& desc, elevation::Logger&);
 
 protected:
+    void getSuperviseurListenoire_(const Pistache::Rest::Request&,
+                                   Pistache::Http::ResponseWriter);
     void postSuperviseurBloquer_  (const Pistache::Rest::Request&,
                                    Pistache::Http::ResponseWriter);
     void postSuperviseurDebloquer_(const Pistache::Rest::Request&,
-                                   Pistache::Http::ResponseWriter);
-    void getSuperviseurListenoire_(const Pistache::Rest::Request&,
                                    Pistache::Http::ResponseWriter);
     std::string generateUser_     (const User_t&);
 
