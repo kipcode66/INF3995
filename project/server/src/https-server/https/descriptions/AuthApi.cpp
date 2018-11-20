@@ -7,7 +7,7 @@
 #include <common/logger/Logger.hpp>
 
 #include <http-server/http/exception/InvalidTokenException.hpp>
-#include <http-server/http/exception/BadRequestException.hpp>
+#include <http-server/http/exception/MissingTokenException.hpp>
 
 #include "misc/id_utils.hpp"
 #include "Admin.hpp"
@@ -92,35 +92,39 @@ void AuthApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWrit
 }
 
 void AuthApi::superviseurLogout_(const Rest::Request& request, Http::ResponseWriter response) {
-    auto t = request.headers().getRaw("X-Auth-Token");
-    std::ostringstream logMsg;
-    if (t.value().empty()) {
-        logMsg << "Could not login the admin. Header \"X-Auth-Token\" missing.";
-        m_logger.err(logMsg.str());
-        response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" missing");
-        return;
-    }
-    uint32_t adminId = std::stoul(t.value());
-    if (adminId == 0) {
-        logMsg << "Received an invalid token to logout admin. Logout Aborted.";
-        m_logger.err(logMsg.str());
-        response.send(Http::Code::Forbidden, "Invalid token");
-        return;
-    }
     std::async([&]() {
-        Database* db = Database::instance();
-        if (!db->isAdminConnected(adminId)) {
-            logMsg << "Could not logout admin with token \"" << adminId << "\". Admin was not already logged in.";
-            m_logger.err(logMsg.str());
-            response.send(Http::Code::Unauthorized, "Admin not connected");
-            return;
-        } else {
-            logMsg << "Admin with token \"" << adminId << "\" was successfuly logged out.";
+        Pistache::Http::Code errorCode;
+        std::string errorMessage;
+        try {
+            Admin requestAdmin = Admin::getAdminDataFromRequestToken(request);
+            Database* db = Database::instance();
+
+            db->disconnectAdmin(requestAdmin.getId());
+
+            std::ostringstream logMsg;
+            logMsg << "Admin with token \"" << requestAdmin.getId() << "\" was successfuly logged out.";
             m_logger.log(logMsg.str());
-            db->disconnectAdmin(adminId);
             response.send(Http::Code::Ok, "Logout successful");
             return;
         }
+        catch (const MissingTokenException& e) {
+            errorCode = Pistache::Http::Code::Bad_Request;
+            errorMessage = e.what();
+        }
+        catch (const InvalidTokenException& e) {
+            errorCode = Pistache::Http::Code::Forbidden;
+            errorMessage = e.what();
+        }
+        catch (const AuthenticationFailureException& e) {
+            errorCode = Pistache::Http::Code::Unauthorized;
+            errorMessage = e.what();
+        }
+        catch (const std::exception& e) {
+            errorCode = Pistache::Http::Code::Internal_Server_Error;
+            errorMessage = e.what();
+        }
+        m_logger.err(std::string{"superviseurLogout failed: "} + errorMessage);
+        response.send(errorCode, errorMessage);
     });
 }
 
