@@ -7,6 +7,7 @@
 
 #include "ArgsParser.hpp"
 #include "mp3/Mp3AutoPlayerCallbacks.hpp"
+#include "mp3/event/EventManager.hpp"
 
 void waitForever() {
     std::promise<void>().get_future().wait();
@@ -24,7 +25,10 @@ int main(int argc, char** argv) {
     );
     ArgsParser argsParser{args};
     FileCache fileCache{argsParser.getCachePath()};
-    Mp3AutoPlayerCallbacks autoPlayer{Logger::getLogger("elevation-player"), fileCache};
+
+    Logger& logger = Logger::getLogger("elevation-player");
+    Mp3AutoPlayerCallbacks autoPlayer{logger, fileCache};
+    EventManager eventMgr{argsParser.getPort(), logger};
     waitForever();
     return 0;
 }

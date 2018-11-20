@@ -19,7 +19,7 @@ class RESTRequest<T>(
         method: Int,
         url: String,
         private val body: String = "",
-        private val responseClass: Class<T>?,
+        private val responseClass: Class<T>,
         private val headers: MutableMap<String, String>?,
         private var listener: Response.Listener<ResponseData<T>>,
         errorListener: Response.ErrorListener?
@@ -59,13 +59,15 @@ class RESTRequest<T>(
 
     override fun deliverResponse(response: ResponseData<T>) = listener.onResponse(response)
 
+    @Suppress("UNCHECKED_CAST")
     override fun parseNetworkResponse(response: NetworkResponse?): Response<ResponseData<T>> {
         return try {
             val json = String(
                     response?.data ?: ByteArray(0),
                     Charset.forName(HttpHeaderParser.parseCharset(response?.headers)))
             Response.success(
-                    ResponseData(response?.statusCode ?: -1, gson.fromJson(json, responseClass),
+                    ResponseData(response?.statusCode ?: -1,
+                        if (responseClass == String::class.java) json as T else gson.fromJson(json, responseClass),
                         response),
                     HttpHeaderParser.parseCacheHeaders(response))
         } catch (e: UnsupportedEncodingException) {

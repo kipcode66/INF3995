@@ -113,7 +113,7 @@ startHttpServer() {
     local NUM_TRIES_DEV_MODE="20"
     local RETRY_DELAY="0.5"
     local PORT_OPTION="--port"
-    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\""
+    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\" --player-port ${ELEVATION_PLAYER_PORT}"
 
     startServerProcess "${NAME}" "${PROCESS_EXECUTABLE}" "${OUTPUT_VARIABLE}" "${BASE_PORT_PROD_MODE}" "${NUM_TRIES_PROD_MODE}" "${BASE_PORT_DEV_MODE}" "${NUM_TRIES_DEV_MODE}" "${RETRY_DELAY}" "${PORT_OPTION}" "${EXTRA_PARAMS}"
 }
@@ -123,13 +123,13 @@ startHttpsServer() {
     local NAME="${HTTPS_SERVER_NAME}"
     local PROCESS_EXECUTABLE="./build/${HTTPS_SERVER_NAME}/${HTTPS_SERVER_NAME}"
     local OUTPUT_VARIABLE="HTTPS_SERVER_PORT"
-    local BASE_PORT_PROD_MODE="443"
+    local BASE_PORT_PROD_MODE="7777"
     local NUM_TRIES_PROD_MODE="20"
-    local BASE_PORT_DEV_MODE="4433"
+    local BASE_PORT_DEV_MODE="7777"
     local NUM_TRIES_DEV_MODE="20"
     local RETRY_DELAY="0.5"
     local PORT_OPTION="--port"
-    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\""
+    local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\" --player-port ${ELEVATION_PLAYER_PORT}"
 
     startServerProcess "${NAME}" "${PROCESS_EXECUTABLE}" "${OUTPUT_VARIABLE}" "${BASE_PORT_PROD_MODE}" "${NUM_TRIES_PROD_MODE}" "${BASE_PORT_DEV_MODE}" "${NUM_TRIES_DEV_MODE}" "${RETRY_DELAY}" "${PORT_OPTION}" "${EXTRA_PARAMS}"
 }
@@ -139,9 +139,9 @@ startSslDaemon() {
     local NAME="${SSL_DAEMON_NAME}"
     local PROCESS_EXECUTABLE="./build/${SSL_DAEMON_NAME}/${SSL_DAEMON_NAME}"
     local OUTPUT_VARIABLE="SSL_DAEMON_PORT"
-    local BASE_PORT_PROD_MODE="7777"
+    local BASE_PORT_PROD_MODE="443"
     local NUM_TRIES_PROD_MODE="20"
-    local BASE_PORT_DEV_MODE="7777"
+    local BASE_PORT_DEV_MODE="4433"
     local NUM_TRIES_DEV_MODE="20"
     local RETRY_DELAY="0.5"
     local PORT_OPTION="-l"

@@ -4,12 +4,16 @@
 
 #include "SecureRestApi.hpp"
 #include "rapidjson/document.h"
+#include "misc/id_utils.hpp"
+#include "rapidjson/document.h"
 
+#include <common/database/Database.hpp>
+#include <common/logger/Logger.hpp>
 
 using namespace elevation;
 
-SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache)
-    : RestApi             (addr, logger, cache)
+SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
+    : RestApi(addr, logger, cache, std::move(playerEventSocket))
     , m_logger            (logger)
     , m_volumeApi         (m_desc)
     , m_blacklistApi      (m_desc)

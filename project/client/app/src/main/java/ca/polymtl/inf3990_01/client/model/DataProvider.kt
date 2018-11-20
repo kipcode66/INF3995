@@ -18,8 +18,10 @@ class DataProvider {
 
     private val localSongs: LocalSongs = LocalSongs()
     private val localSongsObservable = ChangeableObservable()
+    private val blackListObservable = ChangeableObservable()
     private val songStates: HashMap<LocalSong, LocalSongSendState> = hashMapOf()
     private val songStatesObservable = ChangeableObservable()
+    private val blackList: UserList = UserList()
 
     @Synchronized operator fun set(song: LocalSong, state: LocalSongSendState) {
         val s = songStates.keys.find { it.compareTo(song) == 0 }
@@ -52,7 +54,12 @@ class DataProvider {
         localSongsObservable.makeChanged()
         localSongsObservable.notifyObservers(localSongs)
     }
-
+    fun setBlackListOfUsers(user: Collection<User>) {
+        blackList.clear()
+        blackList.addAll(user)
+        blackListObservable.makeChanged()
+        blackListObservable.notifyObservers(blackList)
+    }
     fun getLocalSongs(): LocalSongs = localSongs.clone() as LocalSongs
 
     fun observeLocalSongs(o: Observer) {

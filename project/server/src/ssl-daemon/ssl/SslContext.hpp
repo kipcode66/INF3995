@@ -8,7 +8,7 @@
 #include <string>
 #include <memory>
 
-#include "communication/ListenerSocket.hpp"
+#include <common/os/ListenerSocket.hpp>
 
 namespace elevation {
 namespace daemon {

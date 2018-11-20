@@ -1,11 +1,14 @@
 #include "ArgsParser.hpp"
-#include "signal/SignalHandling.hpp"
-#include "core/DaemonMaster.hpp"
 
 #include <iostream>
 #include <stdexcept>
 
+#include "core/DaemonMaster.hpp"
+
+#include <common/os/signal/SignalHandling.hpp>
+
 int main(int argc, char** argv) {
+    using namespace elevation;
     using namespace elevation::daemon;
 
     SignalHandling::installSignalHandlers();

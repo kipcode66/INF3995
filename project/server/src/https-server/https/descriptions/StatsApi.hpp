@@ -1,3 +1,6 @@
+#ifndef HTTPS_DESCRIPTIONS_STATSAPI
+#define HTTPS_DESCRIPTIONS_STATSAPI
+
 #include <pistache/description.h>
 
 class StatsApi {
@@ -8,4 +11,5 @@ private:
     void getSuperviseurStatistiques_( const Pistache::Rest::Request&,
                                       Pistache::Http::ResponseWriter);
 };
+#endif // !HTTPS_DESCRIPTIONS_STATSAPI
 

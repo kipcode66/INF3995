@@ -3,8 +3,9 @@
 #include <iostream>
 #include <regex>
 
-#include "communication/exception/SocketClosedException.hpp"
 #include "packet/HttpPacketReader.hpp"
+
+#include <common/os/exception/SocketClosedException.hpp>
 
 namespace elevation {
 namespace daemon {

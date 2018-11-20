@@ -1,3 +1,6 @@
+#ifndef HTTPS_DESCRIPTIONS_AUTHAPI
+#define HTTPS_DESCRIPTIONS_AUTHAPI
+
 #include <pistache/description.h>
 #include <common/logger/Logger.hpp>
 
@@ -14,4 +17,5 @@ private:
                               Pistache::Http::ResponseWriter response);
     elevation::Logger& m_logger;
 };
+#endif // !HTTPS_DESCRIPTIONS_AUTHAPI
 

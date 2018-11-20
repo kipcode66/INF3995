@@ -7,7 +7,8 @@
 #include <vector>
 
 #include "ssl/SslSession.hpp"
-#include "communication/ClientSocket.hpp"
+
+#include <common/os/ClientSocket.hpp>
 
 namespace elevation {
 namespace daemon {

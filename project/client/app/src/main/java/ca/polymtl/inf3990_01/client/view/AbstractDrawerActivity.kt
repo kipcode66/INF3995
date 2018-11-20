@@ -2,6 +2,7 @@ package ca.polymtl.inf3990_01.client.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.annotation.IdRes
 import android.support.annotation.LayoutRes
 import android.support.design.widget.NavigationView
@@ -16,7 +17,7 @@ import ca.polymtl.inf3990_01.client.controller.ActiveActivityTrackingService
 import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import org.koin.android.ext.android.inject
-import java.util.Observer
+import java.util.*
 
 abstract class AbstractDrawerActivity(
         @LayoutRes private val layoutRes: Int,
@@ -30,12 +31,10 @@ abstract class AbstractDrawerActivity(
     protected lateinit var toolbar: Toolbar
     protected lateinit var navView: NavigationView
 
-    private val stateObserver = Observer { _, state ->
-        if (state is AppState) {
-            state.updateNavigationView(navView)
-            // If it's an activity that is not available in the current state, finish the activity.
-            state.finishActivityIfNeeded(this@AbstractDrawerActivity)
-        }
+    @Suppress("UNUSED_PARAMETER")
+    private fun onStateChange(o: Observable, arg: Any?) {
+        stateService.getState().updateNavigationView(navView.menu)
+        stateService.getState().finishActivityIfNeeded(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,14 +51,10 @@ abstract class AbstractDrawerActivity(
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-        stateService.getState().updateNavigationView(navView)
-        stateService.addObserver(stateObserver)
+        stateService.addObserver(Observer(this::onStateChange))
         navView.setNavigationItemSelectedListener(this)
-    }
-
-    override fun onDestroy() {
-        stateService.deleteObserver(stateObserver)
-        super.onDestroy()
+        stateService.getState().updateNavigationView(navView.menu)
+        stateService.getState().finishActivityIfNeeded(this@AbstractDrawerActivity)
     }
 
     override fun onStart() {

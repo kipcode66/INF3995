@@ -11,9 +11,10 @@
 #include <functional>
 #include <signal.h>
 
-#include "communication/ListenerSocket.hpp"
-#include "communication/ClientSocket.hpp"
 #include "elevation/daemon/Config.hpp"
+
+#include <common/os/ListenerSocket.hpp>
+#include <common/os/ClientSocket.hpp>
 
 namespace elevation {
 namespace daemon {

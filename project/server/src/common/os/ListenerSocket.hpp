@@ -1,10 +1,11 @@
-#ifndef COMMUNICATION_LISTENER_SOCKET_HPP
-#define COMMUNICATION_LISTENER_SOCKET_HPP
+#ifndef OS_LISTENER_SOCKET_HPP
+#define OS_LISTENER_SOCKET_HPP
+
+#include <memory>
 
 #include "Socket.hpp"
 
 namespace elevation {
-namespace daemon {
 
 class ListenerSocket : public Socket {
 public:
@@ -19,10 +20,9 @@ public:
     ListenerSocket& operator=(const ListenerSocket&) = delete;
     ListenerSocket& operator=(ListenerSocket&&);
 
-    Socket accept();
+    virtual std::unique_ptr<Socket> accept();
 };
 
-} // namespace daemon
 } // namespace elevation
 
-#endif // !COMMUNICATION_LISTENER_SOCKET_HPP
+#endif // !OS_LISTENER_SOCKET_HPP

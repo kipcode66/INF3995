@@ -64,7 +64,7 @@ class InitializationManager private constructor(
         }
     }
     @Volatile private var initState = InitState.NOT_INITIALIZED
-    private val preferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+    private val preferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key == CLIENT_NAME_KEY) {
             launch {
                 tokenService.updateToken()

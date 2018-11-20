@@ -1,3 +1,6 @@
+#ifndef HTTPS_DESCRIPTIONS_FILEAPI
+#define HTTPS_DESCRIPTIONS_FILEAPI
+
 #include <pistache/description.h>
 #include <common/logger/Logger.hpp>
 
@@ -13,4 +16,5 @@ private:
 
     Logger& m_logger;
 };
+#endif // !HTTPS_DESCRIPTIONS_FILEAPI
 

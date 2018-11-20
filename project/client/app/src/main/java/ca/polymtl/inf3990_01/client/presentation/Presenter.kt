@@ -1,10 +1,7 @@
 package ca.polymtl.inf3990_01.client.presentation
 
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
-import ca.polymtl.inf3990_01.client.model.LocalSong
-import ca.polymtl.inf3990_01.client.model.LocalSongs
-import ca.polymtl.inf3990_01.client.model.Song
-import ca.polymtl.inf3990_01.client.model.SongQueue
+import ca.polymtl.inf3990_01.client.model.*
 import java.util.*
 
 /**
@@ -27,6 +24,8 @@ class Presenter(stateService: AppStateService): Observable() {
         notifyObservers(songQueue)
     }
 
+
+    @Suppress("UNUSED_PARAMETER")
     private fun onStateUpdate(o: Observable, arg: Any?) {
         if (o is AppStateService) {
             setChanged()

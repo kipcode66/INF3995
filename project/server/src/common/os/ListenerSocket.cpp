@@ -5,7 +5,6 @@
 #include <cstring>
 
 namespace elevation {
-namespace daemon {
 
 ListenerSocket::ListenerSocket(uint16_t portNum)
     : Socket(portNum)
@@ -38,16 +37,15 @@ ListenerSocket& ListenerSocket::operator=(ListenerSocket&& that) {
     return *this;
 }
 
-Socket ListenerSocket::accept() {
+std::unique_ptr<Socket> ListenerSocket::accept() {
     struct sockaddr_in addr;
     socklen_t len = sizeof(addr);
     int ipSocketFd = ::accept(m_fd, (struct sockaddr*)&addr, &len);
     if (ipSocketFd < 0) {
         throw std::runtime_error(::strerror(errno));
     }
-    Socket socketObject(m_portNum, ipSocketFd);
+    std::unique_ptr<Socket> socketObject{new Socket(m_portNum, ipSocketFd)};
     return socketObject;
 }
 
-} // namespace daemon
 } // namespace elevation
