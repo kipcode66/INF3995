@@ -1,13 +1,19 @@
 
-#include <rapidjson/document.h>
 #include <future>
 
-#include <database/Database.hpp>
+#include <rapidjson/document.h>
+
+#include <common/database/Database.hpp>
 #include <common/logger/Logger.hpp>
+
+#include <http-server/http/exception/InvalidTokenException.hpp>
+#include <http-server/http/exception/BadRequestException.hpp>
 
 #include "misc/id_utils.hpp"
 #include "Admin.hpp"
 #include "AuthApi.hpp"
+
+#include "https/exception/AuthenticationFailureException.hpp"
 
 using namespace Pistache;
 using namespace elevation;
@@ -33,18 +39,17 @@ AuthApi::AuthApi(Pistache::Rest::Description& desc, Logger& logger)
 }
 
 void AuthApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWriter response) {
-    std::ostringstream logMsg;
-    try {
-        Admin admin = Admin::extractAdminDataFromRequest(request);
-        if (admin.getUsername() != Database::ADMIN_NAME) {
-            logMsg << "Could not login the admin. Received wrong login";
-            m_logger.err(logMsg.str());
-            response.send(Http::Code::Bad_Request, "Wrong login");
-            return;
-        }
-        std::async([&]() {
+    Pistache::Http::Code errorCode;
+    std::string errorMessage;
+    std::async([&]() {
+        try {
+            Admin admin = Admin::extractAdminDataFromRequest(request);
+            if (admin.getUsername() != Database::ADMIN_NAME) {
+                throw AuthenticationFailureException{admin.getUsername(), admin.getMotDePasse()};
+            }
             Database* db = Database::instance();
             if (db->isAdminConnected(admin.getId())) {
+                std::ostringstream logMsg;
                 logMsg << "Could not Login Admin. Admin with token \"" << admin.getId() << "\" is already connected.";
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Bad_Request, "Admin already connected with this token");
@@ -56,21 +61,34 @@ void AuthApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWrit
             std::string passwordHash = elevation::id_utils::generateMd5Hash(admin.getMotDePasse(), salt);
             if (passwordHash == hash) {
                 db->connectAdmin(admin.getUsername().c_str(), admin.getId());
+                std::ostringstream logMsg;
                 logMsg << "Successfuly logged in admin with token \"" << admin.getId() << "\".";
                 m_logger.log(logMsg.str());
                 response.send(Http::Code::Ok, "Connexion successful");
-                return;
             } else {
-                logMsg << "Could not Login admin with token \"" << admin.getId() << "\". Received wrong password";
-                m_logger.err(logMsg.str());
-                response.send(Http::Code::Forbidden, "Wrong password");
-                return;
+                throw AuthenticationFailureException{admin.getUsername(), admin.getMotDePasse()};
             }
-        });
-    } catch (std::exception& e) {
-        response.send(Http::Code::Bad_Request, std::string("Malformed request - ").append(e.what()));
-        return;
-    }
+            return;
+        }
+        catch (const BadRequestException& e) {
+            errorCode = Pistache::Http::Code::Bad_Request;
+            errorMessage = e.what();
+        }
+        catch (const InvalidTokenException& e) {
+            errorCode = Pistache::Http::Code::Bad_Request;
+            errorMessage = e.what();
+        }
+        catch (const AuthenticationFailureException& e) {
+            errorCode = Pistache::Http::Code::Forbidden;
+            errorMessage = e.what();
+        }
+        catch (const std::exception& e) {
+            errorCode = Http::Code::Internal_Server_Error;
+            errorMessage = e.what();
+        }
+        m_logger.err(std::string{"superviseurLogin failed: "} + errorMessage);
+        response.send(errorCode, errorMessage);
+    });
 }
 
 void AuthApi::superviseurLogout_(const Rest::Request& request, Http::ResponseWriter response) {
