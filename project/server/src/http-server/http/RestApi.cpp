@@ -23,6 +23,25 @@ using namespace elevation;
 using namespace std::placeholders;
 namespace fs = std::experimental::filesystem;
 
+User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
+    auto t = request.headers().getRaw("X-Auth-Token");
+    if (t.value().empty()) {
+        throw MissingTokenException{};
+    }
+
+    uint32_t token = std::stoul(t.value());
+    User_t requestUser = {0};
+    try {
+        requestUser = Database::instance()->getUserById(token);
+    } catch (sqlite_error& e) { }
+
+    if (token == 0 || *requestUser.mac == 0) {
+        throw InvalidTokenException{t.value()};
+    }
+
+    return requestUser;
+}
+
 RestApi::RestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
 : m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
@@ -421,23 +440,3 @@ rapidjson::Value& RestApi::generateSong_(const Song_t& song, uint32_t token, rap
     }
     return songDoc.Move();
 }
-
-User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
-    auto t = request.headers().getRaw("X-Auth-Token");
-    if (t.value().empty()) {
-        throw MissingTokenException{};
-    }
-
-    uint32_t token = std::stoul(t.value());
-    User_t requestUser = {0};
-    try {
-        requestUser = Database::instance()->getUserById(token);
-    } catch (sqlite_error& e) { }
-
-    if (token == 0 || *requestUser.mac == 0) {
-        throw InvalidTokenException{t.value()};
-    }
-
-    return requestUser;
-}
-

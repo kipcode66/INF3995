@@ -22,6 +22,9 @@ class RestApi {
 public:
     static constexpr const int MAX_SONG_PER_USER = 5;
 
+protected:
+    static User_t getUserFromRequestToken_(const Rest::Request& request);
+
 public:
     RestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket);
     ~RestApi();
@@ -38,8 +41,6 @@ protected:
 
     std::string generateAllSongsAsViewedBy_(uint32_t token, bool adminSerialization = false);
     rapidjson::Value& generateSong_(const Song_t& song, uint32_t token, rapidjson::Document::AllocatorType& allocator, bool adminSerialization);
-
-    static User_t getUserFromRequestToken_(const Rest::Request& request);
 
     std::shared_ptr<Http::Endpoint> m_httpEndpoint;
     Rest::Description m_desc;
