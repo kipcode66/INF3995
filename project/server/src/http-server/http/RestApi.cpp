@@ -160,13 +160,13 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 strncpy(requestUser.name, request_json["nom"].GetString(), User_t::NAME_LENGTH);
             }
         }
-        
-        
+
+
         User_t existingUser = { 0 };
         Database* db = Database::instance();
         existingUser = db->getUserByMac(requestUser.mac);
         if (*existingUser.mac == 0) {
-            std::string salt = id_utils::generateSalt(strlen(requestUser.mac)); 
+            std::string salt = id_utils::generateSalt(strlen(requestUser.mac));
             requestUser.userId = id_utils::generateId(requestUser.mac, salt);
 
             db->createUser(&requestUser);
@@ -184,7 +184,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 db->createUser(&requestUser);
 
                 logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
-                m_logger.log(logMsg.str());    
+                m_logger.log(logMsg.str());
 
                 std::string body = generateBody(requestUser.userId, "connection successful");
                 response.send(Http::Code::Ok, body);
@@ -288,7 +288,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             std::time_t now = std::time(nullptr);
             std::tm* nowTm = std::localtime(&now);
             std::stringstream fileName;
-            // Generate a new name 
+            // Generate a new name
             fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S_") << std::hash<std::string>()(t.value());
             std::experimental::filesystem::path filePath(fileName.str());
             std::experimental::filesystem::path tmpPath = filePath;
