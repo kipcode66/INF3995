@@ -12,7 +12,6 @@
 using namespace Pistache;
 using namespace elevation;
 
-
 AuthApi::AuthApi(Pistache::Rest::Description& desc, Logger& logger)
     : m_logger(logger)
 {

@@ -2,7 +2,6 @@
 
 using namespace Pistache;
 
-
 FileManagementApi::FileManagementApi(Rest::Description& desc, Logger& logger)
     : m_logger(logger)
 {
