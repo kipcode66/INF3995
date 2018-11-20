@@ -442,7 +442,7 @@ User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
     } catch (sqlite_error& e) { }
 
     if (token == 0 || *requestUser.mac == 0) {
-        throw InvalidTokenException{};
+        throw InvalidTokenException{t.value()};
     }
 
     return requestUser;
