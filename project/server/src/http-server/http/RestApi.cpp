@@ -208,7 +208,15 @@ void RestApi::getFileList_(const Pistache::Rest::Request& request, Pistache::Htt
     std::thread([this](const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
         try {
             User_t requestUser = getUserFromRequestToken_(request);
-            std::string serializedList = rest_utils::generateAllSongsAsViewedBy_(requestUser.userId);
+            std::string serializedList;
+            try {
+                serializedList = rest_utils::generateAllSongsAsViewedBy_(requestUser.userId);
+            }
+            catch (const sqlite_error& e) {
+                m_logger.err(std::string{"usager getFileList failed: "} + e.what());
+                response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
+                return;
+            }
 
             std::ostringstream logMsg;
             logMsg << "The file list for user \"" << requestUser.userId << "\" was successfuly sent.";
@@ -216,7 +224,7 @@ void RestApi::getFileList_(const Pistache::Rest::Request& request, Pistache::Htt
             response.send(Pistache::Http::Code::Ok, serializedList);
         }
         catch (const std::exception& e) {
-            m_logger.err(std::string{"getFileList failed: "} + e.what());
+            m_logger.err(std::string{"usager getFileList failed: "} + e.what());
             response.send(Pistache::Http::Code::Forbidden, e.what());
             return;
         }
