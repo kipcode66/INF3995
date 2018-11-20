@@ -31,7 +31,7 @@ void FileManagementApi::getSuperviseurFile_(const Rest::Request& request,
     // querying a param from the request object, by name
     std::thread([this](const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
     try {
-        Admin requestAdmin{request};
+        Admin requestAdmin = Admin::getAdminDataFromRequestToken(request);
         Database* db = Database::instance();
         if (db->isAdminConnected(requestAdmin.getId())) {
             std::string serializedList = rest_utils::generateAllSongsAsViewedBy_(requestAdmin.getId(), true);

@@ -35,7 +35,7 @@ AuthApi::AuthApi(Pistache::Rest::Description& desc, Logger& logger)
 void AuthApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWriter response) {
     std::ostringstream logMsg;
     try {
-        Admin admin(request);
+        Admin admin = Admin::extractAdminDataFromRequest(request);
         if (admin.getUsername() != Database::ADMIN_NAME) {
             logMsg << "Could not login the admin. Received wrong login";
             m_logger.err(logMsg.str());

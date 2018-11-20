@@ -2,9 +2,9 @@
 
 #include "Admin.hpp"
 
-Admin::Admin(const Pistache::Rest::Request& req) {
+Admin Admin::extractAdminDataFromRequest(const Pistache::Rest::Request& request) {
     rapidjson::Document jsonDocument;
-    jsonDocument.Parse(req.body().c_str());
+    jsonDocument.Parse(request.body().c_str());
     bool fieldsValid = (jsonDocument.IsObject()
                      && jsonDocument.HasMember("usager")
                      && jsonDocument.HasMember("mot_de_passe")
@@ -13,14 +13,23 @@ Admin::Admin(const Pistache::Rest::Request& req) {
     if (!fieldsValid) {
         throw std::runtime_error("missing fields");
     }
-    auto token = req.headers().getRaw("X-Auth-Token").value();
+    auto token = request.headers().getRaw("X-Auth-Token").value();
     if (token.empty() || std::stoul(token) == 0) {
         throw std::runtime_error("invalid token");
     }
 
-    this->m_username = jsonDocument["usager"].GetString();
-    this->m_motDePasse = jsonDocument["mot_de_passe"].GetString();
-    this->m_id = std::stoul(token);
+    std::string username   = jsonDocument["usager"].GetString();
+    std::string motDePasse = jsonDocument["mot_de_passe"].GetString();
+    uint32_t id = std::stoul(token);
+
+    return Admin{username, motDePasse, id};
+}
+
+Admin Admin::getAdminDataFromRequestToken(const Pistache::Rest::Request& request) {
+
+}
+
+Admin::Admin(std::string username, std::string motDePasse, uint32_t id) {
 }
 
 std::string Admin::getUsername() const {
