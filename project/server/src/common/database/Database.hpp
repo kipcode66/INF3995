@@ -20,6 +20,7 @@ class Database {
 public:
     static constexpr const char*   ADMIN_NAME         = "admin";
     static constexpr const char*   DEFAULT_PASSWORD   = "admin";
+    static constexpr const int32_t IS_BLACKLISTED     = 1;
     static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
 
     static Database* instance();
@@ -54,6 +55,8 @@ public:
 
     int getUserConnectionStatus(uint32_t userId) const;
 
+    std::vector<User_t> getBlackList();
+
 protected:
     Database();
     Database(std::experimental::filesystem::path);
@@ -66,6 +69,7 @@ protected:
     Song_t getSongByQuery_(const Query&) const;
     std::vector<Song_t> getSongsByQuery_(const Query&) const;
     User_t getUserByQuery_(const Query&) const;
+    std::vector<User_t> getUsersByQuery_(const Query&) const;
     void executeQuery_(const Query& query);
 
     sqlite3* m_db = 0;

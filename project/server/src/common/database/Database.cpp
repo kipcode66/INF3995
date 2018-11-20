@@ -60,6 +60,24 @@ User_t Database::getUserByQuery_(const Query& query) const {
     return std::move(user);
 }
 
+std::vector<User_t> Database::getUsersByQuery_(const Query& query) const {
+    User_t user;
+    std::vector<User_t> users;
+    Statement stmt{m_db, query};
+
+    while (stmt.step()) {
+        user = { 0 };
+        user.userId = stmt.getColumnInt(0);
+        strncpy(user.ip, stmt.getColumnText(1).c_str(), User_t::IP_LENGTH);
+        strncpy(user.name, stmt.getColumnText(2).c_str(), User_t::NAME_LENGTH);
+        strncpy(user.mac, stmt.getColumnText(3).c_str(), User_t::MAC_LENGTH); // do last as a coherence check
+
+        users.push_back(user);
+    }
+
+    return users;
+}
+
 /*
  * Returns an empty user (all 0s) on unsuccessful search
  */
@@ -325,6 +343,12 @@ Database::Database(std::experimental::filesystem::path serverPath) {
         sqlite3_close_v2(m_db);
         throw;
     }
+}
+
+std::vector<User_t> Database::getBlackList() {
+    return getUsersByQuery_(Query(
+        "SELECT user_id, ip, name, mac FROM user"
+        " WHERE (is_blacklisted = %i);", Database::IS_BLACKLISTED));
 }
 
 Database::~Database() {
