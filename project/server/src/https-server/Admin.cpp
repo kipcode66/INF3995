@@ -52,8 +52,11 @@ Admin Admin::getAdminDataFromRequestToken(const Pistache::Rest::Request& request
     return Admin{"", "", id};
 }
 
-Admin::Admin(std::string username, std::string motDePasse, uint32_t id) {
-}
+Admin::Admin(std::string username, std::string motDePasse, uint32_t id)
+    : m_username(username)
+    , m_motDePasse(motDePasse)
+    , m_id(id)
+{ }
 
 std::string Admin::getUsername() const {
     return this->m_username;
