@@ -3,7 +3,7 @@
 
 #include "Admin.hpp"
 
-Admin::Admin(const Rest::Request& req) {
+Admin::Admin(const Pistache::Rest::Request& req) {
     rapidjson::Document jsonDocument;
     jsonDocument.Parse(req.body().c_str());
     bool fieldsValid = (jsonDocument.IsObject()
