@@ -20,11 +20,11 @@ Admin Admin::extractAdminDataFromRequest(const Pistache::Rest::Request& request)
                      && jsonDocument["usager"]       != '\0'
                      && jsonDocument["mot_de_passe"] != '\0');
     if (!fieldsValid) {
-        throw std::runtime_error("missing fields");
+        throw BadRequestException{};
     }
     auto token = request.headers().getRaw("X-Auth-Token").value();
     if (token.empty() || std::stoul(token) == 0) {
-        throw std::runtime_error("invalid token");
+        throw InvalidTokenException{token};
     }
 
     std::string username   = jsonDocument["usager"].GetString();
