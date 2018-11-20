@@ -197,17 +197,26 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
 
 void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
     m_logger.log("postFile called");
-    std::ostringstream logMsg;
 
-    auto t = request.headers().getRaw("X-Auth-Token");
-    if (t.value().empty()) {
-        logMsg << "Could not post the file. Header \"X-Auth-Token\" missing.";
-        m_logger.err(logMsg.str());
-        response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" missing");
+    User_t requestUser = {};
+    try {
+        requestUser = getUserFromRequestToken_(request);
+    }
+    catch (const MissingTokenException& e) {
+        std::ostringstream logMsg;
+        logMsg << "Could not post the file. Received invalid token.";
+        m_logger.err(e.what());
+        response.send(Http::Code::Bad_Request, e.what());
+        return;
+    }
+    catch (const InvalidTokenException& e) {
+        m_logger.err(e.what());
+        response.send(Http::Code::Forbidden, e.what());
         return;
     }
 
     if (!m_cache.isInitialized()) {
+        std::ostringstream logMsg;
         logMsg << "Could not post the file. Cache is not initialized";
         m_logger.err(logMsg.str());
         response.send(Http::Code::Internal_Server_Error, "Cache not initialized");
@@ -216,7 +225,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
     const std::string body = request.body();
 
-    std::thread([this, t](std::ostringstream logMsg, const std::string body, Http::ResponseWriter response) {
+    std::thread([this, requestUser](const std::string body, Http::ResponseWriter response) {
         Mp3Header* header = nullptr;
         try {
             Database* db = Database::instance();
@@ -230,22 +239,8 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 return;
             });
 
-            uint32_t token = std::stoul(t.value());
-
-            User_t requestUser = {0};
-            try {
-                requestUser = db->getUserById(token);
-            } catch (sqlite_error& e) { }
-
-            if (token == 0 || *requestUser.mac == 0) {
-                logMsg << "Could not post the file. Received invalid token.";
-                m_logger.err(logMsg.str());
-                response.send(Http::Code::Forbidden, "Invalid token");
-                return;
-            }
-
             // Start fetching the user's songs
-            auto songsFuture = std::async(std::launch::async, std::bind(&Database::getSongsByUser, db, _1), token);
+            auto songsFuture = std::async(std::launch::async, std::bind(&Database::getSongsByUser, db, _1), requestUser.userId);
 
             // +=-=-=-= Save in a file =-=-=-=+
             // Generate
@@ -253,7 +248,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             std::tm* nowTm = std::localtime(&now);
             std::stringstream fileName;
             // Generate a new name
-            fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S_") << std::hash<std::string>()(t.value());
+            fileName << std::put_time(nowTm, "%Y-%m-%d_%H-%M-%S_") << std::hash<uint32_t>()(requestUser.userId);
             std::experimental::filesystem::path filePath(fileName.str());
             std::experimental::filesystem::path tmpPath = filePath;
             // Try a new file name until we find on that is not used.
@@ -274,6 +269,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 header = new Mp3Header(filePath.string());
             }
             catch (std::invalid_argument& e) {
+                std::ostringstream logMsg;
                 logMsg << "Could not post the file. The file does not have an id3v2 tag.";
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
@@ -293,6 +289,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             const auto& songs = songsFuture.get();
             bool songInQueue = std::any_of(songs.cbegin(), songs.cend(), [&](const Song_t& a) {return strcmp(a.title, song.title) == 0;});
             if (songInQueue || songs.size() >= MAX_SONG_PER_USER) {
+                std::ostringstream logMsg;
                 logMsg << "Could not post the file. The song \"" << song.title << "\" is aleady in the queue";
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Request_Entity_Too_Large, "Song already in the queue");
@@ -300,25 +297,21 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 delete header;
                 return;
             }
+            else {
+                std::ostringstream logMsg;
+                logMsg << '{' << requestUser.mac << '}' << " Sent MP3 \"" << song.title << "\" of length " << song.duration;
+                m_logger.log(logMsg.str());
 
-            logMsg << '{' << requestUser.mac << '}' << " Sent MP3 \"" << song.title << "\" of length " << song.duration;
-            m_logger.log(logMsg.str());
+                db->createSong(&song);
 
-            db->createSong(&song);
+                response.send(Http::Code::Ok, "Ok"); // We send the response at the end in the case there is an error in the process.
 
-            response.send(Http::Code::Ok, "Ok"); // We send the response at the end in the case there is an error in the process.
-
-            delete header;
-            return;
-        }
-        catch (std::logic_error &e) {
-            logMsg << "Token not valid; got \"" << t.value() << "\"";
-            m_logger.err(logMsg.str());
-            response.send(Http::Code::Bad_Request, "Header \"X-Auth-Token\" must be a 32 bits integer");
-            delete header;
-            return;
+                delete header;
+                return;
+            }
         }
         catch (std::runtime_error &e) {
+            std::ostringstream logMsg;
             logMsg << "An error occured while saving the song : " << e.what();
             m_logger.err(logMsg.str());
             response.send(Http::Code::Internal_Server_Error, e.what());
@@ -326,7 +319,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             return;
         }
         response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
-    }, std::move(logMsg), std::move(body), std::move(response)).detach();
+    }, std::move(body), std::move(response)).detach();
 }
 
 void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
