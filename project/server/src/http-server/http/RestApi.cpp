@@ -24,7 +24,7 @@ using namespace elevation;
 using namespace std::placeholders;
 namespace fs = std::experimental::filesystem;
 
-User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
+User_t RestApi::getUserFromRequestToken_(const Pistache::Rest::Request& request) {
     auto t = request.headers().getRaw("X-Auth-Token");
     if (t.value().empty()) {
         throw MissingTokenException{};
@@ -43,7 +43,7 @@ User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
     return requestUser;
 }
 
-User_t RestApi::extractUserDataFromRequest_(const Rest::Request& request) {
+User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& request) {
     auto body = request.body();
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
@@ -66,8 +66,8 @@ User_t RestApi::extractUserDataFromRequest_(const Rest::Request& request) {
     return requestUser;
 }
 
-RestApi::RestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
-: m_httpEndpoint(std::make_shared<Http::Endpoint>(addr))
+RestApi::RestApi(Pistache::Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
+: m_httpEndpoint(std::make_shared<Pistache::Http::Endpoint>(addr))
 , m_desc("Rest API", "1.0")
 , m_logger(logger)
 , m_cache(cache)
@@ -84,7 +84,7 @@ RestApi::~RestApi() {
 }
 
 void RestApi::init() {
-    auto opts = Http::Endpoint::options();
+    auto opts = Pistache::Http::Endpoint::options();
     m_httpEndpoint->init(opts);
     createDescription_();
 }
@@ -92,7 +92,7 @@ void RestApi::init() {
 void RestApi::start() {
     m_router.initFromDescription(m_desc);
 
-    Rest::Swagger swagger(m_desc);
+    Pistache::Rest::Swagger swagger(m_desc);
     swagger
             .install(m_router);
 
@@ -106,10 +106,10 @@ void RestApi::createDescription_() {
             .license("Apache", "http://www.apache.org/licenses/LICENSE-2.0");
 
     auto backendErrorResponse =
-            m_desc.response(Http::Code::Internal_Server_Error, "An error occurred with the backend");
+            m_desc.response(Pistache::Http::Code::Internal_Server_Error, "An error occurred with the backend");
 
     m_desc
-            .schemes(Rest::Scheme::Http)
+            .schemes(Pistache::Rest::Scheme::Http)
             .produces(MIME(Application, Json))
             .consumes(MIME(Application, Json));
 
@@ -148,7 +148,7 @@ std::string generateBody(uint32_t id, std::string message) {
     return buf.GetString();
 }
 
-void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
+void RestApi::getIdentification_(const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
     User_t requestUser = {};
     try {
         requestUser = extractUserDataFromRequest_(request);
@@ -159,7 +159,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         return;
     }
 
-    std::thread([&](Http::ResponseWriter response, User_t requestUser) {
+    std::thread([&](Pistache::Http::ResponseWriter response, User_t requestUser) {
         try {
             User_t existingUser = { 0 };
             Database* db = Database::instance();
@@ -177,7 +177,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 m_logger.log(logMsg.str());
 
                 std::string body = generateBody(requestUser.userId, "connection successful");
-                response.send(Http::Code::Ok, body);
+                response.send(Pistache::Http::Code::Ok, body);
                 return;
             }
             else {
@@ -189,7 +189,7 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
                 m_logger.log(logMsg.str());
 
                 std::string body = generateBody(requestUser.userId, "connection successful");
-                response.send(Http::Code::Ok, body);
+                response.send(Pistache::Http::Code::Ok, body);
                 return;
             }
         }
@@ -200,9 +200,9 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     }, std::move(response), requestUser).detach();
 }
 
-void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
+void RestApi::getFileList_(const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
     // querying a param from the request object, by name
-    std::thread([this](const Rest::Request& request, Http::ResponseWriter response) {
+    std::thread([this](const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
         try {
             User_t requestUser = getUserFromRequestToken_(request);
             std::string serializedList = generateAllSongsAsViewedBy_(requestUser.userId);
@@ -210,7 +210,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
             std::ostringstream logMsg;
             logMsg << "The file list for user \"" << requestUser.userId << "\" was successfuly sent.";
             m_logger.log(logMsg.str());
-            response.send(Http::Code::Ok, serializedList);
+            response.send(Pistache::Http::Code::Ok, serializedList);
         }
         catch (const std::exception& e) {
             std::ostringstream logMsg;
@@ -222,7 +222,7 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
     }, std::move(request), std::move(response)).detach();
 }
 
-void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter response) {
+void RestApi::postFile_(const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
     m_logger.log("postFile called");
 
     User_t requestUser = {};
@@ -233,12 +233,12 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
         std::ostringstream logMsg;
         logMsg << "Could not post the file. Received invalid token.";
         m_logger.err(e.what());
-        response.send(Http::Code::Bad_Request, e.what());
+        response.send(Pistache::Http::Code::Bad_Request, e.what());
         return;
     }
     catch (const std::exception& e) {
         m_logger.err(e.what());
-        response.send(Http::Code::Forbidden, e.what());
+        response.send(Pistache::Http::Code::Forbidden, e.what());
         return;
     }
 
@@ -246,13 +246,13 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
         std::ostringstream logMsg;
         logMsg << "Could not post the file. Cache is not initialized";
         m_logger.err(logMsg.str());
-        response.send(Http::Code::Internal_Server_Error, "Cache not initialized");
+        response.send(Pistache::Http::Code::Internal_Server_Error, "Cache not initialized");
         return;
     }
 
     const std::string body = request.body();
 
-    std::thread([this, requestUser](const std::string body, Http::ResponseWriter response) {
+    std::thread([this, requestUser](const std::string body, Pistache::Http::ResponseWriter response) {
         Mp3Header* header = nullptr;
         try {
             Database* db = Database::instance();
@@ -299,7 +299,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 std::ostringstream logMsg;
                 logMsg << "Could not post the file. The file does not have an id3v2 tag.";
                 m_logger.err(logMsg.str());
-                response.send(Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
+                response.send(Pistache::Http::Code::Unsupported_Media_Type, "The file is not an MP3 file");
                 m_cache.deleteFile(filePath.filename());
                 delete header;
                 return;
@@ -319,7 +319,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 std::ostringstream logMsg;
                 logMsg << "Could not post the file. The song \"" << song.title << "\" is aleady in the queue";
                 m_logger.err(logMsg.str());
-                response.send(Http::Code::Request_Entity_Too_Large, "Song already in the queue");
+                response.send(Pistache::Http::Code::Request_Entity_Too_Large, "Song already in the queue");
                 m_cache.deleteFile(filePath.filename());
                 delete header;
                 return;
@@ -331,7 +331,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
 
                 db->createSong(&song);
 
-                response.send(Http::Code::Ok, "Ok"); // We send the response at the end in the case there is an error in the process.
+                response.send(Pistache::Http::Code::Ok, "Ok"); // We send the response at the end in the case there is an error in the process.
 
                 delete header;
                 return;
@@ -341,18 +341,18 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             std::ostringstream logMsg;
             logMsg << "An error occured while saving the song : " << e.what();
             m_logger.err(logMsg.str());
-            response.send(Http::Code::Internal_Server_Error, e.what());
+            response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
             delete header;
             return;
         }
-        response.send(Http::Code::Internal_Server_Error, "Request terminated without an answer...");
+        response.send(Pistache::Http::Code::Internal_Server_Error, "Request terminated without an answer...");
     }, std::move(body), std::move(response)).detach();
 }
 
-void RestApi::deleteFile_(const Rest::Request& request, Http::ResponseWriter response) {
+void RestApi::deleteFile_(const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
     std::async(
         std::launch::async,
-        [this](const Rest::Request& request, Http::ResponseWriter response) {
+        [this](const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
             Database* db = Database::instance();
             uint32_t songId;
             try {
