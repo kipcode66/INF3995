@@ -6,5 +6,5 @@ CREATE TABLE userConnection (user_id INTEGER UNIQUE NOT NULL PRIMARY KEY, connec
 CREATE TABLE adminLogin (login VARCHAR(256) UNIQUE NOT NULL, hashed_password VARCHAR(32) NOT NULL, salt VARCHAR(32) NOT NULL);
 CREATE TABLE adminConnection (login VARCHAR(256) UNIQUE NOT NULL, isConnected INTEGER, admin_id INTEGER, timeStamp REAL);
 INSERT INTO adminConnection VALUES('admin',0,123456789,0.0);
-CREATE TABLE cachedSong (title VARCHAR(256), artist VARCHAR(256), user_id INTEGER NOT NULL, duration INTEGER, path VARCHAR(256));
+CREATE TABLE songs (title VARCHAR(256), artist VARCHAR(256), user_id INTEGER NOT NULL, duration INTEGER, path VARCHAR(256), deleted_by_admin INTEGER, timestamp Real);
 COMMIT;
