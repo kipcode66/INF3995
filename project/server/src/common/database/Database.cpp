@@ -104,11 +104,21 @@ void Database::createUser(const User_t* user) {
 }
 
 void Database::connectUser(const struct User_t* user) {
-    uint32_t userIsConnected = 1;
     executeQuery_(Query(
-        "INSERT INTO userConnection VALUES (%u, %u, julianday('now'));",
-        user->userId,
-        userIsConnected));
+        "INSERT INTO userConnection (user_id, connection_expiration) VALUES (%u, julianday('now', '+1 day'));",
+        user->userId));
+}
+
+bool Database::isUserConnected(const uint32_t userId) const {
+    Statement stmt{m_db, Query(
+        "SELECT julianday(connection_expiration) - julianday('now') FROM userConnection "
+        "WHERE (user_id = %u);",
+        userId)};
+
+    if (stmt.step()) {
+        return (stmt.getColumnDouble(0) > 0);
+    }
+    return false;
 }
 
 int Database::getUserConnectionStatus(uint32_t userId) const {
@@ -176,6 +186,12 @@ std::pair<std::string, std::string> Database::getSaltAndHashedPasswordByLogin(
     return saltAndHashedPassword;
 }
 
+std::vector<User_t> Database::getBlackList() {
+    return getUsersByQuery_(Query(
+        "SELECT user_id, ip, name, mac FROM user"
+        " WHERE (is_blacklisted = %i);", Database::IS_BLACKLISTED));
+}
+
 Song_t Database::getSongByQuery_(const Query& query) const {
     Song_t song = {};
     Statement stmt{m_db, query};
@@ -194,21 +210,21 @@ Song_t Database::getSongByQuery_(const Query& query) const {
 
 Song_t Database::getSongById(int id) const {
     return getSongByQuery_(Query(
-        "SELECT rowid, title, artist, user_id, duration, path FROM cachedSong "
+        "SELECT rowid, title, artist, user_id, duration, path FROM songs "
         "WHERE (rowid = %u);",
         id));
 }
 
 Song_t Database::getSongByTitle(const std::string& title) const {
     return getSongByQuery_(Query(
-        "SELECT rowid, title, artist, user_id, duration, path FROM cachedSong "
+        "SELECT rowid, title, artist, user_id, duration, path FROM songs "
         "WHERE (title = '%q');",
         title.c_str()));
 }
 
 Song_t Database::getSongByPath(const std::string& path) const {
     return getSongByQuery_(Query(
-        "SELECT rowid, title, artist, user_id, duration, path FROM cachedSong "
+        "SELECT rowid, title, artist, user_id, duration, path FROM songs "
         "WHERE (path = '%q');",
         path.c_str()));
 }
@@ -235,19 +251,19 @@ std::vector<Song_t> Database::getSongsByQuery_(const Query& query) const {
 std::vector<Song_t> Database::getSongsByUser(int userId) const {
     return getSongsByQuery_(Query(
         "SELECT rowid, title, artist, user_id, duration, path, song_order "
-        "FROM cachedSong WHERE (user_id = %u) ORDER BY song_order ASC;",
+        "FROM songs WHERE (user_id = %u) ORDER BY song_order ASC;",
         userId));
 }
 
 std::vector<Song_t> Database::getAllSongs() const {
     return getSongsByQuery_(Query(
         "SELECT rowid, title, artist, user_id, duration, path, song_order "
-        "FROM cachedSong ORDER BY song_order ASC;"));
+        "FROM songs ORDER BY song_order ASC;"));
 }
 
 void Database::createSong(const Song_t* song) {
     executeQuery_(Query(
-        "INSERT OR REPLACE INTO cachedSong VALUES ('%q', '%q', %u, %u, '%q', %i);",
+        "INSERT OR REPLACE INTO songs (title, artist, user_id, duration, path, song_order, timestamp) VALUES ('%q', '%q', %u, %u, '%q', %i, julianday('now'));",
         song->title,
         song->artist,
         song->userId,
@@ -258,7 +274,7 @@ void Database::createSong(const Song_t* song) {
 
 void Database::removeSong(uint32_t id) {
     executeQuery_(Query(
-        "DELETE FROM cachedSong WHERE rowid = %i;",
+        "DELETE FROM songs WHERE rowid = %i;",
         id));
 }
 
@@ -288,7 +304,7 @@ void Database::enableForeignKeys_() {
 }
 
 void Database::wipeDbSongs_() {
-    executeAndRetryOnLock_(Query("DELETE FROM cachedSong;"));
+    executeAndRetryOnLock_(Query("DELETE FROM songs;"));
 }
 
 void Database::initDefaultAdmin() {
@@ -343,12 +359,6 @@ Database::Database(std::experimental::filesystem::path serverPath) {
         sqlite3_close_v2(m_db);
         throw;
     }
-}
-
-std::vector<User_t> Database::getBlackList() {
-    return getUsersByQuery_(Query(
-        "SELECT user_id, ip, name, mac FROM user"
-        " WHERE (is_blacklisted = %i);", Database::IS_BLACKLISTED));
 }
 
 Database::~Database() {

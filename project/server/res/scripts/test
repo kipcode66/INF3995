@@ -37,7 +37,6 @@ buildTestDB() {
     local EXISTING_TEST_DB="$TEST_DATABASE_RESOURCES_DIR/$TEST_DB_NAME"
     local TEST_STRUCT_FILE="testStruct.sql"
 
-    pwd
     echo rm -f "$EXISTING_TEST_DB"
     if [ -f "$EXISTING_TEST_DB" ]; then
         rm -f "$EXISTING_TEST_DB"

@@ -208,14 +208,21 @@ void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter re
         uint32_t token = std::stoul(t.value());
 
         User_t requestUser = {0};
+        bool isUserConnected;
         try {
             requestUser = db->getUserById(token);
+            isUserConnected = db->isUserConnected(token);
         } catch (sqlite_error& e) { }
 
         if (token == 0 || *requestUser.mac == 0) {
-            logMsg << "Could not post the file. Received invalid token.";
+            logMsg << "Could not get the file list. Received invalid token.";
             m_logger.err(logMsg.str());
             response.send(Http::Code::Forbidden, "Invalid token");
+            return;
+        } else if (!isUserConnected) {
+            logMsg << "Could not get the file list. User with token \"" << token << "\" is not connected.";
+            m_logger.err(logMsg.str());
+            response.send(Http::Code::Forbidden, "User not connected");
             return;
         }
         std::vector<Song_t> songs = db->getAllSongs();
@@ -236,6 +243,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
     std::ostringstream logMsg;
 
     auto t = request.headers().getRaw("X-Auth-Token");
+
     if (t.value().empty()) {
         logMsg << "Could not post the file. Header \"X-Auth-Token\" missing.";
         m_logger.err(logMsg.str());
@@ -269,7 +277,9 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
             uint32_t token = std::stoul(t.value());
 
             User_t requestUser = {0};
+            bool isUserConnected;
             try {
+                isUserConnected = db->isUserConnected(token);
                 requestUser = db->getUserById(token);
             } catch (sqlite_error& e) { }
 
@@ -277,6 +287,11 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
                 logMsg << "Could not post the file. Received invalid token.";
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Forbidden, "Invalid token");
+                return;
+            } else if (!isUserConnected) {
+                logMsg << "Could not post the file. User with token \"" << token << "\" is not connected.";
+                m_logger.err(logMsg.str());
+                response.send(Http::Code::Forbidden, "User not connected");
                 return;
             }
 
