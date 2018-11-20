@@ -24,6 +24,7 @@ public:
 
 protected:
     static User_t getUserFromRequestToken_(const Rest::Request& request);
+    static User_t extractUserDataFromRequest_(const Rest::Request& request);
 
 public:
     RestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket);

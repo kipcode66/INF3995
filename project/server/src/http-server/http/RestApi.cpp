@@ -16,6 +16,7 @@
 #include "misc/Base64.hpp"
 #include "misc/id_utils.hpp"
 #include "mp3/header/Mp3Header.hpp"
+#include "exception/BadRequestException.hpp"
 #include "exception/MissingTokenException.hpp"
 #include "exception/InvalidTokenException.hpp"
 
@@ -39,6 +40,29 @@ User_t RestApi::getUserFromRequestToken_(const Rest::Request& request) {
         throw InvalidTokenException{t.value()};
     }
 
+    return requestUser;
+}
+
+User_t RestApi::extractUserDataFromRequest_(const Rest::Request& request) {
+    auto body = request.body();
+    rapidjson::Document request_json;
+    request_json.Parse(body.c_str());
+
+    if ((!request_json.IsObject()
+            || (!request_json.HasMember("mac")
+                || !request_json.HasMember("ip")
+                || request_json["mac"] == '\n'
+                || request_json["ip"] == '\n'))) {
+        throw BadRequestException();
+    }
+    User_t requestUser = { 0 };
+    if (request_json.IsObject()) {
+        strncpy(requestUser.mac, request_json["mac"].GetString(), User_t::MAC_LENGTH);
+        strncpy(requestUser.ip, request_json["ip"].GetString(), User_t::IP_LENGTH);
+        if (request_json.HasMember("nom")) {
+            strncpy(requestUser.name, request_json["nom"].GetString(), User_t::NAME_LENGTH);
+        }
+    }
     return requestUser;
 }
 
@@ -125,68 +149,55 @@ std::string generateBody(uint32_t id, std::string message) {
 }
 
 void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWriter response) {
-    auto body = request.body();
-    rapidjson::Document request_json;
-    request_json.Parse(body.c_str());
-    std::ostringstream logMsg;
-
-    m_logger.log("getIdentification_ called");
-
-    if ((!request_json.IsObject()
-            || (!request_json.HasMember("mac")
-                || !request_json.HasMember("ip")
-                || request_json["mac"] == '\n'
-                || request_json["ip"] == '\n'))) {
-        logMsg << "Could not login the user. The request is malformed.";
-        m_logger.err(logMsg.str());
-        response.send(Http::Code::Bad_Request, "Malformed request");
+    User_t requestUser = {};
+    try {
+        requestUser = extractUserDataFromRequest_(request);
+    }
+    catch (const BadRequestException& e) {
+        m_logger.err(std::string{"getIdentification failed: "} + e.what());
+        response.send(Pistache::Http::Code::Bad_Request, e.what());
         return;
     }
-    std::thread([&](rapidjson::Document request_json, Http::ResponseWriter response, std::ostringstream logMsg) {
-        User_t requestUser = { 0 };
-        if (request_json.IsObject()) {
-            strncpy(requestUser.mac, request_json["mac"].GetString(), User_t::MAC_LENGTH);
-            strncpy(requestUser.ip, request_json["ip"].GetString(), User_t::IP_LENGTH);
-            if (request_json.HasMember("nom")) {
-                strncpy(requestUser.name, request_json["nom"].GetString(), User_t::NAME_LENGTH);
-            }
-        }
 
-        User_t existingUser = { 0 };
-        Database* db = Database::instance();
-        existingUser = db->getUserByMac(requestUser.mac);
-        if (*existingUser.mac == 0) {
-            std::string salt = id_utils::generateSalt(strlen(requestUser.mac));
-            requestUser.userId = id_utils::generateId(requestUser.mac, salt);
+    std::thread([&](Http::ResponseWriter response, User_t requestUser) {
+        try {
+            User_t existingUser = { 0 };
+            Database* db = Database::instance();
+            existingUser = db->getUserByMac(requestUser.mac);
+            bool userAlreadyExisted = (*existingUser.mac != 0);
+            if (!userAlreadyExisted) {
+                std::string salt = id_utils::generateSalt(strlen(requestUser.mac));
+                requestUser.userId = id_utils::generateId(requestUser.mac, salt);
 
-            db->createUser(&requestUser);
-            db->connectUser(&requestUser);
-
-            logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
-            m_logger.log(logMsg.str());
-
-            std::string body = generateBody(requestUser.userId, "connection successful");
-            response.send(Http::Code::Ok, body);
-            return;
-        } else {
-            requestUser.userId = existingUser.userId;
-            try {
                 db->createUser(&requestUser);
+                db->connectUser(&requestUser);
 
+                std::ostringstream logMsg;
                 logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
                 m_logger.log(logMsg.str());
 
                 std::string body = generateBody(requestUser.userId, "connection successful");
                 response.send(Http::Code::Ok, body);
                 return;
-            } catch (sqlite_error& e) {
-                logMsg << "couldn't create user in db: " << e.what();
-                m_logger.err(logMsg.str());
-                response.send(Http::Code::Internal_Server_Error, logMsg.str());
+            }
+            else {
+                requestUser.userId = existingUser.userId;
+                db->createUser(&requestUser);
+
+                std::ostringstream logMsg;
+                logMsg << '{' << requestUser.mac << '}' << " Reassigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
+                m_logger.log(logMsg.str());
+
+                std::string body = generateBody(requestUser.userId, "connection successful");
+                response.send(Http::Code::Ok, body);
                 return;
             }
         }
-    }, std::move(request_json), std::move(response), std::move(logMsg)).detach();
+        catch (const sqlite_error& e) {
+            m_logger.err(std::string{"getIdentification failed: "} + e.what());
+            response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
+        }
+    }, std::move(response), requestUser).detach();
 }
 
 void RestApi::getFileList_(const Rest::Request& request, Http::ResponseWriter response) {
@@ -225,7 +236,7 @@ void RestApi::postFile_(const Rest::Request& request, Http::ResponseWriter respo
         response.send(Http::Code::Bad_Request, e.what());
         return;
     }
-    catch (const InvalidTokenException& e) {
+    catch (const std::exception& e) {
         m_logger.err(e.what());
         response.send(Http::Code::Forbidden, e.what());
         return;
