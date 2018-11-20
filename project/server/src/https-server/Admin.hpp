@@ -4,6 +4,7 @@
 #include <pistache/description.h>
 #include <rapidjson/document.h>
 
+namespace elevation {
 class Admin {
 public:
     static Admin extractAdminDataFromRequest (const Pistache::Rest::Request& request);
@@ -22,5 +23,8 @@ private:
     std::string m_motDePasse;
     uint32_t    m_id;
 };
+
+} // namespace elevation
+
 #endif // !HTTPS_ADMIN_HPP
 

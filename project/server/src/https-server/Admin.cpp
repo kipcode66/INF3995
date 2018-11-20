@@ -2,6 +2,15 @@
 
 #include "Admin.hpp"
 
+#include <common/database/Database.hpp>
+
+#include <http-server/http/exception/MissingTokenException.hpp>
+#include <http-server/http/exception/InvalidTokenException.hpp>
+
+#include "https/exception/AuthenticationFailureException.hpp"
+
+namespace elevation {
+
 Admin Admin::extractAdminDataFromRequest(const Pistache::Rest::Request& request) {
     rapidjson::Document jsonDocument;
     jsonDocument.Parse(request.body().c_str());
@@ -26,7 +35,21 @@ Admin Admin::extractAdminDataFromRequest(const Pistache::Rest::Request& request)
 }
 
 Admin Admin::getAdminDataFromRequestToken(const Pistache::Rest::Request& request) {
+    auto token = request.headers().getRaw("X-Auth-Token").value();
+    if (token.empty()) {
+        throw MissingTokenException{};
+    }
+    uint32_t id = std::stoul(token);
+    if (id == 0) {
+        throw InvalidTokenException{token};
+    }
 
+    Database* db = Database::instance();
+    if (!db->isAdminConnected(id)) {
+        throw AuthenticationFailureException{token};
+    }
+
+    return Admin{"", "", id};
 }
 
 Admin::Admin(std::string username, std::string motDePasse, uint32_t id) {
@@ -44,3 +67,4 @@ uint32_t Admin::getId() const {
     return this->m_id;
 }
 
+} // namespace elevation
