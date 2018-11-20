@@ -1,4 +1,3 @@
-#include "https/SecureRestApi.hpp"
 #include <rapidjson/document.h>
 
 #include "Admin.hpp"
