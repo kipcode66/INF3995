@@ -82,9 +82,9 @@ BOOST_AUTO_TEST_CASE(connectUser) {
     DatabaseTest* db = DatabaseTest::instance();
     db->connectUser(&createdUser);
 
-    int connectionStatus = db->getUserConnectionStatus(createdUser.userId);
+    bool isUserConnected = db->isUserConnected(createdUser.userId);
 
-    BOOST_CHECK_EQUAL(connectionStatus, 1);
+    BOOST_CHECK_EQUAL(isUserConnected, true);
 }
 
 BOOST_AUTO_TEST_CASE(connectAdmin) {
@@ -104,5 +104,25 @@ BOOST_AUTO_TEST_CASE(disconnectAdmin) {
 
     BOOST_CHECK_EQUAL(connectionStatus, false);
 }
+
+// BOOST_AUTO_TEST_CASE(getUserByQuery_) {
+//     DatabaseTest* db = DatabaseTest::instance();
+//     Query query("Select * FROM user;");
+//     std::vector<User_t> users = db->getUsersByQuery_(query);
+
+//     bool connectionStatus = db->isAdminConnected(123456789);
+
+//     BOOST_CHECK_EQUAL(connectionStatus, false);
+// }
+
+// BOOST_AUTO_TEST_CASE(getBlackList) {
+//     DatabaseTest* db = DatabaseTest::instance();
+//     db->disconnectAdmin(123456789);
+
+//     bool connectionStatus = db->isAdminConnected(123456789);
+
+//     BOOST_CHECK_EQUAL(connectionStatus, false);
+// }
+
 
 } // namespace elevation

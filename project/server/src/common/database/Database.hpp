@@ -34,9 +34,10 @@ public:
     User_t getUserByMac     (const std::string&) const;
     User_t getUserById      (uint32_t) const;
     void   createUser       (const User_t* user);
-    void   setAdminPassword (const std::string& password);
-    void   updateTimestamp  (const User_t* user);
     void   connectUser      (const struct User_t* user);
+    bool   isUserConnected  (const uint32_t userId) const; 
+    void   updateTimestamp  (const User_t* user);
+    void   setAdminPassword (const std::string& password);
     void   connectAdmin     (const std::string& login, uint32_t adminId);
     void   disconnectAdmin  (uint32_t adminId);
     bool   isAdminConnected (uint32_t adminId) const;

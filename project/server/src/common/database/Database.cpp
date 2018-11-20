@@ -104,12 +104,22 @@ void Database::createUser(const User_t* user) {
 }
 
 void Database::connectUser(const struct User_t* user) {
-    uint32_t userIsConnected = 1;
     executeQuery_(Query(
-        "INSERT INTO userConnection VALUES (%u, %u, julianday('now'));",
-        user->userId,
-        userIsConnected));
+        "INSERT INTO userConnection (user_id, connection_expiration) VALUES (%u, julianday('now', '+1 day'));",
+        user->userId));
 }
+
+bool Database::isUserConnected(const uint32_t userId) const {
+    Statement stmt{m_db, Query(
+        "SELECT julianday(connection_expiration) - julianday('now') FROM userConnection "
+        "WHERE (user_id = %u);",
+        userId)};
+
+    if (stmt.step()) {
+        return (stmt.getColumnDouble(0) > 0);
+    }
+    return false;
+} 
 
 int Database::getUserConnectionStatus(uint32_t userId) const {
     Statement stmt{m_db, Query(
@@ -120,7 +130,7 @@ int Database::getUserConnectionStatus(uint32_t userId) const {
         return stmt.getColumnInt(0);
     }
     return 0;
-}
+}    
 
 void Database::setAdminPassword(const std::string& password) {
     std::string salt = id_utils::generateSalt(password.length());
