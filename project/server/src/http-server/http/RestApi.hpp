@@ -39,9 +39,6 @@ protected:
     void postFile_         (const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response);
     void deleteFile_       (const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response);
 
-    std::string generateAllSongsAsViewedBy_(uint32_t token, bool adminSerialization = false);
-    rapidjson::Value& generateSong_(const Song_t& song, uint32_t token, rapidjson::Document::AllocatorType& allocator, bool adminSerialization);
-
 protected:
     std::shared_ptr<Pistache::Http::Endpoint> m_httpEndpoint;
     Pistache::Rest::Description m_desc;

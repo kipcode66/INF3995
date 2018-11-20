@@ -208,7 +208,7 @@ void RestApi::getFileList_(const Pistache::Rest::Request& request, Pistache::Htt
     std::thread([this](const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
         try {
             User_t requestUser = getUserFromRequestToken_(request);
-            std::string serializedList = generateAllSongsAsViewedBy_(requestUser.userId);
+            std::string serializedList = rest_utils::generateAllSongsAsViewedBy_(requestUser.userId);
 
             std::ostringstream logMsg;
             logMsg << "The file list for user \"" << requestUser.userId << "\" was successfuly sent.";
@@ -216,9 +216,7 @@ void RestApi::getFileList_(const Pistache::Rest::Request& request, Pistache::Htt
             response.send(Pistache::Http::Code::Ok, serializedList);
         }
         catch (const std::exception& e) {
-            std::ostringstream logMsg;
-            logMsg << "An error occurred: " << e.what();
-            m_logger.err(logMsg.str());
+            m_logger.err(std::string{"getFileList failed: "} + e.what());
             response.send(Pistache::Http::Code::Forbidden, e.what());
             return;
         }
@@ -400,54 +398,4 @@ void RestApi::deleteFile_(const Pistache::Rest::Request& request, Pistache::Http
         request,
         std::move(response)
     );
-}
-
-std::string RestApi::generateAllSongsAsViewedBy_(uint32_t token, bool adminSerialization) {
-    std::vector<Song_t> songs = Database::instance()->getAllSongs();
-    rapidjson::Document songsDoc;
-    songsDoc.SetObject();
-    rapidjson::Value songsArray;
-    songsArray.SetArray();
-    for (auto& song : songs) {
-        songsArray.PushBack(generateSong_(song, token, songsDoc.GetAllocator(), adminSerialization), songsDoc.GetAllocator());
-    }
-    songsDoc.AddMember(rapidjson::Value().SetString("chansons"), songsArray, songsDoc.GetAllocator());
-
-    rapidjson::StringBuffer buf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
-    songsDoc.Accept(writer);
-
-    return buf.GetString();
-}
-
-rapidjson::Value& RestApi::generateSong_(const Song_t& song, uint32_t token, rapidjson::Document::AllocatorType& allocator, bool adminSerialization) {
-    rapidjson::Value songDoc;
-    songDoc.SetObject();
-    try {
-        User_t user = Database::instance()->getUserById(song.userId);
-        Mp3Duration d(song.duration);
-        std::stringstream duration;
-        duration << std::setfill('0') << std::setw(2);
-        duration << d.getMinutes() << ':' << d.getSeconds();
-        songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), allocator);
-        songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), allocator);
-        songDoc.AddMember("duree", rapidjson::Value(duration.str().c_str(), duration.str().length()), allocator);
-        songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), allocator);
-        songDoc.AddMember("proprietaire", token == song.userId ? true : false, allocator);
-        songDoc.AddMember("no", song.id, allocator);
-
-        if (adminSerialization) {
-            Database* db = Database::instance();
-            User_t owner = db->getUserById(song.userId);
-            songDoc.AddMember("mac", rapidjson::Value(owner.mac, strlen(owner.mac)), allocator);
-            songDoc.AddMember("ip" , rapidjson::Value(owner.ip , strlen(owner.ip )), allocator);
-            songDoc.AddMember("id" , owner.userId, allocator);
-        }
-    }
-    catch (sqlite_error& e) {
-        std::stringstream msg;
-        msg << "An error occured while generating song a song's json: " << e.what();
-        m_logger.err(msg.str());
-    }
-    return songDoc.Move();
 }
