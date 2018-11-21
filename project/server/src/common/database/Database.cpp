@@ -353,8 +353,8 @@ std::vector<User_t> Database::getBlackList() {
 
 bool Database::getBlacklistByMAC(const std::string& MAC) const {
     Statement stmt{m_db, Query(
-        "SELECT is_blacklisted FROM user"
-        " WHERE (mac = '%q');",
+        "SELECT is_blacklisted FROM user "
+        "WHERE (mac = '%q');",
         MAC.c_str())};
     stmt.step();
     bool tmp = stmt.getColumnInt(0);

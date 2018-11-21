@@ -19,7 +19,7 @@ class UsagerIdentification_TestCase(unittest.TestCase):
     def test__good_request(self):
         req = None
         try:
-            req = requests.get(BASE_PATH + port_no + '/usager/identification',
+            req = requests.post(BASE_PATH + port_no + '/usager/identification',
                     json={'ip': mock_ip, 'mac': mock_mac, 'name': mock_name})
         except ConnectionError:
             self.assertIsNotNone(req, "Connection established")
@@ -28,7 +28,7 @@ class UsagerIdentification_TestCase(unittest.TestCase):
     def test__bad_request(self):
         req = None
         try:
-            req = requests.get(BASE_PATH + port_no + '/usager/identification',
+            req = requests.post(BASE_PATH + port_no + '/usager/identification',
                     json={'spam': 'egg', 'egg': 'more egg', 'foo': 'baz'})
         except ConnectionError:
             self.assertIsNotNone(req, "Connection established")
@@ -37,12 +37,11 @@ class UsagerIdentification_TestCase(unittest.TestCase):
     def test__response_format(self):
         req = None
         try:
-            req = requests.get(BASE_PATH + port_no + '/usager/identification',
+            req = requests.post(BASE_PATH + port_no + '/usager/identification',
                     json={'ip': mock_ip, 'mac': mock_mac, 'name': mock_name})
         except ConnectionError:
             self.assertIsNotNone(req, "Connection established")
         json = req.json()
-        # print(json)
         self.assertTrue('identificateur' in json, "field 'identificateur' in response")
         self.assertTrue('message' in json, "field 'message' in response")
         self.assertTrue('success' in json["message"], "response message indicate 'uccess'")
