@@ -30,6 +30,7 @@ void Mp3Header::getSongInfo_(TagLib::ID3v2::Tag* mp3Tag, TagLib::MPEG::Propertie
     m_year = mp3Tag->year();
     m_track = mp3Tag->track();
     m_duration = Mp3Duration(mp3Properties->lengthInSeconds());
+    m_sampleRate = mp3Properties->sampleRate();
 }
 
 bool Mp3Header::isMP3File_(const std::string& fileName) {
@@ -64,4 +65,8 @@ int Mp3Header::getYear() {
 
 int Mp3Header::getTrack() {
     return m_track;
+}
+
+int Mp3Header::getSampleRate() {
+    return m_sampleRate;
 }
