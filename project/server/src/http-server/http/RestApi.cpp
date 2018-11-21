@@ -54,8 +54,8 @@ User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& reque
     if ((!request_json.IsObject()
             || (!request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
-                || request_json["mac"] == '\n'
-                || request_json["ip"] == '\n'))) {
+                || request_json["mac"] == '\0'
+                || request_json["ip"] == '\0'))) {
         throw BadRequestException();
     }
     User_t requestUser = { 0 };
