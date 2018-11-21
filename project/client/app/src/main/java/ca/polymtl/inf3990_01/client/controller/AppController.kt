@@ -39,6 +39,7 @@ class AppController(
     private var reloadBlackListJob: Job? = null
     private var swapSongsJob: Job? = null
     private var volumeRequestJob: Job? = null
+    private var volumeChangeRequestJob: Job? = null
     private var task: ScheduledFuture<*>? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
@@ -60,6 +61,8 @@ class AppController(
         eventMgr.addEventListener(this::onLogoutRequest)
         eventMgr.addEventListener(this::deleteSong)
         eventMgr.addEventListener(this::swapSongs)
+        eventMgr.addEventListener(this::onVolumeRequest)
+        eventMgr.addEventListener(this::onVolumeChangeRequest)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -195,6 +198,23 @@ class AppController(
                     val volume = secureRestService.getVolume()
                     if (volumeController.getVolume().level != volume.level) {
                         eventMgr.dispatchEvent(VolumeChangedEvent(volume))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun onVolumeChangeRequest(event: VolumeChangeRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (volumeChangeRequestJob?.isCompleted != false) {
+                val jobTmp = volumeChangeRequestJob
+                volumeChangeRequestJob = async {
+                    jobTmp?.join()
+                    when (event.change) {
+                        VolumeChangeRequestEvent.Companion.Change.INCREASE -> secureRestService.decreaseVolume(event.value!!)
+                        VolumeChangeRequestEvent.Companion.Change.DECREASE -> secureRestService.decreaseVolume(event.value!!)
+                        VolumeChangeRequestEvent.Companion.Change.MUTE -> secureRestService.muteVolume()
+                        VolumeChangeRequestEvent.Companion.Change.UNMUTE -> secureRestService.unmuteVolume()
                     }
                 }
             }

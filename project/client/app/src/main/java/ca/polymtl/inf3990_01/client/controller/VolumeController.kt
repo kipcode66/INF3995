@@ -8,17 +8,14 @@ import android.support.v4.media.VolumeProviderCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-import ca.polymtl.inf3990_01.client.controller.event.AppTerminateEvent
-import ca.polymtl.inf3990_01.client.controller.event.EventManager
-import ca.polymtl.inf3990_01.client.controller.event.VolumeChangedEvent
-import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
+import android.support.v4.media.session.PlaybackStateCompat
+import ca.polymtl.inf3990_01.client.controller.event.*
 import ca.polymtl.inf3990_01.client.model.Volume
-import kotlinx.coroutines.experimental.launch
+
 
 class VolumeController(
     private val appCtx: Context,
-    private val eventMgr: EventManager,
-    private val secureRestService: SecureRestRequestService
+    private val eventMgr: EventManager
 ): BroadcastReceiver() {
     companion object {
         const val PERCENTAGE_MAX = 100
@@ -31,7 +28,7 @@ class VolumeController(
 
     private val mediaSession = MediaSessionCompat(
         appCtx, "VolumeControllerSession")
-    private lateinit var mediaController: MediaControllerCompat
+    private var mediaController: MediaControllerCompat
     private val volumeProvider =
         object : VolumeProviderCompat(VolumeProviderCompat.VOLUME_CONTROL_RELATIVE, PERCENTAGE_MAX, PERCENTAGE_INITIAL) {
             fun setVolumeLevel(volume: Volume) {
@@ -42,16 +39,16 @@ class VolumeController(
                 super.onAdjustVolume(direction)
                 when (direction) {
                     AudioManager.ADJUST_RAISE -> {
-                        launch {secureRestService.increaseVolume(PERCENTAGE_INCREMENT)}
+                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.INCREASE, PERCENTAGE_INCREMENT))
                     }
                     AudioManager.ADJUST_LOWER -> {
-                        launch {secureRestService.decreaseVolume(PERCENTAGE_INCREMENT)}
+                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.DECREASE))
                     }
                     AudioManager.ADJUST_MUTE -> {
-                        launch {secureRestService.muteVolume()}
+                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.MUTE))
                     }
                     AudioManager.ADJUST_UNMUTE -> {
-                        launch {secureRestService.unmuteVolume()}
+                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.UNMUTE))
                     }
                 }
             }
@@ -60,20 +57,37 @@ class VolumeController(
     init {
         mediaSession.setFlags(FLAG_HANDLES_MEDIA_BUTTONS)
         mediaSession.setPlaybackToRemote(volumeProvider)
+        val state = PlaybackStateCompat.Builder()
+        .setActions(0)
+        .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
+        .build()
+        mediaSession.setPlaybackState(state)
         mediaController = MediaControllerCompat(appCtx, mediaSession)
         eventMgr.addEventListener(this::onVolumeChanged)
         eventMgr.addEventListener(this::onAppTerminate)
-        mediaSession.isActive = true
+        eventMgr.addEventListener(this::onAppResume)
+        eventMgr.addEventListener(this::onAppStop)
     }
 
     fun getVolume(): Volume {
         return Volume(volumeProvider.currentVolume, volumeProvider.currentVolume <= 0)
     }
 
+    @Suppress("UNUSED_PARAMETER")
+    private fun onAppResume(event: AppResumeEvent) {
+        mediaSession.isActive = true
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onAppStop(event: AppStopEvent) {
+        mediaSession.isActive = false
+    }
+
     private fun onVolumeChanged(event: VolumeChangedEvent) {
         volumeProvider.setVolumeLevel(event.volume)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onAppTerminate(event: AppTerminateEvent) {
         mediaSession.release()
     }
