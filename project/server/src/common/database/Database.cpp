@@ -347,11 +347,32 @@ Database::Database(std::experimental::filesystem::path serverPath) {
 
 std::vector<User_t> Database::getBlackList() {
     return getUsersByQuery_(Query(
-        "SELECT user_id, ip, name, mac FROM user"
-        " WHERE (is_blacklisted = %i);", Database::IS_BLACKLISTED));
+        "SELECT user_id, ip, name, mac FROM user "
+        "WHERE (is_blacklisted = %i);", Database::IS_BLACKLISTED));
+}
+
+bool Database::getBlacklistByMAC(const std::string& MAC) const {
+    Statement stmt{m_db, Query(
+        "SELECT is_blacklisted FROM user"
+        " WHERE (mac = '%q');",
+        MAC.c_str())};
+    stmt.step();
+    bool tmp = stmt.getColumnInt(0);
+
+    fprintf(stderr, "blacklist value for mac=%s is %d\n", MAC.c_str(), tmp);
+    return (tmp == Database::IS_BLACKLISTED); // TODO throw err ?
+}
+
+void Database::blacklistMAC(const std::string& MAC) {
+    executeQuery_(Query(
+        "UPDATE user "
+        "SET is_blacklisted = '%q' "
+        "WHERE (mac = '%q');",
+        Database::IS_BLACKLISTED));
 }
 
 Database::~Database() {
     sqlite3_close_v2(m_db);
     sqlite3_shutdown();
 }
+

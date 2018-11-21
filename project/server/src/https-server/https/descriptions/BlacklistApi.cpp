@@ -88,12 +88,31 @@ std::string BlacklistApi::generateUser_(const User_t& user) {
 }
 
 void BlacklistApi::postSuperviseurBloquer_(const Rest::Request& request,
-                                            Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "user blocked");
+                                           Http::ResponseWriter response) {
+    std::thread([this](const Rest::Request& request, Http::ResponseWriter response) {
+        Database* db = Database::instance();
+        rapidjson::Document jsonDocument;
+        jsonDocument.Parse(request.body().c_str());
+        bool isValid = (jsonDocument.IsObject() &&
+                        jsonDocument.HasMember("MAC"));
+        if (!isValid) {
+            response.send(Http::Code::Bad_Request, "Malformed request");
+            return;
+        }
+        // TODO check if admin
+        std::string mac(jsonDocument["MAC"].GetString());
+        std::cerr << mac << std::endl;
+        if (db->getBlacklistByMAC(mac)) {
+            response.send(Http::Code::Ok, "No change made - user already blocked");
+        } else {
+            /* db->blacklistMAC(mac); */
+            response.send(Http::Code::Ok, "User blocked");
+        }
+    }, std::move(request), std::move(response)).detach();
 }
 
 void BlacklistApi::postSuperviseurDebloquer_(const Rest::Request& request,
-                                              Http::ResponseWriter response) {
+                                             Http::ResponseWriter response) {
     response.send(Http::Code::Ok, "user unblocked");
 }
 

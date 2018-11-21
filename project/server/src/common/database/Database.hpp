@@ -57,6 +57,9 @@ public:
 
     std::vector<User_t> getBlackList();
 
+    bool getBlacklistByMAC (const std::string& MAC) const;
+    void blacklistMAC      (const std::string& MAC);
+
 protected:
     Database();
     Database(std::experimental::filesystem::path);
