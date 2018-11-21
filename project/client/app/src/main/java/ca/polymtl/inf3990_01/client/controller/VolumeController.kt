@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
 import android.support.v4.media.VolumeProviderCompat
-import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
 import android.support.v4.media.session.PlaybackStateCompat
@@ -29,13 +28,20 @@ class VolumeController(
     override fun onReceive(context: Context?, intent: Intent?) {
     }
 
-    private val mediaSession = MediaSessionCompat(
-        appCtx, "VolumeControllerSession")
-    private var mediaController: MediaControllerCompat
+    private val mediaSession = MediaSessionCompat(appCtx, javaClass.name)
     private val volumeProvider =
         object : VolumeProviderCompat(VolumeProviderCompat.VOLUME_CONTROL_RELATIVE, PERCENTAGE_MAX, PERCENTAGE_INITIAL) {
             fun setVolumeLevel(volume: Volume) {
                 currentVolume = if (volume.mute) 0 else volume.level
+            }
+
+            override fun onSetVolumeTo(volume: Int) {
+                super.onSetVolumeTo(volume)
+                val diff = volume - currentVolume
+                when {
+                    diff > 0 -> eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.INCREASE, diff))
+                    diff < 0 -> eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.DECREASE, -diff))
+                }
             }
 
             override fun onAdjustVolume(direction: Int) {
@@ -45,7 +51,7 @@ class VolumeController(
                         eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.INCREASE, PERCENTAGE_INCREMENT))
                     }
                     AudioManager.ADJUST_LOWER -> {
-                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.DECREASE))
+                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.DECREASE, PERCENTAGE_INCREMENT))
                     }
                     AudioManager.ADJUST_MUTE -> {
                         eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.MUTE))
@@ -65,7 +71,6 @@ class VolumeController(
         .setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
         .build()
         mediaSession.setPlaybackState(state)
-        mediaController = MediaControllerCompat(appCtx, mediaSession)
         eventMgr.addEventListener(this::onVolumeChanged)
         eventMgr.addEventListener(this::onAppTerminate)
         eventMgr.addEventListener(this::onAppResume)
