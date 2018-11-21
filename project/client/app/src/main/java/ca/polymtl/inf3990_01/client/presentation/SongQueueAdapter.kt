@@ -13,7 +13,7 @@ import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.SongQueue
-import ca.polymtl.inf3990_01.client.utils.NetUtils
+import ca.polymtl.inf3990_01.client.utils.Misc
 import kotlinx.android.synthetic.main.server_song.view.*
 import java.util.*
 
@@ -56,7 +56,7 @@ class SongQueueAdapter(
             if (song.sentBy == null || !song.sentBy.isEmpty())
                 appCtx.getString(R.string.song_queue_item_sent_by, song.sentBy ?: userName)
             else ""
-        val duration : String = NetUtils.formatTime(song.durationMS.toLong())
+        val duration : String = Misc.formatTime(song.durationMS.toLong())
         view.duration.text = duration
         view.sender_ip.text = song.ip ?: view.context.getString(R.string.error_message_no_ip)
         view.sender_mac.text = song.mac ?: view.context.getString(R.string.error_message_no_mac)

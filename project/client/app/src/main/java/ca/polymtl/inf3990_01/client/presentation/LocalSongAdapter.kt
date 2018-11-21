@@ -13,7 +13,7 @@ import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.LocalSongs
 import ca.polymtl.inf3990_01.client.model.SongQueue
-import ca.polymtl.inf3990_01.client.utils.NetUtils
+import ca.polymtl.inf3990_01.client.utils.Misc
 import kotlinx.android.synthetic.main.local_song.view.*
 import java.util.*
 
@@ -82,7 +82,7 @@ class LocalSongAdapter(
         val song = this.localSongs[postion]
         view.songName.text = song.title
         view.author.text = song.authorName
-        val duration : String = NetUtils.formatTime(song.durationMS.toLong())
+        val duration : String = Misc.formatTime(song.durationMS.toLong())
         view.duration.text = duration
         val isAdmin = stateService.getState().type == AppStateService.State.Admin
         val isSongInQueue = ownedSongs.any { s -> s.title == song.title && s.authorName == song.authorName }
