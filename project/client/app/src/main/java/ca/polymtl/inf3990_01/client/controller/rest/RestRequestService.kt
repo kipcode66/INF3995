@@ -7,6 +7,8 @@ import android.util.Base64OutputStream
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.InitializationManager
+import ca.polymtl.inf3990_01.client.controller.event.EventManager
+import ca.polymtl.inf3990_01.client.controller.event.RequestQueueReloadEvent
 import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
 import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
 import ca.polymtl.inf3990_01.client.model.DataProvider
@@ -27,6 +29,7 @@ class RestRequestService(
     private val tokenMgr: TokenManagerService,
     private val httpClient: HTTPRestClient,
     private val initMgr: InitializationManager,
+    private val eventMgr: EventManager,
     private val dataProvider: DataProvider
 ) {
     companion object {
@@ -128,6 +131,7 @@ class RestRequestService(
                 }
             }
         }
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     suspend fun deleteSong(song: Song) {
@@ -155,6 +159,7 @@ class RestRequestService(
             request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpClient.addToRequestQueue(request)
         }
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     private fun encoder(song: LocalSong): PipedInputStream {

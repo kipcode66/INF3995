@@ -6,16 +6,18 @@ import android.util.Log
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.InitializationManager
+import ca.polymtl.inf3990_01.client.controller.event.EventManager
+import ca.polymtl.inf3990_01.client.controller.event.RequestQueueReloadEvent
 import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
 import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
-import com.android.volley.Response
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.Song
 import ca.polymtl.inf3990_01.client.model.SoundVolume
 import ca.polymtl.inf3990_01.client.model.Statistics
 import ca.polymtl.inf3990_01.client.model.User
+import com.android.volley.DefaultRetryPolicy
+import com.android.volley.Request
+import com.android.volley.Response
 import com.google.gson.Gson
 import java.math.BigInteger
 import kotlin.coroutines.experimental.suspendCoroutine
@@ -25,6 +27,7 @@ class SecureRestRequestService(
     private val httpsClient: HTTPSRestClient,
     private val tokenService: TokenManagerService,
     private val initMgr: InitializationManager,
+    private val eventMgr: EventManager,
     private val appStateService: AppStateService
     ) {
     companion object {
@@ -110,6 +113,7 @@ class SecureRestRequestService(
             request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     suspend fun swapSongs(pair: Pair<Song, Song>) {
@@ -207,6 +211,7 @@ class SecureRestRequestService(
         if (resp) {
             appStateService.setState(AppStateService.State.Admin)
         }
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     suspend fun logout() {
@@ -242,6 +247,7 @@ class SecureRestRequestService(
             httpsClient.addToRequestQueue(request)
         }
         appStateService.setState(AppStateService.State.User)
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     suspend fun changePassword(newPassword: String) {
