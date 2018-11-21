@@ -58,4 +58,5 @@
     <string name="error_message_unauthenticated">Unauthorised</string>
     <string name="black_list_item_button_desc">Unblock user</string>
     <string name="song_item_duration_format">Duration: %1$s</string>
+    <string name="error_message_song_not_in_queue">Song no longer in the queue</string>
 </resources>

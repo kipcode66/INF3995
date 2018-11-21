@@ -43,6 +43,8 @@ class SecureRestRequestService(
             val proposeePar: String?, val proprietaire: Boolean, val no: Int)
         private data class SongListResponseData(val chansons: List<SongResponseData>)
 
+        private data class SwapSongRequestData(val une: Int, val autre: Int)
+
         private const val RESOURCE_URI = "/superviseur"
     }
     private var lastMessageSongList: String? = null
@@ -105,19 +107,44 @@ class SecureRestRequestService(
                         val msg = when (error.networkResponse?.statusCode ?: 0) {
                             401 -> appCtx.getString(R.string.error_message_unknown_user)
                             405 -> appCtx.getString(R.string.error_message_deletion_refused)
-                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
+                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage?:error.message}"
                         }
                         continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
                     }
             )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     suspend fun swapSongs(pair: Pair<Song, Song>) {
-        TODO("Not Implemented")
+        val token = tokenService.getToken()
+        suspendCoroutine<ResponseData<String>> { continuation ->
+            val request = RESTRequest(
+                Request.Method.POST,
+                httpsClient.getBaseURL() + "$RESOURCE_URI/inversion",
+                Gson().toJson(SwapSongRequestData(pair.first.id, pair.second.id)),
+                String::class.java,
+                mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
+                Response.Listener { resp ->
+                    continuation.resume(resp)
+                },
+                Response.ErrorListener { error ->
+                    val msg = when (error.networkResponse?.statusCode ?: 0) {
+                        400 -> appCtx.getString(R.string.error_message_bad_request)
+                        401 -> appCtx.getString(R.string.error_message_unknown_user)
+                        405 -> appCtx.getString(R.string.error_message_unauthenticated)
+                        409 -> appCtx.getString(R.string.error_message_song_not_in_queue)
+                        else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage?:error.message}"
+                    }
+                    continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
+                }
+            )
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     suspend fun getVolume(): SoundVolume {
@@ -153,7 +180,7 @@ class SecureRestRequestService(
                     Response.ErrorListener { error ->
                         val msg = when (error.networkResponse?.statusCode ?: 0) {
                             401 -> appCtx.getString(R.string.error_message_unknown_user)
-                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
+                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage?:error.message}"
                         }
                         if (canDisplayMessage) {
                             Handler(appCtx.mainLooper).post {
@@ -165,7 +192,7 @@ class SecureRestRequestService(
                         continuation.resume(resp)
                     }
             )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         for (user in resp.value.bloques) {
@@ -205,7 +232,7 @@ class SecureRestRequestService(
                     continuation.resume(false)
                 }
             )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         if (resp) {
@@ -243,7 +270,7 @@ class SecureRestRequestService(
                     continuation.resume(false)
                 }
             )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         appStateService.setState(AppStateService.State.User)

@@ -9,6 +9,7 @@ import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.DeleteSongEvent
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
+import ca.polymtl.inf3990_01.client.controller.event.SwapSongsRequestEvent
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.Song
@@ -90,7 +91,9 @@ class SongQueueAdapter(
         view.sender_mac.text = song.mac ?: view.context.getString(R.string.error_message_no_mac)
         view.layout_admin.visibility = if (appState.canDisplaySongOwnerData()) View.VISIBLE else View.INVISIBLE
         view.remove_song.visibility = if (appState.canRemoveSong(song)) View.VISIBLE else View.INVISIBLE
-        val isHighlighted = appState.isSongHighlighted(song) || (state == State.SWAP_SELECTION && firstSelection == song)
+        val isHighlighted =
+            appState.isSongHighlighted(song) ||
+            (state == State.SWAP_SELECTION && firstSelection?.id == song.id)
         view.setBackgroundResource(
             if (isHighlighted) R.color.highlight
             else android.R.color.background_light
@@ -102,21 +105,31 @@ class SongQueueAdapter(
         val gd = GestureDetector(appCtx, object: GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent?) {
                 super.onLongPress(e)
-                if (this@SongQueueAdapter.state == State.INITIAL) {
+                if (stateService.getState().type == AppStateService.State.Admin &&
+                    this@SongQueueAdapter.state == State.INITIAL
+                ) {
                     firstSelection = this@SongQueueAdapter.songQueue[position]
-                    Log.d("LocalSongListState", state.name)
                     setState(State.SWAP_SELECTION)
+                    Log.d("LocalSongListState", state.name)
                 }
             }
 
             override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-                if (this@SongQueueAdapter.state == State.SWAP_SELECTION) {
+                if (stateService.getState().type == AppStateService.State.Admin &&
+                    this@SongQueueAdapter.state == State.SWAP_SELECTION
+                ) {
                     val secondSelection = this@SongQueueAdapter.songQueue[position]
-                    if (secondSelection != firstSelection) {
-                        // TODO Do stuff
+                    if (secondSelection.id != firstSelection!!.id) {
+                        Log.d(
+                            "LocalSongListState",
+                            "[${firstSelection!!.title}] && [${secondSelection.title}]")
+
+                        eventMgr.dispatchEvent(
+                            SwapSongsRequestEvent(Pair(firstSelection!!, secondSelection)))
+
                         firstSelection = null
-                        Log.d("LocalSongListState", state.name)
                         setState(State.INITIAL)
+                        Log.d("LocalSongListState", state.name)
                         return true
                     }
                 }

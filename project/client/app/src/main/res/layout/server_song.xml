@@ -5,11 +5,8 @@
     android:orientation="horizontal"
     android:columnCount="3"
     android:padding="@dimen/song_item_padding"
-    android:focusable="true"
-    android:clickable="true"
     android:longClickable="true"
     android:hapticFeedbackEnabled="true"
-    android:focusableInTouchMode="true"
     android:foreground="?selectableItemBackground"
     android:foregroundTintMode="add" >
 

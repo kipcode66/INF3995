@@ -36,6 +36,7 @@ class AppController(
     private var loginJob: Job? = null
     private var logoutJob: Job? = null
     private var reloadBlackListJob: Job? = null
+    private var swapSongsJob: Job? = null
     private var task: ScheduledFuture<*>? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
@@ -56,6 +57,7 @@ class AppController(
         eventMgr.addEventListener(this::onLoginRequest)
         eventMgr.addEventListener(this::onLogoutRequest)
         eventMgr.addEventListener(this::deleteSong)
+        eventMgr.addEventListener(this::swapSongs)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -123,8 +125,8 @@ class AppController(
     }
 
     private fun onSendSong(event: SendSongEvent) {
-        launch {
-            restService.sendSong(event.song)
+        if (appStateService.getState().type != AppStateService.State.Admin) {
+            launch {restService.sendSong(event.song)}
         }
     }
 
@@ -166,6 +168,18 @@ class AppController(
             launch {restService.deleteSong(event.song)}
         }
 
+    }
+
+    private fun swapSongs(event: SwapSongsRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (swapSongsJob?.isCompleted != false) {
+                val jobTmp = swapSongsJob
+                swapSongsJob = async {
+                    jobTmp?.join()
+                    secureRestService.swapSongs(event.songs)
+                }
+            }
+        }
     }
 
 }
