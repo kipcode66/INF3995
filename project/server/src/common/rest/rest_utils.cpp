@@ -37,18 +37,18 @@ rapidjson::Value& generateSong_(const Song_t& song, uint32_t token, rapidjson::D
     std::ostringstream duration;
     duration << std::setfill('0') << std::setw(2);
     duration << d.getMinutes() << ':' << d.getSeconds();
-    songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title)), allocator);
-    songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist)), allocator);
-    songDoc.AddMember("duree", rapidjson::Value(duration.str().c_str(), duration.str().length()), allocator);
-    songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name)), allocator);
+    songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title), allocator), allocator);
+    songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist), allocator), allocator);
+    songDoc.AddMember("duree", rapidjson::Value(duration.str().c_str(), duration.str().length(), allocator), allocator);
+    songDoc.AddMember("proposeePar", rapidjson::Value(user.name, strlen(user.name), allocator), allocator);
     songDoc.AddMember("proprietaire", token == song.userId ? true : false, allocator);
     songDoc.AddMember("no", song.id, allocator);
 
     if (adminSerialization) {
         Database* db = Database::instance();
         User_t owner = db->getUserById(song.userId);
-        songDoc.AddMember("mac", rapidjson::Value(owner.mac, strlen(owner.mac)), allocator);
-        songDoc.AddMember("ip" , rapidjson::Value(owner.ip , strlen(owner.ip )), allocator);
+        songDoc.AddMember("mac", rapidjson::Value(owner.mac, strlen(owner.mac), allocator), allocator);
+        songDoc.AddMember("ip" , rapidjson::Value(owner.ip , strlen(owner.ip ), allocator), allocator);
         songDoc.AddMember("id" , owner.userId, allocator);
     }
     return songDoc.Move();
