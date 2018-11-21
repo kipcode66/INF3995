@@ -9,7 +9,9 @@
     android:clickable="true"
     android:longClickable="true"
     android:hapticFeedbackEnabled="true"
-    android:focusableInTouchMode="true" >
+    android:focusableInTouchMode="true"
+    android:foreground="?selectableItemBackground"
+    android:foregroundTintMode="add" >
 
     <LinearLayout
         android:layout_height="match_parent"

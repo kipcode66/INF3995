@@ -3,15 +3,15 @@ package ca.polymtl.inf3990_01.client.presentation
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Handler
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
+import android.view.*
 import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.DeleteSongEvent
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.DataProvider
+import ca.polymtl.inf3990_01.client.model.Song
 import ca.polymtl.inf3990_01.client.model.SongQueue
 import ca.polymtl.inf3990_01.client.utils.Misc
 import kotlinx.android.synthetic.main.server_song.view.*
@@ -26,6 +26,16 @@ class SongQueueAdapter(
         private val eventMgr: EventManager,
         private val dataProvider: DataProvider
 ): BaseAdapter() {
+    companion object {
+        private enum class State {
+            INITIAL,
+            SWAP_SELECTION;
+        }
+    }
+
+    private var state = State.INITIAL
+    private var firstSelection: Song? = null
+
     init {
         dataProvider.observeSongQueue(Observer(this::onSongQueueChange))
         stateService.addObserver(this::onAppStateChange)
@@ -43,9 +53,27 @@ class SongQueueAdapter(
         Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
     }
 
-    override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {
+    /**
+     * @return true if event was handled, false otherwise
+     */
+    fun onBackPressed(): Boolean {
+        return when(state) {
+            State.SWAP_SELECTION -> {
+                setState(State.INITIAL)
+                true
+            }
+            else -> false
+        }
+    }
+
+    private fun setState(s: State) {
+        state = s
+        Handler(appCtx.mainLooper).post(this::notifyDataSetChanged)
+    }
+
+    override fun getView(position: Int, v: View?, viewGroup: ViewGroup?): View {
         val view = v ?: layoutInflater.inflate(R.layout.server_song, viewGroup, false)
-        val song = this.songQueue[postion]
+        val song = this.songQueue[position]
         val appState = stateService.getState()
         var userName = preferences.getString("client_name", appCtx.getString(R.string.client_name_default)) as String
         userName = if (userName.isBlank()) appCtx.getString(R.string.client_name_default) else userName
@@ -62,17 +90,46 @@ class SongQueueAdapter(
         view.sender_mac.text = song.mac ?: view.context.getString(R.string.error_message_no_mac)
         view.layout_admin.visibility = if (appState.canDisplaySongOwnerData()) View.VISIBLE else View.INVISIBLE
         view.remove_song.visibility = if (appState.canRemoveSong(song)) View.VISIBLE else View.INVISIBLE
+        val isHighlighted = appState.isSongHighlighted(song) || (state == State.SWAP_SELECTION && firstSelection == song)
         view.setBackgroundResource(
-            if (appState.isSongHighlighted(song)) R.color.highlight
+            if (isHighlighted) R.color.highlight
             else android.R.color.background_light
         )
+
         view.remove_song.setOnClickListener {
             eventMgr.dispatchEvent(DeleteSongEvent(song))
+        }
+        val gd = GestureDetector(appCtx, object: GestureDetector.SimpleOnGestureListener() {
+            override fun onLongPress(e: MotionEvent?) {
+                super.onLongPress(e)
+                if (this@SongQueueAdapter.state == State.INITIAL) {
+                    firstSelection = this@SongQueueAdapter.songQueue[position]
+                    Log.d("LocalSongListState", state.name)
+                    setState(State.SWAP_SELECTION)
+                }
+            }
+
+            override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+                if (this@SongQueueAdapter.state == State.SWAP_SELECTION) {
+                    val secondSelection = this@SongQueueAdapter.songQueue[position]
+                    if (secondSelection != firstSelection) {
+                        // TODO Do stuff
+                        firstSelection = null
+                        Log.d("LocalSongListState", state.name)
+                        setState(State.INITIAL)
+                        return true
+                    }
+                }
+                return super.onSingleTapConfirmed(e)
+            }
+        })
+        view.setOnTouchListener { _: View?, event: MotionEvent? ->
+            gd.onTouchEvent(event)
         }
         return view
     }
     override fun getItemId(p: Int): Long {
-        return  p.toLong()
+        return p.toLong()
     }
 
     override fun getCount(): Int {

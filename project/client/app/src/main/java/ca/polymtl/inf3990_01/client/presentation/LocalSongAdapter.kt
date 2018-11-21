@@ -77,9 +77,9 @@ class LocalSongAdapter(
         }
     }
 
-    override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {
+    override fun getView(position: Int, v: View?, viewGroup: ViewGroup?): View {
         val view = v ?: layoutInflater.inflate(R.layout.local_song, viewGroup, false)
-        val song = this.localSongs[postion]
+        val song = this.localSongs[position]
         view.songName.text = song.title
         view.author.text = song.authorName
         val duration : String = Misc.formatTime(song.durationMS.toLong())
@@ -102,7 +102,7 @@ class LocalSongAdapter(
     }
 
     override fun getItemId(p: Int): Long {
-        return  p.toLong()
+        return p.toLong()
     }
 
     override fun getCount(): Int {
