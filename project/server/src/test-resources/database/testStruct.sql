@@ -1,7 +1,10 @@
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
 CREATE TABLE user (ip VARCHAR(16), mac VARCHAR(18) UNIQUE, name VARCHAR(256), user_id INTEGER UNIQUE, is_blacklisted INTEGER);
-INSERT INTO user (ip, mac, name, user_id) VALUES('192.168.0.1','11:22:33:44:55:66','othman',123456789);
+INSERT INTO user (ip, mac, name, user_id, is_blacklisted) VALUES('192.168.0.1','11:22:33:44:55:61','othman',123456781, 0);
+INSERT INTO user (ip, mac, name, user_id, is_blacklisted) VALUES('192.168.0.2','11:22:33:44:55:62','othmane',123456782, 1);
+INSERT INTO user (ip, mac, name, user_id, is_blacklisted) VALUES('192.168.0.3','11:22:33:44:55:63','othmanee',123456783, 1);
+INSERT INTO user (ip, mac, name, user_id, is_blacklisted) VALUES('192.168.0.4','11:22:33:44:55:64','othmaneee',123456784, 1);
 CREATE TABLE userConnection (user_id INTEGER UNIQUE NOT NULL PRIMARY KEY, connection_expiration REAL, FOREIGN KEY(user_id) REFERENCES user(user_id));
 CREATE TABLE adminLogin (login VARCHAR(256) UNIQUE NOT NULL, hashed_password VARCHAR(32) NOT NULL, salt VARCHAR(32) NOT NULL);
 CREATE TABLE adminConnection (login VARCHAR(256) UNIQUE NOT NULL, isConnected INTEGER, admin_id INTEGER, timeStamp REAL);
