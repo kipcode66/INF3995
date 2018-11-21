@@ -6,11 +6,8 @@ import android.util.Log
 import ca.polymtl.inf3990_01.client.controller.event.*
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
-import ca.polymtl.inf3990_01.client.model.DataProvider
-import ca.polymtl.inf3990_01.client.model.User
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
-import ca.polymtl.inf3990_01.client.model.Song
-import ca.polymtl.inf3990_01.client.presentation.Presenter
+import ca.polymtl.inf3990_01.client.model.DataProvider
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -23,7 +20,6 @@ class AppController(
         private val restService: RestRequestService,
         private val secureRestService: SecureRestRequestService,
         private val dataProvider: DataProvider,
-        private val presenter: Presenter,
         private val preferences: SharedPreferences,
         private val localSongController: LocalSongController,
         private val appStateService: AppStateService,
@@ -101,7 +97,7 @@ class AppController(
                     restService.getSongList()
                 }
                 // now, we update the model
-                presenter.setQueue(list)
+                dataProvider.setSongQueue(list)
             }
         }
     }
@@ -134,7 +130,7 @@ class AppController(
 
     @Suppress("UNUSED_PARAMETER")
     private fun onReloadLocalSong(event: LocalSongLoadEvent) {
-        localSongController.reloadLocalSong()
+        localSongController.reloadLocalSong(event.activity)
     }
 
     private fun onLoginRequest(event: LoginRequestEvent) {
@@ -167,7 +163,7 @@ class AppController(
             launch {secureRestService.deleteSong(event.song)}
         }
         else {
-            launch{ restService.deleteSong(event.song)}
+            launch {restService.deleteSong(event.song)}
         }
 
     }

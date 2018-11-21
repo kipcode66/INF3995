@@ -9,30 +9,27 @@ import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.event.SendSongEvent
-import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.LocalSongs
 import ca.polymtl.inf3990_01.client.model.SongQueue
-import kotlinx.android.synthetic.main.local_song.view.*
-import kotlinx.android.synthetic.main.local_song.view.send
-import java.util.*
-
 import ca.polymtl.inf3990_01.client.utils.NetUtils
+import kotlinx.android.synthetic.main.local_song.view.*
+import java.util.*
 
 class LocalSongAdapter(
         private val localSongs: LocalSongs,
         private val layoutInflater: LayoutInflater,
         private val appCtx: Context,
         private val eventMgr: EventManager,
-        private val presenter: Presenter,
         private val stateService: AppStateService,
         private val dataProvider: DataProvider
 ): BaseAdapter() {
     private var ownedSongs = getUpdatedOwnerSongsQueue()
 
     init {
-        presenter.addObserver(Observer(this::onPresenter))
+        stateService.addObserver(this::onStateChange)
+        dataProvider.observeSongQueue(Observer(this::onSongQueueChange))
         dataProvider.observeLocalSongSendStates(Observer(this::onLocalSongSendStateChange))
         dataProvider.observeLocalSongs(Observer(this::onLocalSongsChange))
     }
@@ -52,17 +49,18 @@ class LocalSongAdapter(
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onPresenter(o: Observable, arg: Any?) {
-        if (arg is SongQueue) {
-            ownedSongs = getUpdatedOwnerSongsQueue()
-            Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
-            updateLocalSongSendState(arg)
-        }
-        else if (arg is AppState) {
-            Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
-        }
+    private fun onSongQueueChange(o: Observable, arg: Any?) {
+        ownedSongs = getUpdatedOwnerSongsQueue()
+        updateLocalSongSendState(arg as SongQueue)
+        Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
     }
-    private fun getUpdatedOwnerSongsQueue () = presenter.getSongs().filter { song -> song.sentBy == null }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onStateChange(o: Observable, arg: Any?) {
+        Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
+    }
+
+    private fun getUpdatedOwnerSongsQueue () = dataProvider.getSongQueue().filter { song -> song.sentBy == null }
 
     private fun updateLocalSongSendState(songs: SongQueue) {
         for (s in songs) {

@@ -14,10 +14,8 @@ import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
 import ca.polymtl.inf3990_01.client.utils.NetUtils
 import com.android.volley.*
 import com.google.gson.Gson
-import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 import java.math.BigInteger
-import kotlin.coroutines.experimental.coroutineContext
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
@@ -69,7 +67,6 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
     private var token: BigInteger = BigInteger.ZERO
     private var tokenLock = Object()
     private var lastMessage: String? = null
-    private var currentUpdateJob: Job? = null
 
     init {
         launch {
@@ -96,7 +93,7 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
         }
         if ((oldToken != token || resp.identificateur == BigInteger.ZERO) && lastMessage != resp.message) {
             // TODO Send a signal to the Presenter to show popup with the response message.
-            // Temporarly, opening a Toast (a little message at the bottom of the screen)
+            // Temporarily, opening a Toast (a little message at the bottom of the screen)
             if (canDisplayMessage || resp.identificateur != BigInteger.ZERO) {
                 Handler(appCtx.mainLooper).post {
                     Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()

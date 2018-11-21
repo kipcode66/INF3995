@@ -9,6 +9,6 @@
     <item
         android:id="@+id/action_disconnect"
         android:orderInCategory="101"
-        android:title="@string/action_diconnect"
+        android:title="@string/action_disconnect"
         app:showAsAction="never"/>
 </menu>

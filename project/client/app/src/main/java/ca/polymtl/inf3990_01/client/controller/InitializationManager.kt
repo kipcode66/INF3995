@@ -6,7 +6,6 @@ import ca.polymtl.inf3990_01.client.controller.event.AppInitEvent
 import ca.polymtl.inf3990_01.client.controller.event.AppStartEvent
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.joinChildren
 import kotlinx.coroutines.experimental.launch
 

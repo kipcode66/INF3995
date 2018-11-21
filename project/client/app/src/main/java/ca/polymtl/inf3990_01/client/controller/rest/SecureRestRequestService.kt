@@ -28,17 +28,19 @@ class SecureRestRequestService(
     private val appStateService: AppStateService
     ) {
     companion object {
-        private class UserResponseData(
-            val mac: String, val ip: String, val name: String)
-        private class UserListResponseData(val users: List<UserResponseData>)
-        data class LoginRequestData(val usager: String, val mot_de_passe: String)
-        private class SongResponseData(
+        private data class UserResponseData(
+            val mac: String, val ip: String, val nom: String)
+        private data class UserListResponseData(val bloques: List<UserResponseData>)
+
+        private data class LoginRequestData(val usager: String, val mot_de_passe: String)
+
+        private data class SongResponseData(
             val titre: String, val artiste: String, val duree: String,
             val ip: String, val mac: String, val id: BigInteger,
             val proposeePar: String?, val proprietaire: Boolean, val no: Int)
-        private class SongListResponseData(val chansons: List<SongResponseData>)
+        private data class SongListResponseData(val chansons: List<SongResponseData>)
 
-        const val RESOURCE_URI = "/superviseur/file"
+        private const val RESOURCE_URI = "/superviseur"
     }
     private var lastMessageSongList: String? = null
 
@@ -49,7 +51,7 @@ class SecureRestRequestService(
             val canDisplayMessage = initMgr.isInitialized
             val request = RESTRequest(
                 Request.Method.GET,
-                httpsClient.getBaseURL() + RESOURCE_URI,
+                httpsClient.getBaseURL() + "$RESOURCE_URI/file/",
                 "",
                 SongListResponseData::class.java,
                 mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
@@ -73,7 +75,7 @@ class SecureRestRequestService(
                     continuation.resume(resp)
                 }
             )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         for (chanson in resp.value.chansons) {
@@ -89,7 +91,7 @@ class SecureRestRequestService(
         suspendCoroutine<ResponseData<String>> { continuation ->
             val request = RESTRequest(
                     Request.Method.DELETE,
-                    httpsClient.getBaseURL() + "/superviseur/chanson/$songToDelete",
+                    httpsClient.getBaseURL() + "$RESOURCE_URI/chanson/$songToDelete",
                     "",
                     String::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
@@ -98,7 +100,7 @@ class SecureRestRequestService(
                     },
                     Response.ErrorListener { error ->
                         val msg = when (error.networkResponse?.statusCode ?: 0) {
-                            401 -> appCtx.getString(R.string.error_message_unknow_user)
+                            401 -> appCtx.getString(R.string.error_message_unknown_user)
                             405 -> appCtx.getString(R.string.error_message_deletion_refused)
                             else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
                         }
@@ -137,7 +139,7 @@ class SecureRestRequestService(
             val canDisplayMessage = initMgr.isInitialized
             val request = RESTRequest(
                     Request.Method.GET,
-                    httpsClient.getBaseURL() + RestRequestService.RESOURCE_URI ,
+                    httpsClient.getBaseURL() + "$RESOURCE_URI/listenoire" ,
                     "",
                     UserListResponseData::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
@@ -146,7 +148,7 @@ class SecureRestRequestService(
                     },
                     Response.ErrorListener { error ->
                         val msg = when (error.networkResponse?.statusCode ?: 0) {
-                            401 -> appCtx.getString(R.string.error_message_unknow_user)
+                            401 -> appCtx.getString(R.string.error_message_unknown_user)
                             else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
                         }
                         if (canDisplayMessage) {
@@ -162,8 +164,8 @@ class SecureRestRequestService(
             request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
-        for (user in resp.value.users) {
-            list.add(User(user.mac, user.ip, user.name))
+        for (user in resp.value.bloques) {
+            list.add(User(user.mac, user.ip, user.nom))
         }
         return list
     }
@@ -175,7 +177,7 @@ class SecureRestRequestService(
             val token = tokenService.getToken()
             val request = RESTRequest(
                 Request.Method.POST,
-                httpsClient.getBaseURL() + "/superviseur/login",
+                httpsClient.getBaseURL() + "$RESOURCE_URI/login",
                 Gson().toJson(LoginRequestData(username, password)),
                 String::class.java,
                 mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
@@ -213,7 +215,7 @@ class SecureRestRequestService(
             val token = tokenService.getToken()
             val request = RESTRequest(
                 Request.Method.POST,
-                httpsClient.getBaseURL() + "/superviseur/logout",
+                httpsClient.getBaseURL() + "$RESOURCE_URI/logout",
                 "",
                 String::class.java,
                 mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),

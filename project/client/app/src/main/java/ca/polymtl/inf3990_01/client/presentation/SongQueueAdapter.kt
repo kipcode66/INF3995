@@ -10,8 +10,8 @@ import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.DeleteSongEvent
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
-import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
+import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.SongQueue
 import ca.polymtl.inf3990_01.client.utils.NetUtils
 import kotlinx.android.synthetic.main.server_song.view.*
@@ -24,10 +24,10 @@ class SongQueueAdapter(
         private val appCtx: Context,
         private val preferences: SharedPreferences,
         private val eventMgr: EventManager,
-        presenter: Presenter
+        private val dataProvider: DataProvider
 ): BaseAdapter() {
     init {
-        presenter.addObserver(Observer(this::onPresenterUpdate))
+        dataProvider.observeSongQueue(Observer(this::onSongQueueChange))
         stateService.addObserver(this::onAppStateChange)
     }
 
@@ -37,12 +37,10 @@ class SongQueueAdapter(
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onPresenterUpdate(o: Observable, arg: Any?) {
-        if (arg is SongQueue) {
-            songQueue.clear()
-            songQueue.addAll(arg)
-            Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
-        }
+    private fun onSongQueueChange(o: Observable, arg: Any?) {
+        songQueue.clear()
+        songQueue.addAll(arg as SongQueue)
+        Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
     }
 
     override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {

@@ -37,17 +37,17 @@ class StatisticsActivity : AbstractDrawerActivity(R.layout.activity_statistics, 
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        when (item.itemId) {
+        return when (item.itemId) {
             R.id.action_show_login -> {
                 val loginDialog = LoginDialog(this, eventMgr)
                 loginDialog.show()
-                return true
+                true
             }
             R.id.action_disconnect -> {
                 eventMgr.dispatchEvent(LogoutRequestEvent())
-                return true
+                true
             }
-            else -> return super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }
