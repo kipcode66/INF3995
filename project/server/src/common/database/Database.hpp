@@ -54,8 +54,6 @@ public:
 
     void initDefaultAdmin();
 
-    int getUserConnectionStatus(uint32_t userId) const;
-
     std::vector<User_t> getBlackList();
 
 protected:
