@@ -23,6 +23,7 @@ class AppController(
         private val preferences: SharedPreferences,
         private val localSongController: LocalSongController,
         private val appStateService: AppStateService,
+        private val volumeController: VolumeController,
         private val appCtx: Context
 ) {
     companion object {
@@ -37,6 +38,7 @@ class AppController(
     private var logoutJob: Job? = null
     private var reloadBlackListJob: Job? = null
     private var swapSongsJob: Job? = null
+    private var volumeRequestJob: Job? = null
     private var task: ScheduledFuture<*>? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
@@ -121,6 +123,7 @@ class AppController(
     private fun scheduleQueueTask(prefs: SharedPreferences): ScheduledFuture<*> {
         return executor.scheduleAtFixedRate({
             eventMgr.dispatchEvent(RequestQueueReloadEvent())
+            eventMgr.dispatchEvent(VolumeRequestEvent())
         }, 0, prefs.getString(QUEUE_PERIOD_KEY, "$QUEUE_PERIOD_DEFAULT")?.toLong() ?: QUEUE_PERIOD_DEFAULT, TimeUnit.MILLISECONDS)
     }
 
@@ -177,6 +180,22 @@ class AppController(
                 swapSongsJob = async {
                     jobTmp?.join()
                     secureRestService.swapSongs(event.songs)
+                }
+            }
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onVolumeRequest(event: VolumeRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (volumeRequestJob?.isCompleted != false) {
+                val jobTmp = volumeRequestJob
+                volumeRequestJob = async {
+                    jobTmp?.join()
+                    val volume = secureRestService.getVolume()
+                    if (volumeController.getVolume().level != volume.level) {
+                        eventMgr.dispatchEvent(VolumeChangedEvent(volume))
+                    }
                 }
             }
         }
