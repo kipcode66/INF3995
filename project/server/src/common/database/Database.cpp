@@ -115,17 +115,6 @@ bool Database::isUserConnected(const uint32_t userId) const {
     return false;
 }
 
-int Database::getUserConnectionStatus(uint32_t userId) const {
-    Statement stmt{m_db, Query(
-        "SELECT isConnected FROM userConnection WHERE (user_id = %u);",
-        userId)};
-
-    if (stmt.step()) {
-        return stmt.getColumnInt(0);
-    }
-    return 0;
-}
-
 void Database::setAdminPassword(const std::string& password) {
     std::string salt = id_utils::generateSalt(password.length());
     std::string passwordHash = id_utils::generateMd5Hash(password, salt);
