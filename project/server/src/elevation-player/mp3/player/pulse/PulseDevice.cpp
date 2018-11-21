@@ -15,7 +15,7 @@ PulseDevice::PulseDevice(const uint32_t rate)
     int error;
     pa_sample_spec spec = PULSE_SPECIFICATION;
     spec.rate = rate;
-    pa_simple* device = pa_simple_new(NULL, "Elevation player", PA_STREAM_PLAYBACK, NULL, "Elevation stream", &PULSE_SPECIFICATION, NULL, NULL, &error);
+    pa_simple* device = pa_simple_new(NULL, "Elevation player", PA_STREAM_PLAYBACK, NULL, "Elevation stream", &spec, NULL, NULL, &error);
     if (device == NULL) {
         throw std::runtime_error(::pa_strerror(error));
     }
