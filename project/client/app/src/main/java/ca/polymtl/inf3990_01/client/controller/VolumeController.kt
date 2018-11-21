@@ -10,12 +10,15 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
 import android.support.v4.media.session.PlaybackStateCompat
 import ca.polymtl.inf3990_01.client.controller.event.*
+import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.Volume
+import java.util.*
 
 
 class VolumeController(
     private val appCtx: Context,
-    private val eventMgr: EventManager
+    private val eventMgr: EventManager,
+    private val stateService: AppStateService
 ): BroadcastReceiver() {
     companion object {
         const val PERCENTAGE_MAX = 100
@@ -67,15 +70,21 @@ class VolumeController(
         eventMgr.addEventListener(this::onAppTerminate)
         eventMgr.addEventListener(this::onAppResume)
         eventMgr.addEventListener(this::onAppStop)
+        stateService.addObserver(this::onAppStateChange)
     }
 
     fun getVolume(): Volume {
         return Volume(volumeProvider.currentVolume, volumeProvider.currentVolume <= 0)
     }
 
+    @SuppressWarnings("UNUSED_PARAMETER")
+    private fun onAppStateChange(o: Observable, arg: Any?) {
+        mediaSession.isActive = stateService.getState().type == AppStateService.State.Admin
+    }
+
     @Suppress("UNUSED_PARAMETER")
     private fun onAppResume(event: AppResumeEvent) {
-        mediaSession.isActive = true
+        mediaSession.isActive = stateService.getState().type == AppStateService.State.Admin
     }
 
     @Suppress("UNUSED_PARAMETER")

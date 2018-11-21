@@ -211,7 +211,7 @@ class AppController(
                 volumeChangeRequestJob = async {
                     jobTmp?.join()
                     when (event.change) {
-                        VolumeChangeRequestEvent.Companion.Change.INCREASE -> secureRestService.decreaseVolume(event.value!!)
+                        VolumeChangeRequestEvent.Companion.Change.INCREASE -> secureRestService.increaseVolume(event.value!!)
                         VolumeChangeRequestEvent.Companion.Change.DECREASE -> secureRestService.decreaseVolume(event.value!!)
                         VolumeChangeRequestEvent.Companion.Change.MUTE -> secureRestService.muteVolume()
                         VolumeChangeRequestEvent.Companion.Change.UNMUTE -> secureRestService.unmuteVolume()
