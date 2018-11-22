@@ -52,6 +52,7 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
             }
         }
     } while (retry);
+    return newSong;
 }
 
 void Mp3AutoPlayerCallbacks::songRemover_(fs::path pathOfSong) {
