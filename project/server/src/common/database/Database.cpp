@@ -351,24 +351,27 @@ std::vector<User_t> Database::getBlackList() {
         "WHERE (is_blacklisted = %i);", Database::IS_BLACKLISTED));
 }
 
-bool Database::getBlacklistByMAC(const std::string& MAC) const {
+bool Database::getBlacklistByMAC(const std::string& mac) const {
     Statement stmt{m_db, Query(
         "SELECT is_blacklisted FROM user "
         "WHERE (mac = '%q');",
-        MAC.c_str())};
-    stmt.step();
-    bool tmp = stmt.getColumnInt(0);
-
-    fprintf(stderr, "blacklist value for mac=%s is %d\n", MAC.c_str(), tmp);
-    return (tmp == Database::IS_BLACKLISTED); // TODO throw err ?
+        mac.c_str())};
+    if(stmt.step()) {
+        bool tmp = stmt.getColumnInt(0);
+        /* fprintf(stderr, "blacklist value for mac=%s is %d\n", mac.c_str(), tmp); */
+        return (tmp == Database::IS_BLACKLISTED);
+    } else {
+        throw std::runtime_error("No such user in db");
+    }
 }
 
-void Database::blacklistMAC(const std::string& MAC) {
+void Database::blacklistMAC(const std::string& mac) {
     executeQuery_(Query(
         "UPDATE user "
-        "SET is_blacklisted = '%q' "
+        "SET is_blacklisted = %i "
         "WHERE (mac = '%q');",
-        Database::IS_BLACKLISTED));
+        Database::IS_BLACKLISTED,
+        mac.c_str()));
 }
 
 Database::~Database() {

@@ -93,8 +93,13 @@ void BlacklistApi::postSuperviseurBloquer_(const Rest::Request& request,
         Database* db = Database::instance();
         rapidjson::Document jsonDocument;
         jsonDocument.Parse(request.body().c_str());
+
+        // 'ip' and 'name' are not used but required by the specs
         bool isValid = (jsonDocument.IsObject() &&
-                        jsonDocument.HasMember("MAC"));
+                        jsonDocument.HasMember("ip") &&
+                        jsonDocument.HasMember("MAC") &&
+                        jsonDocument.HasMember("nom") &&
+                        jsonDocument["MAC"] != "\0");
         if (!isValid) {
             response.send(Http::Code::Bad_Request, "Malformed request");
             return;
@@ -102,11 +107,15 @@ void BlacklistApi::postSuperviseurBloquer_(const Rest::Request& request,
         // TODO check if admin
         std::string mac(jsonDocument["MAC"].GetString());
         std::cerr << mac << std::endl;
-        if (db->getBlacklistByMAC(mac)) {
-            response.send(Http::Code::Ok, "No change made - user already blocked");
-        } else {
-            /* db->blacklistMAC(mac); */
-            response.send(Http::Code::Ok, "User blocked");
+        try {
+            if (db->getBlacklistByMAC(mac)) {
+                response.send(Http::Code::Ok, "No change made - user already blocked");
+            } else {
+                db->blacklistMAC(mac);
+                response.send(Http::Code::Ok, "User blocked");
+            }
+        } catch (std::exception& e) {
+            response.send(Http::Code::Internal_Server_Error, std::string("unknown error - ").append(e.what()));
         }
     }, std::move(request), std::move(response)).detach();
 }

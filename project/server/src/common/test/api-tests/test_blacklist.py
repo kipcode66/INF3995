@@ -24,7 +24,8 @@ endpoints = {
         'data': {
             'ip': mock_ip,
             'mac':mock_mac,
-            'nom': mock_nom,
+            # 'nom': mock_nom,
+            'name': mock_nom,
         }
     },
     'listenoire': {
@@ -34,7 +35,12 @@ endpoints = {
     'bloquer': {
         'request': requests.post,
         'path': '/superviseur/bloquer',
-        'data': {"MAC": mock_mac},
+        'headers': mock_headers,
+        'data': {
+            'MAC': mock_mac,
+            'ip' : mock_ip,
+            'nom': mock_nom
+        },
     },
 }
 
@@ -57,7 +63,7 @@ class BlacklistTest(unittest.TestCase):
             assertTrue(False, "Could not login as Admin")
 
 
-    def test_getListenoire_good(self):
+    def test_listenoire_good(self):
         "Test getting the blacklist"
 
         disable_warnings()
@@ -73,18 +79,24 @@ class BlacklistTest(unittest.TestCase):
         self.assertEqual(req.status_code, 200, "status code is correct")
 
 
-    @unittest.skip("WIP")
-    def test__postBloquer(self):
+    def test_bloquer(self):
         "Creates a user and then block it"
+
         disable_warnings()
         req = None
         try:
-            e = endpoints['identification']
-            create_req = e['request'](
-                BASE_PATH + port_no + e['path'],
-                headers=e['headers'],
-                verify=False,
-                data=e['data'])
+            # e = endpoints['identification']
+            # create_req = requests.post(
+            #     BASE_PATH + port_no + '/usager/identification',
+            #     json={'ip': mock_ip, 'mac': mock_mac, 'name': 'test_user'},
+            #     verify=False
+            # )
+
+            # create_req = e['request'](
+            #     BASE_PATH + port_no + e['path'],
+            #     verify=False,
+            #     data=e['data'])
+            # self.assertEqual(create_req.status_code, 200, "could not create user")
 
             e = endpoints['bloquer']
             block_req = e['request'](
@@ -95,7 +107,6 @@ class BlacklistTest(unittest.TestCase):
         except ConnectionError:
             self.assertIsNotNone(req, "Connection established")
 
-        self.assertEqual(create_req.status_code, 200, "could not create user")
         self.assertEqual(block_req.status_code, 200, "could not block user")
 
 if __name__ == '__main__':
