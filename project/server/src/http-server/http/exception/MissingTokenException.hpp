@@ -3,9 +3,11 @@
 
 #include <stdexcept>
 
+#include "BadRequestException.hpp"
+
 namespace elevation {
 
-class MissingTokenException : public std::exception {
+class MissingTokenException : public BadRequestException {
 public:
     virtual const char* what() const noexcept override;
 };

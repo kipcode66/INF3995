@@ -3,6 +3,8 @@
 #include <iostream>
 #include <functional>
 
+#include <common/mp3/header/Mp3Header.hpp>
+
 #include "mp3/player/mad/MadDecoder.hpp"
 #include "mp3/player/mad/MadAudioFormatter.hpp"
 #include "mp3/player/pulse/PulseDevice.hpp"
@@ -12,7 +14,13 @@ namespace elevation {
 void Mp3Player::run_(std::string fileName, std::shared_ptr<std::atomic<bool>> stopRequested) {
     try {
         MadDecoder decoder(std::move(SharedFileMemory(fileName)), MadAudioFormatter());
-        PulseDevice pulse;
+        uint32_t rate = PulseDevice::DEFAULT_SAMPLE_RATE;
+        try {
+            Mp3Header header{fileName};
+            rate = header.getSampleRate();
+        }
+        catch (...) { }
+        PulseDevice pulse{rate};
 
         while (!decoder.isDone() && !stopRequested->load()) {
             std::vector<uint8_t> frame = decoder.decodeNextFrame();

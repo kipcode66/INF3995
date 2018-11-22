@@ -21,6 +21,7 @@ set(HTTPS_SERVER_CPP_SOURCES
     https/descriptions/StatsApi.cpp
     https/descriptions/AuthApi.cpp
     https/descriptions/FileManagementApi.cpp
+    https/exception/AuthenticationFailureException.cpp
     Admin.cpp
 )
 
@@ -37,6 +38,7 @@ set(HTTPS_SERVER_HEADER_SOURCES
     https/descriptions/StatsApi.hpp
     https/descriptions/AuthApi.hpp
     https/descriptions/FileManagementApi.hpp
+    https/exception/AuthenticationFailureException.hpp
     Admin.hpp
 )
 

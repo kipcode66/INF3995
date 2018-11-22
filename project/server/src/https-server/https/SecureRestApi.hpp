@@ -15,12 +15,11 @@
 
 #include <common/logger/Logger.hpp>
 
-using namespace Pistache;
 namespace elevation {
 
 class SecureRestApi : public RestApi {
 public:
-    SecureRestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket);
+    SecureRestApi(Pistache::Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket);
     void init();
 
 protected:

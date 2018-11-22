@@ -7,7 +7,6 @@
 
 using namespace Pistache;
 
-
 StatsApi::StatsApi(Rest::Description& desc) {
     auto superviseurPath = desc.path("/superviseur");
     superviseurPath

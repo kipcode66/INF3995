@@ -12,7 +12,7 @@
 
 using namespace elevation;
 
-SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
+SecureRestApi::SecureRestApi(Pistache::Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
     : RestApi(addr, logger, cache, std::move(playerEventSocket))
     , m_logger            (logger)
     , m_volumeApi         (m_desc)
@@ -23,7 +23,7 @@ SecureRestApi::SecureRestApi(Address addr, Logger& logger, FileCache& cache, Mp3
 { }
 
 void SecureRestApi::init() {
-    auto opts = Http::Endpoint::options();
+    auto opts = Pistache::Http::Endpoint::options();
     m_httpEndpoint->init(opts);
     createDescription_();
 }

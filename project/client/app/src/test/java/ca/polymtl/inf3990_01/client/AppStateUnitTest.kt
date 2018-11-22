@@ -18,7 +18,7 @@ class AppStateUnitTest : KoinTest {
     @Before
     fun before() {
         StandAloneContext.startKoin(listOf(module {
-            single { AppStateService() }
+            single { AppStateService(get()) }
         })) with (Mockito.mock(Context::class.java))
     }
 

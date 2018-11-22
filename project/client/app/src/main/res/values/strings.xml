@@ -32,7 +32,7 @@
     <string name="error_message_bad_request">Bad Request</string>
     <string name="error_message_unknown">Unknown Error</string>
     <string name="error_message_forbidden">Forbidden</string>
-    <string name="error_message_unknow_user">unauthenticated user</string>
+    <string name="error_message_unknown_user">unauthenticated user</string>
     <string name="error_message_access">access denied</string>
     <string name="error_message_deletion_refused">the song does not belong to the user or wrong song</string>
     <string name="desc_message_remove_song">Query the server to remove a song</string>
@@ -46,7 +46,7 @@
     <string name="song_queue_item_sent_by">Sent by: %1$s</string>
     <string name="client_name_default">You</string>
     <string name="local_song_sendButton_label_send">Send</string>
-    <string name="local_song_sendButton_label_sending">Sending...</string>
+    <string name="local_song_sendButton_label_sending">Sending…</string>
     <string name="local_song_sendButton_label_sent">Sent</string>
     <string name="login_hint_username">Username</string>
     <string name="login_hint_password">Password</string>
@@ -54,6 +54,12 @@
     <string name="login_dialog_title">Login</string>
     <string name="login_username_default_text" translatable="false">admin</string>
     <string name="action_show_login">Admin Login</string>
-    <string name="action_diconnect">Disconnect</string>
+    <string name="action_disconnect">Disconnect</string>
     <string name="error_message_unauthenticated">Unauthorised</string>
+    <string name="black_list_item_button_desc">Unblock user</string>
+    <string name="song_item_duration_format">Duration: %1$s</string>
+    <string name="error_message_song_not_in_queue">Song no longer in the queue</string>
+    <string name="settings_key_server_address" translatable="false">server_url</string>
+    <string name="settings_key_client_name" translatable="false">client_name</string>
+    <string name="settings_key_queue_refresh_period" translatable="false">queue_period</string>
 </resources>
