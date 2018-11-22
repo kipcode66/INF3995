@@ -5,6 +5,9 @@
 
 #include <pulse/simple.h>
 #include <pulse/error.h>
+#include <pulse/pulseaudio.h>
+
+#include "PulseVolume.hpp"
 
 namespace elevation {
 
@@ -23,12 +26,15 @@ public:
     PulseDevice& operator=(PulseDevice&& that);
 
     void play(const std::vector<uint8_t>& data);
+    PulseVolume& getVolumeManager() { return m_pulseVolume; }
 
 protected:
     void cleanup_();
+    ::pa_context* makeContext_();
 
 protected:
     pa_simple* m_device;
+    PulseVolume m_pulseVolume;
 };
 
 } // namespace elevation
