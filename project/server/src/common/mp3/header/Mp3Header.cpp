@@ -4,10 +4,16 @@
 Mp3Header::Mp3Header(const std::string& fileName)
 {
     TagLib::MPEG::File mp3File(fileName.c_str());
-    if (!mp3File.isOpen() || !isMP3File_(fileName) || !mp3File.hasID3v2Tag()) {
+    if (!mp3File.isOpen() || !isMP3File_(fileName) || (!mp3File.hasID3v1Tag() && !mp3File.hasID3v2Tag())) {
         throw std::invalid_argument( "MP3 file failed to open" );
     }
-    TagLib::ID3v2::Tag* mp3Tag = mp3File.ID3v2Tag(true);
+    TagLib::Tag* mp3Tag;
+    if (mp3File.hasID3v2Tag()) {
+        mp3Tag = (TagLib::Tag*)mp3File.ID3v2Tag(true);
+    }
+    else {
+        mp3Tag = (TagLib::Tag*)mp3File.ID3v1Tag(true);
+    }
     TagLib::MPEG::Properties* mp3Properties = mp3File.audioProperties();
     getSongInfo_(mp3Tag, mp3Properties);
 }
@@ -22,7 +28,7 @@ void Mp3Header::displaySongInfo() {
     std::cout << " la chanson dure  " << m_duration.getMinutes() << " minutes et " << m_duration.getSeconds() << " secondes " << std::endl;
 }
 
-void Mp3Header::getSongInfo_(TagLib::ID3v2::Tag* mp3Tag, TagLib::MPEG::Properties* mp3Properties) {
+void Mp3Header::getSongInfo_(TagLib::Tag* mp3Tag, TagLib::MPEG::Properties* mp3Properties) {
     m_title = mp3Tag->title().toCString();
     m_artist = mp3Tag->artist().toCString();
     m_album = mp3Tag->album().toCString();
