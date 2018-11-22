@@ -12,4 +12,8 @@ void ElevationPlayerMp3EventVisitor::onMuteEvent(const MuteEvent& event) const {
     std::cout << "Got mute event" << std::endl;
 }
 
+void ElevationPlayerMp3EventVisitor::onUnmuteEvent(const UnmuteEvent& event) const {
+    std::cout << "Got unmute event" << std::endl;
+}
+
 } // namespace elevation

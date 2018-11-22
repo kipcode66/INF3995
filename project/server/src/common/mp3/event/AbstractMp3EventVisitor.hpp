@@ -6,11 +6,13 @@ namespace elevation {
 // Forward-declarations to break circular dependencies.
 class VolumeChangeEvent;
 class MuteEvent;
+class UnmuteEvent;
 
 class AbstractMp3EventVisitor {
 public:
     virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) const = 0;
     virtual void onMuteEvent(const MuteEvent& event) const = 0;
+    virtual void onUnmuteEvent(const UnmuteEvent& event) const = 0;
 };
 
 } // namespace elevation
