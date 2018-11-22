@@ -5,7 +5,7 @@
 
 namespace elevation {
 
-VolumeChangeEvent::VolumeChangeEvent(uint8_t changeTo)
+VolumeChangeEvent::VolumeChangeEvent(volumePercent_t changeTo)
     : Mp3Event(Mp3Event::EventType::VOLUME_CHANGE)
     , m_changeTo(changeTo)
 { }

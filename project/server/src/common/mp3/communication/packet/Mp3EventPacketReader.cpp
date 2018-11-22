@@ -53,7 +53,7 @@ std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeEvent_(Mp3Event::Even
 }
 
 std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeVolumeChangeEvent_(std::string payload) {
-    auto newVolume = deserializeElement_<uint8_t>(payload, 0);
+    auto newVolume = deserializeElement_<volumePercent_t>(payload, 0);
     return std::unique_ptr<Mp3Event>{new VolumeChangeEvent{newVolume}};
 }
 
