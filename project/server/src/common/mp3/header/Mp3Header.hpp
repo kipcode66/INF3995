@@ -23,9 +23,10 @@ public:
     std::string getGenre();
     int getYear();
     int getTrack();
+    int getSampleRate();
 
 private:
-    void getSongInfo_(TagLib::ID3v2::Tag* mp3Tag, TagLib::MPEG::Properties* mp3Properties);
+    void getSongInfo_(TagLib::Tag* mp3Tag, TagLib::MPEG::Properties* mp3Properties);
     bool isMP3File_(const std::string& fileName);
 
     Mp3Duration m_duration;
@@ -35,6 +36,7 @@ private:
     std::string m_genre;
     int m_year;
     int m_track;
+    int m_sampleRate;
 };
 
 #endif // !SRC_HTTP_MP3_HEADER_HPP

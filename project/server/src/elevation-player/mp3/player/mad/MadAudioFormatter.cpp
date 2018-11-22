@@ -35,6 +35,18 @@ std::vector<uint8_t> MadAudioFormatter::format(struct mad_pcm* pcm) {
             data.push_back((sample >> 0) & 0xff);
             data.push_back((sample >> 8) & 0xff);
         }
+    } else if (pcm->channels == 1) {
+        while (nsamples--) {
+            mad_fixed_t sample;
+
+            sample = formatSample_(*left_ch++);
+            data.push_back((sample >> 0) & 0xff);
+            data.push_back((sample >> 8) & 0xff);
+
+            // doubling the channel for mono
+            data.push_back((sample >> 0) & 0xff);
+            data.push_back((sample >> 8) & 0xff);
+        }
     } else {
         throw std::runtime_error("MP3 file does not support stereo");
     }

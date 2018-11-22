@@ -54,8 +54,8 @@ User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& reque
     if ((!request_json.IsObject()
             || (!request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
-                || request_json["mac"] == '\n'
-                || request_json["ip"] == '\n'))) {
+                || request_json["mac"] == '\0'
+                || request_json["ip"] == '\0'))) {
         throw BadRequestException();
     }
     User_t requestUser = { 0 };
@@ -210,6 +210,15 @@ void RestApi::getFileList_(const Pistache::Rest::Request& request, Pistache::Htt
             User_t requestUser = getUserFromRequestToken_(request);
             std::string serializedList;
             try {
+                Database* db = Database::instance();
+                bool isUserConnected = db->isUserConnected(requestUser.userId);
+                if (!isUserConnected) {
+                    std::ostringstream logMsg;
+                    logMsg << "Could not get the file list. User with token \"" << requestUser.userId << "\" is not connected.";
+                    m_logger.err(logMsg.str());
+                    response.send(Pistache::Http::Code::Forbidden, "User not connected");
+                    return;
+                }
                 serializedList = rest_utils::generateAllSongsAsViewedBy_(requestUser.userId);
             }
             catch (const sqlite_error& e) {
@@ -237,6 +246,15 @@ void RestApi::postFile_(const Pistache::Rest::Request& request, Pistache::Http::
     User_t requestUser = {};
     try {
         requestUser = getUserFromRequestToken_(request);
+        Database* db = Database::instance();
+        bool isUserConnected = db->isUserConnected(requestUser.userId);
+        if (!isUserConnected) {
+            std::ostringstream logMsg;
+            logMsg << "Could not post the file. User with token \"" << requestUser.userId << "\" is not connected.";
+            m_logger.err(logMsg.str());
+            response.send(Pistache::Http::Code::Forbidden, "User not connected");
+            return;
+        }
     }
     catch (const MissingTokenException& e) {
         std::ostringstream logMsg;

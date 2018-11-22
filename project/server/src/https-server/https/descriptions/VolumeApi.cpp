@@ -33,7 +33,7 @@ VolumeApi::VolumeApi(Pistache::Rest::Description& desc) {
 
 void VolumeApi::GET_volume_(const Rest::Request& request,
                                           Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "GET_volume_ called");
+    response.send(Http::Code::Ok, "{\"volume\":50,\"sourdine\":false}");
 }
 
 void VolumeApi::POST_volumeAug_ (const Rest::Request& request,

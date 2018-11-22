@@ -82,9 +82,9 @@ BOOST_AUTO_TEST_CASE(connectUser) {
     DatabaseTest* db = DatabaseTest::instance();
     db->connectUser(&createdUser);
 
-    int connectionStatus = db->getUserConnectionStatus(createdUser.userId);
+    bool isUserConnected = db->isUserConnected(createdUser.userId);
 
-    BOOST_CHECK_EQUAL(connectionStatus, 1);
+    BOOST_CHECK_EQUAL(isUserConnected, true);
 }
 
 BOOST_AUTO_TEST_CASE(connectAdmin) {

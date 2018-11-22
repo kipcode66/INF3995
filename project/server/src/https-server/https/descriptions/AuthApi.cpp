@@ -50,9 +50,9 @@ void AuthApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWrit
             Database* db = Database::instance();
             if (db->isAdminConnected(admin.getId())) {
                 std::ostringstream logMsg;
-                logMsg << "Could not Login Admin. Admin with token \"" << admin.getId() << "\" is already connected.";
-                m_logger.err(logMsg.str());
-                response.send(Http::Code::Bad_Request, "Admin already connected with this token");
+                logMsg << "Admin with token \"" << admin.getId() << "\" is already connected. Applying idempotent behaviour and return OK.";
+                m_logger.log(logMsg.str());
+                response.send(Http::Code::Ok, "Already connected");
                 return;
             }
             auto saltAndPasswordHash = db->getSaltAndHashedPasswordByLogin(admin.getUsername().c_str());
@@ -116,8 +116,10 @@ void AuthApi::superviseurLogout_(const Rest::Request& request, Http::ResponseWri
             errorMessage = e.what();
         }
         catch (const AuthenticationFailureException& e) {
-            errorCode = Pistache::Http::Code::Unauthorized;
-            errorMessage = e.what();
+            errorMessage = e.what() + std::string{"; Applying idempotent behaviour and return OK."};
+            m_logger.log(errorMessage);
+            response.send(Pistache::Http::Code::Ok, e.what());
+            return;
         }
         catch (const std::exception& e) {
             errorCode = Pistache::Http::Code::Internal_Server_Error;
