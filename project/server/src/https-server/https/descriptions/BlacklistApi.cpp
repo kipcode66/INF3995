@@ -72,7 +72,7 @@ std::string BlacklistApi::generateUser_(const User_t& user) {
     userDoc.SetObject();
     try {
         userDoc.AddMember(rapidjson::StringRef("ip"), rapidjson::Value(user.ip, strlen(user.ip)), userDoc.GetAllocator());
-        userDoc.AddMember(rapidjson::StringRef("MAC"), rapidjson::Value(user.mac, strlen(user.mac)), userDoc.GetAllocator());
+        userDoc.AddMember(rapidjson::StringRef("mac"), rapidjson::Value(user.mac, strlen(user.mac)), userDoc.GetAllocator());
         userDoc.AddMember(rapidjson::StringRef("name"), rapidjson::Value(user.name, strlen(user.name)), userDoc.GetAllocator());
     }
     catch (sqlite_error& e) {
@@ -97,15 +97,15 @@ void BlacklistApi::postSuperviseurBloquer_(const Rest::Request& request,
         // 'ip' and 'name' are not used but required by the specs
         bool isValid = (jsonDocument.IsObject() &&
                         jsonDocument.HasMember("ip") &&
-                        jsonDocument.HasMember("MAC") &&
+                        jsonDocument.HasMember("mac") &&
                         jsonDocument.HasMember("nom") &&
-                        jsonDocument["MAC"] != "\0");
+                        jsonDocument["mac"] != "\0");
         if (!isValid) {
             response.send(Http::Code::Bad_Request, "Malformed request");
             return;
         }
         // TODO check if admin
-        std::string mac(jsonDocument["MAC"].GetString());
+        std::string mac(jsonDocument["mac"].GetString());
         std::cerr << mac << std::endl;
         try {
             if (db->getBlacklistByMAC(mac)) {

@@ -360,9 +360,10 @@ Database::Database(std::experimental::filesystem::path serverPath) {
 
 
 bool Database::getBlacklistByMAC(const std::string& mac) const {
+    std::cerr << "mac in getBlacklist" << mac << std::endl;
     Statement stmt{m_db, Query(
         "SELECT is_blacklisted FROM user "
-        "WHERE (mac = '%q');",
+        "WHERE mac = '%q';",
         mac.c_str())};
     if(stmt.step()) {
         bool tmp = stmt.getColumnInt(0);
