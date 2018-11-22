@@ -7,16 +7,21 @@ import sys
 from requests.exceptions import ConnectionError
 
 BASE_PATH = 'http://127.0.0.1:'
+port_no = '8080'
+
 mock_ip = '123.2.2.2'
 mock_mac = '21:22:F2:22:22:FF'
 mock_name = 'Martha Stewart'
 
-class UsagerIdentification_TestCase(unittest.TestCase):
+class UserApiTestCase(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
 
     def test__good_request(self):
+        """
+        Test the return value of a proper request to 'usager/identification
+        """
         req = None
         try:
             req = requests.post(BASE_PATH + port_no + '/usager/identification',
@@ -41,14 +46,13 @@ class UsagerIdentification_TestCase(unittest.TestCase):
                     json={'ip': mock_ip, 'mac': mock_mac, 'name': mock_name})
         except ConnectionError:
             self.assertIsNotNone(req, "Connection established")
+
         json = req.json()
-        self.assertTrue('identificateur' in json, "field 'identificateur' in response")
-        self.assertTrue('message' in json, "field 'message' in response")
-        self.assertTrue('success' in json["message"], "response message indicate 'uccess'")
+        self.assertTrue("identificateur" in json, "returns an identificateur")
+        self.assertTrue("message" in json, "returns a message")
+
 
 if __name__ == '__main__':
-    global port_no
-
     if len(sys.argv) == 2:
         port_no = str(sys.argv.pop(1))
         print(port_no)

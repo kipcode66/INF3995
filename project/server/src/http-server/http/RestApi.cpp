@@ -145,8 +145,8 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
     if ((!request_json.IsObject()
             || (!request_json.HasMember("mac")
                 || !request_json.HasMember("ip")
-                || request_json["mac"] == '\n'
-                || request_json["ip"] == '\n'))) {
+                || request_json["mac"] == '\0'
+                || request_json["ip"] == '\0'))) {
         logMsg << "Could not login the user. The request is malformed.";
         m_logger.err(logMsg.str());
         response.send(Http::Code::Bad_Request, "Malformed request");
