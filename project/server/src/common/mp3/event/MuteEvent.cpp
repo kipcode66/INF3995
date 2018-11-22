@@ -11,11 +11,15 @@ bool MuteEvent::operator==(const Mp3Event& other) const {
 }
 
 std::string MuteEvent::serialize() const {
-    return "";
+    std::ostringstream serializationStream;
+    serializationStream << Mp3Event::serialize();
+    Mp3Event::padToDataSize(serializationStream);
+    std::string serialization = serializationStream.str();
+    return serialization;
 }
 
 void MuteEvent::acceptVisitor(const AbstractMp3EventVisitor& visitor) {
-
+    visitor.onMuteEvent(*this);
 }
 
 } // namespace elevation
