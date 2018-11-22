@@ -49,6 +49,7 @@ set(COMMON_CPP_SOURCES
 set(COMMON_HEADER_SOURCES
     args/RestServerArgsParser.hpp
     logger/Logger.hpp
+    mp3/definitions/Volume.hpp
     mp3/header/Mp3Duration.hpp
     mp3/header/Mp3Header.hpp
     mp3/event/Mp3Event.hpp
