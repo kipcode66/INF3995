@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <pulse/context.h>
+#include <pulse/pulseaudio.h>
 
 #include <common/mp3/definitions/Volume.hpp>
 
@@ -13,8 +13,13 @@ class PulseDevice; // Forward-declaration to brea circular dependencies
 
 class PulseVolume {
 public:
-    explicit PulseVolume(::pa_context* context);
-    virtual ~PulseVolume() = default;
+    explicit PulseVolume();
+    PulseVolume(const PulseVolume&) = delete;
+    PulseVolume(PulseVolume&&) = delete;
+    virtual ~PulseVolume();
+
+    PulseVolume& operator=(const PulseVolume&) = delete;
+    PulseVolume& operator=(PulseVolume&&) = delete;
 
     volumePercent_t getVolume() const;
     void setVolume(volumePercent_t newVolume);
@@ -22,7 +27,11 @@ public:
     void unmute();
 
 protected:
+    void initializeContext_();
+
+protected:
     ::pa_context* m_context;
+    ::pa_mainloop* m_mainloop;
 };
 
 } // namespace elevation

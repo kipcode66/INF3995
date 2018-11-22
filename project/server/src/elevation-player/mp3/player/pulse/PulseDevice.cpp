@@ -11,7 +11,7 @@ const pa_sample_spec PulseDevice::PULSE_SPECIFICATION = { .format = PA_SAMPLE_S1
 
 PulseDevice::PulseDevice()
     : m_device(nullptr)
-    , m_pulseVolume(makeContext_())
+    , m_pulseVolume()
 {
     int error;
     pa_simple* device = pa_simple_new(NULL, "Elevation player", PA_STREAM_PLAYBACK, NULL, "Elevation stream", &PULSE_SPECIFICATION, NULL, NULL, &error);
@@ -23,7 +23,7 @@ PulseDevice::PulseDevice()
 
 PulseDevice::PulseDevice(PulseDevice&& that)
     : m_device(nullptr)
-    , m_pulseVolume(makeContext_())
+    , m_pulseVolume()
 {
     operator=(std::move(that));
 }
@@ -53,12 +53,6 @@ void PulseDevice::cleanup_() {
     if (m_device != nullptr) {
         ::pa_simple_free(m_device);
     }
-}
-
-::pa_context* PulseDevice::makeContext_() {
-    ::pa_mainloop* mainloop = ::pa_mainloop_new();
-    ::pa_context* context = ::pa_context_new(::pa_mainloop_get_api(mainloop), nullptr);
-    return std::move(context);
 }
 
 } // namespace elevation

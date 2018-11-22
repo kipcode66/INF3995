@@ -30,7 +30,6 @@ public:
 
 protected:
     void cleanup_();
-    ::pa_context* makeContext_();
 
 protected:
     pa_simple* m_device;
