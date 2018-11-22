@@ -60,7 +60,7 @@ void Mp3AutoPlayerCallbacks::songRemover_(fs::path pathOfSong) {
         retry = false;
         try {
             Database* db = Database::instance();
-            Song_t oldSong = db->getSongByPath(pathOfSong)
+            Song_t oldSong = db->getSongByPath(pathOfSong);
             if (oldSong.id != 0) {
                 db->removeSong(oldSong.id);
             }
