@@ -3,6 +3,7 @@ package ca.polymtl.inf3990_01.client.controller
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.*
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
@@ -27,8 +28,8 @@ class AppController(
         private val appCtx: Context
 ) {
     companion object {
-        const val QUEUE_PERIOD_KEY = "queue_period"
         const val QUEUE_PERIOD_DEFAULT = 4000L
+        internal const val NO_DELAY = 0L
     }
 
     private val executor = ScheduledThreadPoolExecutor(1)
@@ -43,15 +44,19 @@ class AppController(
     private var task: ScheduledFuture<*>? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
-        if (key == QUEUE_PERIOD_KEY) {
-            task?.cancel(true)
-            task = scheduleQueueTask(sharedPreferences)
+        when (key) {
+            appCtx.getString(R.string.settings_key_queue_refresh_period) -> {
+                task?.cancel(true)
+                task = scheduleQueueTask(sharedPreferences)
+            }
+            appCtx.getString(R.string.settings_key_server_address) ->
+                appStateService.setState(AppStateService.State.User)
         }
     }
 
     init {
         eventMgr.addEventListener(this::onAppInit)
-        eventMgr.addEventListener(this::onAppStart)
+        eventMgr.addEventListener(this::onAppResume)
         eventMgr.addEventListener(this::onAppStop)
         eventMgr.addEventListener(this::reloadQueue)
         eventMgr.addEventListener(this::onSendSong)
@@ -59,8 +64,8 @@ class AppController(
         eventMgr.addEventListener(this::reloadBlackListUser)
         eventMgr.addEventListener(this::onLoginRequest)
         eventMgr.addEventListener(this::onLogoutRequest)
-        eventMgr.addEventListener(this::deleteSong)
-        eventMgr.addEventListener(this::swapSongs)
+        eventMgr.addEventListener(this::onDeleteSong)
+        eventMgr.addEventListener(this::onSwapSongsRequest)
         eventMgr.addEventListener(this::onVolumeRequest)
         eventMgr.addEventListener(this::onVolumeChangeRequest)
     }
@@ -73,10 +78,11 @@ class AppController(
     }
 
     /**
-     * When the app resumes from inactivity (when starting or coming back from being paused), we start the reload loop.
+     * When the app resumes from inactivity (when starting or coming back from being paused),
+     * we start the reload loop.
      */
     @Suppress("UNUSED_PARAMETER")
-    private fun onAppStart(event: AppResumeEvent) {
+    private fun onAppResume(event: AppResumeEvent) {
         // Make sure that the previous task was stopped
         task?.cancel(true)
         // Start the updating loop
@@ -84,7 +90,8 @@ class AppController(
     }
 
     /**
-     * When the app is no longer visible (when no activities are being shown, when paused), we stop the reload loop.
+     * When the app is no longer visible (when no activities are being shown, when paused),
+     * we stop the reload loop.
      */
     @Suppress("UNUSED_PARAMETER")
     private fun onAppStop(event: AppStopEvent) {
@@ -127,7 +134,13 @@ class AppController(
         return executor.scheduleAtFixedRate({
             eventMgr.dispatchEvent(RequestQueueReloadEvent())
             eventMgr.dispatchEvent(VolumeRequestEvent())
-        }, 0, prefs.getString(QUEUE_PERIOD_KEY, "$QUEUE_PERIOD_DEFAULT")?.toLong() ?: QUEUE_PERIOD_DEFAULT, TimeUnit.MILLISECONDS)
+        },
+            NO_DELAY,
+            prefs.getString(
+                appCtx.getString(R.string.settings_key_queue_refresh_period),
+                "$QUEUE_PERIOD_DEFAULT"
+            )?.toLong() ?: QUEUE_PERIOD_DEFAULT,
+            TimeUnit.MILLISECONDS)
     }
 
     private fun onSendSong(event: SendSongEvent) {
@@ -166,7 +179,7 @@ class AppController(
         }
     }
 
-    private fun deleteSong(event: DeleteSongEvent){
+    private fun onDeleteSong(event: DeleteSongEvent){
         if (appStateService.getState().type == AppStateService.State.Admin) {
             launch {secureRestService.deleteSong(event.song)}
         }
@@ -176,7 +189,7 @@ class AppController(
 
     }
 
-    private fun swapSongs(event: SwapSongsRequestEvent) {
+    private fun onSwapSongsRequest(event: SwapSongsRequestEvent) {
         if (appStateService.getState().type == AppStateService.State.Admin) {
             if (swapSongsJob?.isCompleted != false) {
                 val jobTmp = swapSongsJob

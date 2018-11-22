@@ -63,7 +63,6 @@ class RestRequestService(
                             500 -> appCtx.getString(R.string.error_message_server)
                             else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
                         }
-                        // TODO Send a signal to the Presenter to show popup with the response message.
                         // Temporarily, opening a Toast (a little message at the bottom of the screen)
                         if (canDisplayMessage && lastMessageSongList != msg) {
                             lastMessageSongList = msg
@@ -110,7 +109,7 @@ class RestRequestService(
                         continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
                     }
             )
-            request.retryPolicy = DefaultRetryPolicy(10 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(30 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpClient.addToRequestQueue(request)
         }
         if (resp.code != 200) {

@@ -86,7 +86,7 @@ class SongQueueAdapter(
                 appCtx.getString(R.string.song_queue_item_sent_by, song.sentBy ?: userName)
             else ""
         val duration : String = Misc.formatTime(song.durationMS.toLong())
-        view.duration.text = duration
+        view.duration.text = appCtx.getString(R.string.song_item_duration_format, duration)
         view.sender_ip.text = song.ip ?: view.context.getString(R.string.error_message_no_ip)
         view.sender_mac.text = song.mac ?: view.context.getString(R.string.error_message_no_mac)
         view.layout_admin.visibility = if (appState.canDisplaySongOwnerData()) View.VISIBLE else View.INVISIBLE

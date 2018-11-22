@@ -83,7 +83,7 @@ class LocalSongAdapter(
         view.songName.text = song.title
         view.author.text = song.authorName
         val duration : String = Misc.formatTime(song.durationMS.toLong())
-        view.duration.text = duration
+        view.duration.text = appCtx.getString(R.string.song_item_duration_format, duration)
         val isAdmin = stateService.getState().type == AppStateService.State.Admin
         val isSongInQueue = ownedSongs.any { s -> s.title == song.title && s.authorName == song.authorName }
         view.send.isEnabled = ownedSongs.size < 5 && !isSongInQueue && !isAdmin && (dataProvider[song] <= DataProvider.LocalSongSendState.NOT_SENT)

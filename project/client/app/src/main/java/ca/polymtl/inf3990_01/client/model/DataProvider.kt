@@ -1,8 +1,14 @@
 package ca.polymtl.inf3990_01.client.model
 
+import android.content.SharedPreferences
+import ca.polymtl.inf3990_01.client.controller.event.AppInitEvent
+import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import java.util.*
 
-class DataProvider {
+class DataProvider(
+    eventMgr: EventManager,
+    settings: SharedPreferences
+) {
     companion object {
         private class ChangeableObservable: Observable() {
             fun makeChanged() {
@@ -26,6 +32,11 @@ class DataProvider {
     private val localSongsObservable = ChangeableObservable()
     private val blackList: UserList = UserList()
     private val blackListObservable = ChangeableObservable()
+    private val settingObservable = ChangeableObservable()
+
+    init {
+        eventMgr.addEventListener<AppInitEvent> {settings.registerOnSharedPreferenceChangeListener(this::onSettingsChanged)}
+    }
 
     @Synchronized operator fun set(song: LocalSong, state: LocalSongSendState) {
         val s = songStates.keys.find { it.compareTo(song) == 0 }
@@ -76,4 +87,12 @@ class DataProvider {
     fun getBlackList(): UserList = blackList.clone() as UserList
     fun observeBlackList(o: Observer) = blackListObservable.addObserver(o)
     fun unobserveBlackList(o: Observer) = blackListObservable.deleteObserver(o)
+
+    private fun onSettingsChanged(settings: SharedPreferences, key: String) {
+        settingObservable.makeChanged()
+        settingObservable.notifyObservers(key)
+    }
+    fun observeSettings(o: Observer) = settingObservable.addObserver(o)
+    fun unobserveSettings(o: Observer) = settingObservable.deleteObserver(o)
+
 }
