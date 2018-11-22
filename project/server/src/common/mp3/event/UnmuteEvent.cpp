@@ -7,7 +7,7 @@ UnmuteEvent::UnmuteEvent()
 { }
 
 void UnmuteEvent::acceptVisitor(const AbstractMp3EventVisitor& visitor) {
-
+    visitor.onUnmuteEvent(*this);
 }
 
 } // namespace elevation
