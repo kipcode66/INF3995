@@ -6,6 +6,8 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
+#include <common/mp3/definitions/Volume.hpp>
+
 namespace elevation {
 
 class PulseDevice {
@@ -23,6 +25,10 @@ public:
     PulseDevice& operator=(PulseDevice&& that);
 
     void play(const std::vector<uint8_t>& data);
+    volumePercent_t getVolume() const;
+    void setVolume(volumePercent_t newVolume);
+    void mute();
+    void unmute();
 
 protected:
     void cleanup_();
