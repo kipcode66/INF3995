@@ -16,6 +16,8 @@ public:
     enum class EventType : uint16_t {
         NONE = 0,
         VOLUME_CHANGE,
+        MUTE,
+        UNMUTE,
         NUM_EVENTS
     };
 
