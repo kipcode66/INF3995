@@ -54,6 +54,17 @@ User_t Database::getUserFromStatement_(const Statement& stmt) const {
     return user;
 }
 
+Song_t Database::getSongFromStatement_(const Statement& stmt) const {
+    Song_t song;
+        song.id = stmt.getColumnInt(0);
+        strncpy(song.title, stmt.getColumnText(1).c_str(), Song_t::TITLE_LENGTH);
+        strncpy(song.artist, stmt.getColumnText(2).c_str(), Song_t::TITLE_LENGTH);
+        song.userId = stmt.getColumnInt(3);
+        song.duration = stmt.getColumnInt(4);
+        strncpy(song.path, stmt.getColumnText(5).c_str(), Song_t::PATH_LENGTH);
+    return song;
+}
+
 User_t Database::getUserByQuery_(const Query& query) const {
     User_t user;
     Statement stmt{m_db, query};
@@ -180,12 +191,7 @@ Song_t Database::getSongByQuery_(const Query& query) const {
     Statement stmt{m_db, query};
 
     if (stmt.step()) {
-        song.id = stmt.getColumnInt(0);
-        strncpy(song.title, stmt.getColumnText(1).c_str(), Song_t::TITLE_LENGTH);
-        strncpy(song.artist, stmt.getColumnText(2).c_str(), Song_t::ARTIST_LENGTH);
-        song.userId = stmt.getColumnInt(3);
-        song.duration = stmt.getColumnInt(4);
-        strncpy(song.path, stmt.getColumnText(5).c_str(), Song_t::PATH_LENGTH);
+        song = getSongFromStatement_(stmt);
     }
 
     return song;
@@ -218,13 +224,7 @@ std::vector<Song_t> Database::getSongsByQuery_(const Query& query) const {
     Statement stmt{m_db, query};
 
     while (stmt.step()) {
-        song_buffer.id = stmt.getColumnInt(0);
-        strncpy(song_buffer.title, stmt.getColumnText(1).c_str(), Song_t::TITLE_LENGTH);
-        strncpy(song_buffer.artist, stmt.getColumnText(2).c_str(), Song_t::TITLE_LENGTH);
-        song_buffer.userId = stmt.getColumnInt(3);
-        song_buffer.duration = stmt.getColumnInt(4);
-        strncpy(song_buffer.path, stmt.getColumnText(5).c_str(), Song_t::PATH_LENGTH);
-
+        song_buffer = getSongFromStatement_(stmt);
         songs.push_back(song_buffer);
     }
 

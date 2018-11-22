@@ -68,10 +68,13 @@ protected:
 
     Song_t getSongByQuery_(const Query&) const;
     std::vector<Song_t> getSongsByQuery_(const Query&) const;
+    Song_t getSongFromStatement_(const Statement& stmt) const;
+
     User_t getUserByQuery_(const Query&) const;
     std::vector<User_t> getUsersByQuery_(const Query&) const;
-    void executeQuery_(const Query& query);
     User_t getUserFromStatement_(const Statement& stmt) const;
+    
+    void executeQuery_(const Query& query);
 
     sqlite3* m_db = 0;
 };
