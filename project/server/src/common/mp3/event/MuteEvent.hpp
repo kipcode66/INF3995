@@ -1,11 +1,11 @@
 #ifndef MP3_EVENT_MUTEEVENT_HPP
 #define MP3_EVENT_MUTEEVENT_HPP
 
-#include "Mp3Event.hpp"
+#include "AbstractPayloadlessEvent.hpp"
 
 namespace elevation {
 
-class MuteEvent : public Mp3Event {
+class MuteEvent : public AbstractPayloadlessEvent {
 public:
     explicit MuteEvent();
     virtual ~MuteEvent() = default;
