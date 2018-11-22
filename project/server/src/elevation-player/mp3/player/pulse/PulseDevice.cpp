@@ -47,22 +47,6 @@ void PulseDevice::play(const std::vector<uint8_t>& data) {
     }
 }
 
-volumePercent_t PulseDevice::getVolume() const {
-    
-}
-
-void PulseDevice::setVolume(volumePercent_t newVolume) {
-
-}
-
-void PulseDevice::mute() {
-
-}
-
-void PulseDevice::unmute() {
-
-}
-
 void PulseDevice::cleanup_() {
     if (m_device != nullptr) {
         ::pa_simple_free(m_device);
