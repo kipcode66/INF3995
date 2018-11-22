@@ -30,6 +30,8 @@ protected:
     std::string readPayload_();
     std::unique_ptr<Mp3Event> deserializeEvent_(Mp3Event::EventType, std::string payload);
     std::unique_ptr<Mp3Event> deserializeVolumeChangeEvent_(std::string payload);
+    std::unique_ptr<Mp3Event> deserializeMuteEvent_(std::string payload);
+    std::unique_ptr<Mp3Event> deserializeUnmuteEvent_(std::string payload);
 
     template <class T>
     static T deserializeElement_(std::string payload, std::size_t offset);
