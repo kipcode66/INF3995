@@ -12,6 +12,11 @@ namespace elevation {
 class PulseDevice; // Forward-declaration to brea circular dependencies
 
 class PulseVolume {
+protected:
+    static double getMinVolumeLogScale_() { return toLogScale_(0); }
+    static double getMaxVolumeLogScale_() { return toLogScale_(1); }
+    static double toLogScale_(double linearFactor);
+
 public:
     explicit PulseVolume();
     PulseVolume(const PulseVolume&) = delete;
