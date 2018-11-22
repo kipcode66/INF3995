@@ -15,6 +15,7 @@ struct Song_t {
     uint32_t userId;
     uint32_t duration;
     char path[PATH_LENGTH];
+    bool deletedByAdmin;
 };
 
 #endif // !DATABASE_SONG_HPP

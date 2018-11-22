@@ -3,7 +3,6 @@
 #include <future>
 
 #include "SecureRestApi.hpp"
-#include "rapidjson/document.h"
 #include "misc/id_utils.hpp"
 #include "rapidjson/document.h"
 

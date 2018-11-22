@@ -5,6 +5,7 @@
 #include <vector>
 #include <utility>
 #include <experimental/filesystem>
+#include <misc/Statistics.hpp>
 
 #include "Statement.hpp"
 #include "templates/User.hpp"
@@ -12,8 +13,6 @@
 #include "sqlite_error.hpp"
 #include "Query.hpp"
 
-#ifndef DATABASE_DATABASE_HPP
-#define DATABASE_DATABASE_HPP
 
 namespace elevation {
 
@@ -21,6 +20,7 @@ class Database {
 public:
     static constexpr const char*   ADMIN_NAME         = "admin";
     static constexpr const char*   DEFAULT_PASSWORD   = "admin";
+    static constexpr const char*   TODAY_QUERY        = " WHERE timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');";
     static constexpr const int32_t IS_BLACKLISTED     = 1;
     static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
 
@@ -50,6 +50,10 @@ public:
     Song_t              getSongByPath(const std::string&) const;
     std::vector<Song_t> getSongsByUser(int userId) const;
     std::vector<Song_t> getAllSongs() const;
+    std::vector<Song_t> getDailySongs() const;
+    
+    Statistics          getStatistics() const;
+
     void                createSong(const Song_t*);
     void                removeSong(uint32_t);
 
@@ -73,6 +77,12 @@ protected:
     User_t getUserByQuery_(const Query&) const;
     std::vector<User_t> getUsersByQuery_(const Query&) const;
     User_t getUserFromStatement_(const Statement& stmt) const;
+    
+    int getDailyUserCount_() const;
+    int getDailySongCount_() const;
+    int getDeletedSongsCount_() const;
+    int getAverageSongDuration_() const;
+    int getStatisticsFromQuery_(const Query&) const;
     
     void executeQuery_(const Query& query);
 

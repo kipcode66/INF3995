@@ -34,6 +34,7 @@ set(COMMON_CPP_SOURCES
     os/signal/SignalHandling.cpp
     filesystem/FileCache.cpp
     misc/id_utils.cpp
+    misc/Statistics.cpp
 )
 
 ###############################################################################
@@ -70,6 +71,7 @@ set(COMMON_HEADER_SOURCES
     filesystem/FileCache.hpp
     misc/Base64.hpp
     misc/id_utils.hpp
+    misc/Statistics.hpp
 )
 
 makeAbsolute(COMMON_CPP_SOURCES)

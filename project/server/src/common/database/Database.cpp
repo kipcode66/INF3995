@@ -62,6 +62,7 @@ Song_t Database::getSongFromStatement_(const Statement& stmt) const {
         song.userId = stmt.getColumnInt(3);
         song.duration = stmt.getColumnInt(4);
         strncpy(song.path, stmt.getColumnText(5).c_str(), Song_t::PATH_LENGTH);
+        song.deletedByAdmin = stmt.getColumnBool(6);
     return song;
 }
 
@@ -242,6 +243,46 @@ std::vector<Song_t> Database::getAllSongs() const {
     return getSongsByQuery_(Query(
         "SELECT rowid, title, artist, user_id, duration, path, song_order "
         "FROM songs ORDER BY song_order ASC;"));
+}
+
+std::vector<Song_t> Database::getDailySongs() const {
+    return getSongsByQuery_(Query(
+        "SELECT rowid, title, artist, user_id, duration, path, deleted_by_admin" + Database::TODAY_QUERY)); 
+}
+
+int Database::getStatisticsFromQuery_(const Query& query) const {
+    int statistic;
+    Statement stmt{m_db, query};
+
+    if (stmt.step()) {
+        statistic = stmt.getColumnInt(0);
+    }
+    return statistic;
+}
+
+int Database::getDailyUserCount_() const {
+    return getStatisticsFromQuery_(Query("SELECT COUNT(DISTINCT user_id) FROM songs"
+        + Database::TODAY_QUERY));
+}
+
+int Database::getDailySongCount_() const {
+    return getStatisticsFromQuery_(Query("SELECT COUNT(DISTINCT id) FROM songs"
+        + Database::TODAY_QUERY));
+}
+
+int Database::getDeletedSongsCount_() const {
+    return getStatisticsFromQuery_(Query("SELECT COUNT(deleted_by_admin) FROM songs"
+        + Database::TODAY_QUERY));
+}
+
+int Database::getAverageSongDuration_() const {
+    return getStatisticsFromQuery_(Query("SELECT avg(duration) FROM songs"
+        + Database::TODAY_QUERY));
+}
+
+Statistics Database::getStatistics() const {
+    return Statistics(getDailyUserCount_(), getDailySongCount_(), 
+        getDeletedSongsCount_(), getAverageSongDuration_()));
 }
 
 void Database::createSong(const Song_t* song) {
