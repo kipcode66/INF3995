@@ -10,9 +10,11 @@
 
 #include "misc/id_utils.hpp"
 #include "Query.hpp"
+#include "templates/exception/NoSuchUserException.hpp"
 
 using namespace elevation;
 using namespace std::chrono_literals;
+
 
 Database* Database::s_instance = nullptr;
 constexpr const char Database::DB_NAME[] = "server.db";
@@ -364,10 +366,9 @@ bool Database::getBlacklistByMAC(const std::string& mac) const {
         mac.c_str())};
     if(stmt.step()) {
         bool tmp = stmt.getColumnInt(0);
-        /* fprintf(stderr, "blacklist value for mac=%s is %d\n", mac.c_str(), tmp); */
         return (tmp == Database::IS_BLACKLISTED);
     } else {
-        throw std::runtime_error("No such user in db");
+        throw NoSuchUserException();
     }
 }
 
