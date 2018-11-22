@@ -9,6 +9,7 @@ import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.event.LogoutRequestEvent
 import ca.polymtl.inf3990_01.client.controller.event.RequestQueueReloadEvent
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
+import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.SongQueue
 import ca.polymtl.inf3990_01.client.presentation.SongQueueAdapter
 import kotlinx.android.synthetic.main.content_queue.*
@@ -22,6 +23,7 @@ class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawe
 
     private val eventMgr: EventManager by inject()
     private val appStateService: AppStateService by inject()
+    private val dataProvider: DataProvider by inject()
 
     private val songQueue: SongQueue = SongQueue()
     private val songQueueAdapter: SongQueueAdapter by inject{ ParameterList(songQueue, layoutInflater) }
@@ -35,6 +37,18 @@ class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawe
         super.onCreate(savedInstanceState)
         appStateService.addObserver(Observer(this::onAppStateChange))
         song_queue.adapter = songQueueAdapter
+        content_queue_swipe.setColorSchemeResources(R.color.colorPrimary, R.color.colorPrimaryDark)
+        content_queue_swipe.setOnRefreshListener { eventMgr.dispatchEvent(RequestQueueReloadEvent()) }
+        dataProvider.observeSongQueue(Observer(this::onSongQueueChange))
+    }
+
+    private fun refresh() {
+        Handler(mainLooper).post {content_queue_swipe.isRefreshing = true}
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onSongQueueChange(o: Observable, arg: Any?) {
+        Handler(mainLooper).post {content_queue_swipe.isRefreshing = false}
     }
 
     override fun onBackPressed() {
@@ -57,7 +71,7 @@ class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawe
         // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
             R.id.action_reload -> {
-                eventMgr.dispatchEvent(RequestQueueReloadEvent())
+                refresh()
                 return true
             }
             R.id.action_show_login -> {

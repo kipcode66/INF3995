@@ -50,4 +50,5 @@
     <string name="black_list_item_button_desc">Débloquer l\'utilisateur</string>
     <string name="song_item_duration_format">Durée: %1$s</string>
     <string name="error_message_song_not_in_queue">La chanson n\'est plus dans la file</string>
+    <string name="error_message_too_many_concurrent_song_sent">Vous ne pouvez envoyer que %1$d chanson(s) en même temps</string>
 </resources>

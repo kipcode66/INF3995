@@ -8,10 +8,10 @@
     tools:context=".view.QueueActivity"
     tools:showIn="@layout/app_bar_queue">
 
-    <LinearLayout
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/content_queue_swipe"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteX="0dp">
@@ -21,7 +21,8 @@
             android:layout_height="0dp"
             android:layout_margin="@dimen/song_item_margin"
             android:layout_weight="1"
+            android:padding="@dimen/swipe_layout_padding"
             android:divider="@android:drawable/divider_horizontal_bright" />
-    </LinearLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </android.support.constraint.ConstraintLayout>
