@@ -45,6 +45,34 @@ double PulseVolume::toLogScale_(double linearFactor) {
     }
     return K * std::log10((linearFactor - A) * B);
 }
+
+double PulseVolume::fromLogScale_(double logFactor) {
+    static const double A =
+        (1 - F0)
+        /
+        (std::pow(10.0, 1.0/K) - 1.0);
+    static const double B =
+        F0
+        *
+        (
+            1.0
+            -
+            (
+                (1.0 - F0)
+                /
+                (
+                    F0
+                    *
+                    (std::pow(10.0, 1.0/K) - 1.0)
+                )
+            )
+        );
+
+    if (logFactor < 0) {
+        throw std::logic_error(std::string{"Cannot convert "} + std::to_string(logFactor) + " to linear scale : Factor is negative");
+    }
+
+    return A * std::pow(10.0, logFactor / 10.0) + B;
 }
 
 PulseVolume::PulseVolume()
