@@ -3,6 +3,7 @@
 
 #include <pistache/description.h>
 
+namespace elevation {
 
 class VolumeApi {
 public:
@@ -19,6 +20,12 @@ private:
                                    Pistache::Http::ResponseWriter);
     void POST_sourdineDesactiver_ (const Pistache::Rest::Request&,
                                    Pistache::Http::ResponseWriter);
+
+private:
+    Mp3EventClientSocket m_socket;
 };
+
+} // namespace elevation
+
 #endif // !HTTPS_DESCRIPTIONS_VOLUMEAPI
 

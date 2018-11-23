@@ -2,6 +2,8 @@
 
 using namespace Pistache;
 
+namespace elevation {
+
 VolumeApi::VolumeApi(Pistache::Rest::Description& desc) {
     auto volumePath = desc.path("superviseur/volume");
     volumePath
@@ -56,3 +58,4 @@ void VolumeApi::POST_sourdineDesactiver_(const Rest::Request& request,
     response.send(Http::Code::Ok, "volume unmuted");
 }
 
+} // namespace elevation

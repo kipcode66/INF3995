@@ -16,7 +16,8 @@
 #include "https/exception/AuthenticationFailureException.hpp"
 
 using namespace Pistache;
-using namespace elevation;
+
+namespace elevation {
 
 AuthApi::AuthApi(Pistache::Rest::Description& desc, Logger& logger)
     : m_logger(logger)
@@ -165,3 +166,4 @@ void AuthApi::postChangePassword_(const Rest::Request& request, Http::ResponseWr
     return;
 }
 
+} // namespace elevation

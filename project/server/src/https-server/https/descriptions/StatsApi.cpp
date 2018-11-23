@@ -7,6 +7,8 @@
 
 using namespace Pistache;
 
+namespace elevation {
+
 StatsApi::StatsApi(Rest::Description& desc) {
     auto superviseurPath = desc.path("/superviseur");
     superviseurPath
@@ -20,3 +22,4 @@ void StatsApi::getSuperviseurStatistiques_(const Rest::Request& request,
     response.send(Http::Code::Ok, "statistics");
 }
 
+} // namespace elevation

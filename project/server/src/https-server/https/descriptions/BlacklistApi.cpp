@@ -6,8 +6,8 @@
 #include "BlacklistApi.hpp"
 
 using namespace Pistache;
-using namespace elevation;
 
+namespace elevation {
 
 BlacklistApi::BlacklistApi(Pistache::Rest::Description& desc, Logger& logger)
     : m_logger(logger)
@@ -97,3 +97,4 @@ void BlacklistApi::postSuperviseurDebloquer_(const Rest::Request& request,
     response.send(Http::Code::Ok, "user unblocked");
 }
 
+} // namespace elevation
