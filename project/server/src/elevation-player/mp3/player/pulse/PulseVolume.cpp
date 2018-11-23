@@ -100,7 +100,7 @@ volumePercent_t PulseVolume::getVolume() const {
         }
     };
     PulseOperation op{::pa_context_get_sink_info_by_index(m_context, m_sinkIndex, callback, (void*)&volume), m_mainloop};
-    op.waitUntilCompleteOrFailed();
+    op.waitUntilCompletedOrFailed();
     return volume;
 }
 
@@ -108,7 +108,7 @@ void PulseVolume::setVolume(volumePercent_t newVolume) {
     ::pa_cvolume pulseVolume = makePulseVolumeStructure_(newVolume);
     ::pa_context_success_cb_t callback = [](pa_context *c, int success, void* data) { };
     PulseOperation op{::pa_context_set_sink_volume_by_index(m_context, m_sinkIndex, &pulseVolume, callback, &newVolume), m_mainloop};
-    op.waitUntilCompleteOrFailed();
+    op.waitUntilCompletedOrFailed();
 }
 
 void PulseVolume::mute() {
@@ -172,7 +172,7 @@ void PulseVolume::initializeSinkData_() {
         }
     };
     PulseOperation op{::pa_context_get_sink_info_list(m_context, callback, (void*)&data), m_mainloop};
-    op.waitUntilCompleteOrFailed();
+    op.waitUntilCompletedOrFailed();
     m_sinkIndex = data.sinkIndex;
     m_numSinkChannels = data.numSinkChannels;
 }

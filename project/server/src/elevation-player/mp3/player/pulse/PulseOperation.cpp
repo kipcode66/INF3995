@@ -14,7 +14,7 @@ PulseOperation::~PulseOperation()
     }
 }
 
-void PulseOperation::waitUntilCompleteOrFailed() {
+void PulseOperation::waitUntilCompletedOrFailed() {
     while (::pa_operation_get_state(m_operation) != PA_OPERATION_DONE) {
         ::pa_mainloop_iterate(m_mainloop, 1, NULL);
     }

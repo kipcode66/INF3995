@@ -22,7 +22,7 @@ public:
     PulseOperation& operator=(const PulseOperation&) = delete;
     PulseOperation& operator=(PulseOperation&&) = delete;
 
-    void waitUntilCompleteOrFailed();
+    void waitUntilCompletedOrFailed();
 
 protected:
     ::pa_operation* m_operation;
