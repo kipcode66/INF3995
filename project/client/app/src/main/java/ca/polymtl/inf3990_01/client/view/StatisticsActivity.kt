@@ -41,7 +41,7 @@ class StatisticsActivity : AbstractDrawerActivity(R.layout.activity_statistics, 
     }
 
     private fun onStatisticsUpdated(o: Observable, arg: Any?) {
-        statisticsLayout.isRefreshing = false
+        Handler(mainLooper).post {statisticsLayout.isRefreshing = false}
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -57,6 +57,10 @@ class StatisticsActivity : AbstractDrawerActivity(R.layout.activity_statistics, 
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            R.id.action_reload -> {
+                Handler(mainLooper).post {statisticsLayout.isRefreshing = true}
+                true
+            }
             R.id.action_show_login -> {
                 val loginDialog = LoginDialog(this, eventMgr)
                 loginDialog.show()

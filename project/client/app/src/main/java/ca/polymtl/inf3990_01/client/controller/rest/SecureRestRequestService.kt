@@ -13,10 +13,7 @@ import ca.polymtl.inf3990_01.client.controller.event.VolumeRequestEvent
 import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
 import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
-import ca.polymtl.inf3990_01.client.model.Song
-import ca.polymtl.inf3990_01.client.model.Statistics
-import ca.polymtl.inf3990_01.client.model.User
-import ca.polymtl.inf3990_01.client.model.Volume
+import ca.polymtl.inf3990_01.client.model.*
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
@@ -31,6 +28,7 @@ class SecureRestRequestService(
     private val tokenService: TokenManagerService,
     private val initMgr: InitializationManager,
     private val eventMgr: EventManager,
+    private val dataProvider: DataProvider,
     private val appStateService: AppStateService,
     private val volumeController: VolumeController
     ) {
@@ -198,7 +196,7 @@ class SecureRestRequestService(
     }
 
     suspend fun getStatistics(): Statistics {
-        var stat = Statistics(BigInteger.ZERO,BigInteger.ZERO,BigInteger.ZERO,BigInteger.ZERO)
+        var stat = dataProvider.getStatistics()
         val resp: ResponseData<Statistics> = suspendCoroutine { continuation ->
             val request : RESTRequest<Statistics> =  generateRequest(Request.Method.GET, "statistiques/", "", continuation, mutableMapOf(
                     401 to appCtx.getString(R.string.error_message_unauthenticated)

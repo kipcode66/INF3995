@@ -2,6 +2,8 @@ package ca.polymtl.inf3990_01.client.controller
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.*
@@ -245,7 +247,7 @@ class AppController(
             loadStatisticsJob = async {
                 jobTmp?.join()
                   val statistics : Statistics = secureRestService.getStatistics()
-                dataProvider.setStatistics(statistics)
+                Handler(Looper.getMainLooper()).post {dataProvider.setStatistics(statistics)}
             }
         }
     }
