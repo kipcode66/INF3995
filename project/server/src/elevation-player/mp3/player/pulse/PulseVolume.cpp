@@ -72,7 +72,7 @@ double PulseVolume::fromLogScale_(double logFactor) {
         throw std::logic_error(std::string{"Cannot convert "} + std::to_string(logFactor) + " to linear scale : Factor is negative");
     }
 
-    return A * std::pow(10.0, logFactor / 10.0) + B;
+    return A * std::pow(10.0, logFactor / K) + B;
 }
 
 PulseVolume::PulseVolume()
