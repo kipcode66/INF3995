@@ -79,6 +79,13 @@ PulseVolume::PulseVolume()
 {
     initializeContext_();
     m_sinkIndex = getSinkIndex_();
+    // std::thread foo = std::thread([this]() {
+        while(true) {
+            std::cout << "Volume: " << (std::size_t)getVolume() << std::endl;
+            using namespace std::chrono_literals;
+            std::this_thread::sleep_for(1s);
+        }
+    // });
 }
 
 PulseVolume::~PulseVolume() {
@@ -95,13 +102,13 @@ volumePercent_t PulseVolume::getVolume() const {
 
     pa_sink_info_cb_t callback = [](pa_context *c, const pa_sink_info *i, int eol, void* data) {
         volumePercent_t* volume = static_cast<volumePercent_t*>(data);
-        if (*volume == std::numeric_limits<volumePercent_t>::max() && eol <= 0) {
+        if (eol <= 0) {
             const pa_cvolume* sinkVolumes = &i->volume;
             double sinkVolume = pa_sw_volume_to_linear(pa_cvolume_avg(sinkVolumes));
             *volume = static_cast<volumePercent_t>(toLogScale_(sinkVolume) * 100.0);
         }
     };
-    ::pa_operation* sinkLinkRequestOperation = ::pa_context_get_sink_info_list(m_context, callback, (void*)&volume);
+    ::pa_operation* sinkLinkRequestOperation = ::pa_context_get_sink_info_by_index(m_context, m_sinkIndex, callback, (void*)&volume);
     while (::pa_operation_get_state(sinkLinkRequestOperation) != PA_OPERATION_DONE) {
         ::pa_mainloop_iterate(m_mainloop, 1, NULL);
     }
