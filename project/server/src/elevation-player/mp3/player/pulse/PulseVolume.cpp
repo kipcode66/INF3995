@@ -91,6 +91,10 @@ volumePercent_t PulseVolume::getVolume() const {
     return getSinkState_().getVolume();
 }
 
+bool PulseVolume::isMuted() const {
+    return getSinkState_().isMuted();
+}
+
 void PulseVolume::setVolume(volumePercent_t newVolume) {
     ::pa_cvolume pulseVolume = makePulseVolumeStructure_(newVolume);
     ::pa_context_success_cb_t callback = [](pa_context *c, int success, void* data) { };

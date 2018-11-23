@@ -52,6 +52,7 @@ public:
     PulseVolume& operator=(PulseVolume&&) = delete;
 
     volumePercent_t getVolume() const;
+    bool isMuted() const;
     void setVolume(volumePercent_t newVolume);
     void mute();
     void unmute();
