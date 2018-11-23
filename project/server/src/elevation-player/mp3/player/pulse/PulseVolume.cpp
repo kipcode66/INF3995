@@ -112,11 +112,11 @@ void PulseVolume::setVolume(volumePercent_t newVolume) {
 }
 
 void PulseVolume::mute() {
-
+    muteOrUnmute_(true);
 }
 
 void PulseVolume::unmute() {
-
+    muteOrUnmute_(false);
 }
 
 void PulseVolume::initializeContext_() {
@@ -184,6 +184,12 @@ void PulseVolume::initializeSinkData_() {
     ::pa_cvolume_init(&pulseVolumeStructure);
     ::pa_cvolume_set(&pulseVolumeStructure, m_numSinkChannels, pulseInternalVolume);
     return pulseVolumeStructure;
+}
+
+void PulseVolume::muteOrUnmute_(bool mute) {
+    ::pa_context_success_cb_t callback = [](pa_context *c, int success, void* data) { };
+    PulseOperation op{::pa_context_set_sink_mute_by_index(m_context, m_sinkIndex, mute, callback, NULL), m_mainloop};
+    op.waitUntilCompletedOrFailed();
 }
 
 } // namespace elevation
