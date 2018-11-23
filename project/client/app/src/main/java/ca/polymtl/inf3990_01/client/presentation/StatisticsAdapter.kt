@@ -35,7 +35,7 @@ class StatisticsAdapter(
         view.userNumber.text = statistics.utilisateurs.toString()
         view.songDeletedNumber.text = statistics.elemines.toString()
         view.duration.text = statistics.temps.toString()
-        Handler(appCtx.mainLooper).post(Runnable(statisticsView::refreshDrawableState))
+        Handler(appCtx.mainLooper).post(Runnable(statisticsView::invalidate))
     }
 
 }
