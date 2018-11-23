@@ -181,4 +181,13 @@ void PulseVolume::initializeSinkData_() {
     m_numSinkChannels = data.numSinkChannels;
 }
 
+::pa_cvolume PulseVolume::makePulseVolumeStructure_(volumePercent_t volume) const {
+    double sinkVolume = fromLogScale_(static_cast<double>(volume) / 100.0);
+    ::pa_volume_t pulseInternalVolume = ::pa_sw_volume_from_linear(sinkVolume);
+    ::pa_cvolume pulseVolumeStructure;
+    ::pa_cvolume_init(&pulseVolumeStructure);
+    ::pa_cvolume_set(&pulseVolumeStructure, m_numSinkChannels, pulseInternalVolume);
+    return pulseVolumeStructure;
+}
+
 } // namespace elevation

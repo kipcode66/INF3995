@@ -46,6 +46,7 @@ public:
 protected:
     void initializeContext_();
     void initializeSinkData_();
+    ::pa_cvolume makePulseVolumeStructure_(volumePercent_t volume) const;
 
 protected:
     ::pa_context* m_context;
