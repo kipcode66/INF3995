@@ -79,13 +79,6 @@ PulseVolume::PulseVolume()
 {
     initializeContext_();
     m_sinkIndex = getSinkIndex_();
-    // std::thread foo = std::thread([this]() {
-        while(true) {
-            std::cout << "Volume: " << (std::size_t)getVolume() << std::endl;
-            using namespace std::chrono_literals;
-            std::this_thread::sleep_for(1s);
-        }
-    // });
 }
 
 PulseVolume::~PulseVolume() {
@@ -174,7 +167,6 @@ uint32_t PulseVolume::getSinkIndex_() {
     pa_sink_info_cb_t callback = [](pa_context *c, const pa_sink_info *i, int eol, void* dataVoid) {
         Data_t* data = static_cast<Data_t*>(dataVoid);
         if (!data->alreadyDone && eol <= 0) {
-            std::cout << "Set to " << i->index << std::endl;
             data->sinkIndex = i->index;
             data->alreadyDone = true;
         }
