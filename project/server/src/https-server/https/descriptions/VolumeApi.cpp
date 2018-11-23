@@ -4,6 +4,12 @@
 #include <common/mp3/event/MuteEvent.hpp>
 #include <common/mp3/event/UnmuteEvent.hpp>
 
+#include <http-server/http/exception/BadRequestException.hpp>
+#include <http-server/http/exception/InvalidTokenException.hpp>
+
+#include "Admin.hpp"
+#include "https/exception/AuthenticationFailureException.hpp"
+
 using namespace Pistache;
 
 namespace elevation {
@@ -55,9 +61,11 @@ void VolumeApi::POST_volumeAssigner_ (const Rest::Request& request,
     }
 
     try {
-        VolumeChangeEvent event{newVolume};
-        m_playerEventSocket.write(event);
-        response.send(Http::Code::Ok, "Volume change commiting...");
+        if (isAdminAuthenticated_(request, response)) {
+            VolumeChangeEvent event{newVolume};
+            m_playerEventSocket.write(event);
+            response.send(Http::Code::Ok, "Volume change commiting...");
+        }
     }
     catch (const std::exception& e) {
         response.send(Pistache::Http::Code::Internal_Server_Error);
@@ -68,9 +76,11 @@ void VolumeApi::POST_volumeAssigner_ (const Rest::Request& request,
 void VolumeApi::POST_sourdineActiver_(const Rest::Request& request,
                                                     Http::ResponseWriter response) {
     try {
-        MuteEvent event;
-        m_playerEventSocket.write(event);
-        response.send(Http::Code::Ok, "Mute commiting...");
+        if (isAdminAuthenticated_(request, response)) {
+            MuteEvent event;
+            m_playerEventSocket.write(event);
+            response.send(Http::Code::Ok, "Mute commiting...");
+        }
     }
     catch (const std::exception& e) {
         response.send(Pistache::Http::Code::Internal_Server_Error);
@@ -81,14 +91,42 @@ void VolumeApi::POST_sourdineActiver_(const Rest::Request& request,
 void VolumeApi::POST_sourdineDesactiver_(const Rest::Request& request,
                                                        Http::ResponseWriter response) {
     try {
-        UnmuteEvent event;
-        m_playerEventSocket.write(event);
-        response.send(Http::Code::Ok, "Unmute commiting...");
+        if (isAdminAuthenticated_(request, response)) {
+            UnmuteEvent event;
+            m_playerEventSocket.write(event);
+            response.send(Http::Code::Ok, "Unmute commiting...");
+        }
     }
     catch (const std::exception& e) {
         response.send(Pistache::Http::Code::Internal_Server_Error);
         return;
     }
+}
+
+bool VolumeApi::isAdminAuthenticated_(const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter& response) {
+    Pistache::Http::Code errorCode;
+    std::string errorMessage;
+    try {
+        volatile Admin admin = Admin::getAdminDataFromRequestToken(request);
+        return true;
+    }
+    catch (const BadRequestException& e) {
+        errorCode = Pistache::Http::Code::Bad_Request;
+        errorMessage = e.what();
+    }
+    catch (const InvalidTokenException& e) {
+        errorCode = Pistache::Http::Code::Forbidden;
+        errorMessage = e.what();
+    }
+    catch (const AuthenticationFailureException& e) {
+        errorCode = Pistache::Http::Code::Unauthorized;
+        errorMessage = e.what();
+    }
+    std::ostringstream logMessageString;
+    logMessageString << request.method() << ' ' << request.resource() << " failed: " << errorMessage;
+    m_logger.err(logMessageString.str());
+    response.send(errorCode, errorMessage);
+    return false;
 }
 
 } // namespace elevation

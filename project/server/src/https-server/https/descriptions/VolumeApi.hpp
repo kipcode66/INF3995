@@ -22,6 +22,8 @@ private:
     void POST_sourdineDesactiver_ (const Pistache::Rest::Request&,
                                    Pistache::Http::ResponseWriter);
 
+    bool isAdminAuthenticated_(const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter& response);
+
 private:
     Logger& m_logger;
     Mp3EventClientSocket m_playerEventSocket;
