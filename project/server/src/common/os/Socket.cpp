@@ -78,7 +78,7 @@ std::string Socket::readLine(char end) {
 }
 
 std::string Socket::read(std::size_t dataSize) {
-    std::vector<char> data(dataSize + 1);
+    std::vector<char> data(dataSize);
     int readAmount = ::read(m_fd, &data[0], dataSize);
     if (readAmount < 0) {
         throw std::runtime_error(::strerror(errno));
@@ -86,8 +86,7 @@ std::string Socket::read(std::size_t dataSize) {
     else if (readAmount == 0) {
         throw SocketClosedException();
     }
-    data[readAmount] = '\0';
-    return std::string(&data[0]);
+    return std::string(&data[0], dataSize);
 }
 
 char Socket::readCharacter_() {
