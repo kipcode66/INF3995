@@ -76,7 +76,7 @@ double PulseVolume::fromLogScale_(double logFactor) {
 PulseVolume::PulseVolume()
 {
     initializeContext_();
-    m_sinkIndex = getSinkIndex_();
+    initializeSinkData_();
 }
 
 PulseVolume::~PulseVolume() {
@@ -109,7 +109,7 @@ void PulseVolume::setVolume(volumePercent_t newVolume) {
     ::pa_volume_t pulseInternalVolume = ::pa_sw_volume_from_linear(sinkVolume);
     ::pa_cvolume volume;
     ::pa_cvolume_init(&volume);
-    ::pa_cvolume_set(&volume, 2, pulseInternalVolume);
+    ::pa_cvolume_set(&volume, m_numSinkChannels, pulseInternalVolume);
     ::pa_context_success_cb_t callback = [](pa_context *c, int success, void* data) { };
     PulseOperation op{::pa_context_set_sink_volume_by_index(m_context, m_sinkIndex, &volume, callback, &newVolume), m_mainloop};
     op.waitUntilCompleteOrFailed();
@@ -158,10 +158,11 @@ void PulseVolume::initializeContext_() {
     }
 }
 
-uint32_t PulseVolume::getSinkIndex_() {
+void PulseVolume::initializeSinkData_() {
     struct Data_t {
         bool alreadyDone;
         uint32_t sinkIndex;
+        uint8_t numSinkChannels;
     };
 
     Data_t data = {.alreadyDone = false, .sinkIndex = std::numeric_limits<uint32_t>::max()};
@@ -170,12 +171,14 @@ uint32_t PulseVolume::getSinkIndex_() {
         Data_t* data = static_cast<Data_t*>(dataVoid);
         if (!data->alreadyDone && eol <= 0) {
             data->sinkIndex = i->index;
+            data->numSinkChannels = i->sample_spec.channels;
             data->alreadyDone = true;
         }
     };
     PulseOperation op{::pa_context_get_sink_info_list(m_context, callback, (void*)&data), m_mainloop};
     op.waitUntilCompleteOrFailed();
-    return data.sinkIndex;
+    m_sinkIndex = data.sinkIndex;
+    m_numSinkChannels = data.numSinkChannels;
 }
 
 } // namespace elevation
