@@ -11,6 +11,7 @@
 
 #include <chrono>
 #include <thread>
+#include "PulseOperation.hpp"
 
 namespace elevation {
 
@@ -101,11 +102,8 @@ volumePercent_t PulseVolume::getVolume() const {
             *volume = static_cast<volumePercent_t>(toLogScale_(sinkVolume) * 100.0);
         }
     };
-    ::pa_operation* sinkLinkRequestOperation = ::pa_context_get_sink_info_by_index(m_context, m_sinkIndex, callback, (void*)&volume);
-    while (::pa_operation_get_state(sinkLinkRequestOperation) != PA_OPERATION_DONE) {
-        ::pa_mainloop_iterate(m_mainloop, 1, NULL);
-    }
-    ::pa_operation_unref(sinkLinkRequestOperation);
+    PulseOperation op{::pa_context_get_sink_info_by_index(m_context, m_sinkIndex, callback, (void*)&volume), m_mainloop};
+    op.waitUntilCompleteOrFailed();
     return volume;
 }
 
@@ -116,11 +114,8 @@ void PulseVolume::setVolume(volumePercent_t newVolume) {
     ::pa_cvolume_init(&volume);
     ::pa_cvolume_set(&volume, 2, pulseInternalVolume);
     ::pa_context_success_cb_t callback = [](pa_context *c, int success, void* data) { };
-    ::pa_operation* sinkVolumeSetRequestOperation = ::pa_context_set_sink_volume_by_index(m_context, m_sinkIndex, &volume, callback, &newVolume);
-    while (::pa_operation_get_state(sinkVolumeSetRequestOperation) != PA_OPERATION_DONE) {
-        ::pa_mainloop_iterate(m_mainloop, 1, NULL);
-    }
-    ::pa_operation_unref(sinkVolumeSetRequestOperation);
+    PulseOperation op{::pa_context_set_sink_volume_by_index(m_context, m_sinkIndex, &volume, callback, &newVolume), m_mainloop};
+    op.waitUntilCompleteOrFailed();
 }
 
 void PulseVolume::mute() {
@@ -181,12 +176,8 @@ uint32_t PulseVolume::getSinkIndex_() {
             data->alreadyDone = true;
         }
     };
-    ::pa_operation* sinkLinkRequestOperation = ::pa_context_get_sink_info_list(m_context, callback, (void*)&data);
-    while (::pa_operation_get_state(sinkLinkRequestOperation) != PA_OPERATION_DONE) {
-        ::pa_mainloop_iterate(m_mainloop, 1, NULL);
-    }
-    ::pa_operation_unref(sinkLinkRequestOperation);
-
+    PulseOperation op{::pa_context_get_sink_info_list(m_context, callback, (void*)&data), m_mainloop};
+    op.waitUntilCompleteOrFailed();
     return data.sinkIndex;
 }
 
