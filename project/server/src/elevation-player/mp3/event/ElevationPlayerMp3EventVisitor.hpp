@@ -11,9 +11,15 @@ namespace elevation {
 
 class ElevationPlayerMp3EventVisitor : public AbstractMp3EventVisitor {
 public:
+    explicit ElevationPlayerMp3EventVisitor(Logger& logger);
+
     virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) override;
     virtual void onMuteEvent(const MuteEvent& event) override;
     virtual void onUnmuteEvent(const UnmuteEvent& event) override;
+
+protected:
+    Logger& m_logger;
+    PulseVolume m_pulseVolume;
 };
 
 } // namespace elevation

@@ -43,7 +43,7 @@ void EventManager::accepterThread_(Mp3EventListenerSocket listener, Logger& logg
 void EventManager::connectionThread_(std::unique_ptr<Mp3EventSocket> eventSocket, Logger& logger) {
     logger.log("New connection accepted");
 
-    ElevationPlayerMp3EventVisitor visitor;
+    ElevationPlayerMp3EventVisitor visitor{logger};
     while (true) {
         try {
             eventSocket->readEvent()->acceptVisitor(visitor);
