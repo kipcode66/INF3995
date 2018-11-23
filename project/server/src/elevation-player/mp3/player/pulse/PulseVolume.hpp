@@ -11,6 +11,15 @@ namespace elevation {
 
 class PulseDevice; // Forward-declaration to brea circular dependencies
 
+/**
+ * @brief Interacts with the PulseAudio volume.
+ *
+ * @note The volume that is returned is the volume of
+ * the average channel of the first output sink. This
+ * means, if there are two sinks (e.g. a bluetooth device
+ * on top of the integrated sound card), we get/set only the
+ * itegrated sound card volume.
+ */
 class PulseVolume {
 protected:
     static constexpr double K = 0.5; ///< Linear <-> LogScale parameter that can be tweaked. Must be strictly positive.
