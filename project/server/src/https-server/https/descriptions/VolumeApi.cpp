@@ -50,7 +50,7 @@ void VolumeApi::POST_volumeAssigner_ (const Rest::Request& request,
                                                Http::ResponseWriter response) {
     volumePercent_t newVolume;
     try {
-        if (std::istringstream{request.param(":volume").as<std::string>()} >> newVolume || newVolume > 100) {
+        if (!(std::istringstream{request.param(":volume").as<std::string>()} >> newVolume) || newVolume > 100) {
             throw std::runtime_error("");
         }
     }
