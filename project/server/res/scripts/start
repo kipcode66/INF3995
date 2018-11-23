@@ -159,7 +159,7 @@ startElevationPlayer() {
     local NUM_TRIES_PROD_MODE="20"
     local BASE_PORT_DEV_MODE="6666"
     local NUM_TRIES_DEV_MODE="20"
-    local RETRY_DELAY="0.5"
+    local RETRY_DELAY="2.0"
     local PORT_OPTION="--port"
     local EXTRA_PARAMS="--cache-path \"${SERVER_CACHE_PATH}\""
 
