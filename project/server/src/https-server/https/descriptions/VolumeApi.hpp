@@ -3,18 +3,19 @@
 
 #include <pistache/description.h>
 
+#include <common/logger/Logger.hpp>
+#include <common/mp3/communication/Mp3EventClientSocket.hpp>
+
 namespace elevation {
 
 class VolumeApi {
 public:
-    VolumeApi(Pistache::Rest::Description& desc);
+    VolumeApi(Pistache::Rest::Description& desc, Logger& logger, Mp3EventClientSocket playerEventSocket);
 
 private:
     void GET_volume_              (const Pistache::Rest::Request&,
                                    Pistache::Http::ResponseWriter);
-    void POST_volumeAug_          (const Pistache::Rest::Request&,
-                                   Pistache::Http::ResponseWriter);
-    void POST_volumeDim_          (const Pistache::Rest::Request&,
+    void POST_volumeAssigner_     (const Pistache::Rest::Request&,
                                    Pistache::Http::ResponseWriter);
     void POST_sourdineActiver_    (const Pistache::Rest::Request&,
                                    Pistache::Http::ResponseWriter);
@@ -22,7 +23,8 @@ private:
                                    Pistache::Http::ResponseWriter);
 
 private:
-    Mp3EventClientSocket m_socket;
+    Logger& m_logger;
+    Mp3EventClientSocket m_playerEventSocket;
 };
 
 } // namespace elevation
