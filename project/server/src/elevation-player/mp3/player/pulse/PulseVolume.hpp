@@ -2,6 +2,7 @@
 #define MP3_PLAYER_PULSE_PULSEVOLUME_HPP
 
 #include <memory>
+#include <limits>
 
 #include <pulse/pulseaudio.h>
 
@@ -29,6 +30,18 @@ protected:
     static double toLogScale_(double linearFactor);
     static double fromLogScale_(double logFactor);
 
+protected:
+    class SinkState {
+    public:
+        explicit SinkState(bool isMuted = true, volumePercent_t volume = std::numeric_limits<volumePercent_t>::max()) : m_isMuted(isMuted), m_volume(volume) { }
+        bool isMuted() const { return m_isMuted; }
+        volumePercent_t getVolume() const { return m_volume; }
+
+    private:
+        bool m_isMuted;
+        volumePercent_t m_volume;
+    };
+
 public:
     explicit PulseVolume();
     PulseVolume(const PulseVolume&) = delete;
@@ -46,7 +59,10 @@ public:
 protected:
     void initializeContext_();
     void initializeSinkData_();
+
     ::pa_cvolume makePulseVolumeStructure_(volumePercent_t volume) const;
+
+    SinkState getSinkState_() const;
     void muteOrUnmute_(bool mute);
 
 protected:

@@ -3,7 +3,6 @@
 #include "PulseVolume.hpp"
 
 #include <iostream>
-#include <limits>
 #include <stdexcept>
 #include <string>
 #include <cmath>
@@ -89,19 +88,7 @@ PulseVolume::~PulseVolume() {
 }
 
 volumePercent_t PulseVolume::getVolume() const {
-    volumePercent_t volume = std::numeric_limits<volumePercent_t>::max();
-
-    pa_sink_info_cb_t callback = [](pa_context *c, const pa_sink_info *i, int eol, void* data) {
-        volumePercent_t* volume = static_cast<volumePercent_t*>(data);
-        if (eol <= 0) {
-            const pa_cvolume* sinkVolumes = &i->volume;
-            double sinkVolume = pa_sw_volume_to_linear(pa_cvolume_avg(sinkVolumes));
-            *volume = static_cast<volumePercent_t>(toLogScale_(sinkVolume) * 100.0);
-        }
-    };
-    PulseOperation op{::pa_context_get_sink_info_by_index(m_context, m_sinkIndex, callback, (void*)&volume), m_mainloop};
-    op.waitUntilCompletedOrFailed();
-    return volume;
+    return getSinkState_().getVolume();
 }
 
 void PulseVolume::setVolume(volumePercent_t newVolume) {
@@ -184,6 +171,24 @@ void PulseVolume::initializeSinkData_() {
     ::pa_cvolume_init(&pulseVolumeStructure);
     ::pa_cvolume_set(&pulseVolumeStructure, m_numSinkChannels, pulseInternalVolume);
     return pulseVolumeStructure;
+}
+
+PulseVolume::SinkState PulseVolume::getSinkState_() const {
+    SinkState sinkState;
+    pa_sink_info_cb_t callback = [](pa_context *c, const pa_sink_info *i, int eol, void* data) {
+        SinkState& sinkStateBuffer = *static_cast<SinkState*>(data);
+        if (eol <= 0) {
+            const pa_cvolume* sinkVolumes = &i->volume;
+            double sinkVolume = pa_sw_volume_to_linear(pa_cvolume_avg(sinkVolumes));
+            bool isMuted = (i->mute != 0);
+            volumePercent_t volume = static_cast<volumePercent_t>(toLogScale_(sinkVolume) * 100.0);
+            SinkState sinkStateTemp{isMuted, volume};
+            sinkStateBuffer = sinkStateTemp;
+        }
+    };
+    PulseOperation op{::pa_context_get_sink_info_by_index(m_context, m_sinkIndex, callback, (void*)&sinkState), m_mainloop};
+    op.waitUntilCompletedOrFailed();
+    return sinkState;
 }
 
 void PulseVolume::muteOrUnmute_(bool mute) {
