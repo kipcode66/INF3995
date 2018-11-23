@@ -23,7 +23,7 @@ class StatisticsActivity : AbstractDrawerActivity(R.layout.activity_statistics, 
     private val eventMgr: EventManager by inject()
     private val appStateService: AppStateService by inject()
     private val dataProvider: DataProvider by inject()
-    private val statisticsAdapter : StatisticsAdapter by inject{ ParameterList(this.statisticsLayout, layoutInflater) }
+    private val statisticsAdapter : StatisticsAdapter by inject{ ParameterList(dataProvider.getStatistics(), this.statisticsLayout) }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onAppStateChange(o: Observable?, arg: Any?) {
@@ -37,6 +37,7 @@ class StatisticsActivity : AbstractDrawerActivity(R.layout.activity_statistics, 
             eventMgr.dispatchEvent(StatisticsRequestEvent())
         }
         dataProvider.observeStatistics(Observer(this::onStatisticsUpdated))
+        statisticsAdapter.updateView()
     }
 
     private fun onStatisticsUpdated(o: Observable, arg: Any?) {

@@ -4,14 +4,8 @@ import android.content.Context
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseAdapter
-import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.Statistics
-import ca.polymtl.inf3990_01.client.model.UserList
-import ca.polymtl.inf3990_01.client.view.StatisticsActivity
-import kotlinx.android.synthetic.main.black_list.view.*
 import kotlinx.android.synthetic.main.content_statistics.view.*
 //import kotlinx.android.synthetic.main.statistics.view.*
 import java.util.*
@@ -34,7 +28,7 @@ class StatisticsAdapter(
         updateView()
     }
 
-    private fun updateView() {
+    fun updateView() {
         val view = statisticsView
         val stat = this.statistics
         view.songNumber.text = statistics.chansons.toString()
