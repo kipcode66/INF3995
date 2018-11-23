@@ -30,6 +30,7 @@ class StatisticsActivity : AbstractDrawerActivity(R.layout.activity_statistics, 
         menuInflater.inflate(R.menu.statistics, menu)
         menu.findItem(R.id.action_show_login).isVisible = appStateService.getState().type == AppStateService.State.User
         menu.findItem(R.id.action_disconnect).isVisible = appStateService.getState().type == AppStateService.State.Admin
+        menu.findItem(R.id.action_block_user).isVisible = appStateService.getState().type == AppStateService.State.Admin
         return true
     }
 
@@ -38,6 +39,10 @@ class StatisticsActivity : AbstractDrawerActivity(R.layout.activity_statistics, 
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            R.id.action_block_user -> {
+                BlockUserDialog(this, eventMgr).show()
+                return true
+            }
             R.id.action_show_login -> {
                 val loginDialog = LoginDialog(this, eventMgr)
                 loginDialog.show()

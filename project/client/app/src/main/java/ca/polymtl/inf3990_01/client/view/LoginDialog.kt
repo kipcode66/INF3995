@@ -11,13 +11,13 @@ import kotlinx.android.synthetic.main.login_layout.*
 class LoginDialog(
     activityCtx: Context,
     private val eventManager: EventManager
-): Dialog(activityCtx) {
+): Dialog(activityCtx, R.style.Dialog) {
     init {
-        setContentView(R.layout.login_layout)
+        setTitle(R.string.login_dialog_title)
         setCancelable(true)
         setCanceledOnTouchOutside(true)
         setOnCancelListener { this@LoginDialog.dismiss() }
-        setTitle(R.string.login_dialog_title)
+        setContentView(R.layout.login_layout)
         login_username.setText(R.string.login_username_default_text)
         login_username.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {

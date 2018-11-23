@@ -9,8 +9,8 @@ import ca.polymtl.inf3990_01.client.controller.event.LocalSongLoadEvent
 import ca.polymtl.inf3990_01.client.controller.event.LogoutRequestEvent
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.LocalSongs
-import kotlinx.android.synthetic.main.content_local_song.*
 import ca.polymtl.inf3990_01.client.presentation.LocalSongAdapter
+import kotlinx.android.synthetic.main.content_local_song.*
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.ParameterList
 import java.util.*
@@ -39,6 +39,7 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
         menuInflater.inflate(R.menu.local_song, menu)
         menu.findItem(R.id.action_show_login).isVisible = appStateService.getState().type == AppStateService.State.User
         menu.findItem(R.id.action_disconnect).isVisible = appStateService.getState().type == AppStateService.State.Admin
+        menu.findItem(R.id.action_block_user).isVisible = appStateService.getState().type == AppStateService.State.Admin
         return true
     }
 
@@ -50,6 +51,10 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
             R.id.action_reload -> {
                 songsList.clear()
                 eventMgr.dispatchEvent(LocalSongLoadEvent(this))
+                return true
+            }
+            R.id.action_block_user -> {
+                BlockUserDialog(this, eventMgr).show()
                 return true
             }
             R.id.action_show_login -> {

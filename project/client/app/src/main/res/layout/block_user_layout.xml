@@ -1,33 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    android:orientation="vertical"
-    android:padding="@dimen/nav_header_vertical_spacing"
-    tools:context=".view.LoginDialog">
+    android:orientation="vertical">
     <EditText
-        android:id="@+id/login_username"
+        android:id="@+id/block_username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:hint="@string/login_hint_username"
-        android:text="@string/login_username_default_text"/>
+        android:hint="@string/client_name"
+        android:imeOptions="actionNext"/>
     <EditText
-        android:id="@+id/login_password"
+        android:id="@+id/block_ip_address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:hint="@string/login_hint_password"/>
+        android:inputType="textFilter"
+        android:hint="@string/default_ip_address"
+        android:imeOptions="actionNext"/>
+    <EditText
+        android:id="@+id/block_mac_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textFilter"
+        android:hint="@string/default_mac_address"
+        android:imeOptions="actionDone"
+        android:imeActionLabel="@string/block_submit_text"/>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
-            android:id="@+id/login_button_submit"
+            android:id="@+id/block_button_submit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:text="@string/login_submit_text"/>
+            android:text="@string/block_submit_text"/>
     </RelativeLayout>
+
 </LinearLayout>

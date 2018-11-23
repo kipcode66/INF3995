@@ -8,6 +8,7 @@ import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.InitializationManager
 import ca.polymtl.inf3990_01.client.controller.VolumeController
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
+import ca.polymtl.inf3990_01.client.controller.event.RequestBlackListReloadEvent
 import ca.polymtl.inf3990_01.client.controller.event.RequestQueueReloadEvent
 import ca.polymtl.inf3990_01.client.controller.event.VolumeRequestEvent
 import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
@@ -22,6 +23,7 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.google.gson.Gson
 import java.math.BigInteger
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
@@ -35,9 +37,9 @@ class SecureRestRequestService(
     private val volumeController: VolumeController
     ) {
     companion object {
-        private data class UserResponseData(
+        private data class UserData(
             val mac: String, val ip: String, val nom: String)
-        private data class UserListResponseData(val bloques: List<UserResponseData>)
+        private data class UserListResponseData(val bloques: List<UserData>)
 
         private data class LoginRequestData(val usager: String, val mot_de_passe: String)
 
@@ -202,11 +204,29 @@ class SecureRestRequestService(
     }
 
     suspend fun blockUser(user: User) {
-        TODO("Not Implemented")
+        suspendCoroutine<ResponseData<String>> { continuation ->
+            val request = generateRequest(Request.Method.POST, "bloquer", UserData(user.mac, user.ip, user.name), continuation, mutableMapOf(
+                400 to appCtx.getString(R.string.error_message_bad_request),
+                401 to appCtx.getString(R.string.error_message_unauthenticated),
+                500 to appCtx.getString(R.string.error_message_server)
+            ), "")
+            request.retryPolicy = DefaultRetryPolicy(TimeUnit.SECONDS.toMillis(10L).toInt(), 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+        eventMgr.dispatchEvent(RequestBlackListReloadEvent())
     }
 
     suspend fun unblockUser(user: User) {
-        TODO("Not Implemented")
+        suspendCoroutine<ResponseData<String>> { continuation ->
+            val request = generateRequest(Request.Method.POST, "debloquer", UserData(user.mac, user.ip, user.name), continuation, mutableMapOf(
+                400 to appCtx.getString(R.string.error_message_bad_request),
+                401 to appCtx.getString(R.string.error_message_unauthenticated),
+                500 to appCtx.getString(R.string.error_message_server)
+            ), "")
+            request.retryPolicy = DefaultRetryPolicy(TimeUnit.SECONDS.toMillis(10L).toInt(), 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+        eventMgr.dispatchEvent(RequestBlackListReloadEvent())
     }
 
     suspend fun getBlackList(): List<User> {

@@ -62,6 +62,7 @@ class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawe
         menuInflater.inflate(R.menu.queue, menu)
         menu.findItem(R.id.action_show_login).isVisible = appStateService.getState().type == AppStateService.State.User
         menu.findItem(R.id.action_disconnect).isVisible = appStateService.getState().type == AppStateService.State.Admin
+        menu.findItem(R.id.action_block_user).isVisible = appStateService.getState().type == AppStateService.State.Admin
         return true
     }
 
@@ -72,6 +73,10 @@ class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawe
         when (item.itemId) {
             R.id.action_reload -> {
                 refresh()
+                return true
+            }
+            R.id.action_block_user -> {
+                BlockUserDialog(this, eventMgr).show()
                 return true
             }
             R.id.action_show_login -> {

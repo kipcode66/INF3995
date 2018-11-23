@@ -10,4 +10,5 @@
     <dimen name="song_item_elevation">8dp</dimen>
     <dimen name="song_item_delete_width">10dp</dimen>
     <dimen name="swipe_layout_padding">16dp</dimen>
+    <dimen name="block_user_layout_header_spacing">16dp</dimen>
 </resources>

@@ -7,13 +7,13 @@ import android.view.MenuItem
 import android.widget.ListView
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
+import ca.polymtl.inf3990_01.client.controller.event.LogoutRequestEvent
 import ca.polymtl.inf3990_01.client.controller.event.RequestBlackListReloadEvent
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.UserList
 import ca.polymtl.inf3990_01.client.presentation.BlackListAdapter
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.ParameterList
-import ca.polymtl.inf3990_01.client.controller.event.LogoutRequestEvent
 import java.util.*
 
 class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R.id.drawer_layout) {
@@ -40,6 +40,7 @@ class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R
         menuInflater.inflate(R.menu.black_list, menu)
         menu.findItem(R.id.action_show_login).isVisible = appStateService.getState().type == AppStateService.State.User
         menu.findItem(R.id.action_disconnect).isVisible = appStateService.getState().type == AppStateService.State.Admin
+        menu.findItem(R.id.action_block_user).isVisible = appStateService.getState().type == AppStateService.State.Admin
         return true
     }
 
@@ -50,6 +51,10 @@ class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R
         when (item.itemId) {
             R.id.action_reload -> {
                 eventMgr.dispatchEvent(RequestBlackListReloadEvent())
+                return true
+            }
+            R.id.action_block_user -> {
+                BlockUserDialog(this, eventMgr).show()
                 return true
             }
             R.id.action_show_login -> {

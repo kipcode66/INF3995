@@ -63,4 +63,9 @@
     <string name="settings_key_client_name" translatable="false">client_name</string>
     <string name="settings_key_queue_refresh_period" translatable="false">queue_period</string>
     <string name="error_message_too_many_concurrent_song_sent">Cannot send more than %1$d at the same time</string>
+    <string name="default_mac_address" translatable="false">00:00:00:00:00:00</string>
+    <string name="default_ip_address" translatable="false">0.0.0.0</string>
+    <string name="block_submit_text">Block</string>
+    <string name="block_dialog_title">Block User</string>
+    <string name="block_user_action_label">Block User</string>
 </resources>

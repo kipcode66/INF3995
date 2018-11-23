@@ -9,6 +9,7 @@ import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.DataProvider
+import ca.polymtl.inf3990_01.client.model.User
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -41,6 +42,8 @@ class AppController(
     private var swapSongsJob: Job? = null
     private var volumeRequestJob: Job? = null
     private var volumeChangeRequestJob: Job? = null
+    private var userBlockRequestJob: Job? = null
+    private var userUnblockRequestJob: Job? = null
     private var task: ScheduledFuture<*>? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
@@ -68,6 +71,8 @@ class AppController(
         eventMgr.addEventListener(this::onSwapSongsRequest)
         eventMgr.addEventListener(this::onVolumeRequest)
         eventMgr.addEventListener(this::onVolumeChangeRequest)
+        eventMgr.addEventListener(this::onUserBlockRequest)
+        eventMgr.addEventListener(this::ononUserUnblockRequest)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -232,6 +237,31 @@ class AppController(
                 }
             }
         }
+    }
+
+    private fun onUserBlockRequest(event: UserBlockRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (userBlockRequestJob?.isCompleted != false) {
+                val jobTmp = userBlockRequestJob
+                userBlockRequestJob = async {
+                    jobTmp?.join()
+                    secureRestService.blockUser(User(event.mac, event.ip, event.username))
+                }
+            }
+        }
+    }
+
+    private fun ononUserUnblockRequest(event: UserUnblockRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (userUnblockRequestJob?.isCompleted != false) {
+                val jobTmp = userUnblockRequestJob
+                userUnblockRequestJob = async {
+                    jobTmp?.join()
+                    secureRestService.blockUser(User(event.mac, event.ip, event.username))
+                }
+            }
+        }
+
     }
 
 }
