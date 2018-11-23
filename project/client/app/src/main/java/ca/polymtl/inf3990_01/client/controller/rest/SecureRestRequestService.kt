@@ -198,7 +198,18 @@ class SecureRestRequestService(
     }
 
     suspend fun getStatistics(): Statistics {
-        TODO("Not Implemented")
+        var stat = Statistics(BigInteger.ZERO,BigInteger.ZERO,BigInteger.ZERO,BigInteger.ZERO)
+        val resp: ResponseData<Statistics> = suspendCoroutine { continuation ->
+            val request : RESTRequest<Statistics> =  generateRequest(Request.Method.GET, "statistiques/", "", continuation, mutableMapOf(
+                    401 to appCtx.getString(R.string.error_message_unauthenticated)
+            ), stat,true)
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+        if (resp.code == 200) {
+            stat = resp.value
+        }
+        return stat
     }
 
     suspend fun blockUser(user: User) {

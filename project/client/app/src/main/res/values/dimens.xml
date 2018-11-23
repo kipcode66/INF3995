@@ -9,4 +9,5 @@
     <dimen name="song_item_padding">5dp</dimen>
     <dimen name="song_item_elevation">8dp</dimen>
     <dimen name="song_item_delete_width">10dp</dimen>
+    <dimen name="statistics_row_padding">40dp</dimen>
 </resources>

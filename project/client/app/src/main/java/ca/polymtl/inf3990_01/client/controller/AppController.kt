@@ -9,6 +9,7 @@ import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.DataProvider
+import ca.polymtl.inf3990_01.client.model.Statistics
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -42,6 +43,7 @@ class AppController(
     private var volumeRequestJob: Job? = null
     private var volumeChangeRequestJob: Job? = null
     private var task: ScheduledFuture<*>? = null
+    private var loadStatisticsJob: Job? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
         when (key) {
@@ -68,6 +70,7 @@ class AppController(
         eventMgr.addEventListener(this::onSwapSongsRequest)
         eventMgr.addEventListener(this::onVolumeRequest)
         eventMgr.addEventListener(this::onVolumeChangeRequest)
+        eventMgr.addEventListener(this::loadStatistics)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -230,6 +233,19 @@ class AppController(
                         VolumeChangeRequestEvent.Companion.Change.UNMUTE -> secureRestService.unmuteVolume()
                     }
                 }
+            }
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun loadStatistics(event: StatisticsRequestEvent) {
+        Log.d("AppController", "loading the statistics")
+        if (loadStatisticsJob?.isCompleted != false) {
+            val jobTmp = loadStatisticsJob
+            loadStatisticsJob = async {
+                jobTmp?.join()
+                  val statistics : Statistics = secureRestService.getStatistics()
+                dataProvider.setStatistics(statistics)
             }
         }
     }

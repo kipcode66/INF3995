@@ -62,4 +62,8 @@
     <string name="settings_key_server_address" translatable="false">server_url</string>
     <string name="settings_key_client_name" translatable="false">client_name</string>
     <string name="settings_key_queue_refresh_period" translatable="false">queue_period</string>
+    <string name="statistics_layout_label_number_of_songs">Submitted songs</string>
+    <string name="statistics_layout_label_number_of_users">Number of users</string>
+    <string name="statistics_layout_label_number_of_song_removed">Removed songs</string>
+    <string name="statistics_layout_label_duration_of_song">Average duration</string>
 </resources>
