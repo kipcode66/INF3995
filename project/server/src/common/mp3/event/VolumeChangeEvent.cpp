@@ -29,7 +29,7 @@ bool VolumeChangeEvent::operator==(const Mp3Event& other) const {
     }
 }
 
-void VolumeChangeEvent::acceptVisitor(const AbstractMp3EventVisitor& visitor) {
+void VolumeChangeEvent::acceptVisitor(AbstractMp3EventVisitor& visitor) {
     visitor.onVolumeChangeEvent(*this);
 }
 

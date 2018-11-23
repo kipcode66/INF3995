@@ -12,7 +12,7 @@ public:
 
     virtual bool operator==(const Mp3Event& other) const override;
     virtual std::string serialize() const override;
-    virtual void acceptVisitor(const AbstractMp3EventVisitor& visitor) override = 0;
+    virtual void acceptVisitor(AbstractMp3EventVisitor& visitor) override = 0;
 };
 
 } // namespace elevation

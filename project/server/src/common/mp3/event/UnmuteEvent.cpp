@@ -6,7 +6,7 @@ UnmuteEvent::UnmuteEvent()
     : AbstractPayloadlessEvent(EventType::UNMUTE)
 { }
 
-void UnmuteEvent::acceptVisitor(const AbstractMp3EventVisitor& visitor) {
+void UnmuteEvent::acceptVisitor(AbstractMp3EventVisitor& visitor) {
     visitor.onUnmuteEvent(*this);
 }
 

@@ -10,7 +10,7 @@ public:
     explicit UnmuteEvent();
     virtual ~UnmuteEvent() = default;
 
-    virtual void acceptVisitor(const AbstractMp3EventVisitor& visitor) override;
+    virtual void acceptVisitor(AbstractMp3EventVisitor& visitor) override;
 };
 
 } // namespace elevation

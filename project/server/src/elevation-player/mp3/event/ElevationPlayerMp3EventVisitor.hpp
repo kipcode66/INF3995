@@ -3,14 +3,17 @@
 
 #include <common/mp3/event/AbstractMp3EventVisitor.hpp>
 #include <common/mp3/event/VolumeChangeEvent.hpp>
+#include <common/logger/Logger.hpp>
+
+#include "mp3/player/pulse/PulseVolume.hpp"
 
 namespace elevation {
 
 class ElevationPlayerMp3EventVisitor : public AbstractMp3EventVisitor {
 public:
-    virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) const override;
-    virtual void onMuteEvent(const MuteEvent& event) const override;
-    virtual void onUnmuteEvent(const UnmuteEvent& event) const override;
+    virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) override;
+    virtual void onMuteEvent(const MuteEvent& event) override;
+    virtual void onUnmuteEvent(const UnmuteEvent& event) override;
 };
 
 } // namespace elevation

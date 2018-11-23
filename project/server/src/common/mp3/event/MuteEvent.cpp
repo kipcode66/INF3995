@@ -8,7 +8,7 @@ MuteEvent::MuteEvent()
 
 MuteEvent::~MuteEvent() { }
 
-void MuteEvent::acceptVisitor(const AbstractMp3EventVisitor& visitor) {
+void MuteEvent::acceptVisitor(AbstractMp3EventVisitor& visitor) {
     visitor.onMuteEvent(*this);
 }
 

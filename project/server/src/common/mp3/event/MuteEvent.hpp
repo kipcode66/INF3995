@@ -10,7 +10,7 @@ public:
     explicit MuteEvent();
     virtual ~MuteEvent();
 
-    virtual void acceptVisitor(const AbstractMp3EventVisitor& visitor);
+    virtual void acceptVisitor(AbstractMp3EventVisitor& visitor);
 };
 
 } // namespace elevation

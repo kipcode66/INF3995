@@ -10,9 +10,9 @@ class UnmuteEvent;
 
 class AbstractMp3EventVisitor {
 public:
-    virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) const = 0;
-    virtual void onMuteEvent(const MuteEvent& event) const = 0;
-    virtual void onUnmuteEvent(const UnmuteEvent& event) const = 0;
+    virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) = 0;
+    virtual void onMuteEvent(const MuteEvent& event) = 0;
+    virtual void onUnmuteEvent(const UnmuteEvent& event) = 0;
 };
 
 } // namespace elevation

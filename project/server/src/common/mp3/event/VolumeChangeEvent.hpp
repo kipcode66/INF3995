@@ -17,7 +17,7 @@ public:
     virtual std::string serialize() const;
     volumePercent_t getNewVolume() const { return m_changeTo; }
 
-    virtual void acceptVisitor(const AbstractMp3EventVisitor& visitor) override;
+    virtual void acceptVisitor(AbstractMp3EventVisitor& visitor) override;
 
 protected:
     volumePercent_t m_changeTo;

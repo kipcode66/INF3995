@@ -35,7 +35,7 @@ public:
 
     virtual std::string serialize() const = 0;
 
-    virtual void acceptVisitor(const AbstractMp3EventVisitor& visitor) = 0;
+    virtual void acceptVisitor(AbstractMp3EventVisitor& visitor) = 0;
 
     /**
      * @brief Useful for unit tests.
