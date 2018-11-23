@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 
         elevation::RestApi api(addr, logger, cache);
         api.init();
-        std::cout << "Server is about to start." << std::endl;
+        logger.log("Server is about to start.");
         api.start();
     }
     catch (std::exception& e) {

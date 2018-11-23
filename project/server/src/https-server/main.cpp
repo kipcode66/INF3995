@@ -19,9 +19,10 @@ int main(int argc, char** argv) {
         elevation::FileCache cache{argsParser.getCachePath()};
 
         elevation::Mp3EventClientSocket playerEventSocket{argsParser.getPlayerPort()};
-        elevation::SecureRestApi api(addr, elevation::Logger::getLogger("https-server"), cache, std::move(playerEventSocket));
+        elevation::Logger& logger = elevation::Logger::getLogger("https-server");
+        elevation::SecureRestApi api(addr, logger, cache, std::move(playerEventSocket));
         api.init();
-        std::cout << "Server is about to start." << std::endl;
+        logger.log("Server is about to start.");
         api.start();
     }
     catch (std::exception& e) {
