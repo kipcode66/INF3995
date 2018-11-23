@@ -90,11 +90,11 @@ PulseVolume::~PulseVolume() {
 }
 
 volumePercent_t PulseVolume::getVolume() const {
-    volumePercent_t volume;
+    volumePercent_t volume = std::numeric_limits<volumePercent_t>::max();
 
     pa_sink_info_cb_t callback = [](pa_context *c, const pa_sink_info *i, int eol, void* data) {
-        if (eol <= 0) {
-            volumePercent_t* volume = static_cast<volumePercent_t*>(data);
+        volumePercent_t* volume = static_cast<volumePercent_t*>(data);
+        if (*volume == std::numeric_limits<volumePercent_t>::max() && eol <= 0) {
             const pa_cvolume* sinkVolumes = &i->volume;
             double sinkVolume = pa_sw_volume_to_linear(pa_cvolume_avg(sinkVolumes));
             *volume = static_cast<volumePercent_t>(toLogScale_(sinkVolume) * 100.0);
