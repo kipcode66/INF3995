@@ -13,7 +13,7 @@
 using namespace elevation;
 
 SecureRestApi::SecureRestApi(Pistache::Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
-    : RestApi(addr, logger, cache, std::move(playerEventSocket))
+    : RestApi(addr, logger, cache)
     , m_logger            (logger)
     , m_volumeApi         (m_desc, m_logger, std::move(playerEventSocket))
     , m_blacklistApi      (m_desc, m_logger)
