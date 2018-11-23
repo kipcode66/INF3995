@@ -105,13 +105,9 @@ volumePercent_t PulseVolume::getVolume() const {
 }
 
 void PulseVolume::setVolume(volumePercent_t newVolume) {
-    double sinkVolume = fromLogScale_(static_cast<double>(newVolume) / 100.0);
-    ::pa_volume_t pulseInternalVolume = ::pa_sw_volume_from_linear(sinkVolume);
-    ::pa_cvolume volume;
-    ::pa_cvolume_init(&volume);
-    ::pa_cvolume_set(&volume, m_numSinkChannels, pulseInternalVolume);
+    ::pa_cvolume pulseVolume = makePulseVolumeStructure_(newVolume);
     ::pa_context_success_cb_t callback = [](pa_context *c, int success, void* data) { };
-    PulseOperation op{::pa_context_set_sink_volume_by_index(m_context, m_sinkIndex, &volume, callback, &newVolume), m_mainloop};
+    PulseOperation op{::pa_context_set_sink_volume_by_index(m_context, m_sinkIndex, &pulseVolume, callback, &newVolume), m_mainloop};
     op.waitUntilCompleteOrFailed();
 }
 
