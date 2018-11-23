@@ -45,10 +45,12 @@ public:
 
 protected:
     void initializeContext_();
+    uint32_t getSinkIndex_();
 
 protected:
     ::pa_context* m_context;
     ::pa_mainloop* m_mainloop;
+    uint32_t m_sinkIndex;
 };
 
 } // namespace elevation

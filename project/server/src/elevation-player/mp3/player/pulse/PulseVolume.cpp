@@ -78,6 +78,7 @@ double PulseVolume::fromLogScale_(double logFactor) {
 PulseVolume::PulseVolume()
 {
     initializeContext_();
+    m_sinkIndex = getSinkIndex_();
 }
 
 PulseVolume::~PulseVolume() {
@@ -153,6 +154,31 @@ void PulseVolume::initializeContext_() {
     while (pa_ready == 0) {
         ::pa_mainloop_iterate(m_mainloop, 1, NULL);
     }
+}
+
+uint32_t PulseVolume::getSinkIndex_() {
+    struct Data_t {
+        bool alreadyDone;
+        uint32_t sinkIndex;
+    };
+
+    Data_t data = {.alreadyDone = false, .sinkIndex = std::numeric_limits<uint32_t>::max()};
+
+    pa_sink_info_cb_t callback = [](pa_context *c, const pa_sink_info *i, int eol, void* dataVoid) {
+        Data_t* data = static_cast<Data_t*>(dataVoid);
+        if (!data->alreadyDone && eol <= 0) {
+            std::cout << "Set to " << i->index << std::endl;
+            data->sinkIndex = i->index;
+            data->alreadyDone = true;
+        }
+    };
+    ::pa_operation* sinkLinkRequestOperation = ::pa_context_get_sink_info_list(m_context, callback, (void*)&data);
+    while (::pa_operation_get_state(sinkLinkRequestOperation) != PA_OPERATION_DONE) {
+        ::pa_mainloop_iterate(m_mainloop, 1, NULL);
+    }
+    ::pa_operation_unref(sinkLinkRequestOperation);
+
+    return data.sinkIndex;
 }
 
 } // namespace elevation
