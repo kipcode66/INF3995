@@ -13,7 +13,7 @@ namespace elevation {
  */
 class PulseOperation {
 public:
-    explicit PulseOperation(::pa_operation* operation);
+    explicit PulseOperation(::pa_operation* operation, ::pa_mainloop* mainloop);
     PulseOperation(const PulseOperation&) = delete;
     PulseOperation(PulseOperation&&) = delete;
 
@@ -26,6 +26,7 @@ public:
 
 protected:
     ::pa_operation* m_operation;
+    ::pa_mainloop* m_mainloop;
 };
 
 } // namespace elevation
