@@ -13,8 +13,8 @@ class PulseDevice; // Forward-declaration to brea circular dependencies
 
 class PulseVolume {
 protected:
-    static double getMinVolumeLogScale_() { return toLogScale_(0); }
-    static double getMaxVolumeLogScale_() { return toLogScale_(1); }
+    static constexpr double K = 0.5; ///< Linear <-> LogScale parameter that can be tweaked. Must be strictly positive.
+    static constexpr double F0 = 0.00001; ///< Linear <-> LogScale parameter that can be tweaked. Must be beween in ]0, 1], but should probably be close to 0.
     static double toLogScale_(double linearFactor);
 
 public:

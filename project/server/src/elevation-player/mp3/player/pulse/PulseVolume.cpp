@@ -15,8 +15,6 @@
 namespace elevation {
 
 double PulseVolume::toLogScale_(double linearFactor) {
-    static constexpr double K = 0.5; // Parameter that can be tweaked. Must be strictly positive.
-    static constexpr double F0 = 0.001; // Parameter that can be tweaked. Must be beween 0 and 1.
     static const double A =
         F0
         *
