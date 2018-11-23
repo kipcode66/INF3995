@@ -59,6 +59,7 @@ class StatisticsActivity : AbstractDrawerActivity(R.layout.activity_statistics, 
         return when (item.itemId) {
             R.id.action_reload -> {
                 Handler(mainLooper).post {statisticsLayout.isRefreshing = true}
+                eventMgr.dispatchEvent(StatisticsRequestEvent())
                 true
             }
             R.id.action_show_login -> {
