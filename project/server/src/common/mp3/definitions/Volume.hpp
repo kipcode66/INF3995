@@ -12,6 +12,11 @@ namespace elevation {
  */
 typedef uint8_t volumePercent_t;
 
+struct VolumeData_t {
+    volumePercent_t volume;
+    bool isMuted;
+};
+
 } // namespace elevation
 
 #endif // !MP3_DEFINITIONS_VOLUME_HPP
