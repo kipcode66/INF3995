@@ -49,6 +49,11 @@ void AuthApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWrit
                 m_logger.err(logMsg.str());
                 response.send(Http::Code::Bad_Request, "Admin already connected with this token");
                 return;
+            } else if (!db->isUserConnected(admin.getId())) {
+                logMsg << "Could not Login Admin. Admin with token \"" << admin.getId() << "\" is not a user.";
+                m_logger.err(logMsg.str());
+                response.send(Http::Code::Bad_Request, "Admin is not a user");
+                return;
             }
             auto saltAndPasswordHash = db->getSaltAndHashedPasswordByLogin(admin.getUsername().c_str());
             std::string salt = std::get<0>(saltAndPasswordHash);
