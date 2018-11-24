@@ -50,9 +50,11 @@ void VolumeApi::POST_volumeAssigner_ (const Rest::Request& request,
                                                Http::ResponseWriter response) {
     volumePercent_t newVolume;
     try {
-        if (!(std::istringstream{request.param(":volume").as<std::string>()} >> newVolume) || newVolume > 100) {
+        unsigned int tmpVolume = 0;
+        if (!(std::istringstream{request.param(":volume").as<std::string>()} >> tmpVolume) || tmpVolume > 100) {
             throw std::runtime_error("");
         }
+	newVolume = tmpVolume;
     }
     catch (const std::runtime_error& e) {
         response.send(Pistache::Http::Code::Bad_Request, "Volume must be an integer and must be in range [0, 100]");
