@@ -2,6 +2,7 @@ package ca.polymtl.inf3990_01.client.view
 
 import android.app.Dialog
 import android.content.Context
+import android.view.animation.CycleInterpolator
 import android.view.inputmethod.EditorInfo
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
@@ -27,8 +28,26 @@ class BlockUserDialog(
             }
         }
         block_button_submit.setOnClickListener {
-            eventManager.dispatchEvent(UserBlockRequestEvent(block_username.text.toString(), block_ip_address.text.toString(), block_mac_address.text.toString()))
-            this@BlockUserDialog.dismiss()
+            val areAllEmpty =
+                block_username.text.trim().isEmpty() &&
+                block_ip_address.text.trim().isEmpty() &&
+                block_mac_address.text.trim().isEmpty()
+            if (!areAllEmpty) {
+                eventManager.dispatchEvent(UserBlockRequestEvent(
+                    block_username.text.trim().toString(),
+                    block_ip_address.text.trim().toString(),
+                    block_mac_address.text.trim().toString()))
+                this@BlockUserDialog.dismiss()
+            }
+            else if (block_username.text.trim().isEmpty()) {
+                block_username.animate().translationX(8.0f).setInterpolator(CycleInterpolator(2.0f))
+            }
+            if (block_mac_address.text.trim().isEmpty()) {
+                block_mac_address.animate().translationX(8.0f).setInterpolator(CycleInterpolator(2.0f))
+            }
+            if (block_ip_address.text.trim().isEmpty()) {
+                block_ip_address.animate().translationX(8.0f).setInterpolator(CycleInterpolator(2.0f))
+            }
         }
     }
 }
