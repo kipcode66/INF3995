@@ -151,21 +151,10 @@ class SecureRestRequestService(
         return volume
     }
 
-    suspend fun increaseVolume(pc: Int) {
+    suspend fun setVolume(pc: Int) {
         suspendCoroutine<ResponseData<String>> { continuation ->
-            val request = generateRequest(Request.Method.POST, "volume/augmenter/$pc", "", continuation, mutableMapOf(
-                401 to appCtx.getString(R.string.error_message_unauthenticated),
-                500 to appCtx.getString(R.string.error_message_server)
-            ), "")
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
-            httpsClient.addToRequestQueue(request)
-        }
-        eventMgr.dispatchEvent(VolumeRequestEvent())
-    }
-
-    suspend fun decreaseVolume(pc: Int) {
-        suspendCoroutine<ResponseData<String>> { continuation ->
-            val request = generateRequest(Request.Method.POST, "volume/diminuer/$pc", "", continuation, mutableMapOf(
+            val request = generateRequest(Request.Method.POST, "volume/assigner/$pc", "", continuation, mutableMapOf(
+                400 to appCtx.getString(R.string.error_message_bad_request),
                 401 to appCtx.getString(R.string.error_message_unauthenticated),
                 500 to appCtx.getString(R.string.error_message_server)
             ), "")
