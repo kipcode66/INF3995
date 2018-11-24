@@ -25,4 +25,8 @@ void ElevationPlayerMp3EventVisitor::onUnmuteEvent(const UnmuteEvent& event) {
     m_logger.log("Got unmute event");
 }
 
+void ElevationPlayerMp3EventVisitor::onVolumeGetRequest(const VolumeGetRequest& event) {
+    m_logger.log("Got volume get request event");
+}
+
 } // namespace elevation

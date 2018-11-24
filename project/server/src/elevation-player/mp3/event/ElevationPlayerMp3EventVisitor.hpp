@@ -3,6 +3,9 @@
 
 #include <common/mp3/event/AbstractMp3EventVisitor.hpp>
 #include <common/mp3/event/VolumeChangeEvent.hpp>
+#include <common/mp3/event/MuteEvent.hpp>
+#include <common/mp3/event/UnmuteEvent.hpp>
+#include <common/mp3/event/VolumeGetRequest.hpp>
 #include <common/logger/Logger.hpp>
 
 #include "mp3/player/pulse/PulseVolume.hpp"
@@ -16,6 +19,7 @@ public:
     virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) override;
     virtual void onMuteEvent(const MuteEvent& event) override;
     virtual void onUnmuteEvent(const UnmuteEvent& event) override;
+    virtual void onVolumeGetRequest(const VolumeGetRequest& event) override;
 
 protected:
     Logger& m_logger;

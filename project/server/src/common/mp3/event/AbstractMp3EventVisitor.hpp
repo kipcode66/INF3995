@@ -7,12 +7,15 @@ namespace elevation {
 class VolumeChangeEvent;
 class MuteEvent;
 class UnmuteEvent;
+class VolumeGetRequest;
+// class VolumeGetResponse;
 
 class AbstractMp3EventVisitor {
 public:
     virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) = 0;
     virtual void onMuteEvent(const MuteEvent& event) = 0;
     virtual void onUnmuteEvent(const UnmuteEvent& event) = 0;
+    virtual void onVolumeGetRequest(const VolumeGetRequest& event) = 0;
 };
 
 } // namespace elevation
