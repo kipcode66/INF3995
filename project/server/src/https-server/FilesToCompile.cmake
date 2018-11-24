@@ -22,6 +22,8 @@ set(HTTPS_SERVER_CPP_SOURCES
     https/descriptions/AuthApi.cpp
     https/descriptions/FileManagementApi.cpp
     https/exception/AuthenticationFailureException.cpp
+    mp3/event/HttpsServerMp3EventVisitor.cpp
+    mp3/event/HttpsServerEventManager.cpp
     Admin.cpp
 )
 
@@ -39,6 +41,8 @@ set(HTTPS_SERVER_HEADER_SOURCES
     https/descriptions/AuthApi.hpp
     https/descriptions/FileManagementApi.hpp
     https/exception/AuthenticationFailureException.hpp
+    mp3/event/HttpsServerMp3EventVisitor.hpp
+    mp3/event/HttpsServerEventManager.hpp
     Admin.hpp
 )
 
