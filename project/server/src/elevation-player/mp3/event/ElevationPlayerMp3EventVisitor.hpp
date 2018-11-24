@@ -17,9 +17,10 @@ public:
     explicit ElevationPlayerMp3EventVisitor(Logger& logger);
 
     virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) override;
-    virtual void onMuteEvent(const MuteEvent& event) override;
-    virtual void onUnmuteEvent(const UnmuteEvent& event) override;
-    virtual void onVolumeGetRequest(const VolumeGetRequest& event) override;
+    virtual void onMuteEvent        (const MuteEvent&         event) override;
+    virtual void onUnmuteEvent      (const UnmuteEvent&       event) override;
+    virtual void onVolumeGetRequest (const VolumeGetRequest&  event) override;
+    virtual void onVolumeGetResponse(const VolumeGetResponse& event) override;
 
 protected:
     Logger& m_logger;
