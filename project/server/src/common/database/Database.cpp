@@ -246,8 +246,9 @@ std::vector<Song_t> Database::getAllSongs() const {
 }
 
 std::vector<Song_t> Database::getDailySongs() const {
-    return getSongsByQuery_(Query(
-        "SELECT rowid, title, artist, user_id, duration, path, deleted_by_admin" + Database::TODAY_QUERY)); 
+    std::string query("SELECT rowid, title, artist, user_id, duration, path, deleted_by_admin");
+    query += TODAY_QUERY;
+    return getSongsByQuery_(Query(query.c_str())); 
 }
 
 int Database::getStatisticsFromQuery_(const Query& query) const {
@@ -261,28 +262,32 @@ int Database::getStatisticsFromQuery_(const Query& query) const {
 }
 
 int Database::getDailyUserCount_() const {
-    return getStatisticsFromQuery_(Query("SELECT COUNT(DISTINCT user_id) FROM songs"
-        + Database::TODAY_QUERY));
+    std::string query("SELECT COUNT(DISTINCT user_id) FROM songs");
+    query += TODAY_QUERY;
+    return getStatisticsFromQuery_(query.c_str());
 }
 
 int Database::getDailySongCount_() const {
-    return getStatisticsFromQuery_(Query("SELECT COUNT(DISTINCT id) FROM songs"
-        + Database::TODAY_QUERY));
+    std::string query("SELECT COUNT(DISTINCT title) FROM songs");
+    query += TODAY_QUERY;
+    return getStatisticsFromQuery_(query.c_str());
 }
 
 int Database::getDeletedSongsCount_() const {
-    return getStatisticsFromQuery_(Query("SELECT COUNT(deleted_by_admin) FROM songs"
-        + Database::TODAY_QUERY));
+    std::string query("SELECT COUNT(title) FROM songs WHERE deleted_by_admin = 1 AND"
+    " timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');");
+    return getStatisticsFromQuery_(query.c_str());
 }
 
 int Database::getAverageSongDuration_() const {
-    return getStatisticsFromQuery_(Query("SELECT avg(duration) FROM songs"
-        + Database::TODAY_QUERY));
+    std::string query("SELECT avg(duration) FROM songs");
+    query += TODAY_QUERY;
+    return getStatisticsFromQuery_(query.c_str());
 }
 
 Statistics Database::getStatistics() const {
-    return Statistics(getDailyUserCount_(), getDailySongCount_(), 
-        getDeletedSongsCount_(), getAverageSongDuration_()));
+    return Statistics(getDailySongCount_(), getDailyUserCount_(), 
+        getDeletedSongsCount_(), getAverageSongDuration_());
 }
 
 void Database::createSong(const Song_t* song) {

@@ -2,13 +2,18 @@
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
 #include <pistache/description.h>
+#include <common/database/Database.hpp>
+#include "rapidjson/document.h"
+#include <pistache/serializer/rapidjson.h>
 
 #include "StatsApi.hpp"
 
 using namespace Pistache;
+using namespace elevation;
 
-
-StatsApi::StatsApi(Rest::Description& desc) {
+StatsApi::StatsApi(Rest::Description& desc, Logger& logger) 
+    :m_logger(logger)
+{
     auto superviseurPath = desc.path("/superviseur");
     superviseurPath
             .route(desc.get("/statistiques"))

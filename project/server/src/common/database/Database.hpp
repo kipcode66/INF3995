@@ -13,6 +13,8 @@
 #include "sqlite_error.hpp"
 #include "Query.hpp"
 
+#ifndef DATABASE_DATABASE_HPP
+#define DATABASE_DATABASE_HPP
 
 namespace elevation {
 

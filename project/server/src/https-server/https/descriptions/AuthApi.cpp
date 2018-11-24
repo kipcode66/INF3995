@@ -3,7 +3,6 @@
 #include <future>
 
 #include <database/Database.hpp>
-#include <common/logger/Logger.hpp>
 
 #include "misc/id_utils.hpp"
 #include "Admin.hpp"

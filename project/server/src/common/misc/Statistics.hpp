@@ -1,4 +1,3 @@
-#include "Statistics.hpp"
 #ifndef MISC_STATISTICS_HPP
 #define MISC_STATISTICS_HPP
 
@@ -12,7 +11,6 @@ public:
     int getUserCount() const;
     int getDeletedSongsCount() const;
     int getAverageDuration() const;
-    std::string generateStatisticsJson();
 
 public:
     int m_SongCount;
