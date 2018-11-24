@@ -14,6 +14,8 @@ import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
 import ca.polymtl.inf3990_01.client.utils.NetUtils
 import com.android.volley.*
 import com.google.gson.Gson
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import java.math.BigInteger
 import kotlin.coroutines.experimental.suspendCoroutine
@@ -65,8 +67,9 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
     }
 
     private var token: BigInteger = BigInteger.ZERO
-    private var tokenLock = Object()
+    private val tokenLock = Object()
     private var lastMessage: String? = null
+    private var updateJob: Deferred<NetworkResponse?>? = null
 
     init {
         launch {
@@ -78,32 +81,40 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
         return token
     }
 
-    @Synchronized suspend fun updateToken(): NetworkResponse? {
-        Log.d(TokenManagerService::class.java.simpleName, "Starting token update")
-        val canDisplayMessage = InitializationManager.hasInstance() && InitializationManager.getInstanceOrThrow().isInitialized
+    suspend fun updateToken(): NetworkResponse? {
+        if (updateJob != null) {
+            return updateJob?.await()
+        }
+        updateJob = async {
+            Log.d(TokenManagerService::class.java.simpleName, "Starting token update")
+            val canDisplayMessage = InitializationManager.hasInstance() && InitializationManager.getInstanceOrThrow().isInitialized
 
-        var oldToken = token // Dummy value to make Kotlin happy
-        synchronized(tokenLock) {
-            oldToken = token
-        }
-        val respData = fetchTokenAndWrapErrors()
-        val resp = respData.value
-        synchronized(tokenLock) {
-            token = resp.identificateur
-        }
-        if ((oldToken != token || resp.identificateur == BigInteger.ZERO) && lastMessage != resp.message) {
-            // TODO Send a signal to the Presenter to show popup with the response message.
-            // Temporarily, opening a Toast (a little message at the bottom of the screen)
-            if (canDisplayMessage || resp.identificateur != BigInteger.ZERO) {
-                Handler(appCtx.mainLooper).post {
-                    Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
-                    lastMessage = resp.message // Prevent to continuously show the same message (can be annoying)
+            var oldToken = token // Dummy value to make Kotlin happy
+            synchronized(tokenLock) {
+                oldToken = token
+            }
+            val respData = fetchTokenAndWrapErrors()
+            val resp = respData.value
+            synchronized(tokenLock) {
+                token = resp.identificateur
+            }
+            if ((oldToken != token || resp.identificateur == BigInteger.ZERO) && lastMessage != resp.message) {
+                // TODO Send a signal to the Presenter to show popup with the response message.
+                // Temporarily, opening a Toast (a little message at the bottom of the screen)
+                if (canDisplayMessage || resp.identificateur != BigInteger.ZERO) {
+                    Handler(appCtx.mainLooper).post {
+                        Toast.makeText(appCtx, resp.message, Toast.LENGTH_LONG).show()
+                        lastMessage = resp.message // Prevent to continuously show the same message (can be annoying)
+                    }
                 }
             }
+            Log.d(TokenManagerService::class.java.simpleName, "Token updated")
+            return@async respData.networkData
         }
-        Log.d(TokenManagerService::class.java.simpleName, "Token updated")
+        val ret = updateJob!!.await()
+        updateJob = null
 
-        return respData.networkData
+        return ret
     }
 
     private suspend fun fetchTokenAndWrapErrors(): ResponseData<GetTokenResponseData> {
@@ -137,7 +148,7 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
             val info = manager.connectionInfo
             val ip = NetUtils.translateIP(info.ipAddress)
             val mac = NetUtils.getMacAddress(appCtx.getString(R.string.interface_name_wifi))
-            val name = preferences.getString(PREFERENCE_KEY_USERNAME, "")!!
+            val name = preferences.getString(PREFERENCE_KEY_USERNAME, "")!!.trim()
             return suspendCoroutine { continuation ->
                 val request = RESTRequest(
                         Request.Method.POST,
@@ -160,7 +171,7 @@ class TokenManagerService private constructor(private val appCtx: Context, priva
                 // Set the request timeout
                 request.retryPolicy = DefaultRetryPolicy(
                         SOCKET_TIMEOUT_MS,
-                        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        0,
                         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
                 )
                 httpClient.addToRequestQueue(request)
