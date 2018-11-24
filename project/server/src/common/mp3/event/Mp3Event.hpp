@@ -18,6 +18,8 @@ public:
         VOLUME_CHANGE,
         MUTE,
         UNMUTE,
+        VOLUME_GET_REQUEST,
+        VOLUME_GET_RESPONSE,
         NUM_EVENTS
     };
 
