@@ -8,6 +8,7 @@ import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.event.LocalSongLoadEvent
 import ca.polymtl.inf3990_01.client.controller.event.LogoutRequestEvent
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
+import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.LocalSongs
 import ca.polymtl.inf3990_01.client.presentation.LocalSongAdapter
 import kotlinx.android.synthetic.main.content_local_song.*
@@ -20,6 +21,7 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
     private var songsList = LocalSongs()
     private val eventMgr: EventManager by inject()
     private val appStateService: AppStateService by inject()
+    private val dataProvider: DataProvider by inject()
     private val localSongAdapter: LocalSongAdapter by inject{ ParameterList(songsList, layoutInflater) }
 
     @Suppress("UNUSED_PARAMETER")
@@ -32,6 +34,19 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
         songs_list.adapter = localSongAdapter
         eventMgr.dispatchEvent(LocalSongLoadEvent(this))
         appStateService.addObserver(Observer(this::onAppStateChange))
+        content_queue_swipe.setColorSchemeResources(R.color.colorPrimary, R.color.colorPrimaryDark)
+        content_queue_swipe.setOnRefreshListener { eventMgr.dispatchEvent(LocalSongLoadEvent(this@LocalSongActivity)) }
+        dataProvider.observeLocalSongs(Observer(this::onLocalSongsChange))
+    }
+
+    private fun refresh() {
+        Handler(mainLooper).post {content_queue_swipe.isRefreshing = true}
+        eventMgr.dispatchEvent(LocalSongLoadEvent(this@LocalSongActivity))
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onLocalSongsChange(o: Observable, arg: Any?) {
+        Handler(mainLooper).post {content_queue_swipe.isRefreshing = false}
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -50,7 +65,7 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
         when (item.itemId) {
             R.id.action_reload -> {
                 songsList.clear()
-                eventMgr.dispatchEvent(LocalSongLoadEvent(this))
+                refresh()
                 return true
             }
             R.id.action_block_user -> {

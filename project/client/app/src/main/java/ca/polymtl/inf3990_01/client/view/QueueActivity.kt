@@ -44,6 +44,7 @@ class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawe
 
     private fun refresh() {
         Handler(mainLooper).post {content_queue_swipe.isRefreshing = true}
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     @Suppress("UNUSED_PARAMETER")
