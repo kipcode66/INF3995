@@ -27,8 +27,10 @@ ClientSocket::ClientSocket(ClientSocket&& that)
 ClientSocket::~ClientSocket() { }
 
 ClientSocket& ClientSocket::operator=(ClientSocket&& that) {
-    Socket::operator=(std::move(that));
-    m_portNum = that.m_portNum;
+    if (&that != this) {
+        Socket::operator=(std::move(that));
+        m_portNum = that.m_portNum;
+    }
     return *this;
 }
 

@@ -47,12 +47,14 @@ Socket::~Socket()
 }
 
 Socket& Socket::operator=(Socket&& that) {
-    if (m_fd != s_NO_FD) {
-        ::close(m_fd);
-    }
+    if (&that != this) {
+        if (m_fd != s_NO_FD) {
+            ::close(m_fd);
+        }
 
-    m_fd = that.m_fd;
-    that.m_fd = s_NO_FD;
+        m_fd = that.m_fd;
+        that.m_fd = s_NO_FD;
+    }
     return *this;
 }
 
