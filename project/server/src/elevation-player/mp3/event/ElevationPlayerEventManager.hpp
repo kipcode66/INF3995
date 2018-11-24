@@ -9,10 +9,10 @@
 
 namespace elevation {
 
-class EventManager {
+class ElevationPlayerEventManager {
 public:
-    explicit EventManager(uint16_t port, Logger& logger);
-    virtual ~EventManager();
+    explicit ElevationPlayerEventManager(uint16_t port, Logger& logger);
+    virtual ~ElevationPlayerEventManager();
 
 protected:
     static void accepterThread_(Mp3EventListenerSocket listener, Logger& logger);
