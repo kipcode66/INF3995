@@ -49,7 +49,7 @@ void EventManager::connectionThread_(std::unique_ptr<Mp3EventSocket> eventSocket
             eventSocket->readEvent()->acceptVisitor(visitor);
         }
         catch (const std::exception& e) {
-            logger.err(std::string("Got C++ exception: ") + e.what());
+            logger.err(std::string("EventManager got C++ exception: ") + e.what());
         }
     }
 }

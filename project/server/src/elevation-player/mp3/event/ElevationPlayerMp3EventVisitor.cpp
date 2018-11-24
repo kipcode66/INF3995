@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <common/mp3/event/exception/UnexpectedEventException.hpp>
+
 namespace elevation {
 
 ElevationPlayerMp3EventVisitor::ElevationPlayerMp3EventVisitor(Logger& logger)
@@ -31,8 +33,8 @@ void ElevationPlayerMp3EventVisitor::onVolumeGetRequest(const VolumeGetRequest& 
 }
 
 void ElevationPlayerMp3EventVisitor::onVolumeGetResponse(const VolumeGetResponse& event) {
-    // TODO Throw an exception
     m_logger.err("Got unexpected volume get response event");
+    throw UnexpectedEventException("VolumeGetResponse");
 }
 
 } // namespace elevation
