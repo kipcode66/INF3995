@@ -394,8 +394,7 @@ bool Database::getBlacklistByMAC(const std::string& mac) const {
         "WHERE mac = '%q';",
         mac.c_str())};
     if(stmt.step()) {
-        bool tmp = stmt.getColumnInt(0);
-        return (tmp == Database::IS_BLACKLISTED);
+        return (stmt.getColumnInt(0) == Database::IS_BLACKLISTED);
     } else {
         throw NoSuchUserException();
     }
