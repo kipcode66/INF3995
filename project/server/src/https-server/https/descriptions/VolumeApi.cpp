@@ -64,7 +64,7 @@ void VolumeApi::POST_volumeAssigner_ (const Rest::Request& request,
     try {
         if (isAdminAuthenticated_(request, response)) {
             VolumeChangeEvent event{newVolume};
-            m_playerEventSocket.write(event);
+            m_playerEventSocket.writeEvent(event);
             response.send(Http::Code::Ok, "Volume change commiting...");
         }
     }
@@ -79,7 +79,7 @@ void VolumeApi::POST_sourdineActiver_(const Rest::Request& request,
     try {
         if (isAdminAuthenticated_(request, response)) {
             MuteEvent event;
-            m_playerEventSocket.write(event);
+            m_playerEventSocket.writeEvent(event);
             response.send(Http::Code::Ok, "Mute commiting...");
         }
     }
@@ -94,7 +94,7 @@ void VolumeApi::POST_sourdineDesactiver_(const Rest::Request& request,
     try {
         if (isAdminAuthenticated_(request, response)) {
             UnmuteEvent event;
-            m_playerEventSocket.write(event);
+            m_playerEventSocket.writeEvent(event);
             response.send(Http::Code::Ok, "Unmute commiting...");
         }
     }

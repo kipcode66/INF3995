@@ -9,7 +9,7 @@
 
 namespace elevation {
 
-class Mp3EventSocket : public Socket {
+class Mp3EventSocket : public virtual Socket {
 public:
     /**
      * @brief Makes an Mp3EventSocket from an accepted Socket.
@@ -23,7 +23,12 @@ public:
     Mp3EventSocket& operator=(const Mp3EventSocket&) = delete;
     Mp3EventSocket& operator=(Mp3EventSocket&& that);
 
+    void writeEvent(const Mp3Event& event);
     std::unique_ptr<Mp3Event> readEvent();
+
+protected:
+    explicit Mp3EventSocket(); // Use by subclasses to avoid having to move
+                               // the Socket base class which was virtual-intialized.
 
 protected:
     Mp3EventPacketReader m_packetReader;
