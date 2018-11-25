@@ -2,7 +2,8 @@
 #include <inttypes.h>
 
 #include <common/args/RestServerArgsParser.hpp>
-#include "https-server/https/SecureRestApi.hpp"
+
+#include "https/SecureRestApi.hpp"
 
 int main(int argc, char** argv) {
     std::vector<std::string> args;
