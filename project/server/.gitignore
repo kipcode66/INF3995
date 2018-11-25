@@ -9,3 +9,5 @@ tags
 /lib/
 /logs/
 /cache/
+__pycache__
+

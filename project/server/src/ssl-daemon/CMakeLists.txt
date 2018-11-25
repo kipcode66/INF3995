@@ -18,7 +18,7 @@ include_directories(                       # Equivalent to the -I flag in g++
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 link_directories("${DEPS_DIR}/lib")        # Equivalent to the -L flag in g++
-link_libraries(ssl crypto atomic)          # Equivalent to the -l flag in g++
+link_libraries(ssl crypto atomic common)   # Equivalent to the -l flag in g++
 
 # Create targets
 add_executable(ssl-daemon     main.cpp "${SSL_DAEMON_HEADER_SOURCES}")

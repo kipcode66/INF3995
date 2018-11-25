@@ -25,6 +25,9 @@
     <string name="error_message_bad_request">Erreur de Requête</string>
     <string name="error_message_unknown">Erreur Inconnue</string>
     <string name="error_message_forbidden">Accès Refusé</string>
+    <string name="error_message_unknown_user">utilisateur non authentifié</string>
+    <string name="error_message_access">accès refusé</string>
+    <string name="error_message_deletion_refused">la chanson n’appartient pas à l’usager ou mauvaise chanson</string>
     <string name="desc_message_remove_song">Demande au serveur de retier une chanson</string>
     <string name="error_message_no_ip">&lt;aucun ip&gt;</string>
     <string name="error_message_no_mac">&lt;aucun MAC&gt;</string>
@@ -35,6 +38,16 @@
     <string name="song_queue_item_sent_by">Proposée par: %1$s</string>
     <string name="client_name_default">Vous</string>
     <string name="local_song_sendButton_label_send">Envoyer</string>
-    <string name="local_song_sendButton_label_sending">Envoi...</string>
+    <string name="local_song_sendButton_label_sending">Envoi…</string>
     <string name="local_song_sendButton_label_sent">Envoyée</string>
+    <string name="login_hint_username">Nom</string>
+    <string name="login_hint_password">Mot de passe</string>
+    <string name="login_submit_text">Connexion</string>
+    <string name="login_dialog_title">Connexion</string>
+    <string name="action_show_login">Connexion Administrateur</string>
+    <string name="action_disconnect">Déconnexion</string>
+    <string name="error_message_unauthenticated">Non-Authentifié</string>
+    <string name="black_list_item_button_desc">Débloquer l\'utilisateur</string>
+    <string name="song_item_duration_format">Durée: %1$s</string>
+    <string name="error_message_song_not_in_queue">La chanson n\'est plus dans la file</string>
 </resources>

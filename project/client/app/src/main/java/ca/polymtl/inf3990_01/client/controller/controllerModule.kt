@@ -6,9 +6,10 @@ import org.koin.dsl.module.module
 
 val controllerModule = module(createOnStart = true) {
     single(createOnStart = true) { InitializationManager.getInstance(get(), get(), get()) }
+    single(createOnStart = true) { VolumeController(get(), get(), get()) }
     single { ActiveActivityTrackingService(get()) }
     single { EventManager.getInstance() }
-    single { AppStateService() }
-    single { AppController(get(), get(), get(), get(), get(), get()) }
-    single { LocalSongController(get(), get(), get()) }
+    single { AppStateService(get()) }
+    single { AppController(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    single { LocalSongController(get(), get()) }
 }

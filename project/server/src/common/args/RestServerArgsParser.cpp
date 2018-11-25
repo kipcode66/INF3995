@@ -30,6 +30,14 @@ RestServerArgsParser::RestServerArgsParser(const std::vector<std::string>& args)
                 throw std::invalid_argument("Missing argument after -p.");
             }
         }
+        else if (arg == "-l" || arg == "--player-port") {
+            try {
+                m_playerPort = parsePort_(args.at(i + 1));
+                ++i;
+            } catch (std::out_of_range& e) {
+                throw std::invalid_argument("Missing argument after -l.");
+            }
+        }
         else if (arg == "-h" || arg == "--help") {
             usage_();
             exit(0);
@@ -46,7 +54,7 @@ uint16_t RestServerArgsParser::parsePort_(const std::string& portString) const {
     iStrStrm >> portId;
 
     if (portId == 0 || portId > UINT32_MAX) {
-        throw std::invalid_argument("Cannot bind server to port \"" + portString + "\"");
+        throw std::invalid_argument("Cannot convert \"" + portString + "\" to port number");
     }
     else {
         return portId;
@@ -56,12 +64,13 @@ uint16_t RestServerArgsParser::parsePort_(const std::string& portString) const {
 void RestServerArgsParser::usage_() const {
     std::cerr <<
         "USAGE:\n"
-        "    http-server --help | -h\n"
-        "    http-server <PORT_OPTION> <CACHE_PATH_OPTION>\n"
+        "    http[s]-server --help | -h\n"
+        "    http[s]-server <PORT_OPTION> <PLAYER_PORT_OPTION> <CACHE_PATH_OPTION>\n"
         "\n"
         "OPTIONS:\n"
         "    -h | --help               Print this message and exit.\n"
         "    -p | --port <PORT>        Port to listen on.\n"
+        "    -l | -player-port <PORT>  Port to connect to the Elevation Player on."
         "    -c | --cache-path <PATH>  Path to the cache directory, where the MP3 songs are.";
 }
 

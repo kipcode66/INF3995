@@ -6,7 +6,6 @@ import ca.polymtl.inf3990_01.client.controller.event.AppInitEvent
 import ca.polymtl.inf3990_01.client.controller.event.AppStartEvent
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.joinChildren
 import kotlinx.coroutines.experimental.launch
 
@@ -64,7 +63,7 @@ class InitializationManager private constructor(
         }
     }
     @Volatile private var initState = InitState.NOT_INITIALIZED
-    private val preferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+    private val preferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key == CLIENT_NAME_KEY) {
             launch {
                 tokenService.updateToken()

@@ -11,6 +11,9 @@ include("${CMAKE_SCRIPTS_DIR}/FilesToCompileFunctions.cmake")
 # All .cpp, .cc, .c files EXCEPT main.cpp
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTP_SERVER_CPP_SOURCES
+    http/exception/BadRequestException.cpp
+    http/exception/MissingTokenException.cpp
+    http/exception/InvalidTokenException.cpp
     http/RestApi.cpp
 )
 
@@ -21,6 +24,9 @@ set(HTTP_SERVER_CPP_SOURCES
 # All .h, .hpp, .hh files
 # Use quotes "" if a file contains a space (although not recommended)
 set(HTTP_SERVER_HEADER_SOURCES
+    http/exception/BadRequestException.hpp
+    http/exception/MissingTokenException.hpp
+    http/exception/InvalidTokenException.hpp
     http/RestApi.hpp
 )
 

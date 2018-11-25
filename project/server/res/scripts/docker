@@ -3,8 +3,6 @@
 THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SCRIPTS_DIR="${THIS_SCRIPT_DIR}"
 source "${SCRIPTS_DIR}/common" # Add the functions in 'common'
-GIT_DIR="${SCRIPTS_DIR}/../../../.."
-SERVER_DIR="${GIT_DIR}/project/server"
 DOCKER_DIR="${SERVER_DIR}/res/docker"
 CONTAINER_TAG=elevation
 

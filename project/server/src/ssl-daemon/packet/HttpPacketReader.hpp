@@ -4,7 +4,7 @@
 #include <string>
 #include <regex>
 
-#include "communication/Socket.hpp"
+#include <common/os/Socket.hpp>
 
 namespace elevation {
 namespace daemon {

@@ -1,5 +1,7 @@
 package ca.polymtl.inf3990_01.client.model
 
+import java.math.BigInteger
+
 open class Song(
     val title:String,
     val authorName:String,
@@ -8,5 +10,5 @@ open class Song(
     val sentBy:String?,
     val ip: String? = null,
     val mac: String? = null,
-    val ownerId: Int? = null
+    val ownerId: BigInteger? = null
 )

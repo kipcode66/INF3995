@@ -3,27 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_queue"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/title_activity_queue" />
-        <item
-            android:id="@+id/nav_local_song"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/title_activity_local_song" />
-        <item
-            android:id="@+id/nav_statistics"
-            android:icon="@android:drawable/ic_menu_info_details"
-            android:title="@string/title_activity_statistics" />
-        <item
-            android:id="@+id/nav_blacklist"
-            android:icon="@android:drawable/ic_menu_close_clear_cancel"
-            android:title="@string/title_activity_black_list" />
-        <item
-            android:id="@+id/nav_settings"
-            android:icon="@android:drawable/ic_menu_preferences"
-            android:title="@string/title_activity_setting" />
-    </group>
+    <item
+        android:id="@+id/nav_local_song"
+        android:icon="@drawable/ic_menu_gallery"
+        android:title="@string/title_activity_local_song" />
+    <item
+        android:id="@+id/nav_queue"
+        android:icon="@drawable/ic_menu_gallery"
+        android:title="@string/title_activity_queue" />
+    <item
+        android:id="@+id/nav_statistics"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="@string/title_activity_statistics" />
+    <item
+        android:id="@+id/nav_blacklist"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        android:title="@string/title_activity_black_list" />
+    <item
+        android:id="@+id/nav_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/title_activity_setting" />
 
 </menu>

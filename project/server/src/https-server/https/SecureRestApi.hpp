@@ -7,29 +7,30 @@
 #include <pistache/description.h>
 
 #include "http-server/http/RestApi.hpp"
+#include "descriptions/VolumeApi.hpp"
+#include "descriptions/BlacklistApi.hpp"
+#include "descriptions/StatsApi.hpp"
+#include "descriptions/FileManagementApi.hpp"
+#include "descriptions/AuthApi.hpp"
 
 #include <common/logger/Logger.hpp>
 
-using namespace Pistache;
 namespace elevation {
 
 class SecureRestApi : public RestApi {
-private:
-    static constexpr const char* ADMIN_USERNAME = "admin";
 public:
-    SecureRestApi(Address addr, Logger& logger, FileCache&);
+    SecureRestApi(Pistache::Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket);
     void init();
 
-private:
-    void createSecureDescription_();
-    void getSuperviseurFile_(const Rest::Request&, Http::ResponseWriter);
-    void superviseurLogin_(const Rest::Request&, Http::ResponseWriter);
-    void superviseurLogout_(const Rest::Request&, Http::ResponseWriter);
-
-private:
+protected:
     Logger& m_logger;
+    VolumeApi         m_volumeApi;
+    BlacklistApi      m_blacklistApi;
+    StatsApi          m_statsApi;
+    FileManagementApi m_fileManagementApi;
+    AuthApi           m_authApi;
 };
 
 } // namespace elevation
+#endif // !HTTPS_RESTAPI_HPP
 
-#endif // HTTPS_RESTAPI_HPP

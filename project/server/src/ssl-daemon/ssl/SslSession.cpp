@@ -11,7 +11,7 @@
 #include <cstring>
 #include <string>
 
-#include "communication/exception/SocketClosedException.hpp"
+#include <common/os/exception/SocketClosedException.hpp>
 #include "elevation/daemon/Config.hpp"
 
 namespace elevation {

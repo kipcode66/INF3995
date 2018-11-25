@@ -13,6 +13,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteX="0dp">
         <ListView
             android:id="@+id/song_queue"
