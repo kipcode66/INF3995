@@ -29,30 +29,19 @@ BlacklistApi::BlacklistApi(Pistache::Rest::Description& desc, Logger& logger)
         .bind(&BlacklistApi::getSuperviseurListenoire_, this)
         .hide();
 }
+
 void BlacklistApi::getSuperviseurListenoire_(const Rest::Request& request,
                                              Http::ResponseWriter response) {
     std::thread([this](const Rest::Request& request, Http::ResponseWriter response) {
         Database* db = Database::instance();
         std::ostringstream logMsg;
-        uint32_t token;
         try {
-            auto t = request.headers().getRaw("X-Auth-Token");
-            token = std::stoul(t.value());
-            std::cerr << token << std::endl;
-        } catch (std::runtime_error& e) {
-            response.send(Http::Code::Bad_Request, std::string("Malformed Request - ").append(e.what()));
-        }
-        if (token == 0) {
-            logMsg << "Could not retrieve the blacklist. Received invalid token.";
-            m_logger.err(logMsg.str());
-            response.send(Http::Code::Forbidden, "Invalid token");
-            return;
-        }
-
-        if (!db->isAdminConnected(token)) {
-            logMsg << "Could not retrieve the blacklist. Admin is not connected with token \"" << token << "\".";
-            m_logger.err(logMsg.str());
-            response.send(Http::Code::Unauthorized, "Admin not connected");
+            if(!checkIfAdmin_(request)) {
+                response.send(Http::Code::Unauthorized, "Admin not connected");
+                return;
+            }
+        } catch (const std::exception& e) {
+            response.send(Http::Code::Bad_Request, std::string("Malformed request - ").append(e.what()));
             return;
         }
         std::vector<User_t> blackList = db->getBlackList();
@@ -62,7 +51,7 @@ void BlacklistApi::getSuperviseurListenoire_(const Rest::Request& request,
             resp << generateUser_(user) << (&blackList.back() != &user ? ",\n" : "\n");
         }
         resp << "]\n}\n";
-        logMsg << "The blacklist was successfuly sent to admin with id \"" << token << "\"";
+        logMsg << "The blacklist was successfuly sent to admin";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
     }, std::move(request), std::move(response)).detach();
@@ -97,15 +86,12 @@ bool BlacklistApi::checkIfAdmin_(const Rest::Request& request) {
     if (token == 0) {
         logMsg << "Could not retrieve the blacklist. Received invalid token.";
         m_logger.err(logMsg.str());
-        /* response.send(Http::Code::Forbidden, "Invalid token"); */
-        /* return; */
         throw std::runtime_error("Invalid Token");
     }
     Database* db = Database::instance();
     if (!db->isAdminConnected(token)) {
         logMsg << "Could not retrieve the blacklist. Admin is not connected with token \"" << token << "\".";
         m_logger.err(logMsg.str());
-        /* response.send(Http::Code::Unauthorized, "Admin not connected"); */
         return false;
     } else {
         return true;
