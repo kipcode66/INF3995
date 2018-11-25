@@ -13,7 +13,7 @@
 using namespace Pistache;
 using namespace elevation;
 
-StatsApi::StatsApi(Rest::Description& desc, Logger& logger) 
+StatsApi::StatsApi(Rest::Description& desc, Logger& logger)
     :m_logger(logger)
 {
     auto superviseurPath = desc.path("/superviseur");

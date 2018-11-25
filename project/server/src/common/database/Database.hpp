@@ -38,7 +38,7 @@ public:
     User_t getUserById      (uint32_t) const;
     void   createUser       (const User_t* user);
     void   connectUser      (const struct User_t* user);
-    bool   isUserConnected  (const uint32_t userId) const; 
+    bool   isUserConnected  (const uint32_t userId) const;
     void   updateTimestamp  (const User_t* user);
     void   setAdminPassword (const std::string& password);
     void   connectAdmin     (const std::string& login, uint32_t adminId);
@@ -52,7 +52,7 @@ public:
     Song_t              getSongByPath(const std::string&) const;
     std::vector<Song_t> getSongsByUser(int userId) const;
     std::vector<Song_t> getAllSongs() const;
-    
+
     Statistics          getStatistics() const;
 
     void                createSong(const Song_t*);
@@ -78,13 +78,13 @@ protected:
     User_t getUserByQuery_(const Query&) const;
     std::vector<User_t> getUsersByQuery_(const Query&) const;
     User_t getUserFromStatement_(const Statement& stmt) const;
-    
+
     int getDailyUserCount_() const;
     int getDailySongCount_() const;
     int getDeletedSongsCount_() const;
     int getAverageSongDuration_() const;
     int getStatisticsFromQuery_(const Query&) const;
-    
+
     void executeQuery_(const Query& query);
 
     sqlite3* m_db = 0;

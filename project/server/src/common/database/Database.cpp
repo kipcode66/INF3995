@@ -280,7 +280,7 @@ int Database::getAverageSongDuration_() const {
 }
 
 Statistics Database::getStatistics() const {
-    return Statistics(getDailySongCount_(), getDailyUserCount_(), 
+    return Statistics(getDailySongCount_(), getDailyUserCount_(),
         getDeletedSongsCount_(), getAverageSongDuration_());
 }
 
