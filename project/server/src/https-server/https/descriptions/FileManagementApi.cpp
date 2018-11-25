@@ -93,11 +93,11 @@ void FileManagementApi::deleteSuperviseurChanson_(const Rest::Request& request,
                 Admin requestAdmin = Admin::getAdminDataFromRequestToken(request);
                 Song_t song = db->getSongById(songId);
 
+                std::ostringstream logMessage;
                 if (song.id != 0) {
                     db->removeSongByAdmin(songId);
                     m_cache.deleteFile(song.path);
 
-                    std::ostringstream logMessage;
                     logMessage << "{ Administrator }"
                                << " Removed MP3 \"" << song.title
                                << "\" of length " << song.duration;
@@ -106,7 +106,6 @@ void FileManagementApi::deleteSuperviseurChanson_(const Rest::Request& request,
                     return;
                 }
                 else {
-                    std::ostringstream logMessage;
                     logMessage << "{ Administrator }"
                                << " tried to remove nonexistant song of id "
                                << songId;
