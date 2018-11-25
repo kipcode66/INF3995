@@ -70,10 +70,10 @@ User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& reque
 }
 
 RestApi::RestApi(Pistache::Address addr, Logger& logger, FileCache& cache)
-: m_httpEndpoint(std::make_shared<Pistache::Http::Endpoint>(addr))
-, m_desc("Rest API", "1.0")
-, m_logger(logger)
-, m_cache(cache)
+    : m_httpEndpoint(std::make_shared<Pistache::Http::Endpoint>(addr))
+    , m_desc("Rest API", "1.0")
+    , m_logger(logger)
+    , m_cache(cache)
 {
     Database::instance();
 }
