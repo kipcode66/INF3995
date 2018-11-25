@@ -42,8 +42,8 @@ User_t createdUser = {
 BOOST_AUTO_TEST_CASE(getUserByMac) {
     User_t user = { 0 };
     DatabaseTest* db = DatabaseTest::instance();
-    user = db->getUserByMac("11:22:33:44:55:66");
-    BOOST_CHECK_EQUAL(user.userId, 123456789);
+    user = db->getUserByMac("11:22:33:44:55:61");
+    BOOST_CHECK_EQUAL(user.userId, 123456781);
     BOOST_CHECK_EQUAL(user.name, "othman");
     BOOST_CHECK_EQUAL(user.ip, "192.168.0.1");
 }
@@ -51,8 +51,8 @@ BOOST_AUTO_TEST_CASE(getUserByMac) {
 BOOST_AUTO_TEST_CASE(getUserById) {
     User_t user = { 0 };
     DatabaseTest* db = DatabaseTest::instance();
-    user = db->getUserById(123456789);
-    BOOST_CHECK_EQUAL(user.mac, "11:22:33:44:55:66");
+    user = db->getUserById(123456781);
+    BOOST_CHECK_EQUAL(user.mac, "11:22:33:44:55:61");
     BOOST_CHECK_EQUAL(user.name, "othman");
     BOOST_CHECK_EQUAL(user.ip, "192.168.0.1");
 }
@@ -89,20 +89,40 @@ BOOST_AUTO_TEST_CASE(connectUser) {
 
 BOOST_AUTO_TEST_CASE(connectAdmin) {
     DatabaseTest* db = DatabaseTest::instance();
-    db->connectAdmin("admin", 123456789);
+    db->connectAdmin("admin", 123456781);
 
-    bool connectionStatus = db->isAdminConnected(123456789);
+    bool connectionStatus = db->isAdminConnected(123456781);
 
     BOOST_CHECK_EQUAL(connectionStatus, true);
 }
 
 BOOST_AUTO_TEST_CASE(disconnectAdmin) {
     DatabaseTest* db = DatabaseTest::instance();
-    db->disconnectAdmin(123456789);
+    db->disconnectAdmin(123456781);
 
-    bool connectionStatus = db->isAdminConnected(123456789);
+    bool connectionStatus = db->isAdminConnected(123456781);
 
     BOOST_CHECK_EQUAL(connectionStatus, false);
+}
+
+BOOST_AUTO_TEST_CASE(getBlackList) {
+    const int numberOfBlacklistedUSers = 3;
+    DatabaseTest* db = DatabaseTest::instance();
+    std::vector<User_t> users = db->getBlackList();
+
+    BOOST_CHECK_EQUAL(users.size(), numberOfBlacklistedUSers);
+    BOOST_CHECK_EQUAL(users[0].userId, 123456782);
+    BOOST_CHECK_EQUAL(users[0].mac, "11:22:33:44:55:62");
+    BOOST_CHECK_EQUAL(users[0].name, "othmane");
+    BOOST_CHECK_EQUAL(users[0].ip, "192.168.0.2");
+    BOOST_CHECK_EQUAL(users[1].userId, 123456783);
+    BOOST_CHECK_EQUAL(users[1].mac, "11:22:33:44:55:63");
+    BOOST_CHECK_EQUAL(users[1].name, "othmanee");
+    BOOST_CHECK_EQUAL(users[1].ip, "192.168.0.3");
+    BOOST_CHECK_EQUAL(users[2].userId, 123456784);
+    BOOST_CHECK_EQUAL(users[2].mac, "11:22:33:44:55:64");
+    BOOST_CHECK_EQUAL(users[2].name, "othmaneee");
+    BOOST_CHECK_EQUAL(users[2].ip, "192.168.0.4");
 }
 
 } // namespace elevation

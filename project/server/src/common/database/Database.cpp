@@ -48,7 +48,7 @@ void Database::executeQuery_(const Query& query) {
 }
 
 User_t Database::getUserFromStatement_(const Statement& stmt) const {
-    User_t user;
+    User_t user = { 0 };
     user.userId = stmt.getColumnInt(0);
     strncpy(user.ip, stmt.getColumnText(1).c_str(), User_t::IP_LENGTH);
     strncpy(user.name, stmt.getColumnText(2).c_str(), User_t::NAME_LENGTH);
@@ -56,8 +56,20 @@ User_t Database::getUserFromStatement_(const Statement& stmt) const {
     return user;
 }
 
+Song_t Database::getSongFromStatement_(const Statement& stmt) const {
+    Song_t song = { 0 };
+        song.id = stmt.getColumnInt(0);
+        strncpy(song.title, stmt.getColumnText(1).c_str(), Song_t::TITLE_LENGTH);
+        strncpy(song.artist, stmt.getColumnText(2).c_str(), Song_t::TITLE_LENGTH);
+        song.userId = stmt.getColumnInt(3);
+        song.duration = stmt.getColumnInt(4);
+        strncpy(song.path, stmt.getColumnText(5).c_str(), Song_t::PATH_LENGTH);
+        song.deletedByAdmin = stmt.getColumnBool(6);
+    return song;
+}
+
 User_t Database::getUserByQuery_(const Query& query) const {
-    User_t user;
+    User_t user = { 0 };
     Statement stmt{m_db, query};
     if (stmt.step()) {
         user = getUserFromStatement_(stmt);
@@ -115,17 +127,6 @@ bool Database::isUserConnected(const uint32_t userId) const {
         return (stmt.getColumnDouble(0) > 0);
     }
     return false;
-}
-
-int Database::getUserConnectionStatus(uint32_t userId) const {
-    Statement stmt{m_db, Query(
-        "SELECT isConnected FROM userConnection WHERE (user_id = %u);",
-        userId)};
-
-    if (stmt.step()) {
-        return stmt.getColumnInt(0);
-    }
-    return 0;
 }
 
 void Database::setAdminPassword(const std::string& password) {
@@ -189,16 +190,11 @@ std::vector<User_t> Database::getBlackList() {
 }
 
 Song_t Database::getSongByQuery_(const Query& query) const {
-    Song_t song = {};
+    Song_t song = { 0 };
     Statement stmt{m_db, query};
 
     if (stmt.step()) {
-        song.id = stmt.getColumnInt(0);
-        strncpy(song.title, stmt.getColumnText(1).c_str(), Song_t::TITLE_LENGTH);
-        strncpy(song.artist, stmt.getColumnText(2).c_str(), Song_t::ARTIST_LENGTH);
-        song.userId = stmt.getColumnInt(3);
-        song.duration = stmt.getColumnInt(4);
-        strncpy(song.path, stmt.getColumnText(5).c_str(), Song_t::PATH_LENGTH);
+        song = getSongFromStatement_(stmt);
     }
 
     return song;
@@ -231,13 +227,7 @@ std::vector<Song_t> Database::getSongsByQuery_(const Query& query) const {
     Statement stmt{m_db, query};
 
     while (stmt.step()) {
-        song_buffer.id = stmt.getColumnInt(0);
-        strncpy(song_buffer.title, stmt.getColumnText(1).c_str(), Song_t::TITLE_LENGTH);
-        strncpy(song_buffer.artist, stmt.getColumnText(2).c_str(), Song_t::TITLE_LENGTH);
-        song_buffer.userId = stmt.getColumnInt(3);
-        song_buffer.duration = stmt.getColumnInt(4);
-        strncpy(song_buffer.path, stmt.getColumnText(5).c_str(), Song_t::PATH_LENGTH);
-
+        song_buffer = getSongFromStatement_(stmt);
         songs.push_back(song_buffer);
     }
 
@@ -255,6 +245,45 @@ std::vector<Song_t> Database::getAllSongs() const {
     return getSongsByQuery_(Query(
         "SELECT rowid, title, artist, user_id, duration, path, song_order "
         "FROM songs ORDER BY song_order ASC;"));
+}
+
+int Database::getStatisticsFromQuery_(const Query& query) const {
+    int statistic;
+    Statement stmt{m_db, query};
+
+    if (stmt.step()) {
+        statistic = stmt.getColumnInt(0);
+    }
+    return statistic;
+}
+
+int Database::getDailyUserCount_() const {
+    std::string query("SELECT COUNT(DISTINCT user_id) FROM songs");
+    query += TODAY_QUERY;
+    return getStatisticsFromQuery_(query.c_str());
+}
+
+int Database::getDailySongCount_() const {
+    std::string query("SELECT COUNT(DISTINCT title) FROM songs");
+    query += TODAY_QUERY;
+    return getStatisticsFromQuery_(query.c_str());
+}
+
+int Database::getDeletedSongsCount_() const {
+    std::string query("SELECT COUNT(title) FROM songs WHERE deleted_by_admin = 1 AND"
+    " timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');");
+    return getStatisticsFromQuery_(query.c_str());
+}
+
+int Database::getAverageSongDuration_() const {
+    std::string query("SELECT avg(duration) FROM songs");
+    query += TODAY_QUERY;
+    return getStatisticsFromQuery_(query.c_str());
+}
+
+Statistics Database::getStatistics() const {
+    return Statistics(getDailySongCount_(), getDailyUserCount_(),
+        getDeletedSongsCount_(), getAverageSongDuration_());
 }
 
 void Database::createSong(const Song_t* song) {
