@@ -1,3 +1,6 @@
+#include <thread>
+#include <future>
+
 #include "FileManagementApi.hpp"
 #include "Admin.hpp"
 
@@ -10,9 +13,12 @@
 #include "https/exception/AuthenticationFailureException.hpp"
 
 using namespace Pistache;
+using namespace elevation;
 
-FileManagementApi::FileManagementApi(Rest::Description& desc, Logger& logger)
+
+FileManagementApi::FileManagementApi(Rest::Description& desc, Logger& logger, FileCache& cache)
     : m_logger(logger)
+    , m_cache(cache)
 {
     auto superviseurPath = desc.path("/superviseur");
     superviseurPath
@@ -80,7 +86,6 @@ void FileManagementApi::deleteSuperviseurChanson_(const Rest::Request& request,
             catch (const std::runtime_error& e) {
                 response.send(Pistache::Http::Code::Bad_Request, e.what());
             }
-
             try {
                 Song_t song = db->getSongById(songId);
 
