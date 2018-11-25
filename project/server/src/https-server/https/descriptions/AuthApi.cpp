@@ -45,8 +45,8 @@ void AuthApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWrit
                 throw AuthenticationFailureException{admin.getUsername(), admin.getMotDePasse()};
             }
             Database* db = Database::instance();
+            std::ostringstream logMsg;
             if (db->isAdminConnected(admin.getId())) {
-                std::ostringstream logMsg;
                 logMsg << "Admin with token \"" << admin.getId() << "\" is already connected. Applying idempotent behaviour and return OK.";
                 m_logger.log(logMsg.str());
                 response.send(Http::Code::Ok, "Already connected");
