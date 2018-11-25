@@ -78,18 +78,11 @@ std::string BlacklistApi::generateUser_(const User_t& user) {
 }
 
 bool BlacklistApi::checkIfAdmin_(const Rest::Request& request) {
-    uint32_t token;
     std::ostringstream logMsg;
 
-    auto t = request.headers().getRaw("X-Auth-Token");
-    token = std::stoul(t.value());
-    if (token == 0) {
-        logMsg << "Could not retrieve the blacklist. Received invalid token.";
-        m_logger.err(logMsg.str());
-        throw std::runtime_error("Invalid Token");
-    }
+    uint32_t token = std::stoul(request.headers().getRaw("X-Auth-Token").value());
     Database* db = Database::instance();
-    if (!db->isAdminConnected(token)) {
+    if (token != 0 && !db->isAdminConnected(token)) {
         logMsg << "Could not retrieve the blacklist. Admin is not connected with token \"" << token << "\".";
         m_logger.err(logMsg.str());
         return false;
