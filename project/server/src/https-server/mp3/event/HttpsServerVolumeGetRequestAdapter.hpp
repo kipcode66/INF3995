@@ -26,7 +26,12 @@ public:
 
 public:
     explicit HttpsServerVolumeGetRequestAdapter(Logger& logger, std::shared_ptr<Mp3EventSocket> socket, std::shared_ptr<HttpsServerMp3EventVisitor> eventVisitor);
+    HttpsServerVolumeGetRequestAdapter(const HttpsServerVolumeGetRequestAdapter&) = delete;
+    HttpsServerVolumeGetRequestAdapter(HttpsServerVolumeGetRequestAdapter&&) = delete;
     virtual ~HttpsServerVolumeGetRequestAdapter() = default;
+
+    HttpsServerVolumeGetRequestAdapter& operator=(const HttpsServerVolumeGetRequestAdapter&) = delete;
+    HttpsServerVolumeGetRequestAdapter& operator=(HttpsServerVolumeGetRequestAdapter&&) = delete;
 
     VolumeData_t getVolumeData();
 
