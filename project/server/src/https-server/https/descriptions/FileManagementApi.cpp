@@ -80,13 +80,17 @@ void FileManagementApi::deleteSuperviseurChanson_(const Rest::Request& request,
         [this](const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
             Database* db = Database::instance();
             uint32_t songId;
+            std::string errorMessage;
+            Pistache::Http::Code errorCode;
             try {
                 songId = request.param(":no").as<uint32_t>();
             }
             catch (const std::runtime_error& e) {
                 response.send(Pistache::Http::Code::Bad_Request, e.what());
+                return;
             }
             try {
+                Admin requestAdmin = Admin::getAdminDataFromRequestToken(request);
                 Song_t song = db->getSongById(songId);
 
                 if (song.id != 0) {
@@ -99,6 +103,7 @@ void FileManagementApi::deleteSuperviseurChanson_(const Rest::Request& request,
                                << "\" of length " << song.duration;
                     m_logger.log(logMessage.str());
                     response.send(Pistache::Http::Code::Ok);
+                    return;
                 }
                 else {
                     std::ostringstream logMessage;
@@ -107,12 +112,26 @@ void FileManagementApi::deleteSuperviseurChanson_(const Rest::Request& request,
                                << songId;
                     m_logger.err(logMessage.str());
                     response.send(Pistache::Http::Code::Method_Not_Allowed);
+                    return;
                 }
+            }
+            catch (const MissingTokenException& e) {
+                errorCode = Pistache::Http::Code::Bad_Request;
+                errorMessage = e.what();
+            }
+            catch (const InvalidTokenException& e) {
+                errorCode = Pistache::Http::Code::Unauthorized;
+                errorMessage = e.what();
+            }
+            catch (const AuthenticationFailureException& e) {
+                errorCode = Pistache::Http::Code::Unauthorized;
+                errorMessage = e.what();
             }
             catch (const std::exception& e) {
                 response.send(Pistache::Http::Code::Forbidden, e.what());
                 return;
             }
+            response.send(errorCode, std::string{"getSuperviseurFile failed: "} + errorMessage);
         },
         request,
         std::move(response)
