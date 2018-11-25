@@ -12,7 +12,12 @@ namespace elevation {
 
 HttpsServerEventManager::HttpsServerEventManager(HttpsServerMp3EventVisitor eventVisitor, std::shared_ptr<Mp3EventSocket> socket, Logger& logger)
 {
-    m_readerThread = std::thread(&HttpsServerEventManager::readerThread_, std::move(eventVisitor), std::move(socket), std::ref(logger));
+    m_readerThread = std::thread(
+        &HttpsServerEventManager::readerThread_,
+        std::make_shared<HttpsServerMp3EventVisitor>(std::move(eventVisitor)),
+        std::move(socket),
+        std::ref(logger)
+    );
 }
 
 HttpsServerEventManager::~HttpsServerEventManager() {
@@ -21,10 +26,10 @@ HttpsServerEventManager::~HttpsServerEventManager() {
     m_readerThread.join();
 }
 
-void HttpsServerEventManager::readerThread_(HttpsServerMp3EventVisitor eventVisitor, std::shared_ptr<Mp3EventSocket> socket, Logger& logger) {
+void HttpsServerEventManager::readerThread_(std::shared_ptr<HttpsServerMp3EventVisitor> eventVisitor, std::shared_ptr<Mp3EventSocket> socket, Logger& logger) {
     while (true) {
         try {
-            socket->readEvent()->acceptVisitor(eventVisitor);
+            socket->readEvent()->acceptVisitor(*eventVisitor);
         }
         catch (const std::exception& e) {
             logger.err(std::string("HttpsServerEventManager got C++ exception: ") + e.what());

@@ -21,7 +21,7 @@ public:
     virtual ~HttpsServerEventManager();
 
 protected:
-    static void readerThread_(HttpsServerMp3EventVisitor eventVisitor, std::shared_ptr<Mp3EventSocket> socket, Logger& logger);
+    static void readerThread_(std::shared_ptr<HttpsServerMp3EventVisitor> eventVisitor, std::shared_ptr<Mp3EventSocket> socket, Logger& logger);
 
 protected:
     std::thread m_readerThread;
