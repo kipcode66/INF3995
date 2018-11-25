@@ -360,7 +360,6 @@ Database::Database(std::experimental::filesystem::path serverPath) {
 
 
 bool Database::getBlacklistByMAC(const std::string& mac) const {
-    std::cerr << "mac in getBlacklist" << mac << std::endl;
     Statement stmt{m_db, Query(
         "SELECT is_blacklisted FROM user "
         "WHERE mac = '%q';",
@@ -373,13 +372,23 @@ bool Database::getBlacklistByMAC(const std::string& mac) const {
     }
 }
 
-void Database::blacklistMAC(const std::string& mac) {
+void Database::setBlacklistFlag_(const std::string& mac, bool flag) {
+    bool blacklistValue = flag ?  Database::IS_BLACKLISTED
+                               : !Database::IS_BLACKLISTED;
     executeQuery_(Query(
         "UPDATE user "
         "SET is_blacklisted = %i "
         "WHERE (mac = '%q');",
-        Database::IS_BLACKLISTED,
+        blacklistValue,
         mac.c_str()));
+}
+
+void Database::blacklistMAC(const std::string& mac) {
+    setBlacklistFlag_(mac, 1);
+}
+
+void Database::whitelistMAC(const std::string& mac) {
+    setBlacklistFlag_(mac, 0);
 }
 
 Database::~Database() {

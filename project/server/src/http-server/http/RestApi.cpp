@@ -52,10 +52,10 @@ User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& reque
     request_json.Parse(body.c_str());
     try {
         if ((!request_json.IsObject()
-                || (!request_json.HasMember("mac")
-                    || !request_json.HasMember("ip")
-                    || request_json["mac"].IsNull()
-                    || request_json["ip"].IsNull()))) {
+                || !request_json.HasMember("mac")
+                || !request_json.HasMember("ip")
+                ||  request_json["mac"].GetStringLength() == 0
+                ||  request_json["ip"] .GetStringLength() == 0)) {
             throw BadRequestException();
         }
     } catch(const BadRequestException& e) {
@@ -72,7 +72,6 @@ User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& reque
             strncpy(requestUser.name, request_json["nom"].GetString(), User_t::NAME_LENGTH);
         }
     }
-    std::cerr << "got user: ip=" << requestUser.ip << ", mac=" << requestUser.mac << ", nom=" << requestUser.name << std::endl;
     return requestUser;
 }
 

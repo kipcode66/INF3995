@@ -61,6 +61,7 @@ public:
 
     bool getBlacklistByMAC (const std::string& MAC) const;
     void blacklistMAC      (const std::string& MAC);
+    void whitelistMAC      (const std::string& mac);
 
 protected:
     Database();
@@ -77,6 +78,8 @@ protected:
     std::vector<User_t> getUsersByQuery_(const Query&) const;
     void executeQuery_(const Query& query);
     User_t getUserFromStatement_(const Statement& stmt) const;
+
+    void setBlacklistFlag_ (const std::string&, bool);
 
     sqlite3* m_db = 0;
 };

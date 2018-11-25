@@ -107,8 +107,7 @@ void BlacklistApi::postSuperviseurBloquer_(const Rest::Request& request,
         bool isValid = (jsonDocument.IsObject() &&
                         jsonDocument.HasMember("ip") &&
                         jsonDocument.HasMember("mac") &&
-                        jsonDocument.HasMember("nom") &&
-                        !jsonDocument["mac"].GetStringLength() == 0);
+                        jsonDocument.HasMember("nom"));
         if (!isValid) {
             response.send(Http::Code::Bad_Request, "Malformed request");
             return;
@@ -154,7 +153,7 @@ void BlacklistApi::postSuperviseurDebloquer_(const Rest::Request& request,
         std::string mac(jsonDocument["mac"].GetString());
         try {
             if (db->getBlacklistByMAC(mac)) {
-                // TODO unblock
+                db->whitelistMAC(mac);
                 response.send(Http::Code::Ok, "user unblocked");
             } else {
                 response.send(Http::Code::Ok, "No change made - user not blocked");
