@@ -16,7 +16,7 @@ public:
 
 protected:
     static void accepterThread_(Mp3EventListenerSocket listener, Logger& logger);
-    static void connectionThread_(std::unique_ptr<Mp3EventSocket> socket, Logger& logger);
+    static void connectionThread_(std::shared_ptr<Mp3EventSocket> socket, Logger& logger);
 
 protected:
     std::thread m_accepterThread;

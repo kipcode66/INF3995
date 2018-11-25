@@ -26,7 +26,7 @@ void ElevationPlayerEventManager::accepterThread_(Mp3EventListenerSocket listene
     while (true) {
         try {
             std::unique_ptr<Socket> socket = listener.accept();
-            std::unique_ptr<Mp3EventSocket> eventSocket{new Mp3EventSocket{std::move(*socket)}};
+            std::shared_ptr<Mp3EventSocket> eventSocket{new Mp3EventSocket{std::move(*socket)}};
             std::thread(&ElevationPlayerEventManager::connectionThread_, std::move(eventSocket), std::ref(logger)).detach();
         }
         catch (const std::exception& e) {
@@ -40,7 +40,7 @@ void ElevationPlayerEventManager::accepterThread_(Mp3EventListenerSocket listene
     }
 }
 
-void ElevationPlayerEventManager::connectionThread_(std::unique_ptr<Mp3EventSocket> eventSocket, Logger& logger) {
+void ElevationPlayerEventManager::connectionThread_(std::shared_ptr<Mp3EventSocket> eventSocket, Logger& logger) {
     logger.log("New connection accepted");
 
     ElevationPlayerMp3EventVisitor visitor{logger};
