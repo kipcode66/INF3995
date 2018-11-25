@@ -2,12 +2,14 @@
 
 #include <iostream>
 
+#include <common/mp3/event/VolumeGetResponse.hpp>
 #include <common/mp3/event/exception/UnexpectedEventException.hpp>
 
 namespace elevation {
 
-HttpsServerMp3EventVisitor::HttpsServerMp3EventVisitor(Logger& logger)
+HttpsServerMp3EventVisitor::HttpsServerMp3EventVisitor(Logger& logger, std::shared_ptr<HttpsServerVolumeGetRequestAdapter> volumeGetRequestAdapter)
     : m_logger(logger)
+    , m_volumeGetRequestAdapter(volumeGetRequestAdapter)
 { }
 
 void HttpsServerMp3EventVisitor::onVolumeChangeEvent(const VolumeChangeEvent& event) {
@@ -31,7 +33,7 @@ void HttpsServerMp3EventVisitor::onVolumeGetRequest(const VolumeGetRequest& even
 }
 
 void HttpsServerMp3EventVisitor::onVolumeGetResponse(const VolumeGetResponse& event) {
-    // TODO Do something with the VolumeGetResponse.
+    m_volumeGetRequestAdapter->setVolumeData_(event.getVolumeData());
     m_logger.log("Got volume get response");
 }
 

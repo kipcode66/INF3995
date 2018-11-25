@@ -8,11 +8,13 @@
 #include <common/mp3/event/VolumeGetRequest.hpp>
 #include <common/logger/Logger.hpp>
 
+#include "HttpsServerVolumeGetRequestAdapter.hpp"
+
 namespace elevation {
 
 class HttpsServerMp3EventVisitor : public AbstractMp3EventVisitor {
 public:
-    explicit HttpsServerMp3EventVisitor(Logger& logger);
+    explicit HttpsServerMp3EventVisitor(Logger& logger, std::shared_ptr<HttpsServerVolumeGetRequestAdapter> volumeGetRequestAdapter);
 
     virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) override;
     virtual void onMuteEvent        (const MuteEvent&         event) override;
@@ -22,6 +24,7 @@ public:
 
 protected:
     Logger& m_logger;
+    std::shared_ptr<HttpsServerVolumeGetRequestAdapter> m_volumeGetRequestAdapter;
 };
 
 } // namespace elevation
