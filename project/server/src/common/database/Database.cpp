@@ -186,7 +186,7 @@ std::pair<std::string, std::string> Database::getSaltAndHashedPasswordByLogin(
 std::vector<User_t> Database::getBlackList() {
     return getUsersByQuery_(Query(
         "SELECT user_id, ip, name, mac FROM user"
-        " WHERE (is_blacklisted = %i);", Database::IS_BLACKLISTED));
+        " WHERE (is_blacklisted = %i);", Database::BLOCKED));
 }
 
 Song_t Database::getSongByQuery_(const Query& query) const {
@@ -298,9 +298,23 @@ void Database::createSong(const Song_t* song) {
         0));
 }
 
+/*
+ * A null path indicate a deleted song
+ */
 void Database::removeSong(uint32_t id, bool wasPlayed) {
     executeQuery_(Query(
-        "UPDATE songs SET was_played = %i WHERE rowid = %i;",
+        "UPDATE songs SET was_played = %i, path = '' WHERE rowid = %i;",
+        wasPlayed,
+        id));
+}
+
+/*
+ * A null path indicate a deleted song
+ */
+void Database::removeSongByAdmin(uint32_t id, bool wasPlayed) {
+    executeQuery_(Query(
+        "UPDATE songs SET was_played = %i, path = '', "
+        "deleted_by_admin = 1 WHERE rowid = %i;",
         wasPlayed,
         id));
 }
@@ -323,7 +337,7 @@ void Database::executeAndRetryOnLock_(const Query& query) {
                 throw e;
             }
         }
-    } while(retry);
+    } while (retry);
 }
 
 void Database::enableForeignKeys_() {
@@ -396,7 +410,7 @@ bool Database::getBlacklistByMAC(const std::string& mac) const {
         "WHERE mac = '%q';",
         mac.c_str())};
     if(stmt.step()) {
-        return (stmt.getColumnInt(0) == Database::IS_BLACKLISTED);
+        return (stmt.getColumnInt(0) == Database::BLOCKED);
     } else {
         throw NoSuchUserException();
     }

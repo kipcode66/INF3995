@@ -90,9 +90,7 @@ void FileManagementApi::deleteSuperviseurChanson_(const Rest::Request& request,
                 Song_t song = db->getSongById(songId);
 
                 if (song.id != 0) {
-
-                    // TODO set deleted by Admin
-                    db->removeSong(songId);
+                    db->removeSongByAdmin(songId);
                     m_cache.deleteFile(song.path);
 
                     std::ostringstream logMessage;
