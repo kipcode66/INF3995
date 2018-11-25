@@ -21,6 +21,7 @@ int Mp3Duration::getDurationInSeconds() const {
 }
 
 std::ostream& operator<< (std::ostream& os, const Mp3Duration& duration) {
-    os << std::setfill('0') << std::setw(2);
-    os << duration.getMinutes() << ':' << duration.getSeconds();
+    std::ostringstream str;
+    str << std::setfill('0') << std::setw(2) << duration.getMinutes() << ':' << duration.getSeconds();
+    return os << str.str();
 }

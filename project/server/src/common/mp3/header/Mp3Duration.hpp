@@ -2,6 +2,7 @@
 #define SRC_HTTP_MP3_DURATION_HPP
 
 #include <inttypes.h>
+#include <sstream>
 #include <ostream>
 
 class Mp3Duration {
