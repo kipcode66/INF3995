@@ -165,7 +165,11 @@ void RestApi::getIdentification_(const Rest::Request& request, Http::ResponseWri
         User_t existingUser = { 0 };
         Database* db = Database::instance();
         existingUser = db->getUserByMac(requestUser.mac);
+
+        std::cout << "le mac du existingUser est " << existingUser.mac << std::endl;
+        std::cout << "le mac du requestUser est " << requestUser.mac << std::endl;
         if (*existingUser.mac == 0) {
+            std::cout << "je suis dans un nouvel user" << std::endl;
             std::string salt = id_utils::generateSalt(strlen(requestUser.mac));
             requestUser.userId = id_utils::generateId(requestUser.mac, salt);
 

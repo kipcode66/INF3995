@@ -46,7 +46,7 @@ void Database::executeQuery_(const Query& query) {
 }
 
 User_t Database::getUserFromStatement_(const Statement& stmt) const {
-    User_t user;
+    User_t user = { 0 };
     user.userId = stmt.getColumnInt(0);
     strncpy(user.ip, stmt.getColumnText(1).c_str(), User_t::IP_LENGTH);
     strncpy(user.name, stmt.getColumnText(2).c_str(), User_t::NAME_LENGTH);
@@ -55,7 +55,7 @@ User_t Database::getUserFromStatement_(const Statement& stmt) const {
 }
 
 Song_t Database::getSongFromStatement_(const Statement& stmt) const {
-    Song_t song;
+    Song_t song = { 0 };
         song.id = stmt.getColumnInt(0);
         strncpy(song.title, stmt.getColumnText(1).c_str(), Song_t::TITLE_LENGTH);
         strncpy(song.artist, stmt.getColumnText(2).c_str(), Song_t::TITLE_LENGTH);
@@ -67,7 +67,7 @@ Song_t Database::getSongFromStatement_(const Statement& stmt) const {
 }
 
 User_t Database::getUserByQuery_(const Query& query) const {
-    User_t user;
+    User_t user = { 0 };
     Statement stmt{m_db, query};
     if (stmt.step()) {
         user = getUserFromStatement_(stmt);
@@ -188,7 +188,7 @@ std::vector<User_t> Database::getBlackList() {
 }
 
 Song_t Database::getSongByQuery_(const Query& query) const {
-    Song_t song = {};
+    Song_t song = { 0 };
     Statement stmt{m_db, query};
 
     if (stmt.step()) {

@@ -3,8 +3,10 @@
 #include <pistache/router.h>
 #include <pistache/description.h>
 #include <common/database/Database.hpp>
+#include <iomanip>
 #include "rapidjson/document.h"
 #include <pistache/serializer/rapidjson.h>
+#include "mp3/header/Mp3Duration.hpp"
 
 #include "StatsApi.hpp"
 
@@ -25,10 +27,14 @@ std::string StatsApi::generateStatistics_(const Statistics& stats) {
     rapidjson::Document statsDoc;
     statsDoc.SetObject();
     try {
+        Mp3Duration d(stats.getAverageDuration());
+        std::stringstream duration;
+        duration << std::setfill('0') << std::setw(2);
+        duration << d.getMinutes() << ':' << d.getSeconds();
         statsDoc.AddMember(rapidjson::StringRef("chansons"), rapidjson::Value(stats.getSongCount()), statsDoc.GetAllocator());
         statsDoc.AddMember(rapidjson::StringRef("utilisateurs"), rapidjson::Value(stats.getUserCount()), statsDoc.GetAllocator());
         statsDoc.AddMember(rapidjson::StringRef("elimines"), rapidjson::Value(stats.getDeletedSongsCount()), statsDoc.GetAllocator());
-        statsDoc.AddMember(rapidjson::StringRef("temps"), rapidjson::Value(stats.getAverageDuration()), statsDoc.GetAllocator());
+        statsDoc.AddMember(rapidjson::StringRef("temps"), rapidjson::Value(duration.str().c_str(), duration.str().length()), statsDoc.GetAllocator());
     }
     catch (sqlite_error& e) {
         std::stringstream msg;
