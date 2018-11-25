@@ -6,14 +6,14 @@
 #include <pistache/router.h>
 #include <pistache/description.h>
 
+#include <common/logger/Logger.hpp>
+
 #include "http-server/http/RestApi.hpp"
 #include "descriptions/VolumeApi.hpp"
 #include "descriptions/BlacklistApi.hpp"
 #include "descriptions/StatsApi.hpp"
 #include "descriptions/FileManagementApi.hpp"
 #include "descriptions/AuthApi.hpp"
-
-#include <common/logger/Logger.hpp>
 
 namespace elevation {
 
