@@ -5,6 +5,7 @@
 #include <vector>
 #include <utility>
 #include <experimental/filesystem>
+#include <misc/Statistics.hpp>
 
 #include "Statement.hpp"
 #include "templates/User.hpp"
@@ -21,6 +22,7 @@ class Database {
 public:
     static constexpr const char*   ADMIN_NAME         = "admin";
     static constexpr const char*   DEFAULT_PASSWORD   = "admin";
+    static constexpr const char*   TODAY_QUERY        = " timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');";
     static constexpr const int32_t IS_BLACKLISTED     = 1;
     static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
 
@@ -36,7 +38,7 @@ public:
     User_t getUserById      (uint32_t) const;
     void   createUser       (const User_t* user);
     void   connectUser      (const struct User_t* user);
-    bool   isUserConnected  (const uint32_t userId) const; 
+    bool   isUserConnected  (const uint32_t userId) const;
     void   updateTimestamp  (const User_t* user);
     void   setAdminPassword (const std::string& password);
     void   connectAdmin     (const std::string& login, uint32_t adminId);
@@ -50,14 +52,19 @@ public:
     Song_t              getSongByPath(const std::string&) const;
     std::vector<Song_t> getSongsByUser(int userId) const;
     std::vector<Song_t> getAllSongs() const;
+
+    Statistics          getStatistics() const;
+
     void                createSong(const Song_t*);
-    void                removeSong(uint32_t);
+    void                removeSong(uint32_t, bool wasPlayed = false);
 
     void initDefaultAdmin();
 
-    int getUserConnectionStatus(uint32_t userId) const;
-
     std::vector<User_t> getBlackList();
+
+    bool getBlacklistByMAC (const std::string& MAC) const;
+    void blacklistMAC      (const std::string& MAC);
+    void whitelistMAC      (const std::string& mac);
 
 protected:
     Database();
@@ -70,10 +77,20 @@ protected:
 
     Song_t getSongByQuery_(const Query&) const;
     std::vector<Song_t> getSongsByQuery_(const Query&) const;
+    Song_t getSongFromStatement_(const Statement& stmt) const;
+
     User_t getUserByQuery_(const Query&) const;
     std::vector<User_t> getUsersByQuery_(const Query&) const;
-    void executeQuery_(const Query& query);
     User_t getUserFromStatement_(const Statement& stmt) const;
+
+    int getDailyUserCount_() const;
+    int getDailySongCount_() const;
+    int getDeletedSongsCount_() const;
+    int getAverageSongDuration_() const;
+    int getStatisticsFromQuery_(const Query&) const;
+
+    void setBlacklistFlag_ (const std::string&, bool);
+    void executeQuery_     (const Query& query);
 
     sqlite3* m_db = 0;
 };
@@ -82,3 +99,4 @@ protected:
 
 
 #endif // DATABASE_DATABASE_HPP
+

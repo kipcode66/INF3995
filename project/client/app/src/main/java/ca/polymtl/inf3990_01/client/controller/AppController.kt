@@ -3,14 +3,12 @@ package ca.polymtl.inf3990_01.client.controller
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.*
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
-import ca.polymtl.inf3990_01.client.model.DataProvider
-import ca.polymtl.inf3990_01.client.model.User
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
-import ca.polymtl.inf3990_01.client.model.Song
-import ca.polymtl.inf3990_01.client.presentation.Presenter
+import ca.polymtl.inf3990_01.client.model.DataProvider
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -23,15 +21,15 @@ class AppController(
         private val restService: RestRequestService,
         private val secureRestService: SecureRestRequestService,
         private val dataProvider: DataProvider,
-        private val presenter: Presenter,
         private val preferences: SharedPreferences,
         private val localSongController: LocalSongController,
         private val appStateService: AppStateService,
+        private val volumeController: VolumeController,
         private val appCtx: Context
 ) {
     companion object {
-        const val QUEUE_PERIOD_KEY = "queue_period"
         const val QUEUE_PERIOD_DEFAULT = 4000L
+        internal const val NO_DELAY = 0L
     }
 
     private val executor = ScheduledThreadPoolExecutor(1)
@@ -40,18 +38,25 @@ class AppController(
     private var loginJob: Job? = null
     private var logoutJob: Job? = null
     private var reloadBlackListJob: Job? = null
+    private var swapSongsJob: Job? = null
+    private var volumeRequestJob: Job? = null
+    private var volumeChangeRequestJob: Job? = null
     private var task: ScheduledFuture<*>? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
-        if (key == QUEUE_PERIOD_KEY) {
-            task?.cancel(true)
-            task = scheduleQueueTask(sharedPreferences)
+        when (key) {
+            appCtx.getString(R.string.settings_key_queue_refresh_period) -> {
+                task?.cancel(true)
+                task = scheduleQueueTask(sharedPreferences)
+            }
+            appCtx.getString(R.string.settings_key_server_address) ->
+                appStateService.setState(AppStateService.State.User)
         }
     }
 
     init {
         eventMgr.addEventListener(this::onAppInit)
-        eventMgr.addEventListener(this::onAppStart)
+        eventMgr.addEventListener(this::onAppResume)
         eventMgr.addEventListener(this::onAppStop)
         eventMgr.addEventListener(this::reloadQueue)
         eventMgr.addEventListener(this::onSendSong)
@@ -59,7 +64,10 @@ class AppController(
         eventMgr.addEventListener(this::reloadBlackListUser)
         eventMgr.addEventListener(this::onLoginRequest)
         eventMgr.addEventListener(this::onLogoutRequest)
-        eventMgr.addEventListener(this::deleteSong)
+        eventMgr.addEventListener(this::onDeleteSong)
+        eventMgr.addEventListener(this::onSwapSongsRequest)
+        eventMgr.addEventListener(this::onVolumeRequest)
+        eventMgr.addEventListener(this::onVolumeChangeRequest)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -70,10 +78,11 @@ class AppController(
     }
 
     /**
-     * When the app resumes from inactivity (when starting or coming back from being paused), we start the reload loop.
+     * When the app resumes from inactivity (when starting or coming back from being paused),
+     * we start the reload loop.
      */
     @Suppress("UNUSED_PARAMETER")
-    private fun onAppStart(event: AppResumeEvent) {
+    private fun onAppResume(event: AppResumeEvent) {
         // Make sure that the previous task was stopped
         task?.cancel(true)
         // Start the updating loop
@@ -81,7 +90,8 @@ class AppController(
     }
 
     /**
-     * When the app is no longer visible (when no activities are being shown, when paused), we stop the reload loop.
+     * When the app is no longer visible (when no activities are being shown, when paused),
+     * we stop the reload loop.
      */
     @Suppress("UNUSED_PARAMETER")
     private fun onAppStop(event: AppStopEvent) {
@@ -101,7 +111,7 @@ class AppController(
                     restService.getSongList()
                 }
                 // now, we update the model
-                presenter.setQueue(list)
+                dataProvider.setSongQueue(list)
             }
         }
     }
@@ -123,18 +133,25 @@ class AppController(
     private fun scheduleQueueTask(prefs: SharedPreferences): ScheduledFuture<*> {
         return executor.scheduleAtFixedRate({
             eventMgr.dispatchEvent(RequestQueueReloadEvent())
-        }, 0, prefs.getString(QUEUE_PERIOD_KEY, "$QUEUE_PERIOD_DEFAULT")?.toLong() ?: QUEUE_PERIOD_DEFAULT, TimeUnit.MILLISECONDS)
+            eventMgr.dispatchEvent(VolumeRequestEvent())
+        },
+            NO_DELAY,
+            prefs.getString(
+                appCtx.getString(R.string.settings_key_queue_refresh_period),
+                "$QUEUE_PERIOD_DEFAULT"
+            )?.toLong() ?: QUEUE_PERIOD_DEFAULT,
+            TimeUnit.MILLISECONDS)
     }
 
     private fun onSendSong(event: SendSongEvent) {
-        launch {
-            restService.sendSong(event.song)
+        if (appStateService.getState().type != AppStateService.State.Admin) {
+            launch {restService.sendSong(event.song)}
         }
     }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onReloadLocalSong(event: LocalSongLoadEvent) {
-        localSongController.reloadLocalSong()
+        localSongController.reloadLocalSong(event.activity)
     }
 
     private fun onLoginRequest(event: LoginRequestEvent) {
@@ -162,14 +179,59 @@ class AppController(
         }
     }
 
-    private fun deleteSong(event: DeleteSongEvent){
+    private fun onDeleteSong(event: DeleteSongEvent){
         if (appStateService.getState().type == AppStateService.State.Admin) {
             launch {secureRestService.deleteSong(event.song)}
         }
         else {
-            launch{ restService.deleteSong(event.song)}
+            launch {restService.deleteSong(event.song)}
         }
 
+    }
+
+    private fun onSwapSongsRequest(event: SwapSongsRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (swapSongsJob?.isCompleted != false) {
+                val jobTmp = swapSongsJob
+                swapSongsJob = async {
+                    jobTmp?.join()
+                    secureRestService.swapSongs(event.songs)
+                }
+            }
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onVolumeRequest(event: VolumeRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (volumeRequestJob?.isCompleted != false) {
+                val jobTmp = volumeRequestJob
+                volumeRequestJob = async {
+                    jobTmp?.join()
+                    val volume = secureRestService.getVolume()
+                    if (volumeController.getVolume().level != volume.level) {
+                        eventMgr.dispatchEvent(VolumeChangedEvent(volume))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun onVolumeChangeRequest(event: VolumeChangeRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (volumeChangeRequestJob?.isCompleted != false) {
+                val jobTmp = volumeChangeRequestJob
+                volumeChangeRequestJob = async {
+                    jobTmp?.join()
+                    when (event.change) {
+                        VolumeChangeRequestEvent.Companion.Change.INCREASE -> secureRestService.increaseVolume(event.value!!)
+                        VolumeChangeRequestEvent.Companion.Change.DECREASE -> secureRestService.decreaseVolume(event.value!!)
+                        VolumeChangeRequestEvent.Companion.Change.MUTE -> secureRestService.muteVolume()
+                        VolumeChangeRequestEvent.Companion.Change.UNMUTE -> secureRestService.unmuteVolume()
+                    }
+                }
+            }
+        }
     }
 
 }

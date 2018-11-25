@@ -8,6 +8,8 @@
         android:id="@+id/login_username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:selectAllOnFocus="true"
         android:hint="@string/login_hint_username"
         android:text="@string/login_username_default_text"/>
     <EditText
@@ -15,6 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
+        android:selectAllOnFocus="true"
         android:hint="@string/login_hint_password"
         android:focusedByDefault="true"/>
     <RelativeLayout

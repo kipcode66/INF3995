@@ -1,10 +1,7 @@
 
 #include <future>
 
-#include <rapidjson/document.h>
-
-#include <common/database/Database.hpp>
-#include <common/logger/Logger.hpp>
+#include <database/Database.hpp>
 
 #include <http-server/http/exception/InvalidTokenException.hpp>
 #include <http-server/http/exception/MissingTokenException.hpp>
@@ -49,11 +46,16 @@ void AuthApi::superviseurLogin_(const Rest::Request& request, Http::ResponseWrit
                 throw AuthenticationFailureException{admin.getUsername(), admin.getMotDePasse()};
             }
             Database* db = Database::instance();
+            std::ostringstream logMsg;
             if (db->isAdminConnected(admin.getId())) {
-                std::ostringstream logMsg;
                 logMsg << "Admin with token \"" << admin.getId() << "\" is already connected. Applying idempotent behaviour and return OK.";
                 m_logger.log(logMsg.str());
                 response.send(Http::Code::Ok, "Already connected");
+                return;
+            } else if (!db->isUserConnected(admin.getId())) {
+                logMsg << "Could not Login Admin. Admin with token \"" << admin.getId() << "\" is not a user.";
+                m_logger.err(logMsg.str());
+                response.send(Http::Code::Bad_Request, "Admin is not a user");
                 return;
             }
             auto saltAndPasswordHash = db->getSaltAndHashedPasswordByLogin(admin.getUsername().c_str());

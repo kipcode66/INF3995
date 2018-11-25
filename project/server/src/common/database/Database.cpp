@@ -10,9 +10,11 @@
 
 #include "misc/id_utils.hpp"
 #include "Query.hpp"
+#include "templates/exception/NoSuchUserException.hpp"
 
 using namespace elevation;
 using namespace std::chrono_literals;
+
 
 Database* Database::s_instance = nullptr;
 constexpr const char Database::DB_NAME[] = "server.db";
@@ -46,7 +48,7 @@ void Database::executeQuery_(const Query& query) {
 }
 
 User_t Database::getUserFromStatement_(const Statement& stmt) const {
-    User_t user;
+    User_t user = { 0 };
     user.userId = stmt.getColumnInt(0);
     strncpy(user.ip, stmt.getColumnText(1).c_str(), User_t::IP_LENGTH);
     strncpy(user.name, stmt.getColumnText(2).c_str(), User_t::NAME_LENGTH);
@@ -54,8 +56,20 @@ User_t Database::getUserFromStatement_(const Statement& stmt) const {
     return user;
 }
 
+Song_t Database::getSongFromStatement_(const Statement& stmt) const {
+    Song_t song = { 0 };
+        song.id = stmt.getColumnInt(0);
+        strncpy(song.title, stmt.getColumnText(1).c_str(), Song_t::TITLE_LENGTH);
+        strncpy(song.artist, stmt.getColumnText(2).c_str(), Song_t::TITLE_LENGTH);
+        song.userId = stmt.getColumnInt(3);
+        song.duration = stmt.getColumnInt(4);
+        strncpy(song.path, stmt.getColumnText(5).c_str(), Song_t::PATH_LENGTH);
+        song.deletedByAdmin = stmt.getColumnBool(6);
+    return song;
+}
+
 User_t Database::getUserByQuery_(const Query& query) const {
-    User_t user;
+    User_t user = { 0 };
     Statement stmt{m_db, query};
     if (stmt.step()) {
         user = getUserFromStatement_(stmt);
@@ -113,17 +127,6 @@ bool Database::isUserConnected(const uint32_t userId) const {
         return (stmt.getColumnDouble(0) > 0);
     }
     return false;
-}
-
-int Database::getUserConnectionStatus(uint32_t userId) const {
-    Statement stmt{m_db, Query(
-        "SELECT isConnected FROM userConnection WHERE (user_id = %u);",
-        userId)};
-
-    if (stmt.step()) {
-        return stmt.getColumnInt(0);
-    }
-    return 0;
 }
 
 void Database::setAdminPassword(const std::string& password) {
@@ -187,16 +190,11 @@ std::vector<User_t> Database::getBlackList() {
 }
 
 Song_t Database::getSongByQuery_(const Query& query) const {
-    Song_t song = {};
+    Song_t song = { 0 };
     Statement stmt{m_db, query};
 
     if (stmt.step()) {
-        song.id = stmt.getColumnInt(0);
-        strncpy(song.title, stmt.getColumnText(1).c_str(), Song_t::TITLE_LENGTH);
-        strncpy(song.artist, stmt.getColumnText(2).c_str(), Song_t::ARTIST_LENGTH);
-        song.userId = stmt.getColumnInt(3);
-        song.duration = stmt.getColumnInt(4);
-        strncpy(song.path, stmt.getColumnText(5).c_str(), Song_t::PATH_LENGTH);
+        song = getSongFromStatement_(stmt);
     }
 
     return song;
@@ -229,13 +227,7 @@ std::vector<Song_t> Database::getSongsByQuery_(const Query& query) const {
     Statement stmt{m_db, query};
 
     while (stmt.step()) {
-        song_buffer.id = stmt.getColumnInt(0);
-        strncpy(song_buffer.title, stmt.getColumnText(1).c_str(), Song_t::TITLE_LENGTH);
-        strncpy(song_buffer.artist, stmt.getColumnText(2).c_str(), Song_t::TITLE_LENGTH);
-        song_buffer.userId = stmt.getColumnInt(3);
-        song_buffer.duration = stmt.getColumnInt(4);
-        strncpy(song_buffer.path, stmt.getColumnText(5).c_str(), Song_t::PATH_LENGTH);
-
+        song_buffer = getSongFromStatement_(stmt);
         songs.push_back(song_buffer);
     }
 
@@ -255,20 +247,61 @@ std::vector<Song_t> Database::getAllSongs() const {
         "FROM songs ORDER BY song_order ASC;"));
 }
 
+int Database::getStatisticsFromQuery_(const Query& query) const {
+    int statistic;
+    Statement stmt{m_db, query};
+
+    if (stmt.step()) {
+        statistic = stmt.getColumnInt(0);
+    }
+    return statistic;
+}
+
+int Database::getDailyUserCount_() const {
+    std::string query("SELECT COUNT(DISTINCT user_id) FROM songs WHERE");
+    query += TODAY_QUERY;
+    return getStatisticsFromQuery_(query.c_str());
+}
+
+int Database::getDailySongCount_() const {
+    std::string query("SELECT COUNT(*) FROM songs WHERE was_played = 1 AND");
+    query += TODAY_QUERY;
+    return getStatisticsFromQuery_(query.c_str());
+}
+
+int Database::getDeletedSongsCount_() const {
+    std::string query("SELECT COUNT(*) FROM songs WHERE deleted_by_admin = 1 AND");
+    query += TODAY_QUERY;
+    return getStatisticsFromQuery_(query.c_str());
+}
+
+int Database::getAverageSongDuration_() const {
+    std::string query("SELECT avg(duration) FROM songs WHERE was_played = 1 AND");
+    query += TODAY_QUERY;
+    return getStatisticsFromQuery_(query.c_str());
+}
+
+Statistics Database::getStatistics() const {
+    return Statistics(getDailySongCount_(), getDailyUserCount_(),
+        getDeletedSongsCount_(), getAverageSongDuration_());
+}
+
 void Database::createSong(const Song_t* song) {
     executeQuery_(Query(
-        "INSERT OR REPLACE INTO songs (title, artist, user_id, duration, path, song_order, timestamp) VALUES ('%q', '%q', %u, %u, '%q', %i, julianday('now'));",
+        "INSERT OR REPLACE INTO songs (title, artist, user_id, duration, path, song_order, timestamp, was_played) VALUES ('%q', '%q', %u, %u, '%q', %i, julianday('now'), %u);",
         song->title,
         song->artist,
         song->userId,
         song->duration,
         song->path,
-        DEFAULT_SONG_ORDER));
+        DEFAULT_SONG_ORDER,
+        0));
 }
 
-void Database::removeSong(uint32_t id) {
+void Database::removeSong(uint32_t id, bool wasPlayed) {
     executeQuery_(Query(
-        "DELETE FROM songs WHERE rowid = %i;",
+        "UPDATE songs SET was_played = %i WHERE rowid = %i;",
+        wasPlayed,
         id));
 }
 
@@ -298,7 +331,7 @@ void Database::enableForeignKeys_() {
 }
 
 void Database::wipeDbSongs_() {
-    executeAndRetryOnLock_(Query("DELETE FROM songs;"));
+    executeAndRetryOnLock_(Query("UPDATE songs SET path = '';"));
 }
 
 void Database::initDefaultAdmin() {
@@ -356,7 +389,40 @@ Database::Database(std::experimental::filesystem::path serverPath) {
     }
 }
 
+
+bool Database::getBlacklistByMAC(const std::string& mac) const {
+    Statement stmt{m_db, Query(
+        "SELECT is_blacklisted FROM user "
+        "WHERE mac = '%q';",
+        mac.c_str())};
+    if(stmt.step()) {
+        return (stmt.getColumnInt(0) == Database::IS_BLACKLISTED);
+    } else {
+        throw NoSuchUserException();
+    }
+}
+
+void Database::setBlacklistFlag_(const std::string& mac, bool flag) {
+    bool blacklistValue = flag ?  Database::IS_BLACKLISTED
+                               : !Database::IS_BLACKLISTED;
+    executeQuery_(Query(
+        "UPDATE user "
+        "SET is_blacklisted = %i "
+        "WHERE (mac = '%q');",
+        blacklistValue,
+        mac.c_str()));
+}
+
+void Database::blacklistMAC(const std::string& mac) {
+    setBlacklistFlag_(mac, 1);
+}
+
+void Database::whitelistMAC(const std::string& mac) {
+    setBlacklistFlag_(mac, 0);
+}
+
 Database::~Database() {
     sqlite3_close_v2(m_db);
     sqlite3_shutdown();
 }
+

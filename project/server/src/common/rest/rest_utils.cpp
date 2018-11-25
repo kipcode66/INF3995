@@ -35,8 +35,7 @@ rapidjson::Value& generateSong_(const Song_t& song, uint32_t token, rapidjson::D
     User_t user = Database::instance()->getUserById(song.userId);
     Mp3Duration d(song.duration);
     std::ostringstream duration;
-    duration << std::setfill('0') << std::setw(2);
-    duration << d.getMinutes() << ':' << d.getSeconds();
+    duration << d;
     songDoc.AddMember(rapidjson::StringRef("titre"), rapidjson::Value(song.title, strlen(song.title), allocator), allocator);
     songDoc.AddMember(rapidjson::StringRef("artiste"), rapidjson::Value(song.artist, strlen(song.artist), allocator), allocator);
     songDoc.AddMember("duree", rapidjson::Value(duration.str().c_str(), duration.str().length(), allocator), allocator);

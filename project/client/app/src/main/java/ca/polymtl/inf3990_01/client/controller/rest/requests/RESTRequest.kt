@@ -1,7 +1,6 @@
 package ca.polymtl.inf3990_01.client.controller.rest.requests
 
 import android.support.annotation.CallSuper
-import ca.polymtl.inf3990_01.client.controller.InitializationManager
 import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
 import com.android.volley.NetworkResponse
 import com.android.volley.ParseError
@@ -35,8 +34,11 @@ class RESTRequest<T>(
         errorListener?.onErrorResponse(error)
     }
 }) {
-    companion object { const val CODE_FORBIDDEN = 403 }
-    private val DUMMY_LISTENER = Response.Listener<ResponseData<T>>{ _ -> }
+    companion object {
+        const val CODE_FORBIDDEN = 403
+    }
+    @Suppress("PrivatePropertyName")
+    private val DUMMY_LISTENER = Response.Listener<ResponseData<T>>{ }
     private val gson = Gson()
 
     override fun getHeaders(): MutableMap<String, String> {

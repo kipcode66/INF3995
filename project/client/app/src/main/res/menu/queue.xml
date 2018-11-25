@@ -5,6 +5,7 @@
         android:id="@+id/action_reload"
         android:orderInCategory="1"
         android:icon="@drawable/ic_menu_refresh"
+        android:title="@string/action_reload"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_show_login"
@@ -14,6 +15,6 @@
     <item
         android:id="@+id/action_disconnect"
         android:orderInCategory="101"
-        android:title="@string/action_diconnect"
+        android:title="@string/action_disconnect"
         app:showAsAction="never"/>
 </menu>

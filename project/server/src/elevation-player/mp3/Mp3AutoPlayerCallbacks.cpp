@@ -3,6 +3,7 @@
 #include <chrono>
 #include <sqlite3/sqlite3.h>
 #include <experimental/filesystem>
+#include <string.h>
 
 #include "Mp3AutoPlayerCallbacks.hpp"
 
@@ -36,7 +37,7 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
         try {
             Database* db = Database::instance();
             auto songs = db->getAllSongs();
-            if (songs.size() > 0) {
+            if (songs.size() > 0 && strlen(songs[0].path) > 0) {
                 newSong = songs[0].path;
             }
         }
@@ -52,6 +53,18 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
             }
         }
     } while (retry);
+
+    try {
+        if (newSong != Mp3AutoPlayer::NO_SONG) {
+            Database* db = Database::instance();
+            auto song = db->getSongByPath(newSong.c_str());
+            db->removeSong(song.id, true);
+        }
+    }
+    catch (sqlite_error& e) {
+        m_logger.err(e.what());
+    }
+
     return newSong;
 }
 

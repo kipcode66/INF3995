@@ -17,10 +17,10 @@ import java.util.*
 
 class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R.id.drawer_layout) {
 
-    var songsList = LocalSongs()
-    val eventMgr: EventManager by inject()
+    private var songsList = LocalSongs()
+    private val eventMgr: EventManager by inject()
     private val appStateService: AppStateService by inject()
-    val localSongAdapter: LocalSongAdapter by inject{ ParameterList(songsList, layoutInflater) }
+    private val localSongAdapter: LocalSongAdapter by inject{ ParameterList(songsList, layoutInflater) }
 
     @Suppress("UNUSED_PARAMETER")
     private fun onAppStateChange(o: Observable?, arg: Any?) {
@@ -30,7 +30,7 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         songs_list.adapter = localSongAdapter
-        eventMgr.dispatchEvent(LocalSongLoadEvent())
+        eventMgr.dispatchEvent(LocalSongLoadEvent(this))
         appStateService.addObserver(Observer(this::onAppStateChange))
     }
 
@@ -49,7 +49,7 @@ class LocalSongActivity : AbstractDrawerActivity(R.layout.activity_local_song, R
         when (item.itemId) {
             R.id.action_reload -> {
                 songsList.clear()
-                eventMgr.dispatchEvent(LocalSongLoadEvent())
+                eventMgr.dispatchEvent(LocalSongLoadEvent(this))
                 return true
             }
             R.id.action_show_login -> {
