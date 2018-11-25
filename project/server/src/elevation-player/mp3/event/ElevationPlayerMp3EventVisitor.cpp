@@ -2,8 +2,8 @@
 
 #include <iostream>
 
+#include <common/mp3/event/VolumeGetResponse.hpp>
 #include <common/mp3/event/exception/UnexpectedEventException.hpp>
-
 namespace elevation {
 
 ElevationPlayerMp3EventVisitor::ElevationPlayerMp3EventVisitor(Logger& logger, std::shared_ptr<Mp3EventSocket> socket)
@@ -29,8 +29,13 @@ void ElevationPlayerMp3EventVisitor::onUnmuteEvent(const UnmuteEvent& event) {
 }
 
 void ElevationPlayerMp3EventVisitor::onVolumeGetRequest(const VolumeGetRequest& event) {
-    // TODO Do something in reaction
     m_logger.log("Got volume get request event");
+    VolumeData_t volumeData = {
+        .volume = m_pulseVolume.getVolume(),
+        .isMuted = m_pulseVolume.isMuted()
+    };
+    VolumeGetResponse response{volumeData};
+    m_socket->writeEvent(response);
 }
 
 void ElevationPlayerMp3EventVisitor::onVolumeGetResponse(const VolumeGetResponse& event) {
