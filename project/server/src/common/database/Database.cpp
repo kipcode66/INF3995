@@ -258,25 +258,25 @@ int Database::getStatisticsFromQuery_(const Query& query) const {
 }
 
 int Database::getDailyUserCount_() const {
-    std::string query("SELECT COUNT(DISTINCT user_id) FROM songs");
+    std::string query("SELECT COUNT(DISTINCT user_id) FROM songs WHERE");
     query += TODAY_QUERY;
     return getStatisticsFromQuery_(query.c_str());
 }
 
 int Database::getDailySongCount_() const {
-    std::string query("SELECT COUNT(DISTINCT title) FROM songs");
+    std::string query("SELECT COUNT(*) FROM songs WHERE was_played = 1 AND");
     query += TODAY_QUERY;
     return getStatisticsFromQuery_(query.c_str());
 }
 
 int Database::getDeletedSongsCount_() const {
-    std::string query("SELECT COUNT(title) FROM songs WHERE deleted_by_admin = 1 AND"
-    " timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');");
+    std::string query("SELECT COUNT(*) FROM songs WHERE deleted_by_admin = 1 AND");
+    query += TODAY_QUERY;
     return getStatisticsFromQuery_(query.c_str());
 }
 
 int Database::getAverageSongDuration_() const {
-    std::string query("SELECT avg(duration) FROM songs");
+    std::string query("SELECT avg(duration) FROM songs WHERE was_played = 1 AND");
     query += TODAY_QUERY;
     return getStatisticsFromQuery_(query.c_str());
 }
@@ -288,18 +288,20 @@ Statistics Database::getStatistics() const {
 
 void Database::createSong(const Song_t* song) {
     executeQuery_(Query(
-        "INSERT OR REPLACE INTO songs (title, artist, user_id, duration, path, song_order, timestamp) VALUES ('%q', '%q', %u, %u, '%q', %i, julianday('now'));",
+        "INSERT OR REPLACE INTO songs (title, artist, user_id, duration, path, song_order, timestamp, was_played) VALUES ('%q', '%q', %u, %u, '%q', %i, julianday('now'), %u);",
         song->title,
         song->artist,
         song->userId,
         song->duration,
         song->path,
-        DEFAULT_SONG_ORDER));
+        DEFAULT_SONG_ORDER,
+        0));
 }
 
-void Database::removeSong(uint32_t id) {
+void Database::removeSong(uint32_t id, bool wasPlayed) {
     executeQuery_(Query(
-        "DELETE FROM songs WHERE rowid = %i;",
+        "UPDATE songs SET was_played = %i WHERE rowid = %i;",
+        wasPlayed,
         id));
 }
 
@@ -329,7 +331,7 @@ void Database::enableForeignKeys_() {
 }
 
 void Database::wipeDbSongs_() {
-    executeAndRetryOnLock_(Query("DELETE FROM songs;"));
+    executeAndRetryOnLock_(Query("UPDATE songs SET path = '';"));
 }
 
 void Database::initDefaultAdmin() {

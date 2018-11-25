@@ -57,7 +57,7 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
         if (newSong != Mp3AutoPlayer::NO_SONG) {
             Database* db = Database::instance();
             auto song = db->getSongByPath(newSong.c_str());
-            db->removeSong(song.id);
+            db->removeSong(song.id, true);
         }
     }
     catch (sqlite_error& e) {

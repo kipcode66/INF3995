@@ -22,7 +22,7 @@ class Database {
 public:
     static constexpr const char*   ADMIN_NAME         = "admin";
     static constexpr const char*   DEFAULT_PASSWORD   = "admin";
-    static constexpr const char*   TODAY_QUERY        = " WHERE timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');";
+    static constexpr const char*   TODAY_QUERY        = " timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');";
     static constexpr const int32_t IS_BLACKLISTED     = 1;
     static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
 
@@ -56,7 +56,7 @@ public:
     Statistics          getStatistics() const;
 
     void                createSong(const Song_t*);
-    void                removeSong(uint32_t);
+    void                removeSong(uint32_t, bool wasPlayed = false);
 
     void initDefaultAdmin();
 
