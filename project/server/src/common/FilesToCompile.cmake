@@ -25,6 +25,7 @@ set(COMMON_CPP_SOURCES
     database/sqlite_error.cpp
     database/Statement.cpp
     database/Query.cpp
+    database/templates/exception/NoSuchUserException.cpp
     os/SharedFileMemory.cpp
     os/Socket.cpp
     os/TestSocket.cpp
@@ -62,6 +63,7 @@ set(COMMON_HEADER_SOURCES
     database/Query.hpp
     database/templates/Song.hpp
     database/templates/User.hpp
+    database/templates/exception/NoSuchUserException.hpp
     os/SharedFileMemory.hpp
     os/Socket.hpp
     os/TestSocket.hpp

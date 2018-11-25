@@ -10,9 +10,11 @@
 
 #include "misc/id_utils.hpp"
 #include "Query.hpp"
+#include "templates/exception/NoSuchUserException.hpp"
 
 using namespace elevation;
 using namespace std::chrono_literals;
+
 
 Database* Database::s_instance = nullptr;
 constexpr const char Database::DB_NAME[] = "server.db";
@@ -385,7 +387,40 @@ Database::Database(std::experimental::filesystem::path serverPath) {
     }
 }
 
+
+bool Database::getBlacklistByMAC(const std::string& mac) const {
+    Statement stmt{m_db, Query(
+        "SELECT is_blacklisted FROM user "
+        "WHERE mac = '%q';",
+        mac.c_str())};
+    if(stmt.step()) {
+        return (stmt.getColumnInt(0) == Database::IS_BLACKLISTED);
+    } else {
+        throw NoSuchUserException();
+    }
+}
+
+void Database::setBlacklistFlag_(const std::string& mac, bool flag) {
+    bool blacklistValue = flag ?  Database::IS_BLACKLISTED
+                               : !Database::IS_BLACKLISTED;
+    executeQuery_(Query(
+        "UPDATE user "
+        "SET is_blacklisted = %i "
+        "WHERE (mac = '%q');",
+        blacklistValue,
+        mac.c_str()));
+}
+
+void Database::blacklistMAC(const std::string& mac) {
+    setBlacklistFlag_(mac, 1);
+}
+
+void Database::whitelistMAC(const std::string& mac) {
+    setBlacklistFlag_(mac, 0);
+}
+
 Database::~Database() {
     sqlite3_close_v2(m_db);
     sqlite3_shutdown();
 }
+

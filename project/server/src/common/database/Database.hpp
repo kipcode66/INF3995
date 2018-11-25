@@ -62,6 +62,10 @@ public:
 
     std::vector<User_t> getBlackList();
 
+    bool getBlacklistByMAC (const std::string& MAC) const;
+    void blacklistMAC      (const std::string& MAC);
+    void whitelistMAC      (const std::string& mac);
+
 protected:
     Database();
     Database(std::experimental::filesystem::path);
@@ -85,7 +89,8 @@ protected:
     int getAverageSongDuration_() const;
     int getStatisticsFromQuery_(const Query&) const;
 
-    void executeQuery_(const Query& query);
+    void setBlacklistFlag_ (const std::string&, bool);
+    void executeQuery_     (const Query& query);
 
     sqlite3* m_db = 0;
 };
@@ -94,3 +99,4 @@ protected:
 
 
 #endif // DATABASE_DATABASE_HPP
+
