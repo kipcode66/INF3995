@@ -3,9 +3,9 @@
 
 namespace elevation {
 
-const char* NoSuchUserException::what() const noexcept {
-    return "No Such User";
-}
+NoSuchUserException::NoSuchUserException()
+    : std::runtime_error("No Such User")
+{ }
 
 } // namespace elevation
 

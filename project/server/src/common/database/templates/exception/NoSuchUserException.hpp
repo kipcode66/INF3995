@@ -1,14 +1,14 @@
 #ifndef DATABASE_EXCEPTION_NOSUCHUSEREXCEPTION_HPP
 #define DATABASE_EXCEPTION_NOSUCHUSEREXCEPTION_HPP
 
-#include <exception>
+#include <stdexcept>
 
 
 namespace elevation {
 
-class NoSuchUserException : public std::exception {
+class NoSuchUserException : public std::runtime_error {
 public:
-    virtual const char* what() const noexcept override;
+    explicit NoSuchUserException();
 };
 
 } // namespace elevation
