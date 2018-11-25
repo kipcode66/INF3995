@@ -69,7 +69,51 @@ void FileManagementApi::getSuperviseurFile_(const Rest::Request& request,
 
 void FileManagementApi::deleteSuperviseurChanson_(const Rest::Request& request,
                                                   Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "deleteSuperviseurChanson called");
+    std::async(
+        std::launch::async,
+        [this](const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
+            Database* db = Database::instance();
+            uint32_t songId;
+            try {
+                songId = request.param(":no").as<uint32_t>();
+            }
+            catch (const std::runtime_error& e) {
+                response.send(Pistache::Http::Code::Bad_Request, e.what());
+            }
+
+            try {
+                Song_t song = db->getSongById(songId);
+
+                if (song.id != 0) {
+
+                    // TODO set deleted by Admin
+                    db->removeSong(songId);
+                    m_cache.deleteFile(song.path);
+
+                    std::ostringstream logMessage;
+                    logMessage << "{ Administrator }"
+                               << " Removed MP3 \"" << song.title
+                               << "\" of length " << song.duration;
+                    m_logger.log(logMessage.str());
+                    response.send(Pistache::Http::Code::Ok);
+                }
+                else {
+                    std::ostringstream logMessage;
+                    logMessage << "{ Administrator }"
+                               << " tried to remove nonexistant song of id "
+                               << songId;
+                    m_logger.err(logMessage.str());
+                    response.send(Pistache::Http::Code::Method_Not_Allowed);
+                }
+            }
+            catch (const std::exception& e) {
+                response.send(Pistache::Http::Code::Forbidden, e.what());
+                return;
+            }
+        },
+        request,
+        std::move(response)
+    );
 }
 
 void FileManagementApi::postSuperviseurInversion_(const Rest::Request& request,
