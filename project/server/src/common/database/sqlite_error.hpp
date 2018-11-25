@@ -3,12 +3,13 @@
 
 #include <stdexcept>
 
+#include <sqlite3/sqlite3.h>
+
 namespace elevation {
 
 class sqlite_error : public std::runtime_error {
 public:
-    sqlite_error();
-    sqlite_error(int);
+    sqlite_error(int code = SQLITE_OK);
     sqlite_error(int, const std::string&);
     virtual ~sqlite_error();
 

@@ -32,6 +32,7 @@ set(COMMON_CPP_SOURCES
     os/ClientSocket.cpp
     os/exception/SocketClosedException.cpp
     os/signal/SignalHandling.cpp
+    rest/rest_utils.cpp
     filesystem/FileCache.cpp
     misc/id_utils.cpp
     misc/Statistics.cpp
@@ -69,6 +70,7 @@ set(COMMON_HEADER_SOURCES
     os/exception/SocketClosedException.hpp
     os/signal/SignalHandling.hpp
     filesystem/FileCache.hpp
+    rest/rest_utils.hpp
     misc/Base64.hpp
     misc/id_utils.hpp
     misc/Statistics.hpp

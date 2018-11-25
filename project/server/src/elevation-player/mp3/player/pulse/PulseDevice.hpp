@@ -11,9 +11,10 @@ namespace elevation {
 class PulseDevice {
 public:
     static const pa_sample_spec PULSE_SPECIFICATION;
+    static const uint32_t DEFAULT_SAMPLE_RATE = 44100;
 
 public:
-    PulseDevice();
+    PulseDevice(const uint32_t rate = DEFAULT_SAMPLE_RATE);
     PulseDevice(const PulseDevice&) = delete;
     PulseDevice(PulseDevice&& that);
 

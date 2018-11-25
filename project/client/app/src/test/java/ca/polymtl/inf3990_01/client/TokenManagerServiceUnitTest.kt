@@ -6,7 +6,6 @@ import org.junit.Before
 import org.junit.Test
 import org.koin.android.ext.koin.with
 import org.koin.standalone.StandAloneContext
-import org.koin.standalone.inject
 import org.koin.test.KoinTest
 import org.mockito.Mockito
 

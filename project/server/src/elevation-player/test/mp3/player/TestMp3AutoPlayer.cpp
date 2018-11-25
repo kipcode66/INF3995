@@ -26,6 +26,7 @@ public:
             std::bind(&TestFixture::nextSongGetter, this),
             std::bind(&TestFixture::songRemover, this, std::placeholders::_1)
           )
+        , m_beforeGettingNextSong(m_beforeGettingNextSongPromise.get_future())
     { }
 
     fs::path nextSongGetter();
@@ -36,6 +37,12 @@ public:
     fs::path m_nextSong;
     fs::path m_lastRemovedSong;
     Mp3AutoPlayer m_mp3AutoPlayer;
+
+    // These futures/promises are to avoid race condition
+    // where we would start waiting for the song to
+    // start after it was started
+    std::promise<void> m_beforeGettingNextSongPromise;
+    std::future<void> m_beforeGettingNextSong;
 };
 
 fs::path TestFixture::nextSongGetter() {
@@ -51,6 +58,7 @@ void TestFixture::songRemover(fs::path song) {
 }
 
 BOOST_FIXTURE_TEST_CASE(constructionDestruction, TestFixture) {
+    m_beforeGettingNextSongPromise.set_value();
 }
 
 #define TIMEOUT_SECONDS 5 // Have to use BOOST_AUTO_TEST_CASE, because BOOST_FIXTURE_TEST_CASE does not have timeout.
@@ -60,6 +68,7 @@ BOOST_AUTO_TEST_CASE(destructionIsOkEvenIfPlaying, *boost::unit_test::timeout(TI
         std::lock_guard<std::mutex> lock(fixture.m_mutex);
         fixture.m_nextSong = TIPPERARY_PATH;
     }
+    fixture.m_beforeGettingNextSongPromise.set_value();
     fixture.m_mp3AutoPlayer.waitUntilSongStarted();
 }
 #undef TIMEOUT_SECONDS
@@ -71,8 +80,11 @@ BOOST_AUTO_TEST_CASE(stopPlaying, *boost::unit_test::timeout(TIMEOUT_SECONDS)) {
         std::lock_guard<std::mutex> lock(fixture.m_mutex);
         fixture.m_nextSong = TIPPERARY_PATH;
     }
-    fixture.m_mp3AutoPlayer.waitUntilSongStarted(); // Race condition here ; it's possible that we start waiting after the song started.
-                                                    // In that case, the test will fail.
+
+    fixture.m_beforeGettingNextSongPromise.set_value();
+    // Small race condition here : It's possible that the song starts between these two lines, before we start waiting.
+    fixture.m_mp3AutoPlayer.waitUntilSongStarted();
+
     BOOST_TEST(fixture.m_nextSong == Mp3AutoPlayer::NO_SONG);
     BOOST_TEST(fixture.m_lastRemovedSong == TestFixture::REMOVED_SONG_INITIAL_VALUE);
     fixture.m_mp3AutoPlayer.stopSong();
@@ -88,8 +100,11 @@ BOOST_AUTO_TEST_CASE(callsCallbacksCorrectly, *boost::unit_test::timeout(TIMEOUT
         std::lock_guard<std::mutex> lock(fixture.m_mutex);
         fixture.m_nextSong = TIPPERARY_SHORT_PATH;
     }
-    fixture.m_mp3AutoPlayer.waitUntilSongStarted(); // Race condition here ; it's possible that we start waiting after the song started.
-                                                    // In that case, the test will fail.
+
+    fixture.m_beforeGettingNextSongPromise.set_value();
+    // Small race condition here : It's possible that the song starts between these two lines, before we start waiting.
+    fixture.m_mp3AutoPlayer.waitUntilSongStarted();
+
     BOOST_TEST(fixture.m_nextSong == Mp3AutoPlayer::NO_SONG);
     BOOST_TEST(fixture.m_lastRemovedSong == TestFixture::REMOVED_SONG_INITIAL_VALUE);
     fixture.m_mp3AutoPlayer.waitUntilSongFinished();

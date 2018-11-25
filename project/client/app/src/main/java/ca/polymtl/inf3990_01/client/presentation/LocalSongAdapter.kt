@@ -9,30 +9,27 @@ import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.event.SendSongEvent
-import ca.polymtl.inf3990_01.client.controller.state.AppState
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.LocalSongs
 import ca.polymtl.inf3990_01.client.model.SongQueue
+import ca.polymtl.inf3990_01.client.utils.Misc
 import kotlinx.android.synthetic.main.local_song.view.*
-import kotlinx.android.synthetic.main.local_song.view.send
 import java.util.*
-
-import ca.polymtl.inf3990_01.client.utils.NetUtils
 
 class LocalSongAdapter(
         private val localSongs: LocalSongs,
         private val layoutInflater: LayoutInflater,
         private val appCtx: Context,
         private val eventMgr: EventManager,
-        private val presenter: Presenter,
         private val stateService: AppStateService,
         private val dataProvider: DataProvider
 ): BaseAdapter() {
     private var ownedSongs = getUpdatedOwnerSongsQueue()
 
     init {
-        presenter.addObserver(Observer(this::onPresenter))
+        stateService.addObserver(this::onStateChange)
+        dataProvider.observeSongQueue(Observer(this::onSongQueueChange))
         dataProvider.observeLocalSongSendStates(Observer(this::onLocalSongSendStateChange))
         dataProvider.observeLocalSongs(Observer(this::onLocalSongsChange))
     }
@@ -52,17 +49,18 @@ class LocalSongAdapter(
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun onPresenter(o: Observable, arg: Any?) {
-        if (arg is SongQueue) {
-            ownedSongs = getUpdatedOwnerSongsQueue()
-            Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
-            updateLocalSongSendState(arg)
-        }
-        else if (arg is AppState) {
-            Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
-        }
+    private fun onSongQueueChange(o: Observable, arg: Any?) {
+        ownedSongs = getUpdatedOwnerSongsQueue()
+        updateLocalSongSendState(arg as SongQueue)
+        Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
     }
-    private fun getUpdatedOwnerSongsQueue () = presenter.getSongs().filter { song -> song.sentBy == null }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onStateChange(o: Observable, arg: Any?) {
+        Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
+    }
+
+    private fun getUpdatedOwnerSongsQueue () = dataProvider.getSongQueue().filter { song -> song.sentBy == null }
 
     private fun updateLocalSongSendState(songs: SongQueue) {
         for (s in songs) {
@@ -79,13 +77,13 @@ class LocalSongAdapter(
         }
     }
 
-    override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {
+    override fun getView(position: Int, v: View?, viewGroup: ViewGroup?): View {
         val view = v ?: layoutInflater.inflate(R.layout.local_song, viewGroup, false)
-        val song = this.localSongs[postion]
+        val song = this.localSongs[position]
         view.songName.text = song.title
         view.author.text = song.authorName
-        val duration : String = NetUtils.formatTime(song.durationMS.toLong())
-        view.duration.text = duration
+        val duration : String = Misc.formatTime(song.durationMS.toLong())
+        view.duration.text = appCtx.getString(R.string.song_item_duration_format, duration)
         val isAdmin = stateService.getState().type == AppStateService.State.Admin
         val isSongInQueue = ownedSongs.any { s -> s.title == song.title && s.authorName == song.authorName }
         view.send.isEnabled = ownedSongs.size < 5 && !isSongInQueue && !isAdmin && (dataProvider[song] <= DataProvider.LocalSongSendState.NOT_SENT)
@@ -104,7 +102,7 @@ class LocalSongAdapter(
     }
 
     override fun getItemId(p: Int): Long {
-        return  p.toLong()
+        return p.toLong()
     }
 
     override fun getCount(): Int {

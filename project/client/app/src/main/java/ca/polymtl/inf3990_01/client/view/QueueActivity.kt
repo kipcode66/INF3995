@@ -37,6 +37,12 @@ class QueueActivity : AbstractDrawerActivity(R.layout.activity_queue, R.id.drawe
         song_queue.adapter = songQueueAdapter
     }
 
+    override fun onBackPressed() {
+        if (!songQueueAdapter.onBackPressed()) {
+            super.onBackPressed()
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.queue, menu)

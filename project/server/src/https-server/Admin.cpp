@@ -1,28 +1,62 @@
-#include "https/SecureRestApi.hpp"
 #include <rapidjson/document.h>
 
 #include "Admin.hpp"
 
-Admin::Admin(const Rest::Request& req) {
+#include <common/database/Database.hpp>
+
+#include <http-server/http/exception/MissingTokenException.hpp>
+#include <http-server/http/exception/InvalidTokenException.hpp>
+
+#include "https/exception/AuthenticationFailureException.hpp"
+
+namespace elevation {
+
+Admin Admin::extractAdminDataFromRequest(const Pistache::Rest::Request& request) {
     rapidjson::Document jsonDocument;
-    jsonDocument.Parse(req.body().c_str());
+    jsonDocument.Parse(request.body().c_str());
     bool fieldsValid = (jsonDocument.IsObject()
                      && jsonDocument.HasMember("usager")
                      && jsonDocument.HasMember("mot_de_passe")
                      && jsonDocument["usager"]       != '\0'
                      && jsonDocument["mot_de_passe"] != '\0');
     if (!fieldsValid) {
-        throw std::runtime_error("missing fields");
+        throw BadRequestException{};
     }
-    auto token = req.headers().getRaw("X-Auth-Token").value();
+    auto token = request.headers().getRaw("X-Auth-Token").value();
     if (token.empty() || std::stoul(token) == 0) {
-        throw std::runtime_error("invalid token");
+        throw InvalidTokenException{token};
     }
 
-    this->m_username = jsonDocument["usager"].GetString();
-    this->m_motDePasse = jsonDocument["mot_de_passe"].GetString();
-    this->m_id = std::stoul(token);
+    std::string username   = jsonDocument["usager"].GetString();
+    std::string motDePasse = jsonDocument["mot_de_passe"].GetString();
+    uint32_t id = std::stoul(token);
+
+    return Admin{username, motDePasse, id};
 }
+
+Admin Admin::getAdminDataFromRequestToken(const Pistache::Rest::Request& request) {
+    auto token = request.headers().getRaw("X-Auth-Token").value();
+    if (token.empty()) {
+        throw MissingTokenException{};
+    }
+    uint32_t id = std::stoul(token);
+    if (id == 0) {
+        throw InvalidTokenException{token};
+    }
+
+    Database* db = Database::instance();
+    if (!db->isAdminConnected(id)) {
+        throw AuthenticationFailureException{token};
+    }
+
+    return Admin{"", "", id};
+}
+
+Admin::Admin(std::string username, std::string motDePasse, uint32_t id)
+    : m_username(username)
+    , m_motDePasse(motDePasse)
+    , m_id(id)
+{ }
 
 std::string Admin::getUsername() const {
     return this->m_username;
@@ -36,3 +70,4 @@ uint32_t Admin::getId() const {
     return this->m_id;
 }
 
+} // namespace elevation

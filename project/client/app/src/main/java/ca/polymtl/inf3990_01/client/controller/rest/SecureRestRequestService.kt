@@ -6,18 +6,23 @@ import android.util.Log
 import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.InitializationManager
+import ca.polymtl.inf3990_01.client.controller.VolumeController
+import ca.polymtl.inf3990_01.client.controller.event.EventManager
+import ca.polymtl.inf3990_01.client.controller.event.RequestQueueReloadEvent
+import ca.polymtl.inf3990_01.client.controller.event.VolumeRequestEvent
 import ca.polymtl.inf3990_01.client.controller.rest.requests.RESTRequest
 import ca.polymtl.inf3990_01.client.controller.rest.requests.ResponseData
+import ca.polymtl.inf3990_01.client.controller.state.AppStateService
+import ca.polymtl.inf3990_01.client.model.Song
+import ca.polymtl.inf3990_01.client.model.Statistics
+import ca.polymtl.inf3990_01.client.model.User
+import ca.polymtl.inf3990_01.client.model.Volume
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
-import ca.polymtl.inf3990_01.client.controller.state.AppStateService
-import ca.polymtl.inf3990_01.client.model.Song
-import ca.polymtl.inf3990_01.client.model.SoundVolume
-import ca.polymtl.inf3990_01.client.model.Statistics
-import ca.polymtl.inf3990_01.client.model.User
 import com.google.gson.Gson
 import java.math.BigInteger
+import kotlin.coroutines.experimental.Continuation
 import kotlin.coroutines.experimental.suspendCoroutine
 
 class SecureRestRequestService(
@@ -25,55 +30,68 @@ class SecureRestRequestService(
     private val httpsClient: HTTPSRestClient,
     private val tokenService: TokenManagerService,
     private val initMgr: InitializationManager,
-    private val appStateService: AppStateService
+    private val eventMgr: EventManager,
+    private val appStateService: AppStateService,
+    private val volumeController: VolumeController
     ) {
     companion object {
-        private class UserResponseData(
-            val mac: String, val ip: String, val name: String)
-        private class UserListResponseData(val users: List<UserResponseData>)
-        data class LoginRequestData(val usager: String, val mot_de_passe: String)
-        private class SongResponseData(
+        private data class UserResponseData(
+            val mac: String, val ip: String, val nom: String)
+        private data class UserListResponseData(val bloques: List<UserResponseData>)
+
+        private data class LoginRequestData(val usager: String, val mot_de_passe: String)
+
+        private data class SongResponseData(
             val titre: String, val artiste: String, val duree: String,
             val ip: String, val mac: String, val id: BigInteger,
             val proposeePar: String?, val proprietaire: Boolean, val no: Int)
-        private class SongListResponseData(val chansons: List<SongResponseData>)
+        private data class SongListResponseData(val chansons: List<SongResponseData>)
 
-        const val RESOURCE_URI = "/superviseur/file"
+        private data class SwapSongRequestData(val une: Int, val autre: Int)
+
+        private data class VolumeResponseData(val volume: BigInteger, val sourdine: Boolean)
+
+        private const val RESOURCE_URI = "/superviseur"
     }
     private var lastMessageSongList: String? = null
+    private var lastMessageGeneric: String? = null
+
+    private inline fun <reified T> generateRequest(method: Int, res: String, body: Any, continuation: Continuation<ResponseData<T>>, messages: MutableMap<Int, String>, defaultResponse: T, displayToast: Boolean = false): RESTRequest<T> {
+        val canDisplayMessage = initMgr.isInitialized
+        return RESTRequest(method, httpsClient.getBaseURL() + "$RESOURCE_URI/$res", Gson().toJson(body), T::class.java,
+            mutableMapOf(
+                TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to tokenService.getToken().toString()
+            ),
+            Response.Listener { resp ->
+                continuation.resume(resp)
+            },
+            Response.ErrorListener { error ->
+                val code: Int = error.networkResponse?.statusCode ?: 0
+                val msg = when {
+                    messages.keys.indexOf(code) > 0 -> messages[code]
+                    else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
+                }
+                // lastMessageGeneric is used to prevent having the same message spamming the user.
+                if (displayToast && canDisplayMessage && lastMessageGeneric != msg) {
+                    lastMessageGeneric = msg
+                    Handler(appCtx.mainLooper).post {
+                        Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show()
+                    }
+                }
+                val resp = ResponseData(error.networkResponse?.statusCode ?: 0, defaultResponse, error.networkResponse)
+                continuation.resume(resp)
+            })
+    }
 
     suspend fun getSongList(): List<Song> {
         val list: MutableList<Song> = mutableListOf()
-        val token = tokenService.getToken()
         val resp: ResponseData<SongListResponseData> = suspendCoroutine { continuation ->
-            val canDisplayMessage = initMgr.isInitialized
-            val request = RESTRequest(
-                Request.Method.GET,
-                httpsClient.getBaseURL() + RESOURCE_URI,
-                "",
-                SongListResponseData::class.java,
-                mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
-                Response.Listener { resp ->
-                    continuation.resume(resp)
-                },
-                Response.ErrorListener { error ->
-                    val msg = when (error.networkResponse?.statusCode ?: 0) {
-                        401 -> appCtx.getString(R.string.error_message_unauthenticated)
-                        500 -> appCtx.getString(R.string.error_message_server)
-                        else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
-                    }
-                    // lastMessageSongList is used to prevent having the same message spamming the user.
-                    if (canDisplayMessage && lastMessageSongList != msg) {
-                        lastMessageSongList = msg
-                        Handler(appCtx.mainLooper).post {
-                            Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show()
-                        }
-                    }
-                    val resp = ResponseData(error.networkResponse?.statusCode ?: 0, SongListResponseData(listOf()), error.networkResponse)
-                    continuation.resume(resp)
-                }
-            )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            val request = generateRequest(Request.Method.GET, "file/", "", continuation, mutableMapOf(
+                400 to appCtx.getString(R.string.error_message_bad_request),
+                401 to appCtx.getString(R.string.error_message_unauthenticated),
+                500 to appCtx.getString(R.string.error_message_server)
+            ), SongListResponseData(listOf()), true)
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         for (chanson in resp.value.chansons) {
@@ -84,38 +102,99 @@ class SecureRestRequestService(
     }
 
     suspend fun deleteSong(song: Song) {
-        val token = tokenService.getToken()
         val songToDelete = song.id.toString()
         suspendCoroutine<ResponseData<String>> { continuation ->
-            val request = RESTRequest(
-                    Request.Method.DELETE,
-                    httpsClient.getBaseURL() + "/superviseur/chanson/$songToDelete",
-                    "",
-                    String::class.java,
-                    mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
-                    Response.Listener { resp ->
-                        continuation.resume(resp)
-                    },
-                    Response.ErrorListener { error ->
-                        val msg = when (error.networkResponse?.statusCode ?: 0) {
-                            401 -> appCtx.getString(R.string.error_message_unknow_user)
-                            405 -> appCtx.getString(R.string.error_message_deletion_refused)
-                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
-                        }
-                        continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
-                    }
-            )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            val request = generateRequest(
+                Request.Method.DELETE, "chanson/$songToDelete",
+                "", continuation, mutableMapOf(
+                    400 to appCtx.getString(R.string.error_message_bad_request),
+                    401 to appCtx.getString(R.string.error_message_unauthenticated),
+                    500 to appCtx.getString(R.string.error_message_server)
+                ), "")
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     suspend fun swapSongs(pair: Pair<Song, Song>) {
-        TODO("Not Implemented")
+        suspendCoroutine<ResponseData<String>> { continuation ->
+            val request = generateRequest(
+                Request.Method.POST, "inversion", SwapSongRequestData(pair.first.id, pair.second.id), continuation, mutableMapOf(
+                    400 to appCtx.getString(R.string.error_message_bad_request),
+                    401 to appCtx.getString(R.string.error_message_unknown_user),
+                    405 to appCtx.getString(R.string.error_message_unauthenticated),
+                    409 to appCtx.getString(R.string.error_message_song_not_in_queue),
+                    500 to appCtx.getString(R.string.error_message_server)
+            ), "")
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
-    suspend fun getVolume(): SoundVolume {
-        TODO("Not Implemented")
+    suspend fun getVolume(): Volume {
+        var volume = volumeController.getVolume()
+        val resp: ResponseData<VolumeResponseData> = suspendCoroutine { continuation ->
+            val request = generateRequest(Request.Method.GET, "volume", "", continuation, mutableMapOf(
+                401 to appCtx.getString(R.string.error_message_unauthenticated),
+                500 to appCtx.getString(R.string.error_message_server)
+            ), VolumeResponseData(BigInteger.ZERO, false))
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+        if (resp.code == 200) {
+            volume = Volume(resp.value.volume.toInt(), resp.value.sourdine)
+        }
+        return volume
+    }
+
+    suspend fun increaseVolume(pc: Int) {
+        suspendCoroutine<ResponseData<String>> { continuation ->
+            val request = generateRequest(Request.Method.POST, "volume/augmenter/$pc", "", continuation, mutableMapOf(
+                401 to appCtx.getString(R.string.error_message_unauthenticated),
+                500 to appCtx.getString(R.string.error_message_server)
+            ), "")
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+        eventMgr.dispatchEvent(VolumeRequestEvent())
+    }
+
+    suspend fun decreaseVolume(pc: Int) {
+        suspendCoroutine<ResponseData<String>> { continuation ->
+            val request = generateRequest(Request.Method.POST, "volume/diminuer/$pc", "", continuation, mutableMapOf(
+                401 to appCtx.getString(R.string.error_message_unauthenticated),
+                500 to appCtx.getString(R.string.error_message_server)
+            ), "")
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+        eventMgr.dispatchEvent(VolumeRequestEvent())
+    }
+
+    suspend fun muteVolume() {
+        suspendCoroutine<ResponseData<String>> { continuation ->
+            val request = generateRequest(Request.Method.POST, "volume/sourdine/activer", "", continuation, mutableMapOf(
+                401 to appCtx.getString(R.string.error_message_unauthenticated),
+                500 to appCtx.getString(R.string.error_message_server)
+            ), "")
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+        eventMgr.dispatchEvent(VolumeRequestEvent())
+    }
+
+    suspend fun unmuteVolume() {
+        suspendCoroutine<ResponseData<String>> { continuation ->
+            val request = generateRequest(Request.Method.POST, "volume/sourdine/desactiver", "", continuation, mutableMapOf(
+                401 to appCtx.getString(R.string.error_message_unauthenticated),
+                500 to appCtx.getString(R.string.error_message_server)
+            ), "")
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            httpsClient.addToRequestQueue(request)
+        }
+        eventMgr.dispatchEvent(VolumeRequestEvent())
     }
 
     suspend fun getStatistics(): Statistics {
@@ -137,7 +216,7 @@ class SecureRestRequestService(
             val canDisplayMessage = initMgr.isInitialized
             val request = RESTRequest(
                     Request.Method.GET,
-                    httpsClient.getBaseURL() + RestRequestService.RESOURCE_URI ,
+                    httpsClient.getBaseURL() + "$RESOURCE_URI/listenoire" ,
                     "",
                     UserListResponseData::class.java,
                     mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
@@ -146,8 +225,8 @@ class SecureRestRequestService(
                     },
                     Response.ErrorListener { error ->
                         val msg = when (error.networkResponse?.statusCode ?: 0) {
-                            401 -> appCtx.getString(R.string.error_message_unknow_user)
-                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage}"
+                            401 -> appCtx.getString(R.string.error_message_unknown_user)
+                            else -> appCtx.getString(R.string.error_message_unknown) + "; ${error.localizedMessage?:error.message}"
                         }
                         if (canDisplayMessage) {
                             Handler(appCtx.mainLooper).post {
@@ -159,11 +238,11 @@ class SecureRestRequestService(
                         continuation.resume(resp)
                     }
             )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
-        for (user in resp.value.users) {
-            list.add(User(user.mac, user.ip, user.name))
+        for (user in resp.value.bloques) {
+            list.add(User(user.mac, user.ip, user.nom))
         }
         return list
     }
@@ -175,7 +254,7 @@ class SecureRestRequestService(
             val token = tokenService.getToken()
             val request = RESTRequest(
                 Request.Method.POST,
-                httpsClient.getBaseURL() + "/superviseur/login",
+                httpsClient.getBaseURL() + "$RESOURCE_URI/login",
                 Gson().toJson(LoginRequestData(username, password)),
                 String::class.java,
                 mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
@@ -199,12 +278,13 @@ class SecureRestRequestService(
                     continuation.resume(false)
                 }
             )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         if (resp) {
             appStateService.setState(AppStateService.State.Admin)
         }
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     suspend fun logout() {
@@ -213,7 +293,7 @@ class SecureRestRequestService(
             val token = tokenService.getToken()
             val request = RESTRequest(
                 Request.Method.POST,
-                httpsClient.getBaseURL() + "/superviseur/logout",
+                httpsClient.getBaseURL() + "$RESOURCE_URI/logout",
                 "",
                 String::class.java,
                 mutableMapOf(TokenManagerService.HTTP_HEADER_NAME_X_AUTH_TOKEN to token.toString()),
@@ -236,10 +316,11 @@ class SecureRestRequestService(
                     continuation.resume(false)
                 }
             )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         appStateService.setState(AppStateService.State.User)
+        eventMgr.dispatchEvent(RequestQueueReloadEvent())
     }
 
     suspend fun changePassword(newPassword: String) {

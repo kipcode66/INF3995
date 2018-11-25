@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.login_layout.*
 
 class LoginDialog(
     activityCtx: Context,
-    val eventManager: EventManager
+    private val eventManager: EventManager
 ): Dialog(activityCtx) {
     init {
         setContentView(R.layout.login_layout)
