@@ -50,19 +50,12 @@ User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& reque
     auto body = request.body();
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
-    try {
-        if ((!request_json.IsObject()
-                || !request_json.HasMember("mac")
-                || !request_json.HasMember("ip")
-                ||  request_json["mac"].GetStringLength() == 0
-                ||  request_json["ip"] .GetStringLength() == 0)) {
-            throw BadRequestException();
-        }
-    } catch(const BadRequestException& e) {
-        throw;
-    } catch (const std::exception& e) {
-        std::cerr << "unexpected error: " << e.what() << std::endl;
-        return User_t{};
+    if ((!request_json.IsObject()
+            || !request_json.HasMember("mac")
+            || !request_json.HasMember("ip")
+            ||  request_json["mac"].GetStringLength() == 0
+            ||  request_json["ip"] .GetStringLength() == 0)) {
+        throw BadRequestException();
     }
     User_t requestUser = { 0 };
     if (request_json.IsObject()) {
@@ -169,7 +162,7 @@ void RestApi::getIdentification_(const Pistache::Rest::Request& request, Pistach
     }
     catch (const std::exception& e) {
         m_logger.err(std::string{"unknow exception as occurred: "} + e.what());
-        response.send(Pistache::Http::Code::Bad_Request, e.what());
+        response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
         return;
     }
 
