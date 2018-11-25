@@ -5,9 +5,8 @@
 
 namespace elevation {
 
-HttpsServerVolumeGetRequestAdapter::HttpsServerVolumeGetRequestAdapter(Logger& logger, std::shared_ptr<Mp3EventSocket> socket, std::shared_ptr<HttpsServerMp3EventVisitor> visitor)
+HttpsServerVolumeGetRequestAdapter::HttpsServerVolumeGetRequestAdapter(Logger& logger, std::shared_ptr<Mp3EventSocket> socket)
     : m_socket(socket)
-    , m_visitor(visitor)
 { }
 
 VolumeData_t HttpsServerVolumeGetRequestAdapter::getVolumeData() {
