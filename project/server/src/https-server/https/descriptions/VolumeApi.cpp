@@ -1,5 +1,8 @@
 #include "VolumeApi.hpp"
 
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+
 #include <common/mp3/event/VolumeChangeEvent.hpp>
 #include <common/mp3/event/MuteEvent.hpp>
 #include <common/mp3/event/UnmuteEvent.hpp>
@@ -44,7 +47,26 @@ VolumeApi::VolumeApi(Pistache::Rest::Description& desc, Logger& logger, std::sha
 
 void VolumeApi::GET_volume_(const Rest::Request& request,
                                           Http::ResponseWriter response) {
-    response.send(Http::Code::Ok, "{\"volume\":50, \"sourdine\":false}");
+    try {
+        if (isAdminAuthenticated_(request, response)) {
+            VolumeData_t volumeData = m_eventFacade.getVolumeData();
+            rapidjson::Document songsDoc;
+            songsDoc.SetObject();
+            songsDoc.AddMember(rapidjson::Value().SetString("volume"  ), volumeData.volume , songsDoc.GetAllocator());
+            songsDoc.AddMember(rapidjson::Value().SetString("sourdine"), volumeData.isMuted, songsDoc.GetAllocator());
+
+            rapidjson::StringBuffer buf;
+            rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+            songsDoc.Accept(writer);
+
+            std::string serializedVolumeData = buf.GetString();
+            response.send(Http::Code::Ok, serializedVolumeData);
+        }
+    }
+    catch (const std::exception& e) {
+        response.send(Pistache::Http::Code::Internal_Server_Error);
+        return;
+    }
 }
 
 void VolumeApi::POST_volumeAssigner_ (const Rest::Request& request,
