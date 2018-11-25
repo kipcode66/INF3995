@@ -23,31 +23,6 @@ StatsApi::StatsApi(Rest::Description& desc, Logger& logger)
             .hide();
 }
 
-std::string StatsApi::generateStatistics_(const Statistics& stats) {
-    rapidjson::Document statsDoc;
-    statsDoc.SetObject();
-    try {
-        Mp3Duration d(stats.getAverageDuration());
-        std::stringstream duration;
-        duration << std::setfill('0') << std::setw(2);
-        duration << d.getMinutes() << ':' << d.getSeconds();
-        statsDoc.AddMember(rapidjson::StringRef("chansons"), rapidjson::Value(stats.getSongCount()), statsDoc.GetAllocator());
-        statsDoc.AddMember(rapidjson::StringRef("utilisateurs"), rapidjson::Value(stats.getUserCount()), statsDoc.GetAllocator());
-        statsDoc.AddMember(rapidjson::StringRef("elimines"), rapidjson::Value(stats.getDeletedSongsCount()), statsDoc.GetAllocator());
-        statsDoc.AddMember(rapidjson::StringRef("temps"), rapidjson::Value(duration.str().c_str(), duration.str().length()), statsDoc.GetAllocator());
-    }
-    catch (sqlite_error& e) {
-        std::stringstream msg;
-        msg << "An error occured while generating a statistics's json: " << e.what();
-        m_logger.err(msg.str());
-    }
-    rapidjson::StringBuffer buf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
-    statsDoc.Accept(writer);
-
-    return buf.GetString();
-}
-
 void StatsApi::getSuperviseurStatistiques_(const Rest::Request& request,
                                            Http::ResponseWriter response) {
     std::thread([this](const Rest::Request& request, Http::ResponseWriter response) {
@@ -72,9 +47,9 @@ void StatsApi::getSuperviseurStatistiques_(const Rest::Request& request,
             response.send(Http::Code::Forbidden, "Admin not connected");
             return;
         }
-        Statistics stats = db->getStatistics();
+        Statistics statistics = db->getStatistics();
         std::stringstream resp;
-        resp << "{\n\"Statistiques\":[\n" << generateStatistics_(stats) << "\n]\n}\n";
+        resp << "{\n\"Statistiques\":[\n" << statistics << "\n]\n}\n";
         logMsg << "Statistics for admin \"" << token << "\" were successfuly sent.";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());

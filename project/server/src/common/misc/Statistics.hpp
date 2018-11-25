@@ -1,3 +1,5 @@
+#include "mp3/header/Mp3Duration.hpp"
+
 #ifndef MISC_STATISTICS_HPP
 #define MISC_STATISTICS_HPP
 
@@ -11,6 +13,9 @@ public:
     int getUserCount() const;
     int getDeletedSongsCount() const;
     int getAverageDuration() const;
+    std::string generateStatistics() const;
+
+    friend std::ostream& operator<<(std::ostream& os, const Statistics& stats);
 
 public:
     int m_songCount;

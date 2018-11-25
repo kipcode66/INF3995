@@ -14,8 +14,6 @@ private:
     void getSuperviseurStatistiques_( const Pistache::Rest::Request&,
                                       Pistache::Http::ResponseWriter);
 
-    std::string generateStatistics_(const Statistics&);
-
 private:
     Logger& m_logger;
 };
