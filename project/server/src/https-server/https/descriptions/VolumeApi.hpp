@@ -10,7 +10,7 @@ namespace elevation {
 
 class VolumeApi {
 public:
-    VolumeApi(Pistache::Rest::Description& desc, Logger& logger, Mp3EventClientSocket playerEventSocket);
+    VolumeApi(Pistache::Rest::Description& desc, Logger& logger, std::shared_ptr<Mp3EventClientSocket> playerEventSocket);
 
 private:
     void GET_volume_              (const Pistache::Rest::Request&,
@@ -26,7 +26,7 @@ private:
 
 private:
     Logger& m_logger;
-    Mp3EventClientSocket m_playerEventSocket;
+    std::shared_ptr<Mp3EventClientSocket> m_playerEventSocket;
 };
 
 } // namespace elevation

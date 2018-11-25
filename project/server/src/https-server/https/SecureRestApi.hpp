@@ -14,6 +14,7 @@
 #include "descriptions/StatsApi.hpp"
 #include "descriptions/FileManagementApi.hpp"
 #include "descriptions/AuthApi.hpp"
+#include "mp3/event/HttpsServerEventFacade.hpp"
 
 namespace elevation {
 
@@ -24,11 +25,14 @@ public:
 
 protected:
     Logger& m_logger;
+    std::shared_ptr<Mp3EventClientSocket> m_socket;
+    HttpsServerEventFacade m_eventFacade;
+
     VolumeApi         m_volumeApi;
     BlacklistApi      m_blacklistApi;
     StatsApi          m_statsApi;
     FileManagementApi m_fileManagementApi;
-    AuthApi           m_authApi;
+    AuthApi           m_authApi;  
 };
 
 } // namespace elevation

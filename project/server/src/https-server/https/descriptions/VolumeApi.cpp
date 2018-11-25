@@ -14,9 +14,9 @@ using namespace Pistache;
 
 namespace elevation {
 
-VolumeApi::VolumeApi(Pistache::Rest::Description& desc, Logger& logger, Mp3EventClientSocket playerEventSocket)
+VolumeApi::VolumeApi(Pistache::Rest::Description& desc, Logger& logger, std::shared_ptr<Mp3EventClientSocket> playerEventSocket)
     : m_logger(logger)
-    , m_playerEventSocket(std::move(playerEventSocket))
+    , m_playerEventSocket(playerEventSocket)
 {
     auto volumePath = desc.path("superviseur/volume");
     volumePath
@@ -64,7 +64,7 @@ void VolumeApi::POST_volumeAssigner_ (const Rest::Request& request,
     try {
         if (isAdminAuthenticated_(request, response)) {
             VolumeChangeEvent event{newVolume};
-            m_playerEventSocket.writeEvent(event);
+            m_playerEventSocket->writeEvent(event);
             response.send(Http::Code::Ok, "Volume change commiting...");
         }
     }
@@ -79,7 +79,7 @@ void VolumeApi::POST_sourdineActiver_(const Rest::Request& request,
     try {
         if (isAdminAuthenticated_(request, response)) {
             MuteEvent event;
-            m_playerEventSocket.writeEvent(event);
+            m_playerEventSocket->writeEvent(event);
             response.send(Http::Code::Ok, "Mute commiting...");
         }
     }
@@ -94,7 +94,7 @@ void VolumeApi::POST_sourdineDesactiver_(const Rest::Request& request,
     try {
         if (isAdminAuthenticated_(request, response)) {
             UnmuteEvent event;
-            m_playerEventSocket.writeEvent(event);
+            m_playerEventSocket->writeEvent(event);
             response.send(Http::Code::Ok, "Unmute commiting...");
         }
     }
