@@ -6,8 +6,9 @@
 
 namespace elevation {
 
-ElevationPlayerMp3EventVisitor::ElevationPlayerMp3EventVisitor(Logger& logger)
+ElevationPlayerMp3EventVisitor::ElevationPlayerMp3EventVisitor(Logger& logger, std::shared_ptr<Mp3EventSocket> socket)
     : m_logger(logger)
+    , m_socket(socket)
 { }
 
 void ElevationPlayerMp3EventVisitor::onVolumeChangeEvent(const VolumeChangeEvent& event) {

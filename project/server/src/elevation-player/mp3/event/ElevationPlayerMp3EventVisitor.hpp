@@ -6,6 +6,7 @@
 #include <common/mp3/event/MuteEvent.hpp>
 #include <common/mp3/event/UnmuteEvent.hpp>
 #include <common/mp3/event/VolumeGetRequest.hpp>
+#include <common/mp3/communication/Mp3EventSocket.hpp>
 #include <common/logger/Logger.hpp>
 
 #include "mp3/player/pulse/PulseVolume.hpp"
@@ -14,7 +15,7 @@ namespace elevation {
 
 class ElevationPlayerMp3EventVisitor : public AbstractMp3EventVisitor {
 public:
-    explicit ElevationPlayerMp3EventVisitor(Logger& logger);
+    explicit ElevationPlayerMp3EventVisitor(Logger& logger, std::shared_ptr<Mp3EventSocket> socket);
 
     virtual void onVolumeChangeEvent(const VolumeChangeEvent& event) override;
     virtual void onMuteEvent        (const MuteEvent&         event) override;
@@ -24,6 +25,7 @@ public:
 
 protected:
     Logger& m_logger;
+    std::shared_ptr<Mp3EventSocket> m_socket;
     PulseVolume m_pulseVolume;
 };
 
