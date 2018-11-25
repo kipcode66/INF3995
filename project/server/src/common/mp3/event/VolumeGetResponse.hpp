@@ -17,6 +17,8 @@ public:
 
     virtual void acceptVisitor(AbstractMp3EventVisitor& visitor) override;
 
+    VolumeData_t getVolumeData() const { return m_volumeData; }
+
 protected:
     VolumeData_t m_volumeData;
 };
