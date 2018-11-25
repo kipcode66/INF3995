@@ -24,6 +24,7 @@ set(HTTPS_SERVER_CPP_SOURCES
     https/exception/AuthenticationFailureException.cpp
     mp3/event/HttpsServerMp3EventVisitor.cpp
     mp3/event/HttpsServerEventManager.cpp
+    mp3/event/HttpsServerVolumeGetRequestAdapter.cpp
     Admin.cpp
 )
 
@@ -43,6 +44,7 @@ set(HTTPS_SERVER_HEADER_SOURCES
     https/exception/AuthenticationFailureException.hpp
     mp3/event/HttpsServerMp3EventVisitor.hpp
     mp3/event/HttpsServerEventManager.hpp
+    mp3/event/HttpsServerVolumeGetRequestAdapter.hpp
     Admin.hpp
 )
 
