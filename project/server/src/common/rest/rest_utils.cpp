@@ -12,7 +12,7 @@ namespace elevation {
 namespace rest_utils {
 
 std::string generateAllSongsAsViewedBy_(uint32_t token, bool adminSerialization) {
-    std::vector<Song_t> songs = Database::instance()->getAllSongs();
+    std::vector<Song_t> songs = Database::instance()->getAllPlayableSongs();
     rapidjson::Document songsDoc;
     songsDoc.SetObject();
     rapidjson::Value songsArray;
