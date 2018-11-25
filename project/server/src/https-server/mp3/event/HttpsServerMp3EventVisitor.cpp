@@ -5,6 +5,8 @@
 #include <common/mp3/event/VolumeGetResponse.hpp>
 #include <common/mp3/event/exception/UnexpectedEventException.hpp>
 
+#include "HttpsServerVolumeGetRequestAdapter.hpp"
+
 namespace elevation {
 
 HttpsServerMp3EventVisitor::HttpsServerMp3EventVisitor(Logger& logger, std::shared_ptr<HttpsServerVolumeGetRequestAdapter> volumeGetRequestAdapter)

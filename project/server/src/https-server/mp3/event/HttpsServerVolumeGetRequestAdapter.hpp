@@ -25,7 +25,7 @@ public:
     static constexpr std::chrono::seconds TIMEOUT_DELAY{10};
 
 public:
-    explicit HttpsServerVolumeGetRequestAdapter(Logger& logger, std::shared_ptr<Mp3EventSocket> socket);
+    explicit HttpsServerVolumeGetRequestAdapter(Logger& logger, std::shared_ptr<Mp3EventSocket> socket, HttpsServerMp3EventVisitor eventVisitor);
     virtual ~HttpsServerVolumeGetRequestAdapter() = default;
 
     VolumeData_t getVolumeData();

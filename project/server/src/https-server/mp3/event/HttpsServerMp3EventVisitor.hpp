@@ -8,9 +8,9 @@
 #include <common/mp3/event/VolumeGetRequest.hpp>
 #include <common/logger/Logger.hpp>
 
-#include "HttpsServerVolumeGetRequestAdapter.hpp"
-
 namespace elevation {
+
+class HttpsServerVolumeGetRequestAdapter;
 
 class HttpsServerMp3EventVisitor : public AbstractMp3EventVisitor {
 public:

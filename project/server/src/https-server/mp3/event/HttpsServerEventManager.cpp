@@ -10,22 +10,21 @@
 
 namespace elevation {
 
-HttpsServerEventManager::HttpsServerEventManager(std::shared_ptr<Mp3EventSocket> socket, Logger& logger)
+HttpsServerEventManager::HttpsServerEventManager(HttpsServerMp3EventVisitor eventVisitor, std::shared_ptr<Mp3EventSocket> socket, Logger& logger)
 {
-    m_accepterThread = std::thread(&HttpsServerEventManager::readerThread_, std::move(socket), std::ref(logger));
+    m_readerThread = std::thread(&HttpsServerEventManager::readerThread_, std::move(eventVisitor), std::move(socket), std::ref(logger));
 }
 
 HttpsServerEventManager::~HttpsServerEventManager() {
     // NOTE: In theory, since the HTTPS Server never finishes until we kill it,
     // this destructor should never get called. However, if it is, it will block forever.
-    m_accepterThread.join();
+    m_readerThread.join();
 }
 
-void HttpsServerEventManager::readerThread_(std::shared_ptr<Mp3EventSocket> socket, Logger& logger) {
-    HttpsServerMp3EventVisitor visitor{logger};
+void HttpsServerEventManager::readerThread_(HttpsServerMp3EventVisitor eventVisitor, std::shared_ptr<Mp3EventSocket> socket, Logger& logger) {
     while (true) {
         try {
-            socket->readEvent()->acceptVisitor(visitor);
+            socket->readEvent()->acceptVisitor(eventVisitor);
         }
         catch (const std::exception& e) {
             logger.err(std::string("HttpsServerEventManager got C++ exception: ") + e.what());

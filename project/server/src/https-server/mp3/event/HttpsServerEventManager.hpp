@@ -7,6 +7,8 @@
 #include <common/mp3/communication/Mp3EventListenerSocket.hpp>
 #include <common/mp3/communication/Mp3EventSocket.hpp>
 
+#include "HttpsServerMp3EventVisitor.hpp"
+
 namespace elevation {
 
 /**
@@ -15,14 +17,14 @@ namespace elevation {
  */
 class HttpsServerEventManager {
 public:
-    explicit HttpsServerEventManager(std::shared_ptr<Mp3EventSocket> socket, Logger& logger);
+    explicit HttpsServerEventManager(HttpsServerMp3EventVisitor eventVisitor, std::shared_ptr<Mp3EventSocket> socket, Logger& logger);
     virtual ~HttpsServerEventManager();
 
 protected:
-    static void readerThread_(std::shared_ptr<Mp3EventSocket> socket, Logger& logger);
+    static void readerThread_(HttpsServerMp3EventVisitor eventVisitor, std::shared_ptr<Mp3EventSocket> socket, Logger& logger);
 
 protected:
-    std::thread m_accepterThread;
+    std::thread m_readerThread;
 };
 
 } // namespace elevation
