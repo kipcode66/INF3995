@@ -3,22 +3,22 @@
 using namespace elevation;
 
 Statistics::Statistics(int nSongs, int nUsers, int nDeletedSongs, int avgDuration) :
-    m_SongCount(nSongs),
-    m_UserCount(nUsers),
-    m_DeletedSongsCount(nDeletedSongs),
+    m_songCount(nSongs),
+    m_userCount(nUsers),
+    m_deletedSongsCount(nDeletedSongs),
     m_averageDurationInSec(avgDuration)
 {}
 
 int Statistics::getSongCount() const {
-    return m_SongCount;
+    return m_songCount;
 }
 
 int Statistics::getUserCount() const {
-    return m_UserCount;
+    return m_userCount;
 }
 
 int Statistics::getDeletedSongsCount() const {
-    return m_DeletedSongsCount;
+    return m_deletedSongsCount;
 }
 
 int Statistics::getAverageDuration() const {

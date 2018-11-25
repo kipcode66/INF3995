@@ -13,9 +13,9 @@ public:
     int getAverageDuration() const;
 
 public:
-    int m_SongCount;
-    int m_UserCount;
-    int m_DeletedSongsCount;
+    int m_songCount;
+    int m_userCount;
+    int m_deletedSongsCount;
     int m_averageDurationInSec;
 
 };
