@@ -50,13 +50,19 @@ User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& reque
     auto body = request.body();
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
-
-    if ((!request_json.IsObject()
-            || (!request_json.HasMember("mac")
-                || !request_json.HasMember("ip")
-                || request_json["mac"] == '\0'
-                || request_json["ip"] == '\0'))) {
-        throw BadRequestException();
+    try {
+        if ((!request_json.IsObject()
+                || (!request_json.HasMember("mac")
+                    || !request_json.HasMember("ip")
+                    || request_json["mac"].IsNull()
+                    || request_json["ip"].IsNull()))) {
+            throw BadRequestException();
+        }
+    } catch(const BadRequestException& e) {
+        throw;
+    } catch (const std::exception& e) {
+        std::cerr << "unexpected error: " << e.what() << std::endl;
+        return User_t{};
     }
     User_t requestUser = { 0 };
     if (request_json.IsObject()) {
@@ -66,6 +72,7 @@ User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& reque
             strncpy(requestUser.name, request_json["nom"].GetString(), User_t::NAME_LENGTH);
         }
     }
+    std::cerr << "got user: ip=" << requestUser.ip << ", mac=" << requestUser.mac << ", nom=" << requestUser.name << std::endl;
     return requestUser;
 }
 
@@ -158,6 +165,11 @@ void RestApi::getIdentification_(const Pistache::Rest::Request& request, Pistach
     }
     catch (const BadRequestException& e) {
         m_logger.err(std::string{"getIdentification failed: "} + e.what());
+        response.send(Pistache::Http::Code::Bad_Request, e.what());
+        return;
+    }
+    catch (const std::exception& e) {
+        m_logger.err(std::string{"unknow exception as occurred: "} + e.what());
         response.send(Pistache::Http::Code::Bad_Request, e.what());
         return;
     }

@@ -3,6 +3,8 @@
 import unittest
 import sys
 import requests
+import subprocess
+import shlex
 
 from requests.exceptions import ConnectionError
 from requests.packages.urllib3 import disable_warnings
@@ -11,7 +13,8 @@ from requests.packages.urllib3 import disable_warnings
 BASE_PATH = 'https://127.0.0.1:'
 port_no = '4433'
 
-mock_headers = {"X-Auth-Token": "123"}
+mock_token = "123456"
+mock_headers = {"X-Auth-Token": mock_token}
 mock_ip = "123.2.3.4"
 mock_mac = "FF:12:34:56:89:0F"
 mock_nom = "test_user"
@@ -20,11 +23,9 @@ endpoints = {
     'identification': {
         'request': requests.post,
         'path': '/usager/identification',
-        'headers': mock_headers,
         'data': {
             'ip': mock_ip,
             'mac':mock_mac,
-            # 'nom': mock_nom,
             'name': mock_nom,
         }
     },
@@ -45,6 +46,9 @@ endpoints = {
 }
 
 class BlacklistTest(unittest.TestCase):
+    """
+    Testing the blacklist. We are using curls because the python library didn't work
+    over HTTPS because of our custom SSL daemon """
 
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
@@ -52,62 +56,80 @@ class BlacklistTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         "Login as admin"
-        disable_warnings()
         try:
-            req = requests.post(
-                    BASE_PATH + port_no + '/superviseur/login',
-                    data={"usager": "admin", "mot_de_passe": "admin"},
-                    headers=mock_headers,
-                    verify=False)
+            cmd = 'curl -k -X POST https://127.0.0.1:4433/superviseur/login '\
+                  '-H \'X-Auth-Token: ' + mock_token + '\' '\
+                  '--data \'{"usager": "admin", "mot_de_passe":"admin"}\''
+            args = shlex.split(cmd)
+            process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, _ = process.communicate()
+            self.assertTrue(
+                    "succesful" in str(stdout) or
+                    "already"   in str(stdout),
+                    "generated user identification")
         except:
-            assertTrue(False, "Could not login as Admin")
+            self.assertTrue(False, "Could not login as Admin")
 
 
     def test_listenoire_good(self):
         "Test getting the blacklist"
 
-        disable_warnings()
-        e = endpoints['listenoire']
-        req = None
-        try:
-            req = e['request'](
-                BASE_PATH + port_no + e['path'],
-                headers=mock_headers,
-                verify=False)
-        except ConnectionError:
-            self.assertIsNotNone(req, "Connection established")
-        self.assertEqual(req.status_code, 200, "status code is correct")
+        cmd = "curl -k -X GET https://127.0.0.1:4433/superviseur/listenoire -H 'X-Auth-Token: " + mock_token + "' "
+        args = shlex.split(cmd)
+        process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        self.assertIn("bloque", str(stdout), "successfully retrieved blacklist")
 
 
     def test_bloquer(self):
         "Creates a user and then block it"
-
         disable_warnings()
-        req = None
-        try:
-            # e = endpoints['identification']
-            # create_req = requests.post(
-            #     BASE_PATH + port_no + '/usager/identification',
-            #     json={'ip': mock_ip, 'mac': mock_mac, 'name': 'test_user'},
-            #     verify=False
-            # )
+        cmd = 'curl -k -X POST https://127.0.0.1:' + port_no + '/usager/identification --data '\
+              '\'{"ip": "' + mock_ip + '", "mac":"' + mock_mac + '", "nom": "test_user1"}\''
+        args = shlex.split(cmd)
+        process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        self.assertTrue("identificateur" in str(stdout), "generated user identification")
 
-            # create_req = e['request'](
-            #     BASE_PATH + port_no + e['path'],
-            #     verify=False,
-            #     data=e['data'])
-            # self.assertEqual(create_req.status_code, 200, "could not create user")
+        cmd = "curl -k -X POST https://127.0.0.1:" + port_no + "/superviseur/bloquer "\
+              "-H 'X-Auth-Token: " + mock_token + \
+              "' --data '{\"mac\":\"" + mock_mac + "\", \"ip\": \"\", \"nom\": \"\"}' "
+        args = shlex.split(cmd)
+        process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        self.assertIn(
+                "blocked", str(stdout), "user succesfully blocked")
 
-            e = endpoints['bloquer']
-            block_req = e['request'](
-                BASE_PATH + port_no + e['path'],
-                headers=mock_headers,
-                data=e['data'],
-                verify=False)
-        except ConnectionError:
-            self.assertIsNotNone(req, "Connection established")
+    def test_bloquer_debloquer(self):
+        "Creates a user and then block it"
+        disable_warnings()
+        cmd = 'curl -k -X POST https://127.0.0.1:' + port_no + '/usager/identification --data '\
+              '\'{"ip": "' + mock_ip + '", "mac":"' + mock_mac + '", "nom": "test_user1"}\''\
+              " -w \"\n%{http_code}\""
+        args = shlex.split(cmd)
+        process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        self.assertTrue("200" in str(stdout), "generated user identification")
 
-        self.assertEqual(block_req.status_code, 200, "could not block user")
+        cmd = "curl -k -X POST https://127.0.0.1:" + port_no + "/superviseur/bloquer "\
+              "-H 'X-Auth-Token: " + mock_token + \
+              "' --data '{\"mac\":\"" + mock_mac + "\", \"ip\": \"\", \"nom\": \"\"}' "\
+              " -w \"\n%{http_code}\""
+        args = shlex.split(cmd)
+        process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        self.assertIn(
+                "200", str(stdout), "user succesfully blocked")
+
+        cmd = "curl -k -X POST https://127.0.0.1:" + port_no + "/superviseur/debloquer "\
+              "-H 'X-Auth-Token: " + mock_token + \
+              "' --data '{\"mac\":\"" + mock_mac + "\", \"ip\": \"\", \"nom\": \"\"}' "\
+              " -w \"\n%{http_code}\""
+        args = shlex.split(cmd)
+        process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        self.assertIn(
+                "200", str(stdout), "user succesfully blocked")
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
