@@ -52,7 +52,6 @@ public:
     Song_t              getSongByPath(const std::string&) const;
     std::vector<Song_t> getSongsByUser(int userId) const;
     std::vector<Song_t> getAllSongs() const;
-    std::vector<Song_t> getDailySongs() const;
     
     Statistics          getStatistics() const;
 

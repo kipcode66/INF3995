@@ -245,12 +245,6 @@ std::vector<Song_t> Database::getAllSongs() const {
         "FROM songs ORDER BY song_order ASC;"));
 }
 
-std::vector<Song_t> Database::getDailySongs() const {
-    std::string query("SELECT rowid, title, artist, user_id, duration, path, deleted_by_admin");
-    query += TODAY_QUERY;
-    return getSongsByQuery_(Query(query.c_str())); 
-}
-
 int Database::getStatisticsFromQuery_(const Query& query) const {
     int statistic;
     Statement stmt{m_db, query};
