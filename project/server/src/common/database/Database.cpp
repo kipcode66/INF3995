@@ -403,22 +403,20 @@ bool Database::getBlacklistByMAC(const std::string& mac) const {
 }
 
 void Database::setBlacklistFlag_(const std::string& mac, bool flag) {
-    bool blacklistValue = flag ?  Database::IS_BLACKLISTED
-                               : !Database::IS_BLACKLISTED;
     executeQuery_(Query(
         "UPDATE user "
         "SET is_blacklisted = %i "
         "WHERE (mac = '%q');",
-        blacklistValue,
+        flag,
         mac.c_str()));
 }
 
 void Database::blacklistMAC(const std::string& mac) {
-    setBlacklistFlag_(mac, 1);
+    setBlacklistFlag_(mac, Database::BLOCKED);
 }
 
 void Database::whitelistMAC(const std::string& mac) {
-    setBlacklistFlag_(mac, 0);
+    setBlacklistFlag_(mac, Database::UNBLOCKED);
 }
 
 Database::~Database() {

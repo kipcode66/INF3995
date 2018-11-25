@@ -22,9 +22,11 @@ class Database {
 public:
     static constexpr const char*   ADMIN_NAME         = "admin";
     static constexpr const char*   DEFAULT_PASSWORD   = "admin";
-    static constexpr const char*   TODAY_QUERY        = " timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');";
-    static constexpr const int32_t IS_BLACKLISTED     = 1;
+    static constexpr const int32_t BLOCKED            = 1;
+    static constexpr const int32_t UNBLOCKED          = 0;
     static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
+    static constexpr const char*   TODAY_QUERY        = " timestamp BETWEEN julianday('now', 'start of day')"
+                                                        " AND julianday('now', 'start of day', '+1 day', '-1 second');";
 
     static Database* instance();
     static void assertSqliteOk(int errcode, const std::string& message = "");
