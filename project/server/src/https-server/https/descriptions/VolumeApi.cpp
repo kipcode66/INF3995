@@ -14,9 +14,10 @@ using namespace Pistache;
 
 namespace elevation {
 
-VolumeApi::VolumeApi(Pistache::Rest::Description& desc, Logger& logger, std::shared_ptr<Mp3EventClientSocket> playerEventSocket)
+VolumeApi::VolumeApi(Pistache::Rest::Description& desc, Logger& logger, std::shared_ptr<Mp3EventClientSocket> playerEventSocket, HttpsServerEventFacade& eventFacade)
     : m_logger(logger)
     , m_playerEventSocket(playerEventSocket)
+    , m_eventFacade(eventFacade)
 {
     auto volumePath = desc.path("superviseur/volume");
     volumePath

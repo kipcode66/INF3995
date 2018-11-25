@@ -17,7 +17,7 @@ SecureRestApi::SecureRestApi(Pistache::Address addr, Logger& logger, FileCache& 
     , m_logger            (logger)
     , m_socket(new Mp3EventClientSocket(std::move(playerEventSocket)))
     , m_eventFacade(logger, m_socket)
-    , m_volumeApi         (m_desc, m_logger, m_socket)
+    , m_volumeApi         (m_desc, m_logger, m_socket, m_eventFacade)
     , m_blacklistApi      (m_desc, m_logger)
     , m_statsApi          (m_desc)
     , m_fileManagementApi (m_desc, m_logger)

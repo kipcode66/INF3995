@@ -6,11 +6,13 @@
 #include <common/logger/Logger.hpp>
 #include <common/mp3/communication/Mp3EventClientSocket.hpp>
 
+#include "mp3/event/HttpsServerEventFacade.hpp"
+
 namespace elevation {
 
 class VolumeApi {
 public:
-    VolumeApi(Pistache::Rest::Description& desc, Logger& logger, std::shared_ptr<Mp3EventClientSocket> playerEventSocket);
+    VolumeApi(Pistache::Rest::Description& desc, Logger& logger, std::shared_ptr<Mp3EventClientSocket> playerEventSocket, HttpsServerEventFacade& eventFacade);
 
 private:
     void GET_volume_              (const Pistache::Rest::Request&,
@@ -27,6 +29,7 @@ private:
 private:
     Logger& m_logger;
     std::shared_ptr<Mp3EventClientSocket> m_playerEventSocket;
+    HttpsServerEventFacade& m_eventFacade;
 };
 
 } // namespace elevation
