@@ -36,7 +36,7 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
         retry = false;
         try {
             Database* db = Database::instance();
-            auto songs = db->getAllSongs();
+            auto songs = db->getAllPlayableSongs();
             if (songs.size() > 0 && strlen(songs[0].path) > 0) {
                 newSong = songs[0].path;
             }
