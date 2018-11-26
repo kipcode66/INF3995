@@ -22,7 +22,7 @@ class VolumeController(
     companion object {
         const val PERCENTAGE_MAX = 100
         const val PERCENTAGE_INITIAL = 0
-        const val PERCENTAGE_INCREMENT = 5
+        const val PERCENTAGE_MULTIPLIER = 5
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -30,29 +30,29 @@ class VolumeController(
 
     private val mediaSession = MediaSessionCompat(appCtx, javaClass.name)
     private val volumeProvider =
-        object : VolumeProviderCompat(VolumeProviderCompat.VOLUME_CONTROL_ABSOLUTE, PERCENTAGE_MAX, PERCENTAGE_INITIAL) {
+        object : VolumeProviderCompat(VolumeProviderCompat.VOLUME_CONTROL_ABSOLUTE, PERCENTAGE_MAX / PERCENTAGE_MULTIPLIER, PERCENTAGE_INITIAL / PERCENTAGE_MULTIPLIER) {
             fun setVolumeLevel(volume: Volume) {
-                currentVolume = volume.level
+                currentVolume = ((volume.level.toDouble() + 1.0) / PERCENTAGE_MULTIPLIER.toDouble()).toInt()
             }
 
             override fun onSetVolumeTo(volume: Int) {
                 super.onSetVolumeTo(volume)
-                currentVolume = Math.max(0, Math.min(volume, PERCENTAGE_MAX))
-                eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.SET, volume))
+                currentVolume = Math.max(0, Math.min(volume, PERCENTAGE_MAX / PERCENTAGE_MULTIPLIER))
+                eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.SET, volume * PERCENTAGE_MULTIPLIER))
             }
 
             override fun onAdjustVolume(direction: Int) {
                 super.onAdjustVolume(direction)
                 when (direction) {
                     AudioManager.ADJUST_RAISE  -> {
-                        currentVolume += PERCENTAGE_INCREMENT
-                        currentVolume = Math.max(0, Math.min(currentVolume, PERCENTAGE_MAX))
-                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.SET, currentVolume))
+                        ++currentVolume
+                        currentVolume = Math.max(0, Math.min(currentVolume, PERCENTAGE_MAX / PERCENTAGE_MULTIPLIER))
+                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.SET, currentVolume * PERCENTAGE_MULTIPLIER))
                     }
                     AudioManager.ADJUST_LOWER  -> {
-                        currentVolume -= PERCENTAGE_INCREMENT
-                        currentVolume = Math.max(0, Math.min(currentVolume, PERCENTAGE_MAX))
-                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.SET, currentVolume))
+                        --currentVolume
+                        currentVolume = Math.max(0, Math.min(currentVolume, PERCENTAGE_MAX / PERCENTAGE_MULTIPLIER))
+                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.SET, currentVolume * PERCENTAGE_MULTIPLIER))
                     }
                     AudioManager.ADJUST_MUTE   -> {
                         eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.MUTE))
