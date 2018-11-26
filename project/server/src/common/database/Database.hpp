@@ -20,9 +20,11 @@ namespace elevation {
 
 class Database {
 public:
-    static constexpr const char*   ADMIN_NAME         = "admin";
-    static constexpr const char*   DEFAULT_PASSWORD   = "admin";
-    static constexpr const char*   TODAY_QUERY        = " timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');";
+    static constexpr const char*   ADMIN_NAME             = "admin";
+    static constexpr const char*   DEFAULT_PASSWORD       = "admin";
+    static constexpr const char*   TODAY_QUERY            = " timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');";
+    static constexpr const char*   SELECT_FROM_SONG_QUERY = "SELECT rowid, title, artist, user_id, duration, path FROM songs WHERE ";
+    static constexpr const char*   ORDER_QUERY            = "ORDER BY song_order ASC;";
     static constexpr const int32_t IS_BLACKLISTED     = 1;
     static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
 

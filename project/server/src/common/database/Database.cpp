@@ -201,24 +201,21 @@ Song_t Database::getSongByQuery_(const Query& query) const {
 }
 
 Song_t Database::getSongById(int id) const {
-    return getSongByQuery_(Query(
-        "SELECT rowid, title, artist, user_id, duration, path FROM songs "
-        "WHERE (rowid = %u);",
-        id));
+    std::string query(SELECT_FROM_SONG_QUERY);
+    query += "rowid = %u;";
+    return getSongByQuery_(Query(query.c_str(), id));
 }
 
 Song_t Database::getSongByTitle(const std::string& title) const {
-    return getSongByQuery_(Query(
-        "SELECT rowid, title, artist, user_id, duration, path FROM songs "
-        "WHERE (title = '%q');",
-        title.c_str()));
+    std::string query(SELECT_FROM_SONG_QUERY);
+    query += "title = '%q';";
+    return getSongByQuery_(Query(query.c_str(), title.c_str()));
 }
 
 Song_t Database::getSongByPath(const std::string& path) const {
-    return getSongByQuery_(Query(
-        "SELECT rowid, title, artist, user_id, duration, path FROM songs "
-        "WHERE (path = '%q');",
-        path.c_str()));
+    std::string query(SELECT_FROM_SONG_QUERY);
+    query += "path = '%q';";
+    return getSongByQuery_(Query(query.c_str(), path.c_str()));
 }
 
 std::vector<Song_t> Database::getSongsByQuery_(const Query& query) const {
@@ -235,23 +232,23 @@ std::vector<Song_t> Database::getSongsByQuery_(const Query& query) const {
 }
 
 std::vector<Song_t> Database::getSongsByUser(int userId) const {
-    return getSongsByQuery_(Query(
-        "SELECT rowid, title, artist, user_id, duration, path, song_order "
-        "FROM songs WHERE (user_id = %u AND was_played = 0 AND length(path) > 0) ORDER BY song_order ASC;",
-        userId));
+    std::string query(SELECT_FROM_SONG_QUERY);
+    query += "(user_id = %u AND was_played = 0 AND length(path) > 0) ";
+    query += ORDER_QUERY;
+    return getSongsByQuery_(Query(query.c_str(), userId));
 }
 
 std::vector<Song_t> Database::getAllSongs() const {
-    return getSongsByQuery_(Query(
-        "SELECT rowid, title, artist, user_id, duration, path, song_order "
-        "FROM songs ORDER BY song_order ASC;"));
+    std::string query(SELECT_FROM_SONG_QUERY);
+    query += ORDER_QUERY;
+    return getSongsByQuery_(Query(query.c_str()));
 }
 
 std::vector<Song_t> Database::getAllPlayableSongs() const {
-    return getSongsByQuery_(Query(
-        "SELECT rowid, title, artist, user_id, duration, path, song_order "
-        "FROM songs WHERE was_played = 0 AND length(path) > 0 "
-        "ORDER BY song_order ASC;"));
+    std::string query(SELECT_FROM_SONG_QUERY);
+    query += "(was_played = 0 AND length(path) > 0) ";
+    query += ORDER_QUERY;
+    return getSongsByQuery_(Query(query.c_str()));
 }
 
 int Database::getStatisticsFromQuery_(const Query& query) const {
@@ -267,25 +264,25 @@ int Database::getStatisticsFromQuery_(const Query& query) const {
 int Database::getDailyUserCount_() const {
     std::string query("SELECT COUNT(DISTINCT user_id) FROM songs WHERE");
     query += TODAY_QUERY;
-    return getStatisticsFromQuery_(query.c_str());
+    return getStatisticsFromQuery_(Query(query.c_str()));
 }
 
 int Database::getDailySongCount_() const {
     std::string query("SELECT COUNT(*) FROM songs WHERE was_played = 1 AND");
     query += TODAY_QUERY;
-    return getStatisticsFromQuery_(query.c_str());
+    return getStatisticsFromQuery_(Query(query.c_str()));
 }
 
 int Database::getDeletedSongsCount_() const {
     std::string query("SELECT COUNT(*) FROM songs WHERE deleted_by_admin = 1 AND");
     query += TODAY_QUERY;
-    return getStatisticsFromQuery_(query.c_str());
+    return getStatisticsFromQuery_(Query(query.c_str()));
 }
 
 int Database::getAverageSongDuration_() const {
     std::string query("SELECT avg(duration) FROM songs WHERE was_played = 1 AND");
     query += TODAY_QUERY;
-    return getStatisticsFromQuery_(query.c_str());
+    return getStatisticsFromQuery_(Query(query.c_str()));
 }
 
 Statistics Database::getStatistics() const {
