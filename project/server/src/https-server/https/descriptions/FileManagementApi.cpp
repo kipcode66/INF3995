@@ -102,7 +102,12 @@ void FileManagementApi::postSuperviseurInversion_(const Rest::Request& request,
             Database* db = Database::instance();
             Song_t song1 = db->getSongById(first);
             Song_t song2 = db->getSongById(first);
-            if (song1.id == 0 || strlen(song1.path) == 0 || song2.id == 0 || strlen(song2.path) == 0) {
+            std::vector<Song_t> songs = db->getAllPlayableSongs();
+            bool isFirst = false;
+            if (songs.size() > 0) {
+                isFirst = songs[0].id == song1.id || songs[0].id == song2.id;
+            }
+            if (song1.id == 0 || strlen(song1.path) == 0 || song2.id == 0 || strlen(song2.path) == 0 || isFirst) {
                 m_logger.err("One or both songs are not in the queue");
                 response.send(Http::Code::Conflict, "One or both songs are not in the queue");
                 return;
