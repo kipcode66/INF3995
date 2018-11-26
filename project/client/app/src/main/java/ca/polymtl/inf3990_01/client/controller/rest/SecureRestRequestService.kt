@@ -38,7 +38,7 @@ class SecureRestRequestService(
     ) {
     companion object {
         private data class UserData(
-            val mac: String, val ip: String, val nom: String)
+            val mac: String, val ip: String, val name: String)
         private data class UserListResponseData(val bloques: List<UserData>)
 
         private data class LoginRequestData(val usager: String, val mot_de_passe: String)
@@ -270,7 +270,7 @@ class SecureRestRequestService(
             httpsClient.addToRequestQueue(request)
         }
         for (user in resp.value.bloques) {
-            list.add(User(user.mac, user.ip, user.nom))
+            list.add(User(user.mac, user.ip, user.name ?: ""))
         }
         return list
     }

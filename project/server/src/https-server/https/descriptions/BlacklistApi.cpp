@@ -46,11 +46,11 @@ void BlacklistApi::getSuperviseurListenoire_(const Rest::Request& request,
         }
         std::vector<User_t> blackList = db->getBlackList();
         std::stringstream resp;
-        resp << "{\n\"bloques\":[\n";
+        resp << "{\"bloques\":[";
         for (auto& user : blackList) {
-            resp << generateUser_(user) << (&blackList.back() != &user ? ",\n" : "\n");
+            resp << generateUser_(user) << (&blackList.back() != &user ? "," : "");
         }
-        resp << "]\n}\n";
+        resp << "]}";
         logMsg << "The blacklist was successfuly sent to admin";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
