@@ -312,6 +312,30 @@ void Database::removeSong(uint32_t id, bool wasPlayed) {
         id));
 }
 
+void Database::swapSongs(const Song_t* song1, const Song_t* song2) {
+    executeQuery_(Query("BEGIN TRANSACTION;"));
+    try {
+        Statement song_orders{m_db, Query{"SELECT rowid, song_order FROM songs WHERE rowid IN (%u, %u);", song1->id, song2->id}};
+        std::vector<std::pair<uint32_t, uint32_t>> orders;
+        while (song_orders.step() && orders.size() < 2) {
+            orders.push_back(std::pair(song_orders.getColumnInt(0), song_orders.getColumnInt(1)));
+        }
+        if (orders.size() < 2) {
+            throw std::runtime_error("One or both songs are not in the queue");
+        }
+        executeQuery_(Query{
+            "UPDATE songs SET song_order = %u WHERE rowid = %u;"
+            "UPDATE songs SET song_order = %u WHERE rowid = %u;",
+            orders[1].second,orders[0].first,
+            orders[0].second,orders[1].first});
+    }
+    catch (...) {
+        executeQuery_(Query("COMMIT TRANSACTION;"));
+        throw;
+    }
+    executeQuery_(Query("COMMIT TRANSACTION;"));
+}
+
 void Database::executeAndRetryOnLock_(const Query& query) {
     bool retry = false;
     do {

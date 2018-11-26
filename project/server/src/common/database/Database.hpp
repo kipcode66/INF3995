@@ -58,6 +58,7 @@ public:
 
     void                createSong(const Song_t*);
     void                removeSong(uint32_t, bool wasPlayed = false);
+    void                swapSongs(const Song_t*, const Song_t*);
 
     void initDefaultAdmin();
 
