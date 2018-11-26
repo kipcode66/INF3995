@@ -2,6 +2,8 @@
 #define SRC_HTTP_MP3_DURATION_HPP
 
 #include <inttypes.h>
+#include <sstream>
+#include <ostream>
 
 class Mp3Duration {
 public:
@@ -15,6 +17,7 @@ public:
     uint32_t getSeconds() const;
 
     int getDurationInSeconds() const;
+    friend std::ostream& operator<< (std::ostream& os, const Mp3Duration& duration);
 
 private:
     int m_durationInSeconds;

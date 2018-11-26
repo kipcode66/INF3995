@@ -2,11 +2,11 @@
 #define MP3_EVENT_MP3EVENTCLIENTSOCKET_HPP
 
 #include "os/ClientSocket.hpp"
-#include "mp3/event/Mp3Event.hpp"
+#include "Mp3EventSocket.hpp"
 
 namespace elevation {
 
-class Mp3EventClientSocket : public ClientSocket {
+class Mp3EventClientSocket : public ClientSocket, public Mp3EventSocket {
 public:
     explicit Mp3EventClientSocket(uint16_t port);
     Mp3EventClientSocket(const Mp3EventClientSocket&) = delete;
@@ -15,8 +15,6 @@ public:
 
     Mp3EventClientSocket& operator&(const Mp3EventClientSocket&) = delete;
     Mp3EventClientSocket& operator=(Mp3EventClientSocket&& that);
-
-    void write(const Mp3Event& event);
 };
 
 }

@@ -26,7 +26,7 @@ protected:
     static User_t extractUserDataFromRequest_(const Pistache::Rest::Request& request);
 
 public:
-    RestApi(Pistache::Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket);
+    RestApi(Pistache::Address addr, Logger& logger, FileCache& cache);
     ~RestApi();
     void init();
     void start();
@@ -45,7 +45,6 @@ protected:
     Pistache::Rest::Router m_router;
     Logger& m_logger;
     FileCache& m_cache;
-    Mp3EventClientSocket m_playerEventSocket;
 };
 
 } // namespace elevation

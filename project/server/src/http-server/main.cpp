@@ -22,10 +22,9 @@ int main(int argc, char** argv) {
         elevation::Logger& logger = elevation::Logger::getLogger("http-server");
         elevation::FileCache cache{argsParser.getCachePath()};
 
-        elevation::Mp3EventClientSocket playerEventSocket{argsParser.getPlayerPort()};
-        elevation::RestApi api(addr, logger, cache, std::move(playerEventSocket));
+        elevation::RestApi api(addr, logger, cache);
         api.init();
-        std::cout << "Server is about to start." << std::endl;
+        logger.log("Server is about to start.");
         api.start();
     }
     catch (std::exception& e) {

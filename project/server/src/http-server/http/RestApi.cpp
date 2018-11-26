@@ -50,12 +50,11 @@ User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& reque
     auto body = request.body();
     rapidjson::Document request_json;
     request_json.Parse(body.c_str());
-
     if ((!request_json.IsObject()
-            || (!request_json.HasMember("mac")
-                || !request_json.HasMember("ip")
-                || request_json["mac"] == '\0'
-                || request_json["ip"] == '\0'))) {
+            || !request_json.HasMember("mac")
+            || !request_json.HasMember("ip")
+            ||  request_json["mac"].GetStringLength() == 0
+            ||  request_json["ip"] .GetStringLength() == 0)) {
         throw BadRequestException();
     }
     User_t requestUser = { 0 };
@@ -69,12 +68,11 @@ User_t RestApi::extractUserDataFromRequest_(const Pistache::Rest::Request& reque
     return requestUser;
 }
 
-RestApi::RestApi(Pistache::Address addr, Logger& logger, FileCache& cache, Mp3EventClientSocket playerEventSocket)
-: m_httpEndpoint(std::make_shared<Pistache::Http::Endpoint>(addr))
-, m_desc("Rest API", "1.0")
-, m_logger(logger)
-, m_cache(cache)
-, m_playerEventSocket(std::move(playerEventSocket))
+RestApi::RestApi(Pistache::Address addr, Logger& logger, FileCache& cache)
+    : m_httpEndpoint(std::make_shared<Pistache::Http::Endpoint>(addr))
+    , m_desc("Rest API", "1.0")
+    , m_logger(logger)
+    , m_cache(cache)
 {
     Database::instance();
 }
@@ -159,6 +157,11 @@ void RestApi::getIdentification_(const Pistache::Rest::Request& request, Pistach
     catch (const BadRequestException& e) {
         m_logger.err(std::string{"getIdentification failed: "} + e.what());
         response.send(Pistache::Http::Code::Bad_Request, e.what());
+        return;
+    }
+    catch (const std::exception& e) {
+        m_logger.err(std::string{"unknow exception as occurred: "} + e.what());
+        response.send(Pistache::Http::Code::Internal_Server_Error, e.what());
         return;
     }
 

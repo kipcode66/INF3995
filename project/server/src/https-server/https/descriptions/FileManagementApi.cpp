@@ -11,6 +11,8 @@
 
 using namespace Pistache;
 
+namespace elevation {
+
 FileManagementApi::FileManagementApi(Rest::Description& desc, Logger& logger)
     : m_logger(logger)
 {
@@ -77,3 +79,4 @@ void FileManagementApi::postSuperviseurInversion_(const Rest::Request& request,
     response.send(Http::Code::Ok, "postSuperviseurInversion called");
 }
 
+} // namespace elevation

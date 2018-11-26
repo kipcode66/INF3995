@@ -1,5 +1,6 @@
 # To Run test cases
 
+## Setup on your local machine
  - Required resources:
     - python3
     - pip
@@ -18,3 +19,14 @@
     `python3 restapitest.py`
 
  - be glad you didn't had to code all that in C++
+
+## Usage
+
+ - activate venv if it's not already
+    `source ./venv/bin/activate`
+    OR
+    `. ./venv/bin/activate`
+
+ - run all test:
+    `python -m unittest --verbose`
+

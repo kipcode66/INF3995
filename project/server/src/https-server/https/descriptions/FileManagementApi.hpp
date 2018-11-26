@@ -4,7 +4,8 @@
 #include <pistache/description.h>
 #include <common/logger/Logger.hpp>
 
-using namespace elevation;
+namespace elevation {
+
 class FileManagementApi {
 public:
     FileManagementApi(Pistache::Rest::Description& desc, Logger& logger);
@@ -16,5 +17,8 @@ private:
 
     Logger& m_logger;
 };
+
+} // namespace elevation
+
 #endif // !HTTPS_DESCRIPTIONS_FILEAPI
 
