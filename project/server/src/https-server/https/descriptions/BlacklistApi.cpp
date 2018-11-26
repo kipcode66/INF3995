@@ -63,7 +63,7 @@ std::string BlacklistApi::generateUser_(const User_t& user) {
     try {
         userDoc.AddMember(rapidjson::StringRef("ip"), rapidjson::Value(user.ip, strlen(user.ip)), userDoc.GetAllocator());
         userDoc.AddMember(rapidjson::StringRef("mac"), rapidjson::Value(user.mac, strlen(user.mac)), userDoc.GetAllocator());
-        userDoc.AddMember(rapidjson::StringRef("name"), rapidjson::Value(user.name, strlen(user.name)), userDoc.GetAllocator());
+        userDoc.AddMember(rapidjson::StringRef("nom"), rapidjson::Value(user.name, strlen(user.name)), userDoc.GetAllocator());
     }
     catch (sqlite_error& e) {
         std::stringstream msg;
