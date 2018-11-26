@@ -22,4 +22,8 @@
         android:entryValues="@array/setting_values_queue_period"
         android:defaultValue="4000"
         android:icon="@drawable/ic_menu_refresh"/>
+    <ca.polymtl.inf3990_01.client.view.PasswordChangeDialogPreference
+        android:key="@string/settings_key_admin_password"
+        android:title="@string/setting_title_admin_password"
+        android:icon="@android:drawable/ic_lock_lock"/>
 </PreferenceScreen>

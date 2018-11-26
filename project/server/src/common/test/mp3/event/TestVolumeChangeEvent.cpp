@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(constructionDestruction) {
 
 BOOST_AUTO_TEST_CASE(serialize) {
     struct TestCase {
-        uint8_t newVolume;
+        volumePercent_t newVolume;
         std::vector<uint8_t> expectedSerialization;
     };
 

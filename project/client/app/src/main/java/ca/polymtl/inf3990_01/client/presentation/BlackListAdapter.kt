@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import ca.polymtl.inf3990_01.client.R
+import ca.polymtl.inf3990_01.client.controller.event.EventManager
+import ca.polymtl.inf3990_01.client.controller.event.UserUnblockRequestEvent
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.UserList
 import kotlinx.android.synthetic.main.black_list.view.*
@@ -17,7 +19,8 @@ class BlackListAdapter(
         private val userList: UserList,
         private val layoutInflater: LayoutInflater,
         private val appCtx: Context,
-        private val dataProvider: DataProvider
+        private val dataProvider: DataProvider,
+        private val eventMgr: EventManager
 ): BaseAdapter() {
     init {
         dataProvider.observeBlackList(Observer(this::onBlackListUpdate))
@@ -36,6 +39,9 @@ class BlackListAdapter(
         view.name.text = user.name
         view.mac.text = user.mac
         view.ip.text = user.ip
+        view.unblock.setOnClickListener {
+            eventMgr.dispatchEvent(UserUnblockRequestEvent(user.name, user.ip, user.mac))
+        }
         return view
     }
 

@@ -41,7 +41,7 @@
     <string name="local_song_sendButton_label_sending">Envoi…</string>
     <string name="local_song_sendButton_label_sent">Envoyée</string>
     <string name="login_hint_username">Nom</string>
-    <string name="login_hint_password">Mot de passe</string>
+    <string name="edit_text_hint_password">Mot de passe</string>
     <string name="login_submit_text">Connexion</string>
     <string name="login_dialog_title">Connexion</string>
     <string name="action_show_login">Connexion Administrateur</string>
@@ -50,4 +50,17 @@
     <string name="black_list_item_button_desc">Débloquer l\'utilisateur</string>
     <string name="song_item_duration_format">Durée: %1$s</string>
     <string name="error_message_song_not_in_queue">La chanson n\'est plus dans la file</string>
+    <string name="statistics_layout_label_number_of_songs">Chansons soumises</string>
+    <string name="statistics_layout_label_number_of_users">Nombre d\'utilisateurs</string>
+    <string name="statistics_layout_label_number_of_song_removed">Chansons retirées</string>
+    <string name="statistics_layout_label_duration_of_song">Durée moyenne</string>
+    <string name="error_message_too_many_concurrent_song_sent">Vous ne pouvez envoyer que %1$d chanson(s) en même temps</string>
+    <string name="block_submit_text">Bloquer</string>
+    <string name="block_user_action_label">Bloquer un Usager</string>
+    <string name="block_dialog_title">Bloquer un Usager</string>
+    <string name="setting_title_admin_password">Changer le mot de passe</string>
+    <string name="setting_dialog_title_admin_password">Changer le Mot de passe Administrateur</string>
+    <string name="password_change_dialog_old_password">Mot de passe Actuelle</string>
+    <string name="password_change_dialog_new_password">Nouveau Mot de passe</string>
+    <string name="change_password_button_submit">Soumettre</string>
 </resources>

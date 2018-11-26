@@ -5,6 +5,7 @@
 #include <common/logger/Logger.hpp>
 #include <common/filesystem/FileCache.hpp>
 
+namespace elevation {
 
 class FileManagementApi {
 public:
@@ -20,5 +21,8 @@ private:
     elevation::Logger& m_logger;
     elevation::FileCache& m_cache;
 };
+
+} // namespace elevation
+
 #endif // !HTTPS_DESCRIPTIONS_FILEAPI
 

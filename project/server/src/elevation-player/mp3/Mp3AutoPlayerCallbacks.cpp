@@ -36,7 +36,7 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
         retry = false;
         try {
             Database* db = Database::instance();
-            auto songs = db->getAllSongs();
+            auto songs = db->getAllPlayableSongs();
             if (songs.size() > 0 && strlen(songs[0].path) > 0) {
                 newSong = songs[0].path;
             }
@@ -53,24 +53,34 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
             }
         }
     } while (retry);
-    try {
-        if (newSong != Mp3AutoPlayer::NO_SONG) {
-            Database* db = Database::instance();
-            auto song = db->getSongByPath(newSong.c_str());
-            db->removeSong(song.id, true);
-        }
-    }
-    catch (sqlite_error& e) {
-        m_logger.err(e.what());
-    }
+
     return newSong;
 }
 
 void Mp3AutoPlayerCallbacks::songRemover_(fs::path pathOfSong) {
-    try {
-        m_cache.deleteFile(pathOfSong.filename());
-    }
-    catch (std::experimental::filesystem::filesystem_error& e) {
-        m_logger.err(e.what());
-    }
+    bool retry;
+    do {
+        retry = false;
+        try {
+            Database* db = Database::instance();
+            Song_t oldSong = db->getSongByPath(pathOfSong);
+            if (oldSong.id != 0) {
+                db->removeSong(oldSong.id, true);
+            }
+            m_cache.deleteFile(pathOfSong.filename());
+        }
+        catch (sqlite_error& e) {
+            if (e.code() == SQLITE_LOCKED ||
+                e.code() == SQLITE_BUSY) {
+                retry = true;
+                std::this_thread::sleep_for(100ms);
+            }
+            else {
+                m_logger.err(e.what());
+            }
+        }
+        catch (fs::filesystem_error& e) {
+            m_logger.err(e.what());
+        }
+    } while (retry);
 }

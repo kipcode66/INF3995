@@ -5,7 +5,7 @@
 
 namespace elevation {
 
-VolumeChangeEvent::VolumeChangeEvent(uint8_t changeTo)
+VolumeChangeEvent::VolumeChangeEvent(volumePercent_t changeTo)
     : Mp3Event(Mp3Event::EventType::VOLUME_CHANGE)
     , m_changeTo(changeTo)
 { }
@@ -29,7 +29,7 @@ bool VolumeChangeEvent::operator==(const Mp3Event& other) const {
     }
 }
 
-void VolumeChangeEvent::acceptVisitor(const AbstractMp3EventVisitor& visitor) {
+void VolumeChangeEvent::acceptVisitor(AbstractMp3EventVisitor& visitor) {
     visitor.onVolumeChangeEvent(*this);
 }
 

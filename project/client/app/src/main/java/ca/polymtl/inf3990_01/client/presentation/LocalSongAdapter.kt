@@ -2,10 +2,12 @@ package ca.polymtl.inf3990_01.client.presentation
 
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.Toast
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
 import ca.polymtl.inf3990_01.client.controller.event.SendSongEvent
@@ -25,6 +27,10 @@ class LocalSongAdapter(
         private val stateService: AppStateService,
         private val dataProvider: DataProvider
 ): BaseAdapter() {
+    companion object {
+        internal const val MAX_CONCURRENT_SENDING = 3L
+    }
+
     private var ownedSongs = getUpdatedOwnerSongsQueue()
 
     init {
@@ -95,8 +101,16 @@ class LocalSongAdapter(
         }
 
         view.send.setOnClickListener {
-            dataProvider[song] = DataProvider.LocalSongSendState.SENDING
-            eventMgr.dispatchEvent(SendSongEvent(song))
+            val nSendingSong = localSongs.map { song -> dataProvider[song] }.filter { state -> state > DataProvider.LocalSongSendState.NOT_SENT && state < DataProvider.LocalSongSendState.SENT }.size
+            if (nSendingSong < MAX_CONCURRENT_SENDING) {
+                dataProvider[song] = DataProvider.LocalSongSendState.SENDING
+                eventMgr.dispatchEvent(SendSongEvent(song))
+            }
+            else {
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(appCtx, appCtx.getString(R.string.error_message_too_many_concurrent_song_sent, MAX_CONCURRENT_SENDING), Toast.LENGTH_LONG).show()
+                }
+            }
         }
         return view
     }

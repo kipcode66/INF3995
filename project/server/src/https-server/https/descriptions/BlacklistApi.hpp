@@ -5,10 +5,11 @@
 #include <common/logger/Logger.hpp>
 #include <common/database/templates/User.hpp>
 
+namespace elevation {
 
 class BlacklistApi {
 public:
-    BlacklistApi(Pistache::Rest::Description& desc, elevation::Logger&);
+    BlacklistApi(Pistache::Rest::Description& desc, Logger&);
 
 protected:
     void getSuperviseurListenoire_  (const Pistache::Rest::Request&,
@@ -21,7 +22,9 @@ protected:
     std::string generateUser_  (const User_t&);
     bool        checkIfAdmin_  (const Pistache::Rest::Request&);
 
-    elevation::Logger& m_logger;
+    Logger& m_logger;
 };
-#endif // !HTTPS_DESCRIPTIONS_BLACKLISTAPI
 
+} // namespace elevation
+
+#endif // !HTTPS_DESCRIPTIONS_BLACKLISTAPI

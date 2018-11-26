@@ -8,4 +8,127 @@
     tools:context=".view.StatisticsActivity"
     tools:showIn="@layout/app_bar_statistics">
 
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/statisticsLayout" >
+        <GridLayout
+            android:padding="@dimen/song_item_margin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:rowCount="4"
+            android:columnCount="2" >
+
+            <TextView
+                android:id="@+id/songNumberTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/statistics_row_padding"
+                android:layout_column="0"
+                android:layout_columnWeight="1"
+                android:layout_row="0"
+                android:layout_rowWeight="0"
+                android:text="@string/statistics_layout_label_number_of_songs"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/songNumber"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/statistics_row_padding"
+                android:layout_column="1"
+                android:layout_columnWeight="1"
+                android:layout_row="0"
+                android:layout_rowWeight="0"
+                android:text="Song number"
+                android:textSize="18sp" />
+
+
+            <TextView
+                android:id="@+id/userNumber"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/statistics_row_padding"
+                android:layout_column="1"
+                android:layout_columnWeight="1"
+                android:layout_row="1"
+                android:layout_rowWeight="0"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:text="User number"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/userNumberTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/statistics_row_padding"
+                android:layout_column="0"
+                android:layout_columnWeight="1"
+                android:layout_row="1"
+                android:layout_rowWeight="0"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:text="@string/statistics_layout_label_number_of_users"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/songDeletedTitle"
+                android:layout_width="25dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/statistics_row_padding"
+                android:layout_column="0"
+                android:layout_columnWeight="1"
+                android:layout_row="2"
+                android:layout_rowWeight="0"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:text="@string/statistics_layout_label_number_of_song_removed"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/songDeletedNumber"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/statistics_row_padding"
+                android:layout_column="1"
+                android:layout_columnWeight="1"
+                android:layout_row="2"
+                android:layout_rowWeight="0"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:text="Song deleted number"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/duration"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/statistics_row_padding"
+                android:layout_column="1"
+                android:layout_columnWeight="1"
+                android:layout_row="3"
+                android:layout_rowWeight="0"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:text="@string/song_item_duration_format"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/durationTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/statistics_row_padding"
+                android:layout_column="0"
+                android:layout_columnWeight="1"
+                android:layout_row="3"
+                android:layout_rowWeight="0"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:text="@string/statistics_layout_label_duration_of_song"
+                android:textSize="18sp" />
+
+        </GridLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
+
 </android.support.constraint.ConstraintLayout>

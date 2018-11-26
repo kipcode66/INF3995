@@ -17,6 +17,8 @@ private:
 private:
     Logger& m_logger;
 };
-}
+
+} // namespace elevation
+
 #endif // !HTTPS_DESCRIPTIONS_STATSAPI
 

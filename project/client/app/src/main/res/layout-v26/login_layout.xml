@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:inputType="textPassword"
         android:selectAllOnFocus="true"
-        android:hint="@string/login_hint_password"
+        android:hint="@string/edit_text_hint_password"
         android:focusedByDefault="true"/>
     <RelativeLayout
         android:layout_width="match_parent"

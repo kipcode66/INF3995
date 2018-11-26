@@ -24,7 +24,9 @@ public:
     int m_averageDurationInSec;
 
 };
+
 std::ostream& operator<<(std::ostream& os, const Statistics& stats);
-}// namespace elevation
+
+} // namespace elevation
 
 #endif

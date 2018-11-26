@@ -1,20 +1,24 @@
-/* #include <pistache/net.h> */
+#include "StatsApi.hpp"
+
+#include <iomanip>
+
 #include <pistache/endpoint.h>
 #include <pistache/router.h>
 #include <pistache/description.h>
-#include <common/database/Database.hpp>
-#include <iomanip>
-#include "rapidjson/document.h"
 #include <pistache/serializer/rapidjson.h>
+
+#include <rapidjson/document.h>
+
+#include <common/database/Database.hpp>
+
 #include "mp3/header/Mp3Duration.hpp"
 
-#include "StatsApi.hpp"
-
 using namespace Pistache;
-using namespace elevation;
+
+namespace elevation {
 
 StatsApi::StatsApi(Rest::Description& desc, Logger& logger)
-    :m_logger(logger)
+    : m_logger(logger)
 {
     auto superviseurPath = desc.path("/superviseur");
     superviseurPath
@@ -49,10 +53,11 @@ void StatsApi::getSuperviseurStatistiques_(const Rest::Request& request,
         }
         Statistics statistics = db->getStatistics();
         std::stringstream resp;
-        resp << "{\n\"Statistiques\":[\n" << statistics << "\n]\n}\n";
+        resp << statistics;
         logMsg << "Statistics for admin \"" << token << "\" were successfuly sent.";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
     }, std::move(request), std::move(response)).detach();
 }
 
+} // namespace elevation

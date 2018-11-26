@@ -4,6 +4,7 @@ build/
 **/venv/
 cmake-build-debug/
 *.db
+*-journal
 tags
 
 /lib/

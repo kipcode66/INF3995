@@ -7,13 +7,15 @@ import android.view.MenuItem
 import android.widget.ListView
 import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
+import ca.polymtl.inf3990_01.client.controller.event.LogoutRequestEvent
 import ca.polymtl.inf3990_01.client.controller.event.RequestBlackListReloadEvent
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
+import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.UserList
 import ca.polymtl.inf3990_01.client.presentation.BlackListAdapter
+import kotlinx.android.synthetic.main.content_black_list.*
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.ParameterList
-import ca.polymtl.inf3990_01.client.controller.event.LogoutRequestEvent
 import java.util.*
 
 class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R.id.drawer_layout) {
@@ -21,6 +23,7 @@ class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R
     private val usersList : UserList = UserList()
     private val eventMgr: EventManager by inject()
     private val appStateService: AppStateService by inject()
+    private val dataProvider: DataProvider by inject()
     private val blackListAdapter: BlackListAdapter by inject{ ParameterList(usersList, layoutInflater) }
 
     @Suppress("UNUSED_PARAMETER")
@@ -33,6 +36,19 @@ class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R
         appStateService.addObserver(Observer(this::onAppStateChange))
         val usersListView = this.findViewById(R.id.users_list) as ListView
         usersListView.adapter = blackListAdapter
+        content_queue_swipe.setColorSchemeResources(R.color.colorPrimary, R.color.colorPrimaryDark)
+        content_queue_swipe.setOnRefreshListener { eventMgr.dispatchEvent(RequestBlackListReloadEvent()) }
+        dataProvider.observeBlackList(Observer(this::onBlackListChange))
+    }
+
+    private fun refresh() {
+        Handler(mainLooper).post {content_queue_swipe.isRefreshing = true}
+        eventMgr.dispatchEvent(RequestBlackListReloadEvent())
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onBlackListChange(o: Observable, arg: Any?) {
+        Handler(mainLooper).post {content_queue_swipe.isRefreshing = false}
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -40,6 +56,7 @@ class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R
         menuInflater.inflate(R.menu.black_list, menu)
         menu.findItem(R.id.action_show_login).isVisible = appStateService.getState().type == AppStateService.State.User
         menu.findItem(R.id.action_disconnect).isVisible = appStateService.getState().type == AppStateService.State.Admin
+        menu.findItem(R.id.action_block_user).isVisible = appStateService.getState().type == AppStateService.State.Admin
         return true
     }
 
@@ -49,7 +66,11 @@ class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R
         // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
             R.id.action_reload -> {
-                eventMgr.dispatchEvent(RequestBlackListReloadEvent())
+                refresh()
+                return true
+            }
+            R.id.action_block_user -> {
+                BlockUserDialog(this, eventMgr).show()
                 return true
             }
             R.id.action_show_login -> {

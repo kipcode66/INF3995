@@ -7,8 +7,8 @@
 #include "BlacklistApi.hpp"
 
 using namespace Pistache;
-using namespace elevation;
 
+namespace elevation {
 
 BlacklistApi::BlacklistApi(Pistache::Rest::Description& desc, Logger& logger)
     : m_logger(logger)
@@ -46,11 +46,11 @@ void BlacklistApi::getSuperviseurListenoire_(const Rest::Request& request,
         }
         std::vector<User_t> blackList = db->getBlackList();
         std::stringstream resp;
-        resp << "{\n\"bloques\":[\n";
+        resp << "{\"bloques\":[";
         for (auto& user : blackList) {
-            resp << generateUser_(user) << (&blackList.back() != &user ? ",\n" : "\n");
+            resp << generateUser_(user) << (&blackList.back() != &user ? "," : "");
         }
-        resp << "]\n}\n";
+        resp << "]}";
         logMsg << "The blacklist was successfuly sent to admin";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
@@ -63,7 +63,7 @@ std::string BlacklistApi::generateUser_(const User_t& user) {
     try {
         userDoc.AddMember(rapidjson::StringRef("ip"), rapidjson::Value(user.ip, strlen(user.ip)), userDoc.GetAllocator());
         userDoc.AddMember(rapidjson::StringRef("mac"), rapidjson::Value(user.mac, strlen(user.mac)), userDoc.GetAllocator());
-        userDoc.AddMember(rapidjson::StringRef("name"), rapidjson::Value(user.name, strlen(user.name)), userDoc.GetAllocator());
+        userDoc.AddMember(rapidjson::StringRef("nom"), rapidjson::Value(user.name, strlen(user.name)), userDoc.GetAllocator());
     }
     catch (sqlite_error& e) {
         std::stringstream msg;
@@ -118,9 +118,11 @@ void BlacklistApi::postSuperviseurBloquer_(const Rest::Request& request,
         std::string mac(jsonDocument["mac"].GetString());
         try {
             if (db->getBlacklistByMAC(mac)) {
+                m_logger.log(std::string{"User "} + mac + " was already blocked.");
                 response.send(Http::Code::Ok, "No change made - user already blocked");
             } else {
                 db->blacklistMAC(mac);
+                m_logger.log(std::string{"User "} + mac + " is now blocked.");
                 response.send(Http::Code::Ok, "User blocked");
             }
         } catch (const NoSuchUserException& e) {
@@ -147,8 +149,10 @@ void BlacklistApi::postSuperviseurDebloquer_(const Rest::Request& request,
         try {
             if (db->getBlacklistByMAC(mac)) {
                 db->whitelistMAC(mac);
+                m_logger.log(std::string{"User "} + mac + " is now unblocked.");
                 response.send(Http::Code::Ok, "user unblocked");
             } else {
+                m_logger.log(std::string{"User "} + mac + " is not blocked.");
                 response.send(Http::Code::Ok, "No change made - user not blocked");
             }
         } catch (std::exception& e) {
@@ -158,3 +162,4 @@ void BlacklistApi::postSuperviseurDebloquer_(const Rest::Request& request,
     }, std::move(request), std::move(response)).detach();
 }
 
+} // namespace elevation

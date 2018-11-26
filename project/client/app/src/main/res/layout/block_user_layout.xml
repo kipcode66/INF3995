@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/block_user_dialog_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    style="@style/Dialog"
+    android:animateLayoutChanges="true">
+    <EditText
+        android:id="@+id/block_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint="@string/client_name"
+        android:imeOptions="actionNext"/>
+    <EditText
+        android:id="@+id/block_ip_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textFilter"
+        android:hint="@string/default_ip_address"
+        android:imeOptions="actionNext"/>
+    <EditText
+        android:id="@+id/block_mac_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textFilter"
+        android:hint="@string/default_mac_address"
+        android:imeOptions="actionDone"
+        android:imeActionLabel="@string/block_submit_text"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/block_button_submit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="@string/block_submit_text"/>
+    </RelativeLayout>
+
+</LinearLayout>

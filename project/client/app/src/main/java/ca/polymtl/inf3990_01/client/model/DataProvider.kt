@@ -3,6 +3,7 @@ package ca.polymtl.inf3990_01.client.model
 import android.content.SharedPreferences
 import ca.polymtl.inf3990_01.client.controller.event.AppInitEvent
 import ca.polymtl.inf3990_01.client.controller.event.EventManager
+import java.math.BigInteger
 import java.util.*
 
 class DataProvider(
@@ -10,7 +11,7 @@ class DataProvider(
     settings: SharedPreferences
 ) {
     companion object {
-        private class ChangeableObservable: Observable() {
+        private class ChangeableObservable : Observable() {
             fun makeChanged() {
                 super.setChanged()
             }
@@ -33,18 +34,20 @@ class DataProvider(
     private val blackList: UserList = UserList()
     private val blackListObservable = ChangeableObservable()
     private val settingObservable = ChangeableObservable()
+    private var statistics: Statistics = Statistics(BigInteger.ZERO,BigInteger.ZERO,BigInteger.ZERO,BigInteger.ZERO)
+    private val statisticsObservable = ChangeableObservable()
 
     init {
-        eventMgr.addEventListener<AppInitEvent> {settings.registerOnSharedPreferenceChangeListener(this::onSettingsChanged)}
+        eventMgr.addEventListener<AppInitEvent> { settings.registerOnSharedPreferenceChangeListener(this::onSettingsChanged) }
     }
 
-    @Synchronized operator fun set(song: LocalSong, state: LocalSongSendState) {
+    @Synchronized
+    operator fun set(song: LocalSong, state: LocalSongSendState) {
         val s = songStates.keys.find { it.compareTo(song) == 0 }
         synchronized(songStates) {
             if (s !== null) {
                 songStates[s] = state
-            }
-            else {
+            } else {
                 songStates[song] = state
             }
         }
@@ -53,7 +56,8 @@ class DataProvider(
     }
 
     operator fun get(song: LocalSong) =
-        songStates[songStates.keys.find { it.compareTo(song) == 0 }] ?: LocalSongSendState.NOT_SENT
+            songStates[songStates.keys.find { it.compareTo(song) == 0 }]
+                    ?: LocalSongSendState.NOT_SENT
 
     fun observeLocalSongSendStates(o: Observer) = songStatesObservable.addObserver(o)
     fun unobserveLocalSongSendStates(o: Observer) = songStatesObservable.deleteObserver(o)
@@ -64,6 +68,7 @@ class DataProvider(
         songQueueObservable.makeChanged()
         songQueueObservable.notifyObservers(songQueue)
     }
+
     fun getSongQueue(): SongQueue = songQueue.clone() as SongQueue
     fun observeSongQueue(o: Observer) = songQueueObservable.addObserver(o)
     fun unobserveSongQueue(o: Observer) = songQueueObservable.deleteObserver(o)
@@ -74,6 +79,7 @@ class DataProvider(
         localSongsObservable.makeChanged()
         localSongsObservable.notifyObservers(localSongs)
     }
+
     fun getLocalSongs(): LocalSongs = localSongs.clone() as LocalSongs
     fun observeLocalSongs(o: Observer) = localSongsObservable.addObserver(o)
     fun unobserveLocalSongs(o: Observer) = localSongsObservable.deleteObserver(o)
@@ -84,6 +90,7 @@ class DataProvider(
         blackListObservable.makeChanged()
         blackListObservable.notifyObservers(blackList)
     }
+
     fun getBlackList(): UserList = blackList.clone() as UserList
     fun observeBlackList(o: Observer) = blackListObservable.addObserver(o)
     fun unobserveBlackList(o: Observer) = blackListObservable.deleteObserver(o)
@@ -92,7 +99,17 @@ class DataProvider(
         settingObservable.makeChanged()
         settingObservable.notifyObservers(key)
     }
+
     fun observeSettings(o: Observer) = settingObservable.addObserver(o)
     fun unobserveSettings(o: Observer) = settingObservable.deleteObserver(o)
+
+    fun setStatistics(newStatistics: Statistics) {
+        statistics = newStatistics
+        statisticsObservable.makeChanged()
+        statisticsObservable.notifyObservers(statistics)
+    }
+    fun getStatistics(): Statistics = statistics
+    fun observeStatistics(o: Observer) = statisticsObservable.addObserver(o)
+    fun unobserveStatistics(o: Observer) = statisticsObservable.deleteObserver(o)
 
 }

@@ -49,11 +49,12 @@ public:
     std::string getAdminPassword() const;
     std::pair<std::string, std::string> getSaltAndHashedPasswordByLogin(const std::string& login) const;
 
-    Song_t              getSongById    (int) const;
-    Song_t              getSongByTitle (const std::string&) const;
-    Song_t              getSongByPath  (const std::string&) const;
-    std::vector<Song_t> getSongsByUser (int userId) const;
-    std::vector<Song_t> getAllSongs    () const;
+    Song_t              getSongById         (int) const;
+    Song_t              getSongByTitle      (const std::string&) const;
+    Song_t              getSongByPath       (const std::string&) const;
+    std::vector<Song_t> getSongsByUser      (int userId) const;
+    std::vector<Song_t> getAllSongs         () const;
+    std::vector<Song_t> getAllPlayableSongs () const;
 
     Statistics          getStatistics  () const;
 

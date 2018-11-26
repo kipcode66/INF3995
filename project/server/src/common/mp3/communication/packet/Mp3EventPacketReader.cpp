@@ -1,5 +1,9 @@
 #include "Mp3EventPacketReader.hpp"
 #include "mp3/event/VolumeChangeEvent.hpp"
+#include "mp3/event/MuteEvent.hpp"
+#include "mp3/event/UnmuteEvent.hpp"
+#include "mp3/event/VolumeGetRequest.hpp"
+#include "mp3/event/VolumeGetResponse.hpp"
 
 namespace elevation {
 
@@ -40,6 +44,14 @@ std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeEvent_(Mp3Event::Even
     switch(eventType) {
     case Mp3Event::EventType::VOLUME_CHANGE:
         return deserializeVolumeChangeEvent_(std::move(payload));
+    case Mp3Event::EventType::MUTE:
+        return deserializeMuteEvent_(std::move(payload));
+    case Mp3Event::EventType::UNMUTE:
+        return deserializeUnmuteEvent_(std::move(payload));
+    case Mp3Event::EventType::VOLUME_GET_REQUEST:
+        return deserializeVolumeGetRequest_(std::move(payload));
+    case Mp3Event::EventType::VOLUME_GET_RESPONSE:
+        return deserializeVolumeGetResponse_(std::move(payload));
     default:
         throw std::runtime_error("Unknown event type " + std::to_string(static_cast<std::size_t>(eventType)));
         break;
@@ -47,8 +59,27 @@ std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeEvent_(Mp3Event::Even
 }
 
 std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeVolumeChangeEvent_(std::string payload) {
-    auto newVolume = deserializeElement_<uint8_t>(payload, 0);
+    auto newVolume = deserializeElement_<volumePercent_t>(payload, 0);
     return std::unique_ptr<Mp3Event>{new VolumeChangeEvent{newVolume}};
+}
+
+std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeMuteEvent_(std::string payload) {
+    return std::unique_ptr<Mp3Event>(new MuteEvent{});
+}
+
+std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeUnmuteEvent_(std::string payload) {
+    return std::unique_ptr<Mp3Event>(new UnmuteEvent{});
+}
+
+std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeVolumeGetRequest_(std::string payload) {
+    return std::unique_ptr<Mp3Event>(new VolumeGetRequest{});
+}
+
+std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeVolumeGetResponse_(std::string payload) {
+    auto volume = deserializeElement_<volumePercent_t>(payload, 0);
+    auto isMuted = deserializeElement_<bool>(payload, sizeof(volumePercent_t));
+    VolumeData_t volumeData = {.volume = volume, .isMuted = isMuted};
+    return std::unique_ptr<Mp3Event>(new VolumeGetResponse{volumeData});
 }
 
 template <class T>

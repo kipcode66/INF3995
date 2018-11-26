@@ -16,6 +16,10 @@ public:
     enum class EventType : uint16_t {
         NONE = 0,
         VOLUME_CHANGE,
+        MUTE,
+        UNMUTE,
+        VOLUME_GET_REQUEST,
+        VOLUME_GET_RESPONSE,
         NUM_EVENTS
     };
 
@@ -33,7 +37,7 @@ public:
 
     virtual std::string serialize() const = 0;
 
-    virtual void acceptVisitor(const AbstractMp3EventVisitor& visitor) = 0;
+    virtual void acceptVisitor(AbstractMp3EventVisitor& visitor) = 0;
 
     /**
      * @brief Useful for unit tests.

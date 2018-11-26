@@ -5,7 +5,7 @@
 
 namespace elevation {
 
-class ClientSocket : public Socket {
+class ClientSocket : public virtual Socket {
 public:
     ClientSocket(uint16_t portNum);
     ClientSocket(const ClientSocket&) = delete;
