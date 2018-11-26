@@ -25,8 +25,11 @@ public:
     static constexpr const char*   TODAY_QUERY            = " timestamp BETWEEN julianday('now', 'start of day') AND julianday('now', 'start of day', '+1 day', '-1 second');";
     static constexpr const char*   SELECT_FROM_SONG_QUERY = "SELECT rowid, title, artist, user_id, duration, path FROM songs WHERE ";
     static constexpr const char*   ORDER_QUERY            = "ORDER BY song_order ASC;";
-    static constexpr const int32_t IS_BLACKLISTED     = 1;
+    static constexpr const int32_t BLOCKED            = 1;
+    static constexpr const int32_t UNBLOCKED          = 0;
     static constexpr const int32_t DEFAULT_SONG_ORDER = 0;
+    static constexpr const char*   TODAY_QUERY        = " timestamp BETWEEN julianday('now', 'start of day')"
+                                                        " AND julianday('now', 'start of day', '+1 day', '-1 second');";
 
     static Database* instance();
     static void assertSqliteOk(int errcode, const std::string& message = "");
@@ -49,17 +52,18 @@ public:
     std::string getAdminPassword() const;
     std::pair<std::string, std::string> getSaltAndHashedPasswordByLogin(const std::string& login) const;
 
-    Song_t              getSongById(int) const;
-    Song_t              getSongByTitle(const std::string&) const;
-    Song_t              getSongByPath(const std::string&) const;
-    std::vector<Song_t> getSongsByUser(int userId) const;
-    std::vector<Song_t> getAllSongs() const;
-    std::vector<Song_t> getAllPlayableSongs() const;
+    Song_t              getSongById         (int) const;
+    Song_t              getSongByTitle      (const std::string&) const;
+    Song_t              getSongByPath       (const std::string&) const;
+    std::vector<Song_t> getSongsByUser      (int userId) const;
+    std::vector<Song_t> getAllSongs         () const;
+    std::vector<Song_t> getAllPlayableSongs () const;
 
-    Statistics          getStatistics() const;
+    Statistics          getStatistics  () const;
 
-    void                createSong(const Song_t*);
-    void                removeSong(uint32_t, bool wasPlayed = false);
+    void                createSong        (const Song_t*);
+    void                removeSong        (uint32_t, bool wasPlayed = false);
+    void                removeSongByAdmin (uint32_t, bool wasPlayed = false);
 
     void initDefaultAdmin();
 

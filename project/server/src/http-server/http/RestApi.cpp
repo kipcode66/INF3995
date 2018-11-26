@@ -383,25 +383,30 @@ void RestApi::deleteFile_(const Pistache::Rest::Request& request, Pistache::Http
             try {
                 User_t requestUser = getUserFromRequestToken_(request);
 
-                Song_t song =
-                    db->getSongById(songId);
+                Song_t song = db->getSongById(songId);
 
                 if (song.id != 0 && song.userId == requestUser.userId) {
                     db->removeSong(songId);
                     m_cache.deleteFile(song.path);
 
                     std::ostringstream logMessage;
-                    logMessage << '{' << requestUser.mac << '}' << " Removed MP3 \"" << song.title << "\" of length " << song.duration;
+                    logMessage << '{' << requestUser.mac << '}'
+                               << " Removed MP3 \"" << song.title
+                               << "\" of length " << song.duration;
                     m_logger.log(logMessage.str());
                     response.send(Pistache::Http::Code::Ok);
                 }
                 else {
                     std::ostringstream logMessage;
                     if (song.id == 0) {
-                        logMessage << '{' << requestUser.mac << '}' << " tried to remove nonexistant song of id " << songId;
+                        logMessage << '{' << requestUser.mac << '}'
+                            << " tried to remove nonexistant song of id "
+                            << songId;
                     }
                     else {
-                        logMessage << '{' << requestUser.mac << '}' << " tried to remove song \"" << song.title << "\" of user " << song.userId;
+                        logMessage << '{' << requestUser.mac << '}'
+                            << " tried to remove song \"" << song.title
+                            << "\" of user " << song.userId;
                     }
                     m_logger.err(logMessage.str());
                     response.send(Pistache::Http::Code::Method_Not_Allowed);
