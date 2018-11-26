@@ -54,17 +54,6 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
         }
     } while (retry);
 
-    try {
-        if (newSong != Mp3AutoPlayer::NO_SONG) {
-            Database* db = Database::instance();
-            auto song = db->getSongByPath(newSong.c_str());
-            db->removeSong(song.id, true);
-        }
-    }
-    catch (sqlite_error& e) {
-        m_logger.err(e.what());
-    }
-
     return newSong;
 }
 
@@ -76,7 +65,7 @@ void Mp3AutoPlayerCallbacks::songRemover_(fs::path pathOfSong) {
             Database* db = Database::instance();
             Song_t oldSong = db->getSongByPath(pathOfSong);
             if (oldSong.id != 0) {
-                db->removeSong(oldSong.id);
+                db->removeSong(oldSong.id, true);
             }
             m_cache.deleteFile(pathOfSong.filename());
         }
