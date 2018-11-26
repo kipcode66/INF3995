@@ -137,18 +137,6 @@ void RestApi::createDescription_() {
             .hide();
 }
 
-std::string generateBody(uint32_t id, std::string message) {
-    rapidjson::Document idDoc;
-    idDoc.SetObject();
-    idDoc.AddMember("identificateur", id, idDoc.GetAllocator());
-    idDoc.AddMember("message", rapidjson::Value(message.c_str(), message.length()), idDoc.GetAllocator());
-
-    rapidjson::StringBuffer buf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
-    idDoc.Accept(writer);
-    return buf.GetString();
-}
-
 void RestApi::getIdentification_(const Pistache::Rest::Request& request, Pistache::Http::ResponseWriter response) {
     User_t requestUser = {};
     try {
@@ -182,7 +170,7 @@ void RestApi::getIdentification_(const Pistache::Rest::Request& request, Pistach
                 logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
                 m_logger.log(logMsg.str());
 
-                std::string body = generateBody(requestUser.userId, "connection successful");
+                std::string body = rest_utils::generateBody_(requestUser.userId, "connection successful");
                 response.send(Pistache::Http::Code::Ok, body);
                 return;
             }
@@ -194,7 +182,7 @@ void RestApi::getIdentification_(const Pistache::Rest::Request& request, Pistach
                 logMsg << '{' << requestUser.mac << '}' << " Reassigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
                 m_logger.log(logMsg.str());
 
-                std::string body = generateBody(requestUser.userId, "connection successful");
+                std::string body = rest_utils::generateBody_(requestUser.userId, "connection successful");
                 response.send(Pistache::Http::Code::Ok, body);
                 return;
             }

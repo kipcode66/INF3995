@@ -3,6 +3,7 @@
 #include <pistache/serializer/rapidjson.h>
 #include <iomanip>
 #include <database/sqlite_error.hpp>
+#include <common/rest/rest_utils.hpp>
 
 using namespace elevation;
 
@@ -29,26 +30,6 @@ int Statistics::getAverageDuration() const {
     return m_averageDurationInSec;
 }
 
-std::string Statistics::generateStatistics() const {
-    rapidjson::Document statsDoc;
-    statsDoc.SetObject();
-    try {
-        Mp3Duration songDuration(m_averageDurationInSec);
-        std::stringstream duration;
-        duration << songDuration;
-        statsDoc.AddMember(rapidjson::StringRef("chansons"), rapidjson::Value(m_songCount), statsDoc.GetAllocator());
-        statsDoc.AddMember(rapidjson::StringRef("utilisateurs"), rapidjson::Value(m_userCount), statsDoc.GetAllocator());
-        statsDoc.AddMember(rapidjson::StringRef("elimines"), rapidjson::Value(m_deletedSongsCount), statsDoc.GetAllocator());
-        statsDoc.AddMember(rapidjson::StringRef("temps"), rapidjson::Value(duration.str().c_str(), duration.str().length()), statsDoc.GetAllocator());
-    }
-    catch (sqlite_error& e) { }
-    rapidjson::StringBuffer buf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
-    statsDoc.Accept(writer);
-
-    return buf.GetString();
-}
-
 std::ostream& elevation::operator<<(std::ostream& os, const Statistics& stats) {
-    return os << stats.generateStatistics();
+    return os << rest_utils::generateStatistics_(stats);
 }

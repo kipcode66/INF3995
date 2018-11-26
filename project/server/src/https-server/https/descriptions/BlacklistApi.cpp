@@ -2,6 +2,7 @@
 #include <common/database/Database.hpp>
 #include <common/logger/Logger.hpp>
 #include <common/database/templates/exception/NoSuchUserException.hpp>
+#include <common/rest/rest_utils.hpp>
 
 #include "rapidjson/document.h"
 #include "BlacklistApi.hpp"
@@ -48,33 +49,19 @@ void BlacklistApi::getSuperviseurListenoire_(const Rest::Request& request,
         std::stringstream resp;
         resp << "{\"bloques\":[";
         for (auto& user : blackList) {
-            resp << generateUser_(user) << (&blackList.back() != &user ? "," : "");
+            try {
+                resp << rest_utils::generateUser_(user) << (&blackList.back() != &user ? "," : "");
+            } catch (sqlite_error& e) {
+                std::stringstream msg;
+                msg << "An error occured while generating song a song's json: " << e.what();
+                m_logger.err(msg.str());
+            }
         }
         resp << "]}";
         logMsg << "The blacklist was successfuly sent to admin";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
     }, std::move(request), std::move(response)).detach();
-}
-
-std::string BlacklistApi::generateUser_(const User_t& user) {
-    rapidjson::Document userDoc;
-    userDoc.SetObject();
-    try {
-        userDoc.AddMember(rapidjson::StringRef("ip"), rapidjson::Value(user.ip, strlen(user.ip)), userDoc.GetAllocator());
-        userDoc.AddMember(rapidjson::StringRef("mac"), rapidjson::Value(user.mac, strlen(user.mac)), userDoc.GetAllocator());
-        userDoc.AddMember(rapidjson::StringRef("nom"), rapidjson::Value(user.name, strlen(user.name)), userDoc.GetAllocator());
-    }
-    catch (sqlite_error& e) {
-        std::stringstream msg;
-        msg << "An error occured while generating song a song's json: " << e.what();
-        m_logger.err(msg.str());
-    }
-    rapidjson::StringBuffer buf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
-    userDoc.Accept(writer);
-
-    return buf.GetString();
 }
 
 bool BlacklistApi::checkIfAdmin_(const Rest::Request& request) {

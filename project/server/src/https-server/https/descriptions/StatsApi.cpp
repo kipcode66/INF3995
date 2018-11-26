@@ -53,7 +53,13 @@ void StatsApi::getSuperviseurStatistiques_(const Rest::Request& request,
         }
         Statistics statistics = db->getStatistics();
         std::stringstream resp;
-        resp << statistics;
+        try {
+            resp << statistics;
+        } catch (sqlite_error& e) {
+            std::stringstream msg;
+            msg << "An error occured while generating a stats json: " << e.what();
+            m_logger.err(msg.str());
+        }
         logMsg << "Statistics for admin \"" << token << "\" were successfuly sent.";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());

@@ -53,5 +53,48 @@ rapidjson::Value& generateSong_(const Song_t& song, uint32_t token, rapidjson::D
     return songDoc.Move();
 }
 
+std::string generateUser_(const User_t& user) {
+    rapidjson::Document userDoc;
+    userDoc.SetObject();
+    userDoc.AddMember(rapidjson::StringRef("ip"), rapidjson::Value(user.ip, strlen(user.ip)), userDoc.GetAllocator());
+    userDoc.AddMember(rapidjson::StringRef("mac"), rapidjson::Value(user.mac, strlen(user.mac)), userDoc.GetAllocator());
+    userDoc.AddMember(rapidjson::StringRef("nom"), rapidjson::Value(user.name, strlen(user.name)), userDoc.GetAllocator());
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    userDoc.Accept(writer);
+
+    return buf.GetString();
+}
+
+std::string generateStatistics_(const Statistics& stats) {
+    rapidjson::Document statsDoc;
+    statsDoc.SetObject();
+    Mp3Duration songDuration(stats.getAverageDuration());
+    std::stringstream duration;
+    duration << songDuration;
+    statsDoc.AddMember(rapidjson::StringRef("chansons"), rapidjson::Value(stats.getSongCount()), statsDoc.GetAllocator());
+    statsDoc.AddMember(rapidjson::StringRef("utilisateurs"), rapidjson::Value(stats.getUserCount()), statsDoc.GetAllocator());
+    statsDoc.AddMember(rapidjson::StringRef("elimines"), rapidjson::Value(stats.getDeletedSongsCount()), statsDoc.GetAllocator());
+    statsDoc.AddMember(rapidjson::StringRef("temps"), rapidjson::Value(duration.str().c_str(), duration.str().length()), statsDoc.GetAllocator());
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    statsDoc.Accept(writer);
+
+    return buf.GetString();
+}
+
+std::string generateBody_(uint32_t id , std::string message) {
+    rapidjson::Document idDoc;
+    idDoc.SetObject();
+    idDoc.AddMember("identificateur", id, idDoc.GetAllocator());
+    idDoc.AddMember("message", rapidjson::Value(message.c_str(), message.length()), idDoc.GetAllocator());
+
+    rapidjson::StringBuffer buf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+    idDoc.Accept(writer);
+    return buf.GetString();
+}
+
+
 } // namespace rest_utils
 } // namespace elevation

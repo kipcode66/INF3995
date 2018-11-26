@@ -100,4 +100,3 @@ protected:
 
 
 #endif // DATABASE_DATABASE_HPP
-

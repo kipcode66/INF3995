@@ -19,8 +19,7 @@ protected:
     void postSuperviseurDebloquer_  (const Pistache::Rest::Request&,
                                      Pistache::Http::ResponseWriter);
 
-    std::string generateUser_  (const User_t&);
-    bool        checkIfAdmin_  (const Pistache::Rest::Request&);
+    bool checkIfAdmin_              (const Pistache::Rest::Request&);
 
     Logger& m_logger;
 };
