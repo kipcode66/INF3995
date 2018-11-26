@@ -53,7 +53,7 @@ void StatsApi::getSuperviseurStatistiques_(const Rest::Request& request,
         }
         Statistics statistics = db->getStatistics();
         std::stringstream resp;
-        resp << "{\n\"Statistiques\":[\n" << statistics << "\n]\n}\n";
+        resp << statistics;
         logMsg << "Statistics for admin \"" << token << "\" were successfuly sent.";
         m_logger.log(logMsg.str());
         response.send(Http::Code::Ok, resp.str());
