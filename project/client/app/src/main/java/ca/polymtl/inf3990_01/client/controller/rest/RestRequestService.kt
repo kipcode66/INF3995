@@ -21,6 +21,7 @@ import java.io.File
 import java.io.InputStreamReader
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
+import java.math.BigInteger
 import kotlin.coroutines.experimental.suspendCoroutine
 
 
@@ -47,7 +48,7 @@ class RestRequestService(
         val list: MutableList<Song> = mutableListOf()
         val token = tokenMgr.getToken()
         val resp: ResponseData<SongListResponseData> = suspendCoroutine { continuation ->
-            val canDisplayMessage = initMgr.isInitialized
+            val canDisplayMessage = initMgr.isInitialized && token != BigInteger.ZERO
             val request = RESTRequest(
                     Request.Method.GET,
                     httpClient.getBaseURL() + "$RESOURCE_URI/file/" + token,

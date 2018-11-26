@@ -8,16 +8,18 @@
     tools:context=".view.LocalSongActivity"
     tools:showIn="@layout/app_bar_local_song">
 
-    <LinearLayout
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/content_queue_swipe"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
         <ListView
             android:id="@+id/songs_list"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_margin="@dimen/nav_header_vertical_spacing" />
-    </LinearLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </android.support.constraint.ConstraintLayout>

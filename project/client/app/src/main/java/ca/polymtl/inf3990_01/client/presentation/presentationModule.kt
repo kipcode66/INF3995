@@ -11,6 +11,6 @@ import org.koin.dsl.module.module
 val presentationModule = module {
     factory { (songQueue: SongQueue, layoutInflater: LayoutInflater) -> SongQueueAdapter(songQueue, layoutInflater, get(), get(), get(), get(), get()) }
     factory { (localSongs: LocalSongs, layoutInflater: LayoutInflater) -> LocalSongAdapter(localSongs, layoutInflater, get(), get(), get(), get())}
-    factory { (usersList: UserList, layoutInflater: LayoutInflater) -> BlackListAdapter(usersList, layoutInflater, get(), get())}
+    factory { (usersList: UserList, layoutInflater: LayoutInflater) -> BlackListAdapter(usersList, layoutInflater, get(), get(), get())}
     factory { (statistics: Statistics, view: View) -> StatisticsAdapter(statistics, view, get(), get())}
 }

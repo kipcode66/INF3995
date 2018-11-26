@@ -12,6 +12,7 @@ import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.Statistics
+import ca.polymtl.inf3990_01.client.model.User
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -31,11 +32,13 @@ class AppController(
         private val appCtx: Context
 ) {
     companion object {
+        const val ADMIN_PASSWORD_DEFAULT = ""
         const val QUEUE_PERIOD_DEFAULT = 4000L
         internal const val NO_DELAY = 0L
     }
 
     private val executor = ScheduledThreadPoolExecutor(1)
+    private var task: ScheduledFuture<*>? = null
 
     private var reloadQueueJob: Job? = null
     private var loginJob: Job? = null
@@ -44,8 +47,10 @@ class AppController(
     private var swapSongsJob: Job? = null
     private var volumeRequestJob: Job? = null
     private var volumeChangeRequestJob: Job? = null
-    private var task: ScheduledFuture<*>? = null
+    private var userBlockRequestJob: Job? = null
+    private var userUnblockRequestJob: Job? = null
     private var loadStatisticsJob: Job? = null
+    private var changePasswordJob: Job? = null
 
     private val prefChangeListener = SharedPreferences.OnSharedPreferenceChangeListener {sharedPreferences, key ->
         when (key) {
@@ -72,7 +77,10 @@ class AppController(
         eventMgr.addEventListener(this::onSwapSongsRequest)
         eventMgr.addEventListener(this::onVolumeRequest)
         eventMgr.addEventListener(this::onVolumeChangeRequest)
-        eventMgr.addEventListener(this::loadStatistics)
+        eventMgr.addEventListener(this::onStatisticsRequest)
+        eventMgr.addEventListener(this::onUserBlockRequest)
+        eventMgr.addEventListener(this::onUserUnblockRequest)
+        eventMgr.addEventListener(this::onChangePasswordRequest)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -229,8 +237,7 @@ class AppController(
                 volumeChangeRequestJob = async {
                     jobTmp?.join()
                     when (event.change) {
-                        VolumeChangeRequestEvent.Companion.Change.INCREASE -> secureRestService.increaseVolume(event.value!!)
-                        VolumeChangeRequestEvent.Companion.Change.DECREASE -> secureRestService.decreaseVolume(event.value!!)
+                        VolumeChangeRequestEvent.Companion.Change.SET -> secureRestService.setVolume(event.value!!)
                         VolumeChangeRequestEvent.Companion.Change.MUTE -> secureRestService.muteVolume()
                         VolumeChangeRequestEvent.Companion.Change.UNMUTE -> secureRestService.unmuteVolume()
                     }
@@ -240,7 +247,7 @@ class AppController(
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun loadStatistics(event: StatisticsRequestEvent) {
+    private fun onStatisticsRequest(event: StatisticsRequestEvent) {
         Log.d("AppController", "loading the statistics")
         if (loadStatisticsJob?.isCompleted != false) {
             val jobTmp = loadStatisticsJob
@@ -252,4 +259,41 @@ class AppController(
         }
     }
 
+    private fun onUserBlockRequest(event: UserBlockRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (userBlockRequestJob?.isCompleted != false) {
+                val jobTmp = userBlockRequestJob
+                userBlockRequestJob = async {
+                    jobTmp?.join()
+                    secureRestService.blockUser(User(event.mac, event.ip, event.username))
+                }
+            }
+        }
+    }
+
+    private fun onUserUnblockRequest(event: UserUnblockRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (userUnblockRequestJob?.isCompleted != false) {
+                val jobTmp = userUnblockRequestJob
+                userUnblockRequestJob = async {
+                    jobTmp?.join()
+                    secureRestService.unblockUser(User(event.mac, event.ip, event.username))
+                }
+            }
+        }
+    }
+
+    private fun onChangePasswordRequest(event: PasswordChangeRequestEvent) {
+        if (appStateService.getState().type == AppStateService.State.Admin) {
+            if (changePasswordJob?.isCompleted != false) {
+                val jobTmp = changePasswordJob
+                changePasswordJob = async {
+                    jobTmp?.join()
+                    if (!event.newPassword.isEmpty()) {
+                        secureRestService.changePassword(event.oldPassword, event.newPassword)
+                    }
+                }
+            }
+        }
+    }
 }

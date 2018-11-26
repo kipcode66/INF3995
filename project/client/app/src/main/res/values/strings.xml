@@ -49,7 +49,7 @@
     <string name="local_song_sendButton_label_sending">Sending…</string>
     <string name="local_song_sendButton_label_sent">Sent</string>
     <string name="login_hint_username">Username</string>
-    <string name="login_hint_password">Password</string>
+    <string name="edit_text_hint_password">Password</string>
     <string name="login_submit_text">Login</string>
     <string name="login_dialog_title">Login</string>
     <string name="login_username_default_text" translatable="false">admin</string>
@@ -66,4 +66,16 @@
     <string name="statistics_layout_label_number_of_users">Number of users</string>
     <string name="statistics_layout_label_number_of_song_removed">Removed songs</string>
     <string name="statistics_layout_label_duration_of_song">Average duration</string>
+    <string name="error_message_too_many_concurrent_song_sent">Cannot send more than %1$d at the same time</string>
+    <string name="default_mac_address" translatable="false">00:00:00:00:00:00</string>
+    <string name="default_ip_address" translatable="false">0.0.0.0</string>
+    <string name="block_submit_text">Block</string>
+    <string name="block_dialog_title">Block User</string>
+    <string name="block_user_action_label">Block User</string>
+    <string name="settings_key_admin_password" translatable="false">admin_password</string>
+    <string name="setting_title_admin_password">Change Password</string>
+    <string name="setting_dialog_title_admin_password">Change Admin Password</string>
+    <string name="password_change_dialog_old_password">Current Password</string>
+    <string name="password_change_dialog_new_password">New Password</string>
+    <string name="change_password_button_submit">Submit</string>
 </resources>
