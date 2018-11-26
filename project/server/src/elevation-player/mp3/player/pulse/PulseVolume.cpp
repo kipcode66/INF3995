@@ -13,25 +13,20 @@ namespace elevation {
 
 double PulseVolume::toLogScale_(double linearFactor) {
     static const double A =
-        F0
-        *
+        F0 *
         (
-            1.0
-            -
+            1.0 -
             (
-                (1.0 - F0)
-                /
+                (1.0 - F0) /
                 (
-                    F0
-                    *
+                    F0 *
                     (std::pow(10.0, 1.0/K) - 1.0)
                 )
             )
         );
 
     static const double B =
-        (std::pow(10.0, 1.0/K) - 1.0)
-        /
+        (std::pow(10.0, 1.0/K) - 1.0) /
         (1.0 - F0);
 
     if (linearFactor < 0) {
@@ -40,30 +35,27 @@ double PulseVolume::toLogScale_(double linearFactor) {
     if (linearFactor < F0) {
         linearFactor = F0;
     }
-    return K * std::log10((linearFactor - A) * B);
+    return 100.0 * K * std::log10((linearFactor - A) * B);
 }
 
 double PulseVolume::fromLogScale_(double logFactor) {
     static const double A =
-        (1 - F0)
-        /
+        (1 - F0) /
         (std::pow(10.0, 1.0/K) - 1.0);
     static const double B =
-        F0
-        *
+        F0 *
         (
-            1.0
-            -
+            1.0 -
             (
-                (1.0 - F0)
-                /
+                (1.0 - F0) /
                 (
-                    F0
-                    *
+                    F0 *
                     (std::pow(10.0, 1.0/K) - 1.0)
                 )
             )
         );
+
+    logFactor /= 100.0;
 
     if (logFactor < 0) {
         throw std::logic_error(std::string{"Cannot convert "} + std::to_string(logFactor) + " to linear scale : Factor is negative");
@@ -169,7 +161,7 @@ void PulseVolume::initializeSinkData_() {
 }
 
 ::pa_cvolume PulseVolume::makePulseVolumeStructure_(volumePercent_t volume) const {
-    double sinkVolume = fromLogScale_(static_cast<double>(volume) / 100.0);
+    double sinkVolume = fromLogScale_(static_cast<double>(volume));
     ::pa_volume_t pulseInternalVolume = ::pa_sw_volume_from_linear(sinkVolume);
     ::pa_cvolume pulseVolumeStructure;
     ::pa_cvolume_init(&pulseVolumeStructure);
@@ -185,7 +177,7 @@ PulseVolume::SinkState PulseVolume::getSinkState_() const {
             const pa_cvolume* sinkVolumes = &i->volume;
             double sinkVolume = pa_sw_volume_to_linear(pa_cvolume_avg(sinkVolumes));
             bool isMuted = (i->mute != 0);
-            volumePercent_t volume = static_cast<volumePercent_t>(toLogScale_(sinkVolume) * 100.0);
+            volumePercent_t volume = static_cast<volumePercent_t>(toLogScale_(sinkVolume));
             SinkState sinkStateTemp{isMuted, volume};
             sinkStateBuffer = sinkStateTemp;
         }

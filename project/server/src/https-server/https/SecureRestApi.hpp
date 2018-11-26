@@ -32,7 +32,7 @@ protected:
     BlacklistApi      m_blacklistApi;
     StatsApi          m_statsApi;
     FileManagementApi m_fileManagementApi;
-    AuthApi           m_authApi;  
+    AuthApi           m_authApi;
 };
 
 } // namespace elevation
