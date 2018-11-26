@@ -80,6 +80,7 @@ class AppController(
         eventMgr.addEventListener(this::onStatisticsRequest)
         eventMgr.addEventListener(this::onUserBlockRequest)
         eventMgr.addEventListener(this::onUserUnblockRequest)
+        eventMgr.addEventListener(this::onUserBlockRequest)
         eventMgr.addEventListener(this::onChangePasswordRequest)
     }
 

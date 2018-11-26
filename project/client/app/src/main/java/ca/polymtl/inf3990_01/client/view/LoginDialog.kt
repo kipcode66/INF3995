@@ -13,6 +13,7 @@ class LoginDialog(
     private val eventManager: EventManager
 ): Dialog(activityCtx, R.style.Dialog) {
     private var canceled: Boolean = false
+
     init {
         setTitle(R.string.login_dialog_title)
         setCancelable(true)
