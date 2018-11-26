@@ -154,7 +154,7 @@ void PulseVolume::initializeSinkData_() {
             data->alreadyDone = true;
         }
     };
-    PulseOperation op{::pa_context_get_sink_info_list(m_context, callback, (void*)&data), m_mainloop};
+    PulseOperation op{::pa_context_get_sink_info_by_name(m_context, NULL, callback, (void*)&data), m_mainloop};
     op.waitUntilCompletedOrFailed();
     m_sinkIndex = data.sinkIndex;
     m_numSinkChannels = data.numSinkChannels;
