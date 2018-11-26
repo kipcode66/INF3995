@@ -247,6 +247,13 @@ std::vector<Song_t> Database::getAllSongs() const {
         "FROM songs ORDER BY song_order ASC;"));
 }
 
+std::vector<Song_t> Database::getAllPlayableSongs() const {
+    return getSongsByQuery_(Query(
+        "SELECT rowid, title, artist, user_id, duration, path, song_order "
+        "FROM songs WHERE was_played = 0 AND length(path) > 0 "
+        "ORDER BY song_order ASC;"));
+}
+
 int Database::getStatisticsFromQuery_(const Query& query) const {
     int statistic;
     Statement stmt{m_db, query};
