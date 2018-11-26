@@ -118,9 +118,11 @@ void BlacklistApi::postSuperviseurBloquer_(const Rest::Request& request,
         std::string mac(jsonDocument["mac"].GetString());
         try {
             if (db->getBlacklistByMAC(mac)) {
+                m_logger.log(std::string{"User "} + mac + " was already blocked.");
                 response.send(Http::Code::Ok, "No change made - user already blocked");
             } else {
                 db->blacklistMAC(mac);
+                m_logger.log(std::string{"User "} + mac + " is now blocked.");
                 response.send(Http::Code::Ok, "User blocked");
             }
         } catch (const NoSuchUserException& e) {
@@ -147,8 +149,10 @@ void BlacklistApi::postSuperviseurDebloquer_(const Rest::Request& request,
         try {
             if (db->getBlacklistByMAC(mac)) {
                 db->whitelistMAC(mac);
+                m_logger.log(std::string{"User "} + mac + " is now unblocked.");
                 response.send(Http::Code::Ok, "user unblocked");
             } else {
+                m_logger.log(std::string{"User "} + mac + " is not blocked.");
                 response.send(Http::Code::Ok, "No change made - user not blocked");
             }
         } catch (std::exception& e) {
