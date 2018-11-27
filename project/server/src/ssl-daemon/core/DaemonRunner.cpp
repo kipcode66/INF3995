@@ -39,7 +39,12 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
     std::for_each(
         m_workers.begin(),
         m_workers.end(),
-        [](std::thread& worker) { worker.join(); }
+        [](std::thread& worker) {
+            try {
+                worker.join();
+            }
+            catch (const std::exception& e) { }
+        }
     );
 }
 
