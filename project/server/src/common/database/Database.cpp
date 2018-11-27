@@ -442,11 +442,10 @@ bool Database::getBlacklistByMAC(const std::string& mac) const {
         "SELECT is_blacklisted FROM user "
         "WHERE mac = '%q';",
         mac.c_str())};
-    if(stmt.step()) {
+    if (stmt.step()) {
         return (stmt.getColumnInt(0) == Database::BLOCKED);
-    } else {
-        throw NoSuchUserException();
     }
+    return false;
 }
 
 void Database::setBlacklistFlag_(const std::string& mac, bool flag) {
