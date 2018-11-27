@@ -53,6 +53,7 @@ User_t Database::getUserFromStatement_(const Statement& stmt) const {
     strncpy(user.ip, stmt.getColumnText(1).c_str(), User_t::IP_LENGTH);
     strncpy(user.name, stmt.getColumnText(2).c_str(), User_t::NAME_LENGTH);
     strncpy(user.mac, stmt.getColumnText(3).c_str(), User_t::MAC_LENGTH);
+    user.isBlocked = stmt.getColumnInt(4);
     return user;
 }
 
@@ -91,13 +92,13 @@ std::vector<User_t> Database::getUsersByQuery_(const Query& query) const {
  */
 User_t Database::getUserByMac(const std::string& mac) const {
     return getUserByQuery_(Query(
-        "SELECT user_id, ip, name, mac FROM user WHERE (mac = '%q');",
+        "SELECT user_id, ip, name, mac, is_blacklisted FROM user WHERE (mac = '%q');",
         mac.c_str()));
 }
 
 User_t Database::getUserById(uint32_t id) const {
     return getUserByQuery_(Query(
-        "SELECT user_id, ip, name, mac FROM user WHERE (user_id = %u);",
+        "SELECT user_id, ip, name, mac, is_blacklisted FROM user WHERE (user_id = %u);",
         id));
 }
 
@@ -113,13 +114,13 @@ void Database::createUser(const User_t* user) {
 
 void Database::connectUser(const struct User_t* user) {
     executeQuery_(Query(
-        "INSERT INTO userConnection (user_id, connection_expiration) VALUES (%u, julianday('now', '+1 day'));",
+        "INSERT OR REPLACE INTO userConnection (user_id, connection_expiration) VALUES (%u, julianday('now', '+1 day'));",
         user->userId));
 }
 
 bool Database::isUserConnected(const uint32_t userId) const {
     Statement stmt{m_db, Query(
-        "SELECT julianday(connection_expiration) - julianday('now') FROM userConnection "
+        "SELECT (connection_expiration - julianday('now')) FROM userConnection "
         "WHERE (user_id = %u);",
         userId)};
 
@@ -185,8 +186,8 @@ std::pair<std::string, std::string> Database::getSaltAndHashedPasswordByLogin(
 
 std::vector<User_t> Database::getBlackList() {
     return getUsersByQuery_(Query(
-        "SELECT user_id, ip, name, mac FROM user"
-        " WHERE (is_blacklisted = %i);", Database::IS_BLACKLISTED));
+        "SELECT user_id, ip, name, mac, is_blacklisted FROM user"
+        " WHERE (is_blacklisted = %i);", Database::BLOCKED));
 }
 
 Song_t Database::getSongByQuery_(const Query& query) const {
@@ -305,9 +306,23 @@ void Database::createSong(const Song_t* song) {
         0));
 }
 
+/*
+ * A null path indicate a deleted song
+ */
 void Database::removeSong(uint32_t id, bool wasPlayed) {
     executeQuery_(Query(
-        "UPDATE songs SET was_played = %i WHERE rowid = %i;",
+        "UPDATE songs SET was_played = %i, path = '' WHERE rowid = %i;",
+        wasPlayed,
+        id));
+}
+
+/*
+ * A null path indicate a deleted song
+ */
+void Database::removeSongByAdmin(uint32_t id, bool wasPlayed) {
+    executeQuery_(Query(
+        "UPDATE songs SET was_played = %i, path = '', "
+        "deleted_by_admin = 1 WHERE rowid = %i;",
         wasPlayed,
         id));
 }
@@ -331,7 +346,7 @@ void Database::swapSongs(const Song_t* song1, const Song_t* song2) {
             orders[0].second,orders[1].first});
     }
     catch (...) {
-        executeQuery_(Query("COMMIT TRANSACTION;"));
+        executeQuery_(Query("ROLLBACK TRANSACTION;"));
         throw;
     }
     executeQuery_(Query("COMMIT TRANSACTION;"));
@@ -355,7 +370,7 @@ void Database::executeAndRetryOnLock_(const Query& query) {
                 throw e;
             }
         }
-    } while(retry);
+    } while (retry);
 }
 
 void Database::enableForeignKeys_() {
@@ -428,29 +443,27 @@ bool Database::getBlacklistByMAC(const std::string& mac) const {
         "WHERE mac = '%q';",
         mac.c_str())};
     if(stmt.step()) {
-        return (stmt.getColumnInt(0) == Database::IS_BLACKLISTED);
+        return (stmt.getColumnInt(0) == Database::BLOCKED);
     } else {
         throw NoSuchUserException();
     }
 }
 
 void Database::setBlacklistFlag_(const std::string& mac, bool flag) {
-    bool blacklistValue = flag ?  Database::IS_BLACKLISTED
-                               : !Database::IS_BLACKLISTED;
     executeQuery_(Query(
         "UPDATE user "
         "SET is_blacklisted = %i "
         "WHERE (mac = '%q');",
-        blacklistValue,
+        flag,
         mac.c_str()));
 }
 
 void Database::blacklistMAC(const std::string& mac) {
-    setBlacklistFlag_(mac, 1);
+    setBlacklistFlag_(mac, Database::BLOCKED);
 }
 
 void Database::whitelistMAC(const std::string& mac) {
-    setBlacklistFlag_(mac, 0);
+    setBlacklistFlag_(mac, Database::UNBLOCKED);
 }
 
 Database::~Database() {

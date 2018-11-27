@@ -6,7 +6,9 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".view.LocalSongActivity"
-    tools:showIn="@layout/app_bar_local_song">
+    tools:showIn="@layout/app_bar_local_song"
+    android:background="@drawable/ic_icone_fond"
+    android:backgroundTint="#04000000">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/content_queue_swipe"

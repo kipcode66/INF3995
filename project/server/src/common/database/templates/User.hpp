@@ -13,6 +13,7 @@ struct User_t {
     char ip[IP_LENGTH];
     char mac[MAC_LENGTH];
     char name[NAME_LENGTH];
+    uint32_t isBlocked;
 };
 
 #endif // !DATABASE_USER_HPP
