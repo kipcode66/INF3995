@@ -7,7 +7,7 @@
 #include <common/mp3/communication/Mp3EventListenerSocket.hpp>
 #include <common/mp3/communication/Mp3EventSocket.hpp>
 
-#include "Mp3AutoPlayer.hpp"
+#include "mp3/player/Mp3AutoPlayer.hpp"
 
 namespace elevation {
 
@@ -17,12 +17,11 @@ public:
     virtual ~ElevationPlayerEventManager();
 
 protected:
-    static void accepterThread_(Mp3EventListenerSocket listener, Logger& logger);
-    static void connectionThread_(std::shared_ptr<Mp3EventSocket> socket, Logger& logger);
+    static void accepterThread_(Mp3EventListenerSocket listener, Logger& logger, std::shared_ptr<Mp3AutoPlayer> autoPlayer);
+    static void connectionThread_(std::shared_ptr<Mp3EventSocket> socket, Logger& logger, std::shared_ptr<Mp3AutoPlayer> autoPlayer);
 
 protected:
     std::thread m_accepterThread;
-    std::shared_ptr<Mp3AutoPlayer> m_autoPlayer;
 };
 
 } // namespace elevation

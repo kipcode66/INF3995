@@ -22,6 +22,7 @@ set(COMMON_CPP_SOURCES
     mp3/event/UnmuteEvent.cpp
     mp3/event/VolumeGetRequest.cpp
     mp3/event/VolumeGetResponse.cpp
+    mp3/event/StopSongEvent.cpp
     mp3/event/exception/UnexpectedEventException.cpp
     mp3/communication/Mp3EventSocket.cpp
     mp3/communication/Mp3EventListenerSocket.cpp
@@ -64,6 +65,7 @@ set(COMMON_HEADER_SOURCES
     mp3/event/UnmuteEvent.hpp
     mp3/event/VolumeGetRequest.hpp
     mp3/event/VolumeGetResponse.hpp
+    mp3/event/StopSongEvent.hpp
     mp3/event/AbstractMp3EventVisitor.hpp
     mp3/event/exception/UnexpectedEventException.hpp
     mp3/communication/Mp3EventSocket.hpp

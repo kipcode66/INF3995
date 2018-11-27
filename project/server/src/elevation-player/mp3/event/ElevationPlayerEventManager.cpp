@@ -11,10 +11,9 @@
 namespace elevation {
 
 ElevationPlayerEventManager::ElevationPlayerEventManager(uint16_t port, Logger& logger, std::shared_ptr<Mp3AutoPlayer> autoPlayer)
-    : m_autoPlayer(autoPlayer)
 {
     Mp3EventListenerSocket listener{port};
-    m_accepterThread = std::thread(&ElevationPlayerEventManager::accepterThread_, std::move(listener), std::ref(logger));
+    m_accepterThread = std::thread(&ElevationPlayerEventManager::accepterThread_, std::move(listener), std::ref(logger), autoPlayer);
 }
 
 ElevationPlayerEventManager::~ElevationPlayerEventManager() {
@@ -23,12 +22,12 @@ ElevationPlayerEventManager::~ElevationPlayerEventManager() {
     m_accepterThread.join();
 }
 
-void ElevationPlayerEventManager::accepterThread_(Mp3EventListenerSocket listener, Logger& logger) {
+void ElevationPlayerEventManager::accepterThread_(Mp3EventListenerSocket listener, Logger& logger, std::shared_ptr<Mp3AutoPlayer> autoPlayer) {
     while (true) {
         try {
             std::unique_ptr<Socket> socket = listener.accept();
             std::shared_ptr<Mp3EventSocket> eventSocket{new Mp3EventSocket{std::move(*socket)}};
-            std::thread(&ElevationPlayerEventManager::connectionThread_, std::move(eventSocket), std::ref(logger)).detach();
+            std::thread(&ElevationPlayerEventManager::connectionThread_, std::move(eventSocket), std::ref(logger), autoPlayer).detach();
         }
         catch (const std::exception& e) {
             std::cerr << "A C++ exception occurred while trying to establish client-server connections : " <<
@@ -41,10 +40,10 @@ void ElevationPlayerEventManager::accepterThread_(Mp3EventListenerSocket listene
     }
 }
 
-void ElevationPlayerEventManager::connectionThread_(std::shared_ptr<Mp3EventSocket> eventSocket, Logger& logger) {
+void ElevationPlayerEventManager::connectionThread_(std::shared_ptr<Mp3EventSocket> eventSocket, Logger& logger, std::shared_ptr<Mp3AutoPlayer> autoPlayer) {
     logger.log("New connection accepted");
 
-    ElevationPlayerMp3EventVisitor visitor{logger, eventSocket, m_autoPlayer};
+    ElevationPlayerMp3EventVisitor visitor{logger, eventSocket, autoPlayer};
     while (true) {
         try {
             eventSocket->readEvent()->acceptVisitor(visitor);
