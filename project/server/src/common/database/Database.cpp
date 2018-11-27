@@ -324,9 +324,10 @@ void Database::swapSongs(const Song_t* song1, const Song_t* song2) {
             throw std::runtime_error("One or both songs are not in the queue");
         }
         executeQuery_(Query{
-            "UPDATE songs SET song_order = %u WHERE rowid = %u;"
             "UPDATE songs SET song_order = %u WHERE rowid = %u;",
-            orders[1].second,orders[0].first,
+            orders[1].second,orders[0].first});
+        executeQuery_(Query{
+            "UPDATE songs SET song_order = %u WHERE rowid = %u;",
             orders[0].second,orders[1].first});
     }
     catch (...) {
