@@ -1,6 +1,7 @@
 package ca.polymtl.inf3990_01.client.controller.rest
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Handler
 import android.util.Log
 import android.widget.Toast
@@ -34,6 +35,7 @@ class SecureRestRequestService(
     private val eventMgr: EventManager,
     private val dataProvider: DataProvider,
     private val appStateService: AppStateService,
+    private val sharedPreferences: SharedPreferences,
     private val volumeController: VolumeController
     ) {
     companion object {
@@ -60,6 +62,7 @@ class SecureRestRequestService(
         private data class ChangePasswordRequestData(val ancien: String, val nouveau: String)
 
         private const val RESOURCE_URI = "/superviseur"
+        private const val DEFAULT_TIMEOUT = 10000
     }
     private var lastMessageGeneric: String? = null
 
@@ -100,7 +103,9 @@ class SecureRestRequestService(
                 401 to appCtx.getString(R.string.error_message_unauthenticated),
                 500 to appCtx.getString(R.string.error_message_server)
             ), SongListResponseData(listOf()), true)
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(
+                sharedPreferences.getString(appCtx.getString(R.string.settings_key_queue_refresh_period), DEFAULT_TIMEOUT.toString())!!.toInt(),
+                0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         for (chanson in resp.value.chansons) {
@@ -135,7 +140,7 @@ class SecureRestRequestService(
                     405 to appCtx.getString(R.string.error_message_unauthenticated),
                     409 to appCtx.getString(R.string.error_message_song_not_in_queue),
                     500 to appCtx.getString(R.string.error_message_server)
-            ), "")
+            ), "", true)
             request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
@@ -149,7 +154,9 @@ class SecureRestRequestService(
                 401 to appCtx.getString(R.string.error_message_unauthenticated),
                 500 to appCtx.getString(R.string.error_message_server)
             ), VolumeResponseData(BigInteger.ZERO, false))
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(
+                sharedPreferences.getString(appCtx.getString(R.string.settings_key_queue_refresh_period), DEFAULT_TIMEOUT.toString())!!.toInt(),
+                0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         if (resp.code == 200) {
@@ -201,7 +208,9 @@ class SecureRestRequestService(
             val request : RESTRequest<StatisticsResponseData> =  generateRequest(Request.Method.GET, "statistiques/", "", continuation, mutableMapOf(
                     401 to appCtx.getString(R.string.error_message_unauthenticated)
             ), StatisticsResponseData(BigInteger.ZERO, BigInteger.ZERO, BigInteger.ZERO, "00:00"),true)
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(
+                sharedPreferences.getString(appCtx.getString(R.string.settings_key_queue_refresh_period), DEFAULT_TIMEOUT.toString())!!.toInt(),
+                0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         if (resp.code == 200) {
@@ -266,11 +275,13 @@ class SecureRestRequestService(
                         continuation.resume(resp)
                     }
             )
-            request.retryPolicy = DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(
+                sharedPreferences.getString(appCtx.getString(R.string.settings_key_queue_refresh_period), DEFAULT_TIMEOUT.toString())!!.toInt(),
+                0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         for (user in resp.value.bloques) {
-            list.add(User(user.mac, user.ip, user.nom ?: ""))
+            list.add(User(user.mac, user.ip, user.nom))
         }
         return list
     }
@@ -306,7 +317,9 @@ class SecureRestRequestService(
                     continuation.resume(false)
                 }
             )
-            request.retryPolicy = DefaultRetryPolicy(10*1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(
+                sharedPreferences.getString(appCtx.getString(R.string.settings_key_queue_refresh_period), DEFAULT_TIMEOUT.toString())!!.toInt(),
+                0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpsClient.addToRequestQueue(request)
         }
         if (resp) {

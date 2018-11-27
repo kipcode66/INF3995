@@ -32,13 +32,22 @@ class VolumeController(
     private val volumeProvider =
         object : VolumeProviderCompat(VolumeProviderCompat.VOLUME_CONTROL_ABSOLUTE, PERCENTAGE_MAX / PERCENTAGE_MULTIPLIER, PERCENTAGE_INITIAL / PERCENTAGE_MULTIPLIER) {
             fun setVolumeLevel(volume: Volume) {
-                currentVolume = ((volume.level.toDouble() + 1.0) / PERCENTAGE_MULTIPLIER.toDouble()).toInt()
+                currentVolume = if (volume.mute) 0 else ((volume.level.toDouble() + 1.0) / PERCENTAGE_MULTIPLIER.toDouble()).toInt()
             }
 
             override fun onSetVolumeTo(volume: Int) {
                 super.onSetVolumeTo(volume)
-                currentVolume = Math.max(0, Math.min(volume, PERCENTAGE_MAX / PERCENTAGE_MULTIPLIER))
-                eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.SET, volume * PERCENTAGE_MULTIPLIER))
+                if (volume == 0 && currentVolume != 0) {
+                    currentVolume = 0
+                    eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.MUTE))
+                }
+                else {
+                    if (volume != 0 && currentVolume == 0) {
+                        eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.UNMUTE))
+                    }
+                    currentVolume = Math.max(0, Math.min(volume, PERCENTAGE_MAX / PERCENTAGE_MULTIPLIER))
+                    eventMgr.dispatchEvent(VolumeChangeRequestEvent(VolumeChangeRequestEvent.Companion.Change.SET, volume * PERCENTAGE_MULTIPLIER))
+                }
             }
 
             override fun onAdjustVolume(direction: Int) {

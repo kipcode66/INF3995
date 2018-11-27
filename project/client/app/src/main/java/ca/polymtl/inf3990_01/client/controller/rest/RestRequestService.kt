@@ -39,6 +39,7 @@ class RestRequestService(
                 val proposeePar: String?, val proprietaire: Boolean, val no: Int)
         private class SongListResponseData(val chansons: List<SongResponseData>)
         const val RESOURCE_URI = "/usager"
+        private const val DEFAULT_SEND_TIMEOUT_MS = 60 * 1000
     }
 
     private var lastMessageSongList: String? = null
@@ -110,7 +111,7 @@ class RestRequestService(
                         continuation.resume(ResponseData(error.networkResponse?.statusCode ?: 0, msg, error.networkResponse))
                     }
             )
-            request.retryPolicy = DefaultRetryPolicy(30 * 1000, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            request.retryPolicy = DefaultRetryPolicy(DEFAULT_SEND_TIMEOUT_MS, 0, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
             httpClient.addToRequestQueue(request)
         }
         if (resp.code != 200) {
