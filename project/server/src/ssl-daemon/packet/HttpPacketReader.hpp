@@ -17,13 +17,13 @@ public:
     static const std::size_t s_HTTP_CONTENT_SIZE_RESULT_GROUP_ID;
 
 public:
-    explicit HttpPacketReader(Socket& socket);
+    explicit HttpPacketReader(std::shared_ptr<Socket> socket);
     virtual ~HttpPacketReader();
 
     std::string readPacket();
 
 protected:
-    Socket& m_socket;
+    std::shared_ptr<Socket> m_socket;
 };
 
 } // namespace daemon

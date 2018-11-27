@@ -21,8 +21,8 @@ public:
 
 protected:
     void runner_(SslSession clientSession, ClientSocket httpServerSocket);
-    void forwardToServer_(std::shared_ptr<SslSession> clientSession, ClientSocket& httpServerSocket);
-    void forwardToClient_(std::shared_ptr<SslSession> clientSession, ClientSocket& httpServerSocket);
+    void forwardToServer_(std::shared_ptr<SslSession> clientSession, std::shared_ptr<ClientSocket> httpServerSocket);
+    void forwardToClient_(std::shared_ptr<SslSession> clientSession, std::shared_ptr<ClientSocket> httpServerSocket);
     void killAll_(); ///< Deamon Runners will not hesitate to kill workers if they want to.
 
 protected:
