@@ -423,7 +423,7 @@ void RestApi::deleteFile_(const Pistache::Rest::Request& request, Pistache::Http
 
                 if (song.id != 0 && song.userId == requestUser.userId) {
                     std::vector<Song_t> songs = db->getAllPlayableSongs();
-                    if (songs.size() > 0 && songs[0].id == song.id) {
+                    if (songs.size() > 0 && songs[0].id != song.id) {
                         db->removeSong(songId);
                         m_cache.deleteFile(song.path);
 
@@ -438,8 +438,8 @@ void RestApi::deleteFile_(const Pistache::Rest::Request& request, Pistache::Http
                                    << " tried to remove the currently playing song.";
                         m_logger.log(logMessage.str());
                         response.send(Pistache::Http::Code::Method_Not_Allowed);
-		    }
-		}
+                    }
+                }
                 else {
                     if (song.id == 0) {
                         logMessage << '{' << requestUser.mac << '}'
