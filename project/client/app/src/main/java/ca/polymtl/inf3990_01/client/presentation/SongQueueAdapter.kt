@@ -80,15 +80,21 @@ class SongQueueAdapter(
         userName = if (userName.isBlank()) appCtx.getString(R.string.client_name_default) else userName
 
         view.title.text = song.title
+        view.title.isSelected = true
         view.author.text = song.authorName
+        view.author.isSelected = true
         view.sent_by.text =
             if (song.sentBy == null || !song.sentBy.isEmpty())
                 appCtx.getString(R.string.song_queue_item_sent_by, song.sentBy ?: userName)
             else ""
+        view.sent_by.isSelected = true
         val duration : String = Misc.formatTime(song.durationMS.toLong())
         view.duration.text = appCtx.getString(R.string.song_item_duration_format, duration)
+        view.duration.isSelected = true
         view.sender_ip.text = song.ip ?: view.context.getString(R.string.error_message_no_ip)
+        view.sender_ip.isSelected = true
         view.sender_mac.text = song.mac ?: view.context.getString(R.string.error_message_no_mac)
+        view.sender_mac.isSelected = true
         view.layout_admin.visibility = if (appState.canDisplaySongOwnerData()) View.VISIBLE else View.INVISIBLE
         view.remove_song.visibility = if (appState.canRemoveSong(song)) View.VISIBLE else View.INVISIBLE
         val isHighlighted =

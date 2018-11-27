@@ -37,8 +37,11 @@ class BlackListAdapter(
         val view = v ?: layoutInflater.inflate(R.layout.black_list, viewGroup, false)
         val user = this.userList[postion]
         view.name.text = if (!user.name.isEmpty()) user.name else appCtx.getString(R.string.no_name)
+        view.name.isSelected = true
         view.mac.text = user.mac
+        view.mac.isSelected = true
         view.ip.text = user.ip
+        view.ip.isSelected = true
         view.unblock.setOnClickListener {
             eventMgr.dispatchEvent(UserUnblockRequestEvent(user.name, user.ip, user.mac))
         }
