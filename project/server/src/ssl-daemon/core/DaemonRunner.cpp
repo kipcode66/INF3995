@@ -42,6 +42,7 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
     }
     tasksReadyPromise.set_value(true);
 
+
     {
         std::lock_guard<std::mutex> lock(m_workersMutex);
         std::for_each(
