@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:columnCount="3"
-    android:padding="@dimen/song_item_padding"
+    android:padding="@dimen/song_item_margin"
     android:focusable="true"
     android:clickable="true"
     android:longClickable="true"
@@ -13,9 +12,9 @@
 
     <LinearLayout
         android:layout_height="match_parent"
+        android:layout_width="match_parent"
         android:orientation="vertical"
-        android:layout_column="0"
-        android:layout_columnWeight="1" >
+        android:layout_weight="1" >
 
         <TextView
             android:id="@+id/name"
@@ -24,6 +23,10 @@
             android:text="User name"
             android:singleLine="true"
             android:ellipsize="marquee"
+            android:marqueeRepeatLimit ="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
             style="@style/Base.TextAppearance.AppCompat.Title" />
 
         <TextView
@@ -33,6 +36,10 @@
             android:text="MAC Address"
             android:singleLine="true"
             android:ellipsize="marquee"
+            android:marqueeRepeatLimit ="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
             style="@style/Base.TextAppearance.AppCompat.Medium" />
 
         <TextView
@@ -40,16 +47,23 @@
             android:layout_width="match_parent"
             android:layout_height="37dp"
             android:text="IP Address"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit ="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true" />
     </LinearLayout>
 
     <ImageButton
         android:id="@+id/unblock"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:padding="@dimen/song_item_delete_width"
+        android:background="@android:color/transparent"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:contentDescription="@string/black_list_item_button_desc"
-        android:layout_column="2"
-        android:layout_columnWeight="0" />
+        android:layout_weight="0" />
 
-</GridLayout>
+</LinearLayout>
