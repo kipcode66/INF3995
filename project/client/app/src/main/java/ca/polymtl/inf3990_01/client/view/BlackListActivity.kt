@@ -39,6 +39,7 @@ class BlackListActivity : AbstractDrawerActivity(R.layout.activity_black_list, R
         content_queue_swipe.setColorSchemeResources(R.color.colorPrimary, R.color.colorPrimaryDark)
         content_queue_swipe.setOnRefreshListener { eventMgr.dispatchEvent(RequestBlackListReloadEvent()) }
         dataProvider.observeBlackList(Observer(this::onBlackListChange))
+        refresh()
     }
 
     private fun refresh() {

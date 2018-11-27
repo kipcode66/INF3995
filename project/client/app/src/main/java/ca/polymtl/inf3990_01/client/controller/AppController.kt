@@ -9,6 +9,7 @@ import ca.polymtl.inf3990_01.client.R
 import ca.polymtl.inf3990_01.client.controller.event.*
 import ca.polymtl.inf3990_01.client.controller.rest.RestRequestService
 import ca.polymtl.inf3990_01.client.controller.rest.SecureRestRequestService
+import ca.polymtl.inf3990_01.client.controller.rest.TokenManagerService
 import ca.polymtl.inf3990_01.client.controller.state.AppStateService
 import ca.polymtl.inf3990_01.client.model.DataProvider
 import ca.polymtl.inf3990_01.client.model.Statistics
@@ -29,6 +30,7 @@ class AppController(
         private val localSongController: LocalSongController,
         private val appStateService: AppStateService,
         private val volumeController: VolumeController,
+        private val tokenService: TokenManagerService,
         private val appCtx: Context
 ) {
     companion object {
@@ -60,6 +62,9 @@ class AppController(
             }
             appCtx.getString(R.string.settings_key_server_address) ->
                 appStateService.setState(AppStateService.State.User)
+            appCtx.getString(R.string.settings_key_server_address) -> {
+                launch {tokenService.updateToken()}
+            }
         }
     }
 

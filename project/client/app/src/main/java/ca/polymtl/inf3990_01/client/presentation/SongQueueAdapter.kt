@@ -79,6 +79,7 @@ class SongQueueAdapter(
         var userName = preferences.getString("client_name", appCtx.getString(R.string.client_name_default)) as String
         userName = if (userName.isBlank()) appCtx.getString(R.string.client_name_default) else userName
 
+        view.now_playing.visibility = if (position == 0) View.VISIBLE else View.GONE
         view.title.text = song.title
         view.title.isSelected = true
         view.author.text = song.authorName
