@@ -18,6 +18,7 @@ DaemonRunner::DaemonRunner(SslSession clientSession, ClientSocket httpServerSock
 
 DaemonRunner::~DaemonRunner() {
     killAll_();
+    std::lock_guard<std::mutex> lock(m_workersMutex);
     std::for_each(m_workers.begin(), m_workers.end(), [](std::thread& worker) {
         try {
             worker.detach();
@@ -32,15 +33,29 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
 
     std::promise<bool> tasksReadyPromise;
     m_tasksReady = tasksReadyPromise.get_future();
-    m_workers.push_back(std::thread(&DaemonRunner::forwardToServer_, this, std::ref(clientSession), std::ref(httpServerSocket)));
-    m_workers.push_back(std::thread(&DaemonRunner::forwardToClient_, this, std::ref(clientSession), std::ref(httpServerSocket)));
+
+    {
+        std::lock_guard<std::mutex> lock(m_workersMutex);
+        m_workers.push_back(std::thread(&DaemonRunner::forwardToServer_, this, std::ref(clientSession), std::ref(httpServerSocket)));
+        m_workers.push_back(std::thread(&DaemonRunner::forwardToClient_, this, std::ref(clientSession), std::ref(httpServerSocket)));
+        // m_workersMutex get unlocked here
+    }
     tasksReadyPromise.set_value(true);
 
-    std::for_each(
-        m_workers.begin(),
-        m_workers.end(),
-        [](std::thread& worker) { worker.join(); }
-    );
+    {
+        std::lock_guard<std::mutex> lock(m_workersMutex);
+        std::for_each(
+            m_workers.begin(),
+            m_workers.end(),
+            [](std::thread& worker) {
+                try {
+                    worker.join();
+                }
+                catch (const std::exception& e) { }
+            }
+        );
+        // m_workersMutex get unlocked here
+    }
 }
 
 void DaemonRunner::forwardToServer_(SslSession& clientSession, ClientSocket& httpServerSocket) {
@@ -86,7 +101,7 @@ void DaemonRunner::forwardToClient_(SslSession& clientSession, ClientSocket& htt
 }
 
 void DaemonRunner::killAll_() {
-    std::lock_guard<std::mutex> killLock(m_killMutex);
+    std::lock_guard<std::mutex> lock(m_workersMutex);
     std::for_each(
         m_workers.begin(),
         m_workers.end(),

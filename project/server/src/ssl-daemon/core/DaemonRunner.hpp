@@ -26,7 +26,7 @@ protected:
 
 protected:
     std::vector<std::thread> m_workers;
-    std::mutex m_killMutex;
+    std::mutex m_workersMutex;
     std::shared_future<bool> m_tasksReady;
 };
 
