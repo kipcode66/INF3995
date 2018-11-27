@@ -53,6 +53,8 @@ std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeEvent_(Mp3Event::Even
         return deserializeVolumeGetRequest_(std::move(payload));
     case Mp3Event::EventType::VOLUME_GET_RESPONSE:
         return deserializeVolumeGetResponse_(std::move(payload));
+    case Mp3Event::EventType::STOP_SONG:
+        return deserializeStopSongEvent_(std::move(payload));
     default:
         throw std::runtime_error("Unknown event type " + std::to_string(static_cast<std::size_t>(eventType)));
         break;

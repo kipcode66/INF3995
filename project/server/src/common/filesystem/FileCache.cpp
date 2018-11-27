@@ -129,14 +129,14 @@ fs::directory_entry FileCache::getFile(const std::string& fileName) const {
 
 void FileCache::ensureCacheDirCreated_() noexcept {
     try {
-        fs::create_directories(m_path);
-        if (fs::exists(m_path)) {
-            for (auto& entry : fs::directory_iterator(m_path)) {
-                fs::remove_all(entry.path());
-            }
-            m_isInitialized = true;
-            std::cout << "File Cache path : " << m_path.string() << std::endl;
+        if (!fs::exists(m_path)) {
+            fs::create_directories(m_path);
         }
+        for (auto& entry : fs::directory_iterator(m_path)) {
+            fs::remove_all(entry.path());
+        }
+        m_isInitialized = true;
+        std::cout << "File Cache path : " << m_path.string() << std::endl;
     }
     catch (fs::filesystem_error& e) {
         std::clog << e.what();
@@ -145,7 +145,9 @@ void FileCache::ensureCacheDirCreated_() noexcept {
 
 void FileCache::wipeCachedFiles_() noexcept {
     try {
-        fs::remove_all(m_path);
+        for (auto& path: fs::directory_iterator(m_path)) {
+            fs::remove_all(path);
+        }
     }
     catch (fs::filesystem_error& e) {
         std::clog << e.what();

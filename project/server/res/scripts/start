@@ -176,7 +176,11 @@ lanunchEverything() {
     local IS_PROD_MODE="${2}"
 
     local SERVER_CACHE_PATH="${SERVER_DIR}/cache"
-    mkdir -p "${SERVER_CACHE_PATH}"
+    local SERVER_LOGS_PATH="${SERVER_DIR}/logs"
+    if [ $(whoami) != "root" ]; then
+        mkdir -p "${SERVER_CACHE_PATH}"
+        mkdir -p "${SERVER_LOGS_PATH}"
+    fi
     if checkProcessesNotAlreadyStarted; then
         cd "${SERVER_DIR}"
         startedEverything=1
