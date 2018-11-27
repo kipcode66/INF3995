@@ -173,6 +173,13 @@ void RestApi::getIdentification_(const Pistache::Rest::Request& request, Pistach
             std::ostringstream logMsg;
             bool userAlreadyExisted = (*existingUser.mac != 0);
             bool isUserConnected = db->isUserConnected(existingUser.userId);
+            bool isUserBlacklisted = db->getBlacklistByMAC(existingUser.mac);
+            if (isUserBlacklisted) {
+                logMsg << '{' << existingUser.mac << '}' << " is blocked.";
+                m_logger.log(logMsg.str());
+                response.send(Pistache::Http::Code::Forbidden, "User has been blocked");
+                return;
+            }
             if (!userAlreadyExisted || !isUserConnected) {
                 std::string salt = id_utils::generateSalt(strlen(requestUser.mac));
                 requestUser.userId = id_utils::generateId(requestUser.mac, salt);
@@ -209,8 +216,15 @@ void RestApi::getFileList_(const Pistache::Rest::Request& request, Pistache::Htt
             try {
                 Database* db = Database::instance();
                 bool isUserConnected = db->isUserConnected(requestUser.userId);
+                bool isUserBlacklisted = db->getBlacklistByMAC(requestUser.mac);
+                std::ostringstream logMsg;
+                if (isUserBlacklisted) {
+                    logMsg << "Could not get the file list. User with token \"" << requestUser.userId << "\" is blocked.";
+                    m_logger.err(logMsg.str());
+                    response.send(Pistache::Http::Code::Forbidden, "User is blocked");
+                    return;
+                }
                 if (!isUserConnected) {
-                    std::ostringstream logMsg;
                     logMsg << "Could not get the file list. User with token \"" << requestUser.userId << "\" is not connected.";
                     m_logger.err(logMsg.str());
                     response.send(Pistache::Http::Code::Forbidden, "User not connected");
@@ -242,15 +256,18 @@ void RestApi::postFile_(const Pistache::Rest::Request& request, Pistache::Http::
 
     User_t requestUser = {};
     try {
+        std::ostringstream logMsg;
+        Database* db = Database::instance();
         requestUser = getUserFromRequestToken_(request);
-        if (requestUser.isBlocked) {
+        bool isUserBlacklisted = db->getBlacklistByMAC(requestUser.mac);
+        if (isUserBlacklisted) {
+            logMsg << "Could not post the file. User with token \"" << requestUser.userId << "\" is blocked.";
+            m_logger.log(logMsg.str());
             response.send(Pistache::Http::Code::Forbidden, "User has been blocked");
             return;
         }
-        Database* db = Database::instance();
         bool isUserConnected = db->isUserConnected(requestUser.userId);
         if (!isUserConnected) {
-            std::ostringstream logMsg;
             logMsg << "Could not post the file. User with token \"" << requestUser.userId << "\" is not connected.";
             m_logger.err(logMsg.str());
             response.send(Pistache::Http::Code::Forbidden, "User not connected");
@@ -392,6 +409,15 @@ void RestApi::deleteFile_(const Pistache::Rest::Request& request, Pistache::Http
 
             try {
                 User_t requestUser = getUserFromRequestToken_(request);
+                bool isUserBlacklisted = db->getBlacklistByMAC(requestUser.mac);
+                std::ostringstream logMessage;
+
+                if (isUserBlacklisted) {
+                    logMessage << "Could not delete the song. User with token \"" << requestUser.userId << "\" is blocked.";
+                    m_logger.log(logMessage.str());
+                    response.send(Pistache::Http::Code::Forbidden, "User has been blocked");
+                    return;
+                }
 
                 Song_t song = db->getSongById(songId);
 
@@ -399,7 +425,6 @@ void RestApi::deleteFile_(const Pistache::Rest::Request& request, Pistache::Http
                     db->removeSong(songId);
                     m_cache.deleteFile(song.path);
 
-                    std::ostringstream logMessage;
                     logMessage << '{' << requestUser.mac << '}'
                                << " Removed MP3 \"" << song.title
                                << "\" of length " << song.duration;
@@ -407,7 +432,6 @@ void RestApi::deleteFile_(const Pistache::Rest::Request& request, Pistache::Http
                     response.send(Pistache::Http::Code::Ok);
                 }
                 else {
-                    std::ostringstream logMessage;
                     if (song.id == 0) {
                         logMessage << '{' << requestUser.mac << '}'
                             << " tried to remove nonexistant song of id "
