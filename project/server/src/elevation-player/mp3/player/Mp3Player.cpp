@@ -60,6 +60,7 @@ Mp3Player& Mp3Player::operator=(Mp3Player&& that) {
 void Mp3Player::startPlaying(const std::string& fileName) {
     std::lock_guard<std::mutex> lock(*m_playerMutex);
     m_player.get();
+    m_stopRequested->store(false);
     m_player = std::async(&Mp3Player::run_, fileName, m_stopRequested);
 }
 
