@@ -20,15 +20,11 @@ public:
     ~DaemonRunner();
 
 protected:
-    void runner_(SslSession clientSession, ClientSocket httpServerSocket);
-    void forwardToServer_(std::shared_ptr<SslSession> clientSession, std::shared_ptr<ClientSocket> httpServerSocket);
-    void forwardToClient_(std::shared_ptr<SslSession> clientSession, std::shared_ptr<ClientSocket> httpServerSocket);
-    void killAll_(); ///< Deamon Runners will not hesitate to kill workers if they want to.
+    static void runner_(SslSession clientSession, ClientSocket httpServerSocket);
+    static void forwardToServer_(std::shared_ptr<SslSession> clientSession, std::shared_ptr<ClientSocket> httpServerSocket, std::shared_ptr<std::shared_future<bool>> tasksReady, std::shared_ptr<std::promise<void>> terminate);
+    static void forwardToClient_(std::shared_ptr<SslSession> clientSession, std::shared_ptr<ClientSocket> httpServerSocket, std::shared_ptr<std::shared_future<bool>> tasksReady, std::shared_ptr<std::promise<void>> terminate);
 
-protected:
-    std::thread m_clientForwarder;
-    std::thread m_serverForwarder;
-    std::shared_future<bool> m_tasksReady;
+    static void kill_(std::thread& thread);
 };
 
 } // namespace daemon

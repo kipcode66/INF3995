@@ -12,39 +12,48 @@ namespace daemon {
 
 DaemonRunner::DaemonRunner(SslSession clientSession, ClientSocket httpServerSocket)
 {
-    std::thread runnerThread(&DaemonRunner::runner_, this, std::move(clientSession), std::move(httpServerSocket));
+    std::thread runnerThread(&DaemonRunner::runner_, std::move(clientSession), std::move(httpServerSocket));
     runnerThread.detach();
 }
 
-DaemonRunner::~DaemonRunner() {
-    killAll_();
-    try {
-        m_clientForwarder.detach();
-    }
-    catch (const std::exception& e) { }
-
-    try {
-        m_serverForwarder.detach();
-    }
-    catch (const std::exception& e) { }
-}
+DaemonRunner::~DaemonRunner()
+{ }
 
 void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSocket) {
     // This thread keeps the clientSession and the socket. When this thread ends, these
     // are closed by their respective destructors.
 
     std::promise<bool> tasksReadyPromise;
-    m_tasksReady = tasksReadyPromise.get_future();
+    std::shared_ptr<std::shared_future<bool>> tasksReady(new std::shared_future<bool>(tasksReadyPromise.get_future()));
+    std::shared_ptr<std::promise<void>> terminatePromise(new std::promise<void>());
+    std::future<void> terminateFuture = terminatePromise->get_future();
+
     std::shared_ptr<SslSession> clientSessionPtr(new SslSession(std::move(clientSession)));
     std::shared_ptr<ClientSocket> httpServerSocketPtr(new ClientSocket(std::move(httpServerSocket)));
-    m_serverForwarder = std::thread(&DaemonRunner::forwardToServer_, this, clientSessionPtr, httpServerSocketPtr);
-    m_clientForwarder = std::thread(&DaemonRunner::forwardToClient_, this, clientSessionPtr, httpServerSocketPtr);
+    std::thread serverForwarder = std::thread(&DaemonRunner::forwardToServer_, clientSessionPtr, httpServerSocketPtr, tasksReady, terminatePromise);
+    std::thread clientForwarder = std::thread(&DaemonRunner::forwardToClient_, clientSessionPtr, httpServerSocketPtr, tasksReady, terminatePromise);
     tasksReadyPromise.set_value(true);
+
+    try {
+        terminateFuture.wait();
+        kill_(serverForwarder);
+        kill_(clientForwarder);
+    }
+    catch(const std::exception& e) { }
+
+    try {
+        clientForwarder.detach();
+    }
+    catch (const std::exception& e) { }
+    try {
+        serverForwarder.detach();
+    }
+    catch (const std::exception& e) { }
 }
 
-void DaemonRunner::forwardToServer_(std::shared_ptr<SslSession> clientSession, std::shared_ptr<ClientSocket> httpServerSocket) {
+void DaemonRunner::forwardToServer_(std::shared_ptr<SslSession> clientSession, std::shared_ptr<ClientSocket> httpServerSocket, std::shared_ptr<std::shared_future<bool>> tasksReady, std::shared_ptr<std::promise<void>> terminate) {
     try {
-        m_tasksReady.wait();
+        tasksReady->wait();
 
         while (true) {
             std::string data = clientSession->read();
@@ -56,16 +65,22 @@ void DaemonRunner::forwardToServer_(std::shared_ptr<SslSession> clientSession, s
         std::cerr << "C++ exception thrown in reader thread : " << e.what() << std::endl;
     }
     catch (...) {
-        killAll_();
+        try {
+            terminate->set_value();
+        }
+        catch (std::exception& e) { }
         throw;
     }
 
-    killAll_();
+    try {
+        terminate->set_value();
+    }
+    catch (std::exception& e) { }
 }
 
-void DaemonRunner::forwardToClient_(std::shared_ptr<SslSession> clientSession, std::shared_ptr<ClientSocket> httpServerSocket) {
+void DaemonRunner::forwardToClient_(std::shared_ptr<SslSession> clientSession, std::shared_ptr<ClientSocket> httpServerSocket, std::shared_ptr<std::shared_future<bool>> tasksReady, std::shared_ptr<std::promise<void>> terminate) {
     try {
-        m_tasksReady.wait();
+        tasksReady->wait();
 
         HttpPacketReader packetReader(httpServerSocket);
         while (true) {
@@ -77,21 +92,23 @@ void DaemonRunner::forwardToClient_(std::shared_ptr<SslSession> clientSession, s
         std::cerr << "C++ exception thrown in writer thread : " << e.what() << std::endl;
     }
     catch (...) {
-        killAll_();
+        try {
+            terminate->set_value();
+        }
+        catch (std::exception& e) { }
         throw;
     }
 
-    killAll_();
+    try {
+        terminate->set_value();
+    }
+    catch (std::exception& e) { }
 }
 
-void DaemonRunner::killAll_() {
-    std::thread::native_handle_type clientHandle = m_clientForwarder.native_handle();
-    if (clientHandle != ::pthread_self() && m_clientForwarder.joinable()) {
-        ::pthread_cancel(clientHandle);
-    }
-    std::thread::native_handle_type serverHandle = m_serverForwarder.native_handle();
-    if (serverHandle != ::pthread_self() && m_serverForwarder.joinable()) {
-        ::pthread_cancel(serverHandle);
+void DaemonRunner::kill_(std::thread& thread) {
+    std::thread::native_handle_type handle = thread.native_handle();
+    if (handle != ::pthread_self() && thread.joinable()) {
+        ::pthread_cancel(handle);
     }
 }
 
