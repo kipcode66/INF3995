@@ -36,7 +36,7 @@ class BlackListAdapter(
     override fun getView(postion: Int, v: View?, viewGroup: ViewGroup?): View {
         val view = v ?: layoutInflater.inflate(R.layout.black_list, viewGroup, false)
         val user = this.userList[postion]
-        view.name.text = user.name
+        view.name.text = if (!user.name.isEmpty()) user.name else appCtx.getString(R.string.no_name)
         view.mac.text = user.mac
         view.ip.text = user.ip
         view.unblock.setOnClickListener {
