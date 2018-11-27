@@ -53,6 +53,7 @@ User_t Database::getUserFromStatement_(const Statement& stmt) const {
     strncpy(user.ip, stmt.getColumnText(1).c_str(), User_t::IP_LENGTH);
     strncpy(user.name, stmt.getColumnText(2).c_str(), User_t::NAME_LENGTH);
     strncpy(user.mac, stmt.getColumnText(3).c_str(), User_t::MAC_LENGTH);
+    user.isBlocked = stmt.getColumnInt(4);
     return user;
 }
 
@@ -91,13 +92,13 @@ std::vector<User_t> Database::getUsersByQuery_(const Query& query) const {
  */
 User_t Database::getUserByMac(const std::string& mac) const {
     return getUserByQuery_(Query(
-        "SELECT user_id, ip, name, mac FROM user WHERE (mac = '%q');",
+        "SELECT user_id, ip, name, mac, is_blacklisted FROM user WHERE (mac = '%q');",
         mac.c_str()));
 }
 
 User_t Database::getUserById(uint32_t id) const {
     return getUserByQuery_(Query(
-        "SELECT user_id, ip, name, mac FROM user WHERE (user_id = %u);",
+        "SELECT user_id, ip, name, mac, is_blacklisted FROM user WHERE (user_id = %u);",
         id));
 }
 
@@ -185,7 +186,7 @@ std::pair<std::string, std::string> Database::getSaltAndHashedPasswordByLogin(
 
 std::vector<User_t> Database::getBlackList() {
     return getUsersByQuery_(Query(
-        "SELECT user_id, ip, name, mac FROM user"
+        "SELECT user_id, ip, name, mac, is_blacklisted FROM user"
         " WHERE (is_blacklisted = %i);", Database::BLOCKED));
 }
 
