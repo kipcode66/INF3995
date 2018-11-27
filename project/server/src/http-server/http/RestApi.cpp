@@ -249,6 +249,9 @@ void RestApi::postFile_(const Pistache::Rest::Request& request, Pistache::Http::
     User_t requestUser = {};
     try {
         requestUser = getUserFromRequestToken_(request);
+        if (requestUser.isBlocked) {
+            response.send(Pistache::Http::Code::Forbidden, "User has been blocked");
+        }
         Database* db = Database::instance();
         bool isUserConnected = db->isUserConnected(requestUser.userId);
         if (!isUserConnected) {
