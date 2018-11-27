@@ -98,15 +98,18 @@ void FileManagementApi::deleteSuperviseurChanson_(const Rest::Request& request,
 
             std::ostringstream logMessage;
             if (song.id != 0) {
+                db->flagSongAsDeletedByAdmin(songId);
+
                 // If its the current playing song (the first in the list), we stop it.
                 std::vector<Song_t> songs = db->getAllPlayableSongs();
                 if (songs.size() > 0 && songs[0].id == song.id) {
                     StopSongEvent event;
                     m_playerEventSocket->writeEvent(event);
                 }
-
-                db->removeSongByAdmin(songId);
-                m_cache.deleteFile(song.path);
+                else {
+                    db->removeSong(songId);
+                    m_cache.deleteFile(song.path);
+                }
 
                 logMessage << "{ Administrator }"
                            << " Removed MP3 \"" << song.title

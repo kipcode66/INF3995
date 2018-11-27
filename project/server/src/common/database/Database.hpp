@@ -58,10 +58,10 @@ public:
 
     Statistics          getStatistics  () const;
 
-    void                createSong        (const Song_t*);
-    void                removeSong        (uint32_t, bool wasPlayed = false);
-    void                removeSongByAdmin (uint32_t, bool wasPlayed = false);
-    void                swapSongs         (const Song_t*, const Song_t*);
+    void                createSong               (const Song_t*);
+    void                removeSong               (uint32_t, bool wasPlayed = false);
+    void                flagSongAsDeletedByAdmin (uint32_t);
+    void                swapSongs                (const Song_t*, const Song_t*);
 
     void initDefaultAdmin();
 

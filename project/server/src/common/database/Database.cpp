@@ -319,11 +319,10 @@ void Database::removeSong(uint32_t id, bool wasPlayed) {
 /*
  * A null path indicate a deleted song
  */
-void Database::removeSongByAdmin(uint32_t id, bool wasPlayed) {
+void Database::flagSongAsDeletedByAdmin(uint32_t id) {
     executeQuery_(Query(
-        "UPDATE songs SET was_played = %i, path = '', "
-        "deleted_by_admin = 1 WHERE rowid = %i;",
-        wasPlayed,
+        "UPDATE songs SET deleted_by_admin = 1 "
+        "WHERE rowid = %i;",
         id));
 }
 
