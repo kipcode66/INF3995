@@ -113,13 +113,13 @@ void Database::createUser(const User_t* user) {
 
 void Database::connectUser(const struct User_t* user) {
     executeQuery_(Query(
-        "INSERT INTO userConnection (user_id, connection_expiration) VALUES (%u, julianday('now', '+1 day'));",
+        "INSERT OR REPLACE INTO userConnection (user_id, connection_expiration) VALUES (%u, julianday('now', '+1 day'));",
         user->userId));
 }
 
 bool Database::isUserConnected(const uint32_t userId) const {
     Statement stmt{m_db, Query(
-        "SELECT julianday(connection_expiration) - julianday('now') FROM userConnection "
+        "SELECT (connection_expiration - julianday('now')) FROM userConnection "
         "WHERE (user_id = %u);",
         userId)};
 

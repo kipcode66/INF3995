@@ -170,34 +170,28 @@ void RestApi::getIdentification_(const Pistache::Rest::Request& request, Pistach
             User_t existingUser = { 0 };
             Database* db = Database::instance();
             existingUser = db->getUserByMac(requestUser.mac);
+            std::ostringstream logMsg;
             bool userAlreadyExisted = (*existingUser.mac != 0);
-            if (!userAlreadyExisted) {
+            bool isUserConnected = db->isUserConnected(existingUser.userId);
+            if (!userAlreadyExisted || !isUserConnected) {
                 std::string salt = id_utils::generateSalt(strlen(requestUser.mac));
                 requestUser.userId = id_utils::generateId(requestUser.mac, salt);
 
-                db->createUser(&requestUser);
-                db->connectUser(&requestUser);
-
-                std::ostringstream logMsg;
                 logMsg << '{' << requestUser.mac << '}' << " Assigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
-                m_logger.log(logMsg.str());
-
-                std::string body = generateBody(requestUser.userId, "connection successful");
-                response.send(Pistache::Http::Code::Ok, body);
-                return;
             }
             else {
                 requestUser.userId = existingUser.userId;
-                db->createUser(&requestUser);
 
-                std::ostringstream logMsg;
                 logMsg << '{' << requestUser.mac << '}' << " Reassigned token \"" << requestUser.userId << "\" to user \"" << requestUser.name << "\"";
-                m_logger.log(logMsg.str());
-
-                std::string body = generateBody(requestUser.userId, "connection successful");
-                response.send(Pistache::Http::Code::Ok, body);
-                return;
             }
+
+            db->createUser(&requestUser);
+            db->connectUser(&requestUser);
+
+            m_logger.log(logMsg.str());
+            std::string body = generateBody(requestUser.userId, "connection successful");
+            response.send(Pistache::Http::Code::Ok, body);
+            return;
         }
         catch (const sqlite_error& e) {
             m_logger.err(std::string{"getIdentification failed: "} + e.what());
