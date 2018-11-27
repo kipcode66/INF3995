@@ -6,6 +6,7 @@
 #include <common/mp3/event/MuteEvent.hpp>
 #include <common/mp3/event/UnmuteEvent.hpp>
 #include <common/mp3/event/VolumeGetRequest.hpp>
+#include <common/mp3/event/StopSongEvent.hpp>
 #include <common/logger/Logger.hpp>
 
 namespace elevation {
@@ -21,6 +22,7 @@ public:
     virtual void onUnmuteEvent      (const UnmuteEvent&       event) override;
     virtual void onVolumeGetRequest (const VolumeGetRequest&  event) override;
     virtual void onVolumeGetResponse(const VolumeGetResponse& event) override;
+    virtual void onStopSongEvent    (const StopSongEvent&     event) override;
 
 protected:
     Logger& m_logger;

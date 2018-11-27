@@ -6,6 +6,7 @@
 
 #include <common/database/Database.hpp>
 #include <common/rest/rest_utils.hpp>
+#include <common/mp3/event/StopSongEvent.hpp>
 
 #include <http-server/http/exception/InvalidTokenException.hpp>
 #include <http-server/http/exception/MissingTokenException.hpp>
@@ -18,9 +19,11 @@ using namespace elevation;
 
 namespace elevation {
 
-FileManagementApi::FileManagementApi(Rest::Description& desc, Logger& logger, FileCache& cache)
+FileManagementApi::FileManagementApi(Rest::Description& desc, Logger& logger, FileCache& cache, std::shared_ptr<Mp3EventClientSocket> playerEventSocket, HttpsServerEventFacade& eventFacade)
     : m_logger(logger)
     , m_cache(cache)
+    , m_playerEventSocket(playerEventSocket)
+    , m_eventFacade(eventFacade)
 {
     auto superviseurPath = desc.path("/superviseur");
     superviseurPath
@@ -95,6 +98,13 @@ void FileManagementApi::deleteSuperviseurChanson_(const Rest::Request& request,
 
             std::ostringstream logMessage;
             if (song.id != 0) {
+                // If its the current playing song (the first in the list), we stop it.
+                std::vector<Song_t> songs = db->getAllPlayableSongs();
+                if (songs.size() > 0 && songs[0].id == song.id) {
+                    StopSongEvent event;
+                    m_playerEventSocket->writeEvent(event);
+                }
+
                 db->removeSongByAdmin(songId);
                 m_cache.deleteFile(song.path);
 

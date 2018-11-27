@@ -20,6 +20,7 @@ public:
         UNMUTE,
         VOLUME_GET_REQUEST,
         VOLUME_GET_RESPONSE,
+        STOP_SONG,
         NUM_EVENTS
     };
 

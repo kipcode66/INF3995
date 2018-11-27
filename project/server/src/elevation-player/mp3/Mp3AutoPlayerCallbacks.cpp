@@ -14,22 +14,27 @@ namespace fs = std::experimental::filesystem;
 Mp3AutoPlayerCallbacks::Mp3AutoPlayerCallbacks(
         Logger& logger,
         FileCache& cache)
-    : m_logger(logger)
-    , m_cache(cache)
-    , m_autoPlayer(nullptr)
+    : m_autoPlayer(nullptr)
 {
-    m_autoPlayer = new Mp3AutoPlayer([this](){return this->newSongProvider_();},[this](fs::path p){this->songRemover_(p);});
+    m_autoPlayer = std::shared_ptr<Mp3AutoPlayer>(new Mp3AutoPlayer(
+        [this, &logger, &cache]() {
+            return newSongProvider_(logger);
+        },
+        [this, &logger, &cache](fs::path p) {
+            songRemover_(p, logger, cache);
+        }
+    ));
 }
 
 Mp3AutoPlayerCallbacks::~Mp3AutoPlayerCallbacks() {
-    delete m_autoPlayer;
+    // automatic delete of m_autoPlayer when the shared_ptr has no more references
 }
 
-Mp3AutoPlayer& Mp3AutoPlayerCallbacks::getReferenceToAutoPlayer() const {
-    return *m_autoPlayer;
+std::shared_ptr<Mp3AutoPlayer> Mp3AutoPlayerCallbacks::getReferenceToAutoPlayer() const {
+    return m_autoPlayer;
 }
 
-fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
+fs::path Mp3AutoPlayerCallbacks::newSongProvider_(Logger& logger) {
     fs::path newSong = Mp3AutoPlayer::NO_SONG;
     bool retry;
     do {
@@ -49,7 +54,7 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
                 std::this_thread::sleep_for(100ms);
             }
             else {
-                m_logger.err(e.what());
+                logger.err(e.what());
             }
         }
     } while (retry);
@@ -57,7 +62,7 @@ fs::path Mp3AutoPlayerCallbacks::newSongProvider_() const {
     return newSong;
 }
 
-void Mp3AutoPlayerCallbacks::songRemover_(fs::path pathOfSong) {
+void Mp3AutoPlayerCallbacks::songRemover_(fs::path pathOfSong, Logger& logger, FileCache& cache) {
     bool retry;
     do {
         retry = false;
@@ -67,7 +72,7 @@ void Mp3AutoPlayerCallbacks::songRemover_(fs::path pathOfSong) {
             if (oldSong.id != 0) {
                 db->removeSong(oldSong.id, true);
             }
-            m_cache.deleteFile(pathOfSong.filename());
+            cache.deleteFile(pathOfSong.filename());
         }
         catch (sqlite_error& e) {
             if (e.code() == SQLITE_LOCKED ||
@@ -76,11 +81,11 @@ void Mp3AutoPlayerCallbacks::songRemover_(fs::path pathOfSong) {
                 std::this_thread::sleep_for(100ms);
             }
             else {
-                m_logger.err(e.what());
+                logger.err(e.what());
             }
         }
         catch (fs::filesystem_error& e) {
-            m_logger.err(e.what());
+            logger.err(e.what());
         }
     } while (retry);
 }

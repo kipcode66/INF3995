@@ -20,15 +20,13 @@ public:
     Mp3AutoPlayerCallbacks& operator=(const Mp3AutoPlayerCallbacks&) = delete;
     Mp3AutoPlayerCallbacks& operator=(Mp3AutoPlayerCallbacks&&) = delete; // See Mp3AutoPlayer.hpp
 
-    Mp3AutoPlayer& getReferenceToAutoPlayer() const;
+    std::shared_ptr<Mp3AutoPlayer> getReferenceToAutoPlayer() const;
 
 protected:
-    Logger& m_logger;
-    FileCache& m_cache;
-    Mp3AutoPlayer* m_autoPlayer;
+    std::shared_ptr<Mp3AutoPlayer> m_autoPlayer;
 
-    path newSongProvider_() const;
-    void songRemover_(path);
+    static path newSongProvider_(Logger& logger);
+    static void songRemover_(path, Logger& logger, FileCache &cache);
 
 };
 

@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 
     Logger& logger = Logger::getLogger("elevation-player");
     Mp3AutoPlayerCallbacks autoPlayer{logger, fileCache};
-    ElevationPlayerEventManager eventMgr{argsParser.getPort(), logger};
+    ElevationPlayerEventManager eventMgr{argsParser.getPort(), logger, std::move(autoPlayer.getReferenceToAutoPlayer())};
     waitForever();
     return 0;
 }

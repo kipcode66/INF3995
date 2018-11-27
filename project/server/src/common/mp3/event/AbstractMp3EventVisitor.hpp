@@ -9,6 +9,7 @@ class MuteEvent;
 class UnmuteEvent;
 class VolumeGetRequest;
 class VolumeGetResponse;
+class StopSongEvent;
 
 class AbstractMp3EventVisitor {
 public:
@@ -17,6 +18,7 @@ public:
     virtual void onUnmuteEvent(const UnmuteEvent& event) = 0;
     virtual void onVolumeGetRequest(const VolumeGetRequest& event) = 0;
     virtual void onVolumeGetResponse(const VolumeGetResponse& event) = 0;
+    virtual void onStopSongEvent(const StopSongEvent& event) = 0;
 };
 
 } // namespace elevation

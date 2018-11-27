@@ -34,6 +34,7 @@ protected:
     std::unique_ptr<Mp3Event> deserializeUnmuteEvent_      (std::string payload);
     std::unique_ptr<Mp3Event> deserializeVolumeGetRequest_ (std::string payload);
     std::unique_ptr<Mp3Event> deserializeVolumeGetResponse_(std::string payload);
+    std::unique_ptr<Mp3Event> deserializeStopSongEvent_    (std::string payload);
 
     template <class T>
     static T deserializeElement_(std::string payload, std::size_t offset);

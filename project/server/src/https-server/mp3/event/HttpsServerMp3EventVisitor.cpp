@@ -39,4 +39,9 @@ void HttpsServerMp3EventVisitor::onVolumeGetResponse(const VolumeGetResponse& ev
     m_logger.log("Got volume get response");
 }
 
+void HttpsServerMp3EventVisitor::onStopSongEvent(const StopSongEvent& event) {
+    m_logger.err("Got unexpected song stop event");
+    throw UnexpectedEventException("StopSongEvent");
+}
+
 } // namespace elevation

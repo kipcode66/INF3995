@@ -4,6 +4,7 @@
 #include "mp3/event/UnmuteEvent.hpp"
 #include "mp3/event/VolumeGetRequest.hpp"
 #include "mp3/event/VolumeGetResponse.hpp"
+#include "mp3/event/StopSongEvent.hpp"
 
 namespace elevation {
 
@@ -80,6 +81,10 @@ std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeVolumeGetResponse_(st
     auto isMuted = deserializeElement_<bool>(payload, sizeof(volumePercent_t));
     VolumeData_t volumeData = {.volume = volume, .isMuted = isMuted};
     return std::unique_ptr<Mp3Event>(new VolumeGetResponse{volumeData});
+}
+
+std::unique_ptr<Mp3Event> Mp3EventPacketReader::deserializeStopSongEvent_(std::string payload) {
+    return std::unique_ptr<Mp3Event>(new StopSongEvent{});
 }
 
 template <class T>

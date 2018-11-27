@@ -7,11 +7,13 @@
 #include <common/mp3/communication/Mp3EventListenerSocket.hpp>
 #include <common/mp3/communication/Mp3EventSocket.hpp>
 
+#include "Mp3AutoPlayer.hpp"
+
 namespace elevation {
 
 class ElevationPlayerEventManager {
 public:
-    explicit ElevationPlayerEventManager(uint16_t port, Logger& logger);
+    explicit ElevationPlayerEventManager(uint16_t port, Logger& logger, std::shared_ptr<Mp3AutoPlayer> autoPlayer);
     virtual ~ElevationPlayerEventManager();
 
 protected:
@@ -20,6 +22,7 @@ protected:
 
 protected:
     std::thread m_accepterThread;
+    std::shared_ptr<Mp3AutoPlayer> m_autoPlayer;
 };
 
 } // namespace elevation

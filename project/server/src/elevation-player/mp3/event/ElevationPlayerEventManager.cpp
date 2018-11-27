@@ -10,7 +10,8 @@
 
 namespace elevation {
 
-ElevationPlayerEventManager::ElevationPlayerEventManager(uint16_t port, Logger& logger)
+ElevationPlayerEventManager::ElevationPlayerEventManager(uint16_t port, Logger& logger, std::shared_ptr<Mp3AutoPlayer> autoPlayer)
+    : m_autoPlayer(autoPlayer)
 {
     Mp3EventListenerSocket listener{port};
     m_accepterThread = std::thread(&ElevationPlayerEventManager::accepterThread_, std::move(listener), std::ref(logger));
@@ -43,7 +44,7 @@ void ElevationPlayerEventManager::accepterThread_(Mp3EventListenerSocket listene
 void ElevationPlayerEventManager::connectionThread_(std::shared_ptr<Mp3EventSocket> eventSocket, Logger& logger) {
     logger.log("New connection accepted");
 
-    ElevationPlayerMp3EventVisitor visitor{logger, eventSocket};
+    ElevationPlayerMp3EventVisitor visitor{logger, eventSocket, m_autoPlayer};
     while (true) {
         try {
             eventSocket->readEvent()->acceptVisitor(visitor);
