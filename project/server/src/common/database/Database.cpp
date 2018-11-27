@@ -411,6 +411,7 @@ Database::Database() {
         assertSqliteOk(
             sqlite3_open_v2(Database::DB_NAME, &m_db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_SHAREDCACHE, NULL),
             "Cannot connect to database");
+        sqlite3_busy_handler(m_db, [](void* pArg, int n) {return 1;}, nullptr);
         enableForeignKeys_();
         wipeDbSongs_();
         initDefaultAdmin();
