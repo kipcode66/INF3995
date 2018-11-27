@@ -101,7 +101,7 @@ void FileManagementApi::postSuperviseurInversion_(const Rest::Request& request,
 
             Database* db = Database::instance();
             Song_t song1 = db->getSongById(first);
-            Song_t song2 = db->getSongById(first);
+            Song_t song2 = db->getSongById(second);
             std::vector<Song_t> songs = db->getAllPlayableSongs();
             bool isFirst = false;
             if (songs.size() > 0) {
