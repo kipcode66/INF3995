@@ -5,6 +5,7 @@
 #include <mutex>
 #include <future>
 #include <vector>
+#include <memory>
 
 #include "ssl/SslSession.hpp"
 
@@ -20,8 +21,8 @@ public:
 
 protected:
     void runner_(SslSession clientSession, ClientSocket httpServerSocket);
-    void forwardToServer_(SslSession& clientSession, ClientSocket& httpServerSocket);
-    void forwardToClient_(SslSession& clientSession, ClientSocket& httpServerSocket);
+    void forwardToServer_(std::shared_ptr<SslSession> clientSession, ClientSocket& httpServerSocket);
+    void forwardToClient_(std::shared_ptr<SslSession> clientSession, ClientSocket& httpServerSocket);
     void killAll_(); ///< Deamon Runners will not hesitate to kill workers if they want to.
 
 protected:

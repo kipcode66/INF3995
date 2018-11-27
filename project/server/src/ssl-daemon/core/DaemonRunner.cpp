@@ -35,17 +35,18 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
 
     std::promise<bool> tasksReadyPromise;
     m_tasksReady = tasksReadyPromise.get_future();
-    m_serverForwarder = std::thread(&DaemonRunner::forwardToServer_, this, std::ref(clientSession), std::ref(httpServerSocket));
-    m_clientForwarder = std::thread(&DaemonRunner::forwardToClient_, this, std::ref(clientSession), std::ref(httpServerSocket));
+    std::shared_ptr<SslSession> clientSessionPtr(new SslSession(std::move(clientSession)));
+    m_serverForwarder = std::thread(&DaemonRunner::forwardToServer_, this, clientSessionPtr, std::ref(httpServerSocket));
+    m_clientForwarder = std::thread(&DaemonRunner::forwardToClient_, this, clientSessionPtr, std::ref(httpServerSocket));
     tasksReadyPromise.set_value(true);
 }
 
-void DaemonRunner::forwardToServer_(SslSession& clientSession, ClientSocket& httpServerSocket) {
+void DaemonRunner::forwardToServer_(std::shared_ptr<SslSession> clientSession, ClientSocket& httpServerSocket) {
     try {
         m_tasksReady.wait();
 
         while (true) {
-            std::string data = clientSession.read();
+            std::string data = clientSession->read();
             httpServerSocket.write(data);
         }
     }
@@ -61,13 +62,13 @@ void DaemonRunner::forwardToServer_(SslSession& clientSession, ClientSocket& htt
     killAll_();
 }
 
-void DaemonRunner::forwardToClient_(SslSession& clientSession, ClientSocket& httpServerSocket) {
+void DaemonRunner::forwardToClient_(std::shared_ptr<SslSession> clientSession, ClientSocket& httpServerSocket) {
     try {
         m_tasksReady.wait();
 
         HttpPacketReader packetReader(httpServerSocket);
         while (true) {
-            clientSession.write(packetReader.readPacket());
+            clientSession->write(packetReader.readPacket());
         }
     }
     catch (const SocketClosedException& e) { }
