@@ -44,13 +44,15 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
 
 
     {
-        std::lock_guard<std::mutex> lock(m_workersMutex);
+        std::unique_lock<std::mutex> lock(m_workersMutex);
         std::for_each(
             m_workers.begin(),
             m_workers.end(),
-            [](std::thread& worker) {
+            [&](std::thread& worker) {
                 try {
+                    lock.unlock();
                     worker.join();
+                    lock.lock();
                 }
                 catch (const std::exception& e) { }
             }
