@@ -16,7 +16,15 @@ DaemonRunner::DaemonRunner(SslSession clientSession, ClientSocket httpServerSock
     runnerThread.detach();
 }
 
-DaemonRunner::~DaemonRunner() { }
+DaemonRunner::~DaemonRunner() {
+    killAll_();
+    std::for_each(m_workers.begin(), m_workers.end(), [](std::thread& worker) {
+        try {
+            worker.detach();
+        }
+        catch (const std::exception& e) { }
+    });
+}
 
 void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSocket) {
     // This thread keeps the clientSession and the socket. When this thread ends, these
