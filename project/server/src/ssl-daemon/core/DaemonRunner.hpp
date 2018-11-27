@@ -25,8 +25,8 @@ protected:
     void killAll_(); ///< Deamon Runners will not hesitate to kill workers if they want to.
 
 protected:
-    std::vector<std::thread> m_workers;
-    std::mutex m_workersMutex;
+    std::thread m_clientForwarder;
+    std::thread m_serverForwarder;
     std::shared_future<bool> m_tasksReady;
 };
 

@@ -18,13 +18,15 @@ DaemonRunner::DaemonRunner(SslSession clientSession, ClientSocket httpServerSock
 
 DaemonRunner::~DaemonRunner() {
     killAll_();
-    std::lock_guard<std::mutex> lock(m_workersMutex);
-    std::for_each(m_workers.begin(), m_workers.end(), [](std::thread& worker) {
-        try {
-            worker.detach();
-        }
-        catch (const std::exception& e) { }
-    });
+    try {
+        m_clientForwarder.detach();
+    }
+    catch (const std::exception& e) { }
+
+    try {
+        m_serverForwarder.detach();
+    }
+    catch (const std::exception& e) { }
 }
 
 void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSocket) {
@@ -33,32 +35,9 @@ void DaemonRunner::runner_(SslSession clientSession, ClientSocket httpServerSock
 
     std::promise<bool> tasksReadyPromise;
     m_tasksReady = tasksReadyPromise.get_future();
-
-    {
-        std::lock_guard<std::mutex> lock(m_workersMutex);
-        m_workers.push_back(std::thread(&DaemonRunner::forwardToServer_, this, std::ref(clientSession), std::ref(httpServerSocket)));
-        m_workers.push_back(std::thread(&DaemonRunner::forwardToClient_, this, std::ref(clientSession), std::ref(httpServerSocket)));
-        // m_workersMutex get unlocked here
-    }
+    m_serverForwarder = std::thread(&DaemonRunner::forwardToServer_, this, std::ref(clientSession), std::ref(httpServerSocket));
+    m_clientForwarder = std::thread(&DaemonRunner::forwardToClient_, this, std::ref(clientSession), std::ref(httpServerSocket));
     tasksReadyPromise.set_value(true);
-
-
-    {
-        std::unique_lock<std::mutex> lock(m_workersMutex);
-        std::for_each(
-            m_workers.begin(),
-            m_workers.end(),
-            [&](std::thread& worker) {
-                try {
-                    lock.unlock();
-                    worker.join();
-                    lock.lock();
-                }
-                catch (const std::exception& e) { }
-            }
-        );
-        // m_workersMutex get unlocked here
-    }
 }
 
 void DaemonRunner::forwardToServer_(SslSession& clientSession, ClientSocket& httpServerSocket) {
@@ -104,17 +83,14 @@ void DaemonRunner::forwardToClient_(SslSession& clientSession, ClientSocket& htt
 }
 
 void DaemonRunner::killAll_() {
-    std::lock_guard<std::mutex> lock(m_workersMutex);
-    std::for_each(
-        m_workers.begin(),
-        m_workers.end(),
-        [](std::thread& worker) {
-            std::thread::native_handle_type handle = worker.native_handle();
-            if (handle != ::pthread_self() && worker.joinable()) {
-                ::pthread_cancel(handle);
-            }
-        }
-    );
+    std::thread::native_handle_type clientHandle = m_clientForwarder.native_handle();
+    if (clientHandle != ::pthread_self() && m_clientForwarder.joinable()) {
+        ::pthread_cancel(clientHandle);
+    }
+    std::thread::native_handle_type serverHandle = m_serverForwarder.native_handle();
+    if (serverHandle != ::pthread_self() && m_serverForwarder.joinable()) {
+        ::pthread_cancel(serverHandle);
+    }
 }
 
 } // namespace daemon
