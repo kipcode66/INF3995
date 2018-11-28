@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Musique Bistro</string>
-    <string name="title_activity_splash_screen">Musique Bistro</string>
+    <string name="app_name">Bistro Elevation</string>
+    <string name="title_activity_splash_screen">Bistro Elevation</string>
     <string name="dummy_button">Bouton Factice</string>
     <string name="dummy_content">CONTENU FACTICE</string>
     <string name="title_activity_queue">File de chanson</string>

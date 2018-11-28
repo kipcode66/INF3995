@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Bistro Music</string>
+    <string name="app_name">Bistro Elevation</string>
 
-    <string name="title_activity_splash_screen">Client App</string>
+    <string name="title_activity_splash_screen">Bistro Elevation</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY CONTENT</string>
     <string name="title_activity_queue">Server Queue</string>
