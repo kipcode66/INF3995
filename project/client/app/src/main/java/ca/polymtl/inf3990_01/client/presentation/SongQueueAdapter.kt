@@ -103,7 +103,7 @@ class SongQueueAdapter(
             (state == State.SWAP_SELECTION && firstSelection?.id == song.id)
         view.setBackgroundResource(
             if (isHighlighted) R.color.highlight
-            else android.R.color.background_light
+            else android.R.color.transparent
         )
 
         view.remove_song.setOnClickListener {
