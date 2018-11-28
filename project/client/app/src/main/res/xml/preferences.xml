@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <ListPreference
-        android:key="@string/settings_key_server_address"
-        android:title="@string/server_url"
+        android:defaultValue="192.168.2.52"
         android:dialogTitle="@string/server_url"
         android:entries="@array/server_url_entries"
         android:entryValues="@array/server_url_entries"
-        android:defaultValue="192.168.2.52"
-        android:icon="@drawable/ic_menu_share"/>
+        android:icon="@drawable/ic_menu_share"
+        android:key="@string/settings_key_server_address"
+        android:title="@string/server_url" />
     <EditTextPreference
-        android:key="@string/settings_key_client_name"
-        android:title="@string/client_name"
         android:dialogTitle="@string/client_name"
         android:hint="@android:string/unknownName"
-        android:icon="@drawable/ic_menu_manage" />
+        android:icon="@drawable/ic_menu_manage"
+        android:key="@string/settings_key_client_name"
+        android:title="@string/client_name" />
     <ListPreference
-        android:key="@string/settings_key_queue_refresh_period"
-        android:title="@string/setting_title_queue_period"
+        android:defaultValue="4000"
         android:dialogTitle="@string/setting_title_queue_period"
         android:entries="@array/setting_labels_queue_period"
         android:entryValues="@array/setting_values_queue_period"
-        android:defaultValue="4000"
-        android:icon="@drawable/ic_menu_refresh"/>
-    <ca.polymtl.inf3990_01.client.view.PasswordChangeDialogPreference
+        android:icon="@drawable/ic_menu_refresh"
+        android:key="@string/settings_key_queue_refresh_period"
+        android:title="@string/setting_title_queue_period" />
+    <!--suppress AndroidElementNotAllowed -->
+    <ca.polymtl.inf3995.client.view.PasswordChangeDialogPreference
+        android:icon="@android:drawable/ic_lock_lock"
         android:key="@string/settings_key_admin_password"
-        android:title="@string/setting_title_admin_password"
-        android:icon="@android:drawable/ic_lock_lock"/>
+        android:title="@string/setting_title_admin_password" />
 </PreferenceScreen>

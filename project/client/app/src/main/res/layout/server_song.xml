@@ -2,115 +2,110 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="@dimen/song_item_margin"
-    android:longClickable="true"
-    android:hapticFeedbackEnabled="true"
     android:foreground="?selectableItemBackground"
-    android:foregroundTintMode="add" >
+    android:foregroundTintMode="add"
+    android:hapticFeedbackEnabled="true"
+    android:longClickable="true"
+    android:orientation="horizontal"
+    android:padding="@dimen/song_item_margin">
 
     <LinearLayout
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:layout_weight="1" >
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-            <ImageView
-                android:id="@+id/now_playing"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_lock_silent_mode_off"
-                android:tint="@color/colorText"
-                android:contentDescription="@string/currently_playing" />
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Song Title"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:marqueeRepeatLimit ="marquee_forever"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:scrollHorizontally="true"
-                style="@style/Base.TextAppearance.AppCompat.Title" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/title"
+            style="@style/Base.TextAppearance.AppCompat.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@android:drawable/ic_lock_silent_mode_off"
+            android:drawableTint="@color/colorText"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="@string/dummy_song_name" />
 
         <TextView
             android:id="@+id/author"
+            style="@style/Base.TextAppearance.AppCompat.Medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Artiste"
-            android:singleLine="true"
             android:ellipsize="marquee"
-            android:marqueeRepeatLimit ="marquee_forever"
             android:focusable="true"
             android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
-            style="@style/Base.TextAppearance.AppCompat.Medium" />
+            android:singleLine="true"
+            android:text="@string/dummy_author" />
+
         <TextView
             android:id="@+id/duration"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="00:00"
-            android:textSize="14sp"
-            android:singleLine="true"
             android:ellipsize="marquee"
-            android:marqueeRepeatLimit ="marquee_forever"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:scrollHorizontally="true" />
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="@string/song_item_duration_format"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/song_item_margin"
-        android:orientation="vertical"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/sent_by"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:singleLine="true"
             android:ellipsize="marquee"
-            android:marqueeRepeatLimit ="marquee_forever"
             android:focusable="true"
             android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
-            android:text="Sent by" />
+            android:singleLine="true"
+            android:text="@string/song_queue_item_sent_by" />
+
         <LinearLayout
             android:id="@+id/layout_admin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="invisible" >
+            android:visibility="invisible">
+
             <TextView
                 android:id="@+id/sender_ip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
                 android:ellipsize="marquee"
-                android:marqueeRepeatLimit ="marquee_forever"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:scrollHorizontally="true"
-                android:text="IP" />
+                android:singleLine="true"
+                android:text="@string/dummy_ip_address" />
+
             <TextView
                 android:id="@+id/sender_mac"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
                 android:ellipsize="marquee"
-                android:marqueeRepeatLimit ="marquee_forever"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:scrollHorizontally="true"
-                android:text="MAC" />
+                android:singleLine="true"
+                android:text="@string/dummy_mac_address" />
         </LinearLayout>
     </LinearLayout>
 
@@ -118,11 +113,11 @@
         android:id="@+id/remove_song"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:padding="@dimen/song_item_delete_width"
-        android:background="@android:color/transparent"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
-        android:contentDescription="@string/desc_message_remove_song"
         android:layout_rowWeight="1"
-        android:layout_weight="0" />
+        android:layout_weight="0"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/desc_message_remove_song"
+        android:padding="@dimen/song_item_delete_width"
+        android:src="@android:drawable/ic_menu_close_clear_cancel" />
 
 </LinearLayout>

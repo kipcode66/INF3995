@@ -4,30 +4,22 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/nav_header_vertical_spacing">
+
     <EditText
         android:id="@+id/login_username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="@string/login_hint_username"
         android:inputType="textPersonName"
         android:selectAllOnFocus="true"
-        android:hint="@string/login_hint_username"
-        android:text="@string/login_username_default_text"/>
+        android:text="@string/login_username_default_text" />
+
     <EditText
         android:id="@+id/login_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:selectAllOnFocus="true"
+        android:focusedByDefault="true"
         android:hint="@string/edit_text_hint_password"
-        android:focusedByDefault="true"/>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/login_button_submit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:text="@string/login_submit_text"/>
-    </RelativeLayout>
+        android:inputType="textPassword"
+        android:selectAllOnFocus="true" />
 </LinearLayout>

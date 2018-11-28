@@ -4,16 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/ic_icone_fond"
+    android:backgroundTint="#04000000"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".view.SettingActivity"
-    tools:showIn="@layout/app_bar_setting"
-    android:background="@drawable/ic_icone_fond"
-    android:backgroundTint="#04000000">
+    tools:showIn="@layout/app_bar_setting">
 
     <fragment
         android:id="@+id/settings_fragment"
-        class="ca.polymtl.inf3990_01.client.view.SettingsFragment"
+        class="ca.polymtl.inf3995.client.view.SettingsFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
 </android.support.constraint.ConstraintLayout>

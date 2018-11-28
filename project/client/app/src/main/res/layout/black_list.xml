@@ -2,68 +2,68 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="@dimen/song_item_margin"
-    android:focusable="true"
     android:clickable="true"
-    android:longClickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:hapticFeedbackEnabled="true"
-    android:focusableInTouchMode="true" >
+    android:longClickable="true"
+    android:orientation="horizontal"
+    android:padding="@dimen/song_item_margin">
 
     <LinearLayout
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:layout_weight="1" >
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/name"
+            style="@style/Base.TextAppearance.AppCompat.Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="User name"
-            android:singleLine="true"
             android:ellipsize="marquee"
-            android:marqueeRepeatLimit ="marquee_forever"
             android:focusable="true"
             android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
-            style="@style/Base.TextAppearance.AppCompat.Title" />
+            android:singleLine="true"
+            android:text="@string/dummy_user_name" />
 
         <TextView
             android:id="@+id/mac"
+            style="@style/Base.TextAppearance.AppCompat.Medium"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="MAC Address"
-            android:singleLine="true"
             android:ellipsize="marquee"
-            android:marqueeRepeatLimit ="marquee_forever"
             android:focusable="true"
             android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
             android:scrollHorizontally="true"
-            style="@style/Base.TextAppearance.AppCompat.Medium" />
+            android:singleLine="true"
+            android:text="@string/dummy_mac_address" />
 
         <TextView
             android:id="@+id/ip"
             android:layout_width="match_parent"
             android:layout_height="37dp"
-            android:text="IP Address"
-            android:textSize="14sp"
-            android:singleLine="true"
             android:ellipsize="marquee"
-            android:marqueeRepeatLimit ="marquee_forever"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:scrollHorizontally="true" />
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="@string/dummy_ip_address"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <ImageButton
         android:id="@+id/unblock"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:padding="@dimen/song_item_delete_width"
+        android:layout_weight="0"
         android:background="@android:color/transparent"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:contentDescription="@string/black_list_item_button_desc"
-        android:layout_weight="0" />
+        android:padding="@dimen/song_item_delete_width"
+        android:src="@android:drawable/ic_menu_close_clear_cancel" />
 
 </LinearLayout>

@@ -1,32 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Bistro Elevation</string>
-    <string name="title_activity_splash_screen">Bistro Elevation</string>
     <string name="dummy_button">Bouton Factice</string>
     <string name="dummy_content">CONTENU FACTICE</string>
     <string name="title_activity_queue">File de chanson</string>
     <string name="navigation_drawer_open">Ouvrir le tiroire de navigation</string>
     <string name="navigation_drawer_close">Fermer le tiroire de navigation</string>
-    <string name="nav_header_desc">Entête de navigation</string>
-    <string name="action_settings">Paramètres</string>
     <string name="server_url">URL du serveur</string>
     <string name="client_name">Nom d\'Utilisateur</string>
     <string name="error_message_network">"Erreur de Réseau "</string>
-    <string name="nav_header_title">Android Studio</string>
     <string name="wifi_disabled">Une connection wifi est nécessaire</string>
     <string name="title_activity_local_song">Vos Chansons</string>
     <string name="title_activity_statistics">Statistiques</string>
     <string name="title_activity_black_list">Liste Noire</string>
     <string name="title_activity_setting">Paramètres</string>
     <string name="action_reload">Rafraîchir</string>
-    <string name="songs_list_title">Liste des Chansons</string>
-    <string name="action_change_state">Changer d\'État</string>
     <string name="error_message_server">Erreur Serveur - Veuillez réessayer plus tard</string>
     <string name="error_message_bad_request">Erreur de Requête</string>
     <string name="error_message_unknown">Erreur Inconnue</string>
     <string name="error_message_forbidden">Accès Refusé</string>
     <string name="error_message_unknown_user">utilisateur non authentifié</string>
-    <string name="error_message_access">accès refusé</string>
     <string name="error_message_deletion_refused">la chanson n’appartient pas à l’usager ou mauvaise chanson</string>
     <string name="desc_message_remove_song">Demande au serveur de retier une chanson</string>
     <string name="error_message_no_ip">&lt;aucun ip&gt;</string>
@@ -59,10 +52,18 @@
     <string name="block_user_action_label">Bloquer un Usager</string>
     <string name="block_dialog_title">Bloquer un Usager</string>
     <string name="setting_title_admin_password">Changer le mot de passe</string>
-    <string name="setting_dialog_title_admin_password">Changer le Mot de passe Administrateur</string>
     <string name="password_change_dialog_old_password">Mot de passe Actuelle</string>
     <string name="password_change_dialog_new_password">Nouveau Mot de passe</string>
     <string name="change_password_button_submit">Soumettre</string>
     <string name="no_name">&lt;Sans nom&gt;</string>
     <string name="currently_playing">Lecture en cours</string>
+    <string name="dummy_user_name">Nom d\'utilisateur</string>
+    <string name="dummy_mac_address">Adresse MAC</string>
+    <string name="dummy_ip_address">Adresse IP</string>
+    <string name="dummy_song_number">Nombre de chansons</string>
+    <string name="dummy_user_number">Nombre d\'usagers</string>
+    <string name="dummy_song_deleted_number">Nombre de chansons supprimées</string>
+    <string name="dummy_song_name">Titre de la chansons</string>
+    <string name="dummy_author">Auteur</string>
+    <string name="error_message_init_canceled">Impossible d\'initialiser l\'application</string>
 </resources>

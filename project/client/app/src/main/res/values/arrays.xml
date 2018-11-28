@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="server_url_entries" >
+    <string-array name="server_url_entries">
         <item>@string/server_url_value1</item>
         <item>@string/server_url_value2</item>
         <item>10.200.6.198</item>

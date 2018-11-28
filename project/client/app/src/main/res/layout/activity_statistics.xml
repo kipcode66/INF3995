@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:openDrawer="start"
-    android:tag="@string/tag_drawer_layout">
+    android:tag="@string/tag_drawer_layout"
+    tools:openDrawer="start">
 
     <include
         layout="@layout/app_bar_statistics"
@@ -15,12 +15,12 @@
         android:layout_height="match_parent" />
 
     <android.support.design.widget.NavigationView
-        android:tag="@string/tag_nav_view"
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        android:tag="@string/tag_nav_view"
         app:menu="@menu/activity_drawer" />
 
 </android.support.v4.widget.DrawerLayout>
