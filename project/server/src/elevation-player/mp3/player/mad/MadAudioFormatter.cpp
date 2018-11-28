@@ -73,7 +73,7 @@ mad_fixed_t MadAudioFormatter::scale_(mad_fixed_t sample) {
 }
 
 mad_fixed_t MadAudioFormatter::dither_(mad_fixed_t sample) {
-    return sample + m_ditheringDistribution(m_rng); // Simple white noise.
+    return sample; // We could add simple white noise by adding 'm_ditheringDistribution(m_rng)'.
 }
 
 } // namespace elevation
