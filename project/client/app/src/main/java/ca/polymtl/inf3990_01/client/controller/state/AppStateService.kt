@@ -28,12 +28,8 @@ class AppStateService(private val appCtx: Context): Observable() {
 
                 override fun isSongHighlighted(song: Song): Boolean = song.sentBy == null
 
-                override fun sendFile(song: LocalSong): Boolean {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
-                override fun canRemoveSong(song: Song): Boolean {
-                    return song.sentBy == null
+                override fun canRemoveSong(song: Song, position: Int): Boolean {
+                    return song.sentBy == null && position > 0
                 }
 
                 override fun canDisplaySongOwnerData(): Boolean = false
@@ -53,13 +49,9 @@ class AppStateService(private val appCtx: Context): Observable() {
                     menu.removeItem(menu.add("").itemId) // Forces an update of the view
                 }
 
-                override fun sendFile(song: LocalSong): Boolean {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
                 override fun isSongHighlighted(song: Song): Boolean = false
 
-                override fun canRemoveSong(song: Song): Boolean = true
+                override fun canRemoveSong(song: Song, position: Int): Boolean = true
 
                 override fun canDisplaySongOwnerData(): Boolean = true
                 override fun <A: AbstractDrawerActivity> finishActivityIfNeeded(activity: A) {}

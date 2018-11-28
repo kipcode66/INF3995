@@ -97,7 +97,7 @@ class SongQueueAdapter(
         view.sender_mac.text = song.mac ?: view.context.getString(R.string.error_message_no_mac)
         view.sender_mac.isSelected = true
         view.layout_admin.visibility = if (appState.canDisplaySongOwnerData()) View.VISIBLE else View.INVISIBLE
-        view.remove_song.visibility = if (appState.canRemoveSong(song)) View.VISIBLE else View.INVISIBLE
+        view.remove_song.visibility = if (appState.canRemoveSong(song, position)) View.VISIBLE else View.INVISIBLE
         val isHighlighted =
             appState.isSongHighlighted(song) ||
             (state == State.SWAP_SELECTION && firstSelection?.id == song.id)
