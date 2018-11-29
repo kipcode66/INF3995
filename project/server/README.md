@@ -46,3 +46,9 @@ Testing
 -------
 
 Use the elevation script to execute the unit tests. See `src/common/test/api-tests/READMEYOUFOOL.md` to run the REST API tests.
+
+Regenerating SSL certificates
+-----------------------------
+
+Remove all files under `res/ssl` except the `regenerateCertificates`
+script, then run `regenerateCertificates` and copy `res/ssl/CA/ca.crt` to `<git_dir>/project/client/app/src/main/res/raw/`.
