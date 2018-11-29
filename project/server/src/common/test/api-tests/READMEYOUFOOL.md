@@ -27,6 +27,9 @@
     OR
     `. ./venv/bin/activate`
 
+ - Start the Elevation server in development mode (See `README.md` under `project/server`) :
+    `./elevation -a`
+
  - run all test:
     `python -m unittest --verbose`
 
