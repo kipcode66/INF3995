@@ -3,7 +3,7 @@
     <string-array name="server_url_entries">
         <item>@string/server_url_value1</item>
         <item>@string/server_url_value2</item>
-        <item>10.200.6.198</item>
+        <item>192.168.2.54</item>
     </string-array>
     <string-array name="setting_labels_queue_period">
         <item>@string/setting_queue_period_label1</item>

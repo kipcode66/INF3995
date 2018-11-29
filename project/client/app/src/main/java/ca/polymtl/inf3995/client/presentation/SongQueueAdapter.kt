@@ -80,7 +80,7 @@ class SongQueueAdapter(
         userName = if (userName.isBlank()) appCtx.getString(R.string.client_name_default) else userName
 
         view.title
-            .setCompoundDrawablesRelativeWithIntrinsicBounds(android.R.drawable.ic_lock_silent_mode_off, 0, 0, 0)
+            .setCompoundDrawablesRelativeWithIntrinsicBounds(if (position == 0) android.R.drawable.ic_lock_silent_mode_off else 0, 0, 0, 0)
         view.title.text = song.title
         view.title.isSelected = true
         view.author.text = song.authorName
