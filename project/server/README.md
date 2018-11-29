@@ -20,7 +20,7 @@ Finally, you should build the Elevation Server and generate a blank database. Se
 Building
 --------
 
-Use the elevation script.
+Use the elevation script. Mind you ; this will take about an hour on the FPGA.
 
 Generating a blank database
 ---------------------
