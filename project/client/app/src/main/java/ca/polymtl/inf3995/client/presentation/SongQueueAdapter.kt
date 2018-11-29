@@ -51,6 +51,9 @@ class SongQueueAdapter(
     private fun onSongQueueChange(o: Observable, arg: Any?) {
         songQueue.clear()
         songQueue.addAll(arg as SongQueue)
+        if (state == State.SWAP_SELECTION && songQueue.indexOf(firstSelection) < 0) {
+            setState(State.INITIAL)
+        }
         Handler(appCtx.mainLooper).post(Runnable(this::notifyDataSetChanged))
     }
 
@@ -100,7 +103,7 @@ class SongQueueAdapter(
         view.layout_admin
             .visibility = if (appState.canDisplaySongOwnerData()) View.VISIBLE else View.INVISIBLE
         view.remove_song
-            .visibility = if (appState.canRemoveSong(song, position)) View.VISIBLE else View.INVISIBLE
+            .visibility = if (appState.canRemoveSong(song, position) && state != State.SWAP_SELECTION) View.VISIBLE else View.INVISIBLE
         val isHighlighted =
             appState.isSongHighlighted(song) ||
             (state == State.SWAP_SELECTION && firstSelection?.id == song.id)
